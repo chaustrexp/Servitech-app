@@ -1,1 +1,32 @@
 <!-- Plantilla base del proyecto ServiTech (Navbar, Footer, Tailwind) -->
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ServiTech{% endblock %}</title>
+    <!-- Tailwind CSS para diseño responsive tipo Stitch -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-sans text-gray-900">
+
+    <!-- Header / Navbar -->
+    <nav class="bg-blue-800 text-white p-4 shadow-md flex justify-between items-center">
+        <h1 class="text-xl font-bold">ServiTech</h1>
+        {% if user.is_authenticated %}
+        <span>Hola, {{ user.first_name }}</span>
+        {% endif %}
+    </nav>
+
+    <!-- Contenido dinámico de cada pantalla -->
+    <main class="container mx-auto p-4 max-w-4xl">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+
+</html>
