@@ -1,1 +1,40 @@
-<!--Plantilla 2: Turno Digital y pantalla de atención-->
+{% extends 'turnos/base.html' %}
+
+{% block title %}Tu Turno Digital - ServiTech{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-xl shadow-lg p-6 max-w-md mx-auto text-center border-t-4 border-blue-600">
+    <p class="text-gray-500 uppercase text-xs font-bold tracking-wider">Turno Digital</p>
+
+    <!-- Código de Turno -->
+    <h2 class="text-5xl font-extrabold text-blue-900 my-4">{{ turno.codigo_turno }}</h2>
+
+    <!-- Badge de Estado Dinámico -->
+    {% if turno.estado == 'CONFIRMADO' %}
+    <span class="bg-green-100 text-green-800 font-semibold px-3 py-1 rounded-full text-sm">
+        Confirmado
+    </span>
+    {% elif turno.estado == 'RETRASADO_CON_AVISO' %}
+    <span class="bg-yellow-100 text-yellow-800 font-semibold px-3 py-1 rounded-full text-sm">
+        Retraso Notificado (+{{ turno.minutos_retraso_notificados }}m)
+    </span>
+    {% endif %}
+
+    <div class="mt-6 text-left border-t pt-4 text-sm space-y-2">
+        <p><strong>Servicio:</strong> {{ turno.servicio.nombre }}</p>
+        <p><strong>Hora:</strong> {{ turno.fecha_hora_inicio|date:"h:i A" }}</p>
+        <p><strong>Técnico:</strong> {{ turno.tecnico.get_full_name|default:"Por asignar" }}</p>
+    </div>
+
+    <!-- Botón de Contingencia (RF-04) -->
+    {% if user.is_authenticated and not turno.notifico_retraso %}
+    <form method="POST" action="{% url 'notificar_retraso' turno.id %}" class="mt-6">
+        {% csrf_token %}
+        <button type="submit"
+            class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded-lg transition">
+            ⚠️ Voy 10 min tarde
+        </button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}
