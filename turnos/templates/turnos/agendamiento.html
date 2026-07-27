@@ -1,1 +1,118 @@
 <!--Plantilla 1: Agendamiento y Calendario de turnos-->
+
+{% extends 'turnos/base.html' %}
+
+{% block title %}Agendar Cita - ServiTech{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+    <!-- Stepper / Indicador de Pasos -->
+    <div class="relative flex justify-between items-center mb-10 px-4 max-w-3xl mx-auto">
+        <!-- Línea conectora -->
+        <div class="absolute top-4 left-8 right-8 h-0.5 bg-slate-300 -z-10"></div>
+
+        <!-- Paso 1 (Activo) -->
+        <div class="flex flex-col items-center">
+            <div
+                class="w-9 h-9 rounded-full bg-slate-100 border-2 border-slate-400 text-slate-700 font-bold flex items-center justify-center text-sm mb-2 shadow-sm">
+                1
+            </div>
+            <span class="text-xs font-bold text-blue-900">Dispositivo</span>
+        </div>
+
+        <!-- Paso 2 -->
+        <div class="flex flex-col items-center">
+            <div
+                class="w-9 h-9 rounded-full bg-white border border-slate-300 text-slate-600 font-medium flex items-center justify-center text-sm mb-2">
+                2
+            </div>
+            <span class="text-xs font-medium text-slate-500">Servicio</span>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="flex flex-col items-center">
+            <div
+                class="w-9 h-9 rounded-full bg-white border border-slate-300 text-slate-600 font-medium flex items-center justify-center text-sm mb-2">
+                3
+            </div>
+            <span class="text-xs font-medium text-slate-500">Fecha y Hora</span>
+        </div>
+
+        <!-- Paso 4 -->
+        <div class="flex flex-col items-center">
+            <div
+                class="w-9 h-9 rounded-full bg-white border border-slate-300 text-slate-600 font-medium flex items-center justify-center text-sm mb-2">
+                4
+            </div>
+            <span class="text-xs font-medium text-slate-500">Resumen</span>
+        </div>
+    </div>
+
+    <!-- Tarjeta Principal del Wizard -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+        <!-- Cuerpo de la tarjeta -->
+        <div class="p-8 md:p-10">
+            <h2 class="text-xl font-bold text-blue-950 mb-8">Selecciona tu dispositivo</h2>
+
+            <!-- Grid de Dispositivos -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- Opción Celular -->
+                <button type="button"
+                    class="group flex flex-col items-center justify-center p-8 rounded-xl border border-slate-200 hover:border-blue-900 hover:shadow-md transition bg-white text-center cursor-pointer">
+                    <div
+                        class="w-16 h-16 bg-blue-50 text-blue-900 rounded-full flex items-center justify-center mb-4 group-hover:scale-105 transition">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <rect x="7" y="2" width="10" height="20" rx="2" ry="2" stroke-width="2" />
+                            <line x1="11" y1="18" x2="13" y2="18" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <span class="font-bold text-slate-800 tracking-wide">CELULAR</span>
+                </button>
+
+                <!-- Opción Laptop -->
+                <button type="button"
+                    class="group flex flex-col items-center justify-center p-8 rounded-xl border border-slate-200 hover:border-blue-900 hover:shadow-md transition bg-white text-center cursor-pointer">
+                    <div
+                        class="w-16 h-16 bg-blue-50 text-blue-900 rounded-full flex items-center justify-center mb-4 group-hover:scale-105 transition">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <rect x="3" y="4" width="18" height="12" rx="2" stroke-width="2" />
+                            <path d="M2 20h20" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <span class="font-bold text-slate-800 tracking-wide">LAPTOP</span>
+                </button>
+
+                <!-- Opción PC -->
+                <button type="button"
+                    class="group flex flex-col items-center justify-center p-8 rounded-xl border border-slate-200 hover:border-blue-900 hover:shadow-md transition bg-white text-center cursor-pointer">
+                    <div
+                        class="w-16 h-16 bg-blue-50 text-blue-900 rounded-full flex items-center justify-center mb-4 group-hover:scale-105 transition">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <rect x="3" y="3" width="18" height="12" rx="2" stroke-width="2" />
+                            <path d="M12 15v5M8 20h8" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <span class="font-bold text-slate-800 tracking-wide">PC</span>
+                </button>
+
+            </div>
+        </div>
+
+        <!-- Footer de la tarjeta con Botón Siguiente -->
+        <div class="bg-slate-50 px-8 py-5 border-t border-slate-100 flex justify-end">
+            <button type="button"
+                class="bg-blue-900 hover:bg-blue-950 text-white font-semibold px-7 py-3 rounded-lg flex items-center space-x-2 transition shadow-sm">
+                <span>Siguiente</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+            </button>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

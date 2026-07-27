@@ -26,3 +26,6 @@ def notificar_retraso(request, turno_id):
             turno.save()
             
     return redirect('ver_turno', codigo_turno=turno.codigo_turno)
+
+def seleccionar_dispositivo(request):
+    return render(request, 'turnos/seleccionar_dipositivo.html')

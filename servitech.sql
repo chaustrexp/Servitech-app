@@ -1,136 +1,54 @@
 -- =========================================================
--- BASE DE DATOS: SISTEMA DE AGENDAMIENTO DE TALLER
--- MOTOR: POSTGRESQL
+-- BASE DE DATOS PARA SISTEMA DE AGENDAMIENTO DE SERVITECH
+-- PostgreSQL
 -- =========================================================
 
 
 -- =========================================================
--- 1. TABLA ROL
--- =========================================================
-
-CREATE TABLE rol (
-    id_rol SERIAL PRIMARY KEY,
-
-    nombre VARCHAR(50) NOT NULL UNIQUE,
-
-    descripcion VARCHAR(255),
-
-    activo BOOLEAN DEFAULT TRUE
-);
-
-
--- =========================================================
--- 2. TABLA USUARIO
+-- 1. TABLA USUARIO
+-- Guarda clientes, técnicos, recepcionistas y administradores
+-- Historias: HU-01, HU-02, HU-03, HU-04, HU-05, HU-06, HU-07, HU-08
 -- =========================================================
 
 CREATE TABLE usuario (
     id_usuario SERIAL PRIMARY KEY,
-
     nombre_completo VARCHAR(150) NOT NULL,
-
     correo VARCHAR(150) UNIQUE NOT NULL,
-
     telefono VARCHAR(20),
-
     contrasena VARCHAR(255) NOT NULL,
 
-    activo BOOLEAN DEFAULT TRUE,
+    rol VARCHAR(30) NOT NULL
+        CHECK (rol IN (
+            'CLIENTE',
+            'TECNICO',
+            'RECEPCIONISTA',
+            'ADMINISTRADOR'
+        )),
 
+    activo BOOLEAN DEFAULT TRUE,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
 -- =========================================================
--- 3. RELACIÓN USUARIO - ROL
--- =========================================================
-
-CREATE TABLE usuario_rol (
-    id_usuario INTEGER NOT NULL,
-
-    id_rol INTEGER NOT NULL,
-
-    PRIMARY KEY (id_usuario, id_rol),
-
-    CONSTRAINT fk_usuario_rol_usuario
-        FOREIGN KEY (id_usuario)
-        REFERENCES usuario(id_usuario)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_usuario_rol_rol
-        FOREIGN KEY (id_rol)
-        REFERENCES rol(id_rol)
-        ON DELETE CASCADE
-);
-
-
--- =========================================================
--- 4. TABLA ESPECIALIDAD
+-- 2. TABLA ESPECIALIDAD
+-- Guarda las especialidades que puede requerir un servicio
+-- Historias: HU-01, HU-02 y HU-08
 -- =========================================================
 
 CREATE TABLE especialidad (
     id_especialidad SERIAL PRIMARY KEY,
-
     nombre VARCHAR(100) NOT NULL UNIQUE,
-
     descripcion VARCHAR(255),
-
     activo BOOLEAN DEFAULT TRUE
 );
 
 
 -- =========================================================
--- 5. TABLA TIPO DE DISPOSITIVO
--- =========================================================
-
-CREATE TABLE tipo_dispositivo (
-    id_tipo_dispositivo SERIAL PRIMARY KEY,
-
-    nombre VARCHAR(50) NOT NULL UNIQUE,
-
-    activo BOOLEAN DEFAULT TRUE
-);
-
-
--- =========================================================
--- 6. TABLA ESTADO DE CITA
--- =========================================================
-
-CREATE TABLE estado_cita (
-    id_estado SERIAL PRIMARY KEY,
-
-    nombre VARCHAR(50) NOT NULL UNIQUE,
-
-    descripcion VARCHAR(255),
-
-    activo BOOLEAN DEFAULT TRUE
-);
-
-
--- =========================================================
--- 7. RELACIÓN TÉCNICO - ESPECIALIDAD
--- =========================================================
-
-CREATE TABLE tecnico_especialidad (
-    id_tecnico INTEGER NOT NULL,
-
-    id_especialidad INTEGER NOT NULL,
-
-    PRIMARY KEY (id_tecnico, id_especialidad),
-
-    CONSTRAINT fk_tecnico_especialidad_tecnico
-        FOREIGN KEY (id_tecnico)
-        REFERENCES usuario(id_usuario)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_tecnico_especialidad_especialidad
-        FOREIGN KEY (id_especialidad)
-        REFERENCES especialidad(id_especialidad)
-        ON DELETE CASCADE
-);
-
-
--- =========================================================
--- 8. TABLA SERVICIO
+-- 3. TABLA SERVICIO
+-- Catálogo de servicios del taller
+-- Incluye dispositivo, duración, buffer y especialidad
+-- Historias: HU-01 y HU-08
 -- =========================================================
 
 CREATE TABLE servicio (
@@ -140,10 +58,17 @@ CREATE TABLE servicio (
 
     descripcion VARCHAR(255),
 
+    tipo_dispositivo VARCHAR(30) NOT NULL
+        CHECK (tipo_dispositivo IN (
+            'CELULAR',
+            'LAPTOP',
+            'PC'
+        )),
+
     duracion_minutos INTEGER NOT NULL
         CHECK (duracion_minutos > 0),
 
-    buffer_minutos INTEGER NOT NULL DEFAULT 0
+    buffer_minutos INTEGER DEFAULT 0
         CHECK (buffer_minutos >= 0),
 
     id_especialidad INTEGER NOT NULL,
@@ -157,7 +82,22 @@ CREATE TABLE servicio (
 
 
 -- =========================================================
--- 9. TABLA HORARIO DEL TÉCNICO
+-- 4. TABLA ESTADO_CITA
+-- Estados posibles de una cita
+-- Historias: HU-03, HU-04, HU-06 y HU-07
+-- =========================================================
+
+CREATE TABLE estado_cita (
+    id_estado SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    descripcion VARCHAR(255)
+);
+
+
+-- =========================================================
+-- 5. TABLA HORARIO_TECNICO
+-- Guarda los horarios de trabajo de cada técnico
+-- Historia: HU-02
 -- =========================================================
 
 CREATE TABLE horario_tecnico (
@@ -172,8 +112,6 @@ CREATE TABLE horario_tecnico (
 
     hora_fin TIME NOT NULL,
 
-    activo BOOLEAN DEFAULT TRUE,
-
     CONSTRAINT fk_horario_tecnico
         FOREIGN KEY (id_tecnico)
         REFERENCES usuario(id_usuario)
@@ -185,7 +123,9 @@ CREATE TABLE horario_tecnico (
 
 
 -- =========================================================
--- 10. TABLA CITA
+-- 6. TABLA CITA
+-- Tabla principal del sistema
+-- Historias: HU-01, HU-02, HU-03, HU-04, HU-05, HU-06 y HU-07
 -- =========================================================
 
 CREATE TABLE cita (
@@ -197,8 +137,6 @@ CREATE TABLE cita (
 
     id_servicio INTEGER NOT NULL,
 
-    id_tipo_dispositivo INTEGER NOT NULL,
-
     id_estado INTEGER NOT NULL DEFAULT 1,
 
     fecha DATE NOT NULL,
@@ -207,66 +145,84 @@ CREATE TABLE cita (
 
     hora_fin TIME NOT NULL,
 
+    -- Datos relacionados con retrasos
+    minutos_retraso INTEGER DEFAULT 0
+        CHECK (minutos_retraso >= 0),
+
+    -- Datos relacionados con cancelaciones
+    motivo_cancelacion VARCHAR(255),
+
+    -- Datos relacionados con reagendamientos
+    motivo_reagendamiento VARCHAR(255),
+
+    -- Datos relacionados con reparaciones extendidas
+    minutos_adicionales INTEGER DEFAULT 0
+        CHECK (minutos_adicionales >= 0),
+
+    motivo_ajuste VARCHAR(255),
+
     observaciones VARCHAR(500),
 
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
+
+    -- Relación con el cliente
     CONSTRAINT fk_cita_cliente
         FOREIGN KEY (id_cliente)
         REFERENCES usuario(id_usuario),
 
+
+    -- Relación con el técnico
     CONSTRAINT fk_cita_tecnico
         FOREIGN KEY (id_tecnico)
         REFERENCES usuario(id_usuario),
 
+
+    -- Relación con el servicio
     CONSTRAINT fk_cita_servicio
         FOREIGN KEY (id_servicio)
         REFERENCES servicio(id_servicio),
 
-    CONSTRAINT fk_cita_dispositivo
-        FOREIGN KEY (id_tipo_dispositivo)
-        REFERENCES tipo_dispositivo(id_tipo_dispositivo),
 
+    -- Relación con el estado
     CONSTRAINT fk_cita_estado
         FOREIGN KEY (id_estado)
         REFERENCES estado_cita(id_estado),
 
+
+    -- Validar que la hora final sea mayor que la inicial
     CONSTRAINT chk_hora_cita
         CHECK (hora_fin > hora_inicio)
 );
 
 
 -- =========================================================
--- 11. HISTORIAL DE ESTADOS
+-- 7. TABLA HISTORIAL_CITA
+-- Guarda los cambios de estado y acciones realizadas
+-- Historias: HU-03, HU-04, HU-05, HU-06 y HU-07
 -- =========================================================
 
-CREATE TABLE historial_estado_cita (
+CREATE TABLE historial_cita (
     id_historial SERIAL PRIMARY KEY,
 
     id_cita INTEGER NOT NULL,
 
-    id_estado_anterior INTEGER,
-
-    id_estado_nuevo INTEGER NOT NULL,
-
     id_usuario INTEGER,
 
-    motivo VARCHAR(255),
+    estado_anterior VARCHAR(50),
+
+    estado_nuevo VARCHAR(50),
+
+    descripcion VARCHAR(255),
 
     fecha_cambio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
 
     CONSTRAINT fk_historial_cita
         FOREIGN KEY (id_cita)
         REFERENCES cita(id_cita)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_historial_estado_anterior
-        FOREIGN KEY (id_estado_anterior)
-        REFERENCES estado_cita(id_estado),
-
-    CONSTRAINT fk_historial_estado_nuevo
-        FOREIGN KEY (id_estado_nuevo)
-        REFERENCES estado_cita(id_estado),
 
     CONSTRAINT fk_historial_usuario
         FOREIGN KEY (id_usuario)
@@ -275,99 +231,9 @@ CREATE TABLE historial_estado_cita (
 
 
 -- =========================================================
--- 12. TABLA RETRASO
--- =========================================================
-
-CREATE TABLE retraso (
-    id_retraso SERIAL PRIMARY KEY,
-
-    id_cita INTEGER NOT NULL,
-
-    minutos_retraso INTEGER NOT NULL
-        CHECK (minutos_retraso > 0),
-
-    fecha_aviso TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_retraso_cita
-        FOREIGN KEY (id_cita)
-        REFERENCES cita(id_cita)
-        ON DELETE CASCADE
-);
-
-
--- =========================================================
--- 13. TABLA CANCELACIÓN
--- =========================================================
-
-CREATE TABLE cancelacion (
-    id_cancelacion SERIAL PRIMARY KEY,
-
-    id_cita INTEGER NOT NULL,
-
-    motivo VARCHAR(255) NOT NULL,
-
-    fecha_cancelacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_cancelacion_cita
-        FOREIGN KEY (id_cita)
-        REFERENCES cita(id_cita)
-        ON DELETE CASCADE
-);
-
-
--- =========================================================
--- 14. TABLA REAGENDAMIENTO
--- =========================================================
-
-CREATE TABLE reagendamiento (
-    id_reagendamiento SERIAL PRIMARY KEY,
-
-    id_cita INTEGER NOT NULL,
-
-    fecha_anterior DATE NOT NULL,
-
-    hora_anterior TIME NOT NULL,
-
-    nueva_fecha DATE NOT NULL,
-
-    nueva_hora TIME NOT NULL,
-
-    motivo VARCHAR(255),
-
-    fecha_reagendamiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_reagendamiento_cita
-        FOREIGN KEY (id_cita)
-        REFERENCES cita(id_cita)
-        ON DELETE CASCADE
-);
-
-
--- =========================================================
--- 15. TABLA AJUSTE DE AGENDA
--- =========================================================
-
-CREATE TABLE ajuste_agenda (
-    id_ajuste SERIAL PRIMARY KEY,
-
-    id_cita INTEGER NOT NULL,
-
-    minutos_adicionales INTEGER NOT NULL
-        CHECK (minutos_adicionales > 0),
-
-    motivo VARCHAR(255) NOT NULL,
-
-    fecha_ajuste TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_ajuste_cita
-        FOREIGN KEY (id_cita)
-        REFERENCES cita(id_cita)
-        ON DELETE CASCADE
-);
-
-
--- =========================================================
--- 16. TABLA NOTIFICACIÓN
+-- 8. TABLA NOTIFICACION
+-- Guarda las notificaciones enviadas a los usuarios
+-- Historias: HU-03, HU-04 y HU-05
 -- =========================================================
 
 CREATE TABLE notificacion (
@@ -385,9 +251,11 @@ CREATE TABLE notificacion (
 
     leida BOOLEAN DEFAULT FALSE,
 
+
     CONSTRAINT fk_notificacion_usuario
         FOREIGN KEY (id_usuario)
         REFERENCES usuario(id_usuario),
+
 
     CONSTRAINT fk_notificacion_cita
         FOREIGN KEY (id_cita)
@@ -397,98 +265,103 @@ CREATE TABLE notificacion (
 
 
 -- =========================================================
--- 17. TABLA ENLACE SEGURO
+-- DATOS INICIALES
 -- =========================================================
-
-CREATE TABLE enlace_seguro (
-    id_enlace SERIAL PRIMARY KEY,
-
-    id_cita INTEGER NOT NULL,
-
-    token VARCHAR(255) UNIQUE NOT NULL,
-
-    tipo_accion VARCHAR(50) NOT NULL,
-
-    fecha_expiracion TIMESTAMP NOT NULL,
-
-    utilizado BOOLEAN DEFAULT FALSE,
-
-    CONSTRAINT fk_enlace_cita
-        FOREIGN KEY (id_cita)
-        REFERENCES cita(id_cita)
-        ON DELETE CASCADE
-);
 
 
 -- =========================================================
--- INSERTAR ROLES
--- =========================================================
-
-INSERT INTO rol (nombre, descripcion)
-VALUES
-    ('CLIENTE', 'Cliente que agenda y administra sus citas'),
-
-    ('TECNICO', 'Técnico encargado de atender las citas'),
-
-    ('RECEPCIONISTA', 'Usuario encargado de gestionar la recepción'),
-
-    ('ADMINISTRADOR', 'Usuario encargado de administrar el sistema');
-
-
--- =========================================================
--- INSERTAR TIPOS DE DISPOSITIVOS
--- =========================================================
-
-INSERT INTO tipo_dispositivo (nombre)
-VALUES
-    ('Celular'),
-    ('Laptop'),
-    ('PC');
-
-
--- =========================================================
--- INSERTAR ESTADOS DE CITA
+-- INSERTAR ESTADOS DE LAS CITAS
 -- =========================================================
 
 INSERT INTO estado_cita (nombre, descripcion)
 VALUES
-    ('PENDIENTE', 'La cita fue creada pero aún no ha sido confirmada'),
-
-    ('CONFIRMADA', 'La cita está confirmada'),
-
-    ('RETRASADA', 'El cliente informó que llegará tarde'),
-
-    ('EN_DIAGNOSTICO', 'El técnico está realizando el diagnóstico'),
-
-    ('EN_REPARACION', 'El equipo está siendo reparado'),
-
-    ('FINALIZADA', 'La atención fue completada'),
-
-    ('CANCELADA', 'La cita fue cancelada'),
-
-    ('NO_SHOW', 'El cliente no asistió'),
-
-    ('REAGENDADA', 'La cita fue movida a otra fecha');
+('PENDIENTE', 'La cita fue creada pero aún no ha sido confirmada'),
+('CONFIRMADA', 'La cita está confirmada'),
+('RETRASADA', 'El cliente informó que llegará tarde'),
+('EN_DIAGNOSTICO', 'El técnico está realizando el diagnóstico'),
+('EN_REPARACION', 'El dispositivo se encuentra en reparación'),
+('FINALIZADA', 'La atención de la cita terminó'),
+('CANCELADA', 'La cita fue cancelada'),
+('NO_SHOW', 'El cliente no asistió a la cita'),
+('REAGENDADA', 'La cita fue cambiada para otra fecha u hora');
 
 
 -- =========================================================
 -- INSERTAR ESPECIALIDADES
 -- =========================================================
 
-INSERT INTO especialidad
-(nombre, descripcion)
+INSERT INTO especialidad (nombre, descripcion)
 VALUES
-    ('Diagnóstico',
-     'Diagnóstico general de dispositivos'),
+('CELULARES', 'Diagnóstico y reparación de dispositivos celulares'),
+('LAPTOPS', 'Diagnóstico y reparación de computadores portátiles'),
+('PC', 'Diagnóstico y reparación de computadores de escritorio'),
+('SOFTWARE', 'Instalación y configuración de software'),
+('HARDWARE', 'Reparación y mantenimiento de componentes físicos');
 
-    ('Hardware',
-     'Reparación y mantenimiento de componentes físicos'),
 
-    ('Software',
-     'Instalación, configuración y reparación de software'),
+-- =========================================================
+-- INSERTAR SERVICIOS
+-- =========================================================
 
-    ('Celulares',
-     'Reparación y mantenimiento de teléfonos celulares'),
+INSERT INTO servicio (
+    nombre,
+    descripcion,
+    tipo_dispositivo,
+    duracion_minutos,
+    buffer_minutos,
+    id_especialidad
+)
+VALUES
+(
+    'Diagnóstico de Celular',
+    'Revisión general del dispositivo celular',
+    'CELULAR',
+    30,
+    10,
+    1
+),
+(
+    'Diagnóstico de Laptop',
+    'Revisión general del computador portátil',
+    'LAPTOP',
+    45,
+    10,
+    2
+),
+(
+    'Diagnóstico de PC',
+    'Revisión general del computador de escritorio',
+    'PC',
+    45,
+    10,
+    3
+),
+(
+    'Reparación Exprés de Celular',
+    'Reparación rápida de un dispositivo celular',
+    'CELULAR',
+    60,
+    15,
+    1
+),
+(
+    'Asesoría de Software',
+    'Asesoría para instalación y configuración de software',
+    'PC',
+    30,
+    5,
+    4
+),
+(
+    'Mantenimiento de Hardware',
+    'Mantenimiento preventivo de componentes físicos',
+    'PC',
+    60,
+    15,
+    5
+);
 
-    ('Computadores',
-     'Reparación y mantenimiento de computadores y laptops');
+
+-- =========================================================
+-- FIN DEL SCRIPT
+-- =========================================================
