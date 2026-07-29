@@ -51,7 +51,11 @@
         </div>
     </div>
 
+<<<<<<< main
     <form method="POST" action="" class="mb-6">
+=======
+    <form id="wizard-form" method="POST" action="" class="mb-6">
+>>>>>>> 25d91660321870a31c18c83addb0a2308ed5f43b
         {% csrf_token %}
         <input type="hidden" name="fecha" id="fecha_input" value="2026-10-08">
         <input type="hidden" name="hora" id="hora_input" value="">
@@ -191,7 +195,11 @@
 
             <button type="button" id="btn-siguiente" 
                 class="bg-[#002b75] text-white font-medium text-sm px-8 py-3 rounded-lg flex items-center gap-2 transition-all hover:bg-[#001f54]"
+<<<<<<< HEAD
                 onclick="document.forms[0].submit()">
+=======
+                onclick="document.getElementById('wizard-form').submit()">
+>>>>>>> 25d91660321870a31c18c83addb0a2308ed5f43b
                 <span>Siguiente</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
             </button>
