@@ -1,0 +1,38 @@
+# ── Entorno Virtual ──────────────────────────────────────────
+venv/
+env/
+.env
+.venv/
+
+# ── Base de datos local ──────────────────────────────────────
+db.sqlite3
+*.sqlite3
+
+# ── Python Cache ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# ── Django ───────────────────────────────────────────────────
+*.log
+local_settings.py
+media/
+
+# ── Static files (solo si hay collectstatic) ─────────────────
+staticfiles/
+
+# ── IDEs y Editores ──────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── OS Files ─────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Archivos del servidor de desarrollo ──────────────────────
+server.log
+server_error.log
+server_output.txt

@@ -1,0 +1,180 @@
+{% extends 'turnos/wizard_base.html' %}
+
+{% block title %}Resumen de tu Cita - ServiTech{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+
+    <!-- STEPPER (PASOS DEL WIZARD) -->
+    <div class="mb-10">
+        <div class="relative flex items-center justify-between max-w-3xl mx-auto px-4">
+            <!-- Línea conectora de fondo -->
+            <div class="absolute left-0 top-4 w-full h-[2px] bg-[#002b75] -z-10"></div>
+
+            <!-- Paso 1 (Completado) -->
+            <div class="flex flex-col items-center bg-[#f8f9fc] px-2">
+                <div class="w-8 h-8 rounded-full bg-[#002b75] text-white flex items-center justify-center text-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <span class="text-xs font-medium text-slate-500 mt-2">Equipo</span>
+            </div>
+
+            <!-- Paso 2 (Completado) -->
+            <div class="flex flex-col items-center bg-[#f8f9fc] px-2">
+                <div class="w-8 h-8 rounded-full bg-[#002b75] text-white flex items-center justify-center text-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <span class="text-xs font-medium text-slate-500 mt-2">Detalles</span>
+            </div>
+
+            <!-- Paso 3 (Completado) -->
+            <div class="flex flex-col items-center bg-[#f8f9fc] px-2">
+                <div class="w-8 h-8 rounded-full bg-[#002b75] text-white flex items-center justify-center text-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <span class="text-xs font-medium text-slate-500 mt-2">Horario</span>
+            </div>
+
+            <!-- Paso 4 (Activo) -->
+            <div class="flex flex-col items-center bg-[#f8f9fc] px-2">
+                <div class="w-8 h-8 rounded-full bg-[#002b75] text-white font-bold flex items-center justify-center text-sm shadow-sm ring-4 ring-blue-100">
+                    4
+                </div>
+                <span class="text-xs font-bold text-[#002b75] mt-2">Resumen</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-6">
+
+        <!-- Columna Izquierda: Revisión de Solicitud -->
+        <div class="flex-1 flex flex-col gap-6">
+
+            <!-- Tarjeta Principal -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+                <div class="flex items-center gap-3 mb-6 border-b border-slate-200 pb-6">
+                    <div class="w-10 h-10 rounded-full bg-[#eef2ff] flex items-center justify-center text-[#002b75]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-[#091124]">Revisión de tu Solicitud</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Equipo Seleccionado -->
+                    <div>
+                        <h3 class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-3">Equipo Seleccionado</h3>
+                        <div class="bg-[#f4f7fb] rounded-lg p-4 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-[#eef2ff] flex items-center justify-center text-[#002b75] flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <div>
+                                <span class="font-bold text-slate-800 text-sm">{{ dispositivo }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Servicio Técnico -->
+                    <div>
+                        <h3 class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-3">Servicio Técnico</h3>
+                        <div class="bg-[#f4f7fb] rounded-lg p-4 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-[#eef2ff] flex items-center justify-center text-[#002b75] flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+                            </div>
+                            <div>
+                                <span class="font-bold text-slate-800 text-sm">{{ servicio }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fecha y Hora -->
+                    <div>
+                        <h3 class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-3">Fecha y Hora</h3>
+                        <div class="bg-[#f4f7fb] rounded-lg p-4 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-[#eef2ff] flex items-center justify-center text-[#002b75] flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <div>
+                                <span class="font-bold text-slate-800 text-sm">{{ fecha }}, {{ hora }}</span>
+                                <span class="text-xs text-slate-400 block">(Cita Confirmada)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estimación de Costo -->
+                    <div>
+                        <h3 class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-3">Estimación de Costo</h3>
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-700 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div>
+                                <span class="font-bold text-green-800 text-lg">$XXX.XX</span>
+                                <span class="text-xs text-green-600 block">Sujeto a diagnóstico físico</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notas adicionales -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+                <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Notas adicionales o comentarios
+                </h3>
+                <textarea id="notas" name="notas" rows="4"
+                    class="w-full border border-slate-200 rounded-lg p-4 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002b75] focus:ring-1 focus:ring-[#002b75] resize-none"
+                    placeholder="Escribe aquí cualquier detalle que nuestro técnico deba saber antes de la cita..."></textarea>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Confirmar Cita -->
+        <div class="w-full lg:w-[320px] flex flex-col gap-4">
+            <!-- Imagen decorativa -->
+            <div class="bg-gradient-to-br from-[#002b75] to-[#1a4db3] rounded-xl overflow-hidden relative h-52 flex items-end p-6 shadow-md">
+                <div class="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400')] bg-cover bg-center"></div>
+                <div class="relative z-10">
+                    <div class="inline-flex items-center gap-2 bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full mb-3 shadow">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        TODO LISTO
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Confirmar -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                <h2 class="text-xl font-bold text-[#091124] mb-3">Confirmar Cita</h2>
+                <p class="text-sm text-slate-500 mb-6">Al hacer clic en "Confirmar Cita", reservaremos el espacio para ti y recibirás una notificación de confirmación en tu correo.</p>
+
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="confirmar" value="1">
+                    <button type="submit"
+                        class="w-full bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md mb-4">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Confirmar Cita
+                    </button>
+                </form>
+
+                <a href="{% url 'seleccionar_fecha_hora' %}"
+                    class="w-full bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Volver al horario
+                </a>
+
+                <div class="mt-5 flex items-start gap-2 text-xs text-slate-400">
+                    <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Puedes cancelar o reprogramar esta cita sin costo hasta 24 horas antes del horario seleccionado.</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
