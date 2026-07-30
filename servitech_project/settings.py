@@ -57,16 +57,26 @@ WSGI_APPLICATION = 'servitech_project.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/stable/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'servitech',     # Nombre de tu base de datos PostgreSQL
-        'USER': 'postgres',      # Tu usuario de PostgreSQL
-        'PASSWORD': 'E1093595859', # ⚠️ Cada quien pone su propia contraseña de PostgreSQL
-        'HOST': 'localhost',     # O la dirección de tu servidor (ej. 127.0.0.1)
-        'PORT': '5432',          # El puerto por defecto de PostgreSQL
+USE_POSTGRES = os.getenv('USE_POSTGRES', 'False').lower() in ('true', '1', 'yes')
+
+if USE_POSTGRES:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'servitech',     # Nombre de tu base de datos PostgreSQL
+            'USER': 'postgres',      # Tu usuario de PostgreSQL
+            'PASSWORD': 'E1093595859', # ⚠️ Cada quien pone su propia contraseña de PostgreSQL
+            'HOST': 'localhost',     # O la dirección de tu servidor (ej. 127.0.0.1)
+            'PORT': '5432',          # El puerto por defecto de PostgreSQL
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
