@@ -1,0 +1,287 @@
+{% extends 'turnos/cliente_base.html' %}
+
+{% block title %}Servicios - ServiTech{% endblock %}
+
+{% block content %}
+<div class="mb-10 text-center md:text-left">
+    <h1 class="text-3xl md:text-4xl font-extrabold text-[#002b75] tracking-tight mb-3">Nuestros Servicios Especializados</h1>
+    <p class="text-slate-500 font-medium max-w-3xl leading-relaxed">
+        Soluciones técnicas de alta precisión para todos tus dispositivos. Confía en el experto, elige ServiTech.
+    </p>
+</div>
+
+<!-- Grid de Servicios -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+
+    <!-- Tarjeta: Celulares -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
+        <div class="h-48 w-full overflow-hidden bg-slate-100 relative">
+            <img src="https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&q=80&w=600" 
+                 alt="Reparación de celulares" class="w-full h-full object-cover">
+        </div>
+        <div class="p-6 flex flex-col flex-grow">
+            <div class="flex items-center gap-2 text-[#002b75] mb-3">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                <span class="text-xs font-bold tracking-widest uppercase">Tecnología Móvil</span>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Celulares</h3>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                Reparación de pantallas, baterías y fallas de placa para todas las marcas líderes. Repuestos originales certificados.
+            </p>
+            
+            <div class="mt-auto">
+                <div class="flex items-center justify-between mb-5">
+                    <span class="bg-[#eef2ff] text-[#002b75] text-xs font-bold px-3 py-1.5 rounded-lg">Desde $45.00</span>
+                    <div class="flex items-center gap-1.5 text-slate-500 text-xs font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        24-48h
+                    </div>
+                </div>
+                <button onclick="openServicioModal('Celulares', 'Reparación de pantallas, baterías y fallas de placa para todas las marcas líderes. Repuestos originales certificados.', 'Desde $45.00', '24-48h', 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&q=80&w=600')" class="block w-full text-center bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
+                    Ver detalles / Agendar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta: Laptops -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
+        <div class="h-48 w-full overflow-hidden bg-slate-100 relative">
+            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=600" 
+                 alt="Reparación de laptops" class="w-full h-full object-cover">
+        </div>
+        <div class="p-6 flex flex-col flex-grow">
+            <div class="flex items-center gap-2 text-[#002b75] mb-3">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <span class="text-xs font-bold tracking-widest uppercase">Cómputo</span>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Laptops</h3>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                Mantenimiento preventivo, cambio de teclado, reparación de bisagras y upgrades de hardware.
+            </p>
+            
+            <div class="mt-auto">
+                <div class="flex items-center justify-between mb-5">
+                    <span class="text-slate-800 text-sm font-bold">Desde $70.00</span>
+                    <span class="text-slate-500 text-xs font-medium">3-5 días</span>
+                </div>
+                <button onclick="openServicioModal('Laptops', 'Mantenimiento preventivo, cambio de teclado, reparación de bisagras y upgrades de hardware.', 'Desde $70.00', '3-5 días', 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=600')" class="block w-full text-center bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
+                    Ver detalles / Agendar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta: PCs Escritorio -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
+        <div class="h-48 w-full overflow-hidden bg-slate-100 relative">
+            <img src="https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&q=80&w=600" 
+                 alt="Armado de PCs" class="w-full h-full object-cover">
+        </div>
+        <div class="p-6 flex flex-col flex-grow">
+            <div class="flex items-center gap-2 text-[#002b75] mb-3">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/></svg>
+                <span class="text-xs font-bold tracking-widest uppercase">Performance</span>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">PCs Escritorio</h3>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                Ensamble a medida, optimización de sistemas de enfriamiento líquido y limpieza profunda.
+            </p>
+            
+            <div class="mt-auto">
+                <div class="flex items-center justify-between mb-5">
+                    <span class="text-slate-800 text-sm font-bold">Desde $60.00</span>
+                    <span class="text-slate-500 text-xs font-medium">2-3 días</span>
+                </div>
+                <button onclick="openServicioModal('PCs Escritorio', 'Ensamble a medida, optimización de sistemas de enfriamiento líquido y limpieza profunda.', 'Desde $60.00', '2-3 días', 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&q=80&w=600')" class="block w-full text-center bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
+                    Ver detalles / Agendar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta: Consolas -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
+        <div class="h-48 w-full overflow-hidden bg-slate-100 relative">
+            <img src="https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?auto=format&fit=crop&q=80&w=600" 
+                 alt="Reparación de Consolas" class="w-full h-full object-cover">
+        </div>
+        <div class="p-6 flex flex-col flex-grow">
+            <div class="flex items-center gap-2 text-[#002b75] mb-3">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="text-xs font-bold tracking-widest uppercase">Gaming</span>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Consolas</h3>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                Reparación de puertos HDMI, joysticks, problemas de encendido y mantenimiento de sobrecalentamiento.
+            </p>
+            
+            <div class="mt-auto">
+                <div class="flex items-center justify-between mb-5">
+                    <span class="text-slate-800 text-sm font-bold">Desde $55.00</span>
+                    <span class="text-slate-500 text-xs font-medium">3-4 días</span>
+                </div>
+                <button onclick="openServicioModal('Consolas', 'Reparación de puertos HDMI, joysticks, problemas de encendido y mantenimiento de sobrecalentamiento.', 'Desde $55.00', '3-4 días', 'https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?auto=format&fit=crop&q=80&w=600')" class="block w-full text-center bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
+                    Ver detalles / Agendar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta: Recuperación -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col md:col-span-2 lg:col-span-1">
+        <div class="h-48 w-full overflow-hidden bg-slate-100 relative">
+            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=600" 
+                 alt="Recuperación de Datos" class="w-full h-full object-cover">
+        </div>
+        <div class="p-6 flex flex-col flex-grow h-full justify-between">
+            <div>
+                <div class="flex items-center gap-2 text-[#002b75] mb-3">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    <span class="text-xs font-bold tracking-widest uppercase">Seguridad</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Recuperación de Datos</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                    Recuperamos tu información valiosa de discos duros dañados, unidades de estado sólido y memorias corruptas con total privacidad garantizada.
+                </p>
+                <div class="mb-6">
+                    <p class="text-lg font-bold text-[#002b75]">Cotización previa</p>
+                    <div class="flex items-center gap-1.5 text-slate-500 text-xs font-medium mt-1">
+                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Evaluación en 2h
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="openServicioModal('Recuperación de Datos', 'Recuperamos tu información valiosa de discos duros dañados, unidades de estado sólido y memorias corruptas con total privacidad garantizada.', 'Cotización previa', 'Evaluación en 2h', 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=600')" class="block w-full text-center border-2 border-[#002b75] text-[#002b75] hover:bg-blue-50 font-bold py-2.5 rounded-xl text-sm transition-colors">
+                Ver detalles / Agendar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Banner: Por qué elegirnos -->
+<div class="bg-[#eef2ff] rounded-3xl p-10 md:p-14 text-center mb-10">
+    <h2 class="text-2xl md:text-3xl font-bold text-[#002b75] mb-2">¿Por qué elegirnos?</h2>
+    <p class="text-slate-600 mb-10">Calidad garantizada en cada reparación</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Razón 1 -->
+        <div class="flex flex-col items-center">
+            <div class="w-16 h-16 rounded-full bg-[#002b75] text-white flex items-center justify-center mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg mb-2">Técnicos Certificados</h3>
+            <p class="text-sm text-slate-500 leading-relaxed max-w-xs">Nuestro equipo cuenta con certificaciones internacionales de las principales marcas.</p>
+        </div>
+        
+        <!-- Razón 2 -->
+        <div class="flex flex-col items-center">
+            <div class="w-16 h-16 rounded-full bg-[#0d7348] text-white flex items-center justify-center mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg mb-2">Garantía Extendida</h3>
+            <p class="text-sm text-slate-500 leading-relaxed max-w-xs">Ofrecemos hasta 12 meses de garantía en piezas y mano de obra para tu tranquilidad.</p>
+        </div>
+
+        <!-- Razón 3 -->
+        <div class="flex flex-col items-center">
+            <div class="w-16 h-16 rounded-full bg-[#d0dbf6] text-[#002b75] flex items-center justify-center mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg mb-2">Servicio Express</h3>
+            <p class="text-sm text-slate-500 leading-relaxed max-w-xs">Entendemos la importancia de tus equipos. Realizamos diagnósticos en tiempo récord.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Banner de Soporte -->
+<div class="bg-[#002b75] rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between text-white gap-6">
+    <div>
+        <h2 class="text-xl font-bold mb-1">¿No encuentras lo que buscas?</h2>
+        <p class="text-blue-200 text-sm">Realizamos diagnósticos personalizados para cualquier tipo de dispositivo electrónico.</p>
+    </div>
+    <a href="{% url 'cliente_soporte' %}" class="bg-white text-[#002b75] font-bold px-6 py-3 rounded-lg hover:bg-slate-50 transition shadow-sm whitespace-nowrap text-sm">
+        Contactar Soporte
+    </a>
+</div>
+
+<!-- Modal Dinámico de Detalles del Servicio -->
+<div id="modal-servicio" class="fixed inset-0 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="cerrarServicioModal()"></div>
+    
+    <div class="relative bg-white w-[90%] max-w-lg rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="modal-servicio-content">
+        <!-- Imagen -->
+        <div class="h-48 w-full bg-slate-200 relative">
+            <img id="modal-img" src="" alt="Servicio" class="w-full h-full object-cover">
+            <button onclick="cerrarServicioModal()" class="absolute top-4 right-4 w-8 h-8 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center text-slate-800 hover:bg-white transition-colors shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        
+        <!-- Contenido -->
+        <div class="p-8">
+            <h3 id="modal-title" class="text-2xl font-extrabold text-slate-800 mb-3">Título</h3>
+            <p id="modal-desc" class="text-slate-500 text-sm leading-relaxed mb-6">Descripción...</p>
+            
+            <div class="flex items-center gap-6 mb-8 border-t border-b border-slate-100 py-4">
+                <div>
+                    <span class="block text-xs font-bold text-slate-400 uppercase mb-1">Precio Estimado</span>
+                    <span id="modal-price" class="text-base font-bold text-[#002b75] bg-[#eef2ff] px-2 py-1 rounded">Desde $0.00</span>
+                </div>
+                <div class="w-px h-10 bg-slate-200"></div>
+                <div>
+                    <span class="block text-xs font-bold text-slate-400 uppercase mb-1">Tiempo de Entrega</span>
+                    <div class="flex items-center gap-1 text-slate-700 font-bold text-sm">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span id="modal-time">X días</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="cerrarServicioModal()" class="flex-1 border-2 border-slate-200 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-50 transition-colors text-sm">
+                    Cerrar
+                </button>
+                <a href="{% url 'seleccionar_dispositivo' %}" class="flex-[2] text-center bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm">
+                    Agendar Ahora
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openServicioModal(title, desc, price, time, imgUrl) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-desc').textContent = desc;
+        document.getElementById('modal-price').textContent = price;
+        document.getElementById('modal-time').textContent = time;
+        document.getElementById('modal-img').src = imgUrl;
+        
+        const modal = document.getElementById('modal-servicio');
+        const content = document.getElementById('modal-servicio-content');
+        
+        modal.classList.remove('hidden');
+        // Pequeño delay para la animación
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+        }, 10);
+    }
+    
+    function cerrarServicioModal() {
+        const modal = document.getElementById('modal-servicio');
+        const content = document.getElementById('modal-servicio-content');
+        
+        modal.classList.add('opacity-0');
+        content.classList.add('scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+</script>
+
+{% endblock %}

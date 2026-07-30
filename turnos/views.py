@@ -5,9 +5,10 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
+from datetime import datetime, timedelta
 
-from .models import Cita, Usuario
-from .forms import RegistroUsuarioForm, CustomLoginForm
+from .models import Cita, Usuario, Especialidad, Servicio, EstadoCita
+from .forms import RegistroUsuarioForm, CustomLoginForm, EditarPerfilForm
 
 
 # ────────────────────────────────────────────────────────────────
@@ -67,8 +68,8 @@ def home(request):
     elif rol == Usuario.Rol.TECNICO:
         return redirect('dashboard_tecnico')
     else:
-        # CLIENTE y RECEPCIONISTA van al agendamiento
-        return redirect('seleccionar_dispositivo')
+        # CLIENTE y RECEPCIONISTA van al dashboard principal
+        return redirect('cliente_inicio')
 
 
 # ────────────────────────────────────────────────────────────────
@@ -125,28 +126,145 @@ def seleccionar_fecha_hora(request):
 def resumen_cita(request):
     """Paso 4 del wizard: resumen y confirmación."""
     dispositivo = request.session.get('wizard_dispositivo')
-    servicio = request.session.get('wizard_servicio')
+    servicio_nombre = request.session.get('wizard_servicio')
     fecha = request.session.get('wizard_fecha')
     hora = request.session.get('wizard_hora')
-    
-    if not all([dispositivo, servicio, fecha, hora]):
+
+    if not all([dispositivo, servicio_nombre, fecha, hora]):
         return redirect('seleccionar_dispositivo')
-        
+
     if request.method == 'POST':
-        # Aquí se crearía la Cita en base de datos.
-        # Cita.objects.create(...)
-        # Limpiar sesión:
+        # El valor del dispositivo ya viene en UPPERCASE (CELULAR, LAPTOP, PC)
+        tipo_dispositivo = dispositivo  # ya es CELULAR / LAPTOP / PC
+
+        # Obtener o crear Especialidad y Servicio
+        especialidad, _ = Especialidad.objects.get_or_create(
+            nombre='General',
+            defaults={'descripcion': 'Servicio técnico general'}
+        )
+        servicio_obj, _ = Servicio.objects.get_or_create(
+            nombre=servicio_nombre,
+            defaults={
+                'tipo_dispositivo': tipo_dispositivo,
+                'duracion_minutos': 60,
+                'especialidad': especialidad,
+            }
+        )
+
+        # Parsear fecha y calcular hora fin
+        fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
+        hora_inicio = datetime.strptime(hora, '%H:%M').time()
+        hora_fin = (datetime.combine(fecha_obj, hora_inicio)
+                    + timedelta(minutes=servicio_obj.duracion_minutos)).time()
+
+        # Estado Confirmada
+        estado, _ = EstadoCita.objects.get_or_create(nombre='Confirmada')
+
+        # Crear la cita en BD
+        cita = Cita.objects.create(
+            cliente=request.user,
+            servicio=servicio_obj,
+            estado=estado,
+            fecha=fecha_obj,
+            hora_inicio=hora_inicio,
+            hora_fin=hora_fin,
+            observaciones=f'Dispositivo: {dispositivo}',
+        )
+
+        # Limpiar sesión del wizard
         for key in ['wizard_dispositivo', 'wizard_servicio', 'wizard_fecha', 'wizard_hora']:
-            if key in request.session:
-                del request.session[key]
-        messages.success(request, "¡Cita confirmada exitosamente!")
-        return redirect('home')
-        
+            request.session.pop(key, None)
+
+        return redirect('cita_confirmada', cita_id=cita.pk)
+
     return render(request, 'turnos/resumen_cita.html', {
         'dispositivo': dispositivo,
-        'servicio': servicio,
+        'servicio': servicio_nombre,
         'fecha': fecha,
-        'hora': hora
+        'hora': hora,
+    })
+
+
+@login_required
+def cita_confirmada(request, cita_id):
+    """Vista de éxito post-confirmación de cita."""
+    cita = get_object_or_404(Cita, pk=cita_id, cliente=request.user)
+
+    # Extraer dispositivo (almacenado como CELULAR/LAPTOP/PC en observaciones)
+    dispositivo_map = {'CELULAR': 'Celular', 'LAPTOP': 'Laptop', 'PC': 'PC'}
+    raw = ''
+    if cita.observaciones and cita.observaciones.startswith('Dispositivo: '):
+        raw = cita.observaciones.replace('Dispositivo: ', '', 1)
+    dispositivo_display = dispositivo_map.get(raw, raw) or cita.servicio.tipo_dispositivo.title()
+
+    # Construir enlace Google Calendar
+    fecha_str = cita.fecha.strftime('%Y%m%d')
+    hi_str = cita.hora_inicio.strftime('%H%M%S')
+    hf_str = cita.hora_fin.strftime('%H%M%S')
+    gcal_url = (
+        f"https://calendar.google.com/calendar/render?action=TEMPLATE"
+        f"&text=Cita+ServiTech+-+{cita.servicio.nombre.replace(' ', '+')}"
+        f"&dates={fecha_str}T{hi_str}/{fecha_str}T{hf_str}"
+        f"&details=Cita+%23ST-{cita.pk}+en+ServiTech"
+    )
+
+    return render(request, 'turnos/cita_confirmada.html', {
+        'cita': cita,
+        'dispositivo': dispositivo_display,
+        'gcal_url': gcal_url,
+    })
+
+
+@login_required
+def detalle_cita(request, cita_id):
+    """Ticket completo de la cita para el cliente."""
+    cita = get_object_or_404(Cita, pk=cita_id, cliente=request.user)
+
+    if request.method == 'POST':
+        accion = request.POST.get('accion')
+
+        if accion == 'retraso':
+            minutos = int(request.POST.get('minutos', 10))
+            if cita.minutos_retraso == 0:
+                cita.minutos_retraso = minutos
+                cita.save()
+                messages.success(request, f'Retraso de {minutos} min notificado correctamente.')
+            else:
+                messages.warning(request, 'Ya notificaste un retraso para esta cita.')
+
+        elif accion == 'cancelar':
+            estado_cancelada, _ = EstadoCita.objects.get_or_create(nombre='Cancelada')
+            cita.estado = estado_cancelada
+            cita.save()
+            messages.success(request, 'Cita cancelada exitosamente.')
+            return redirect('home')
+
+        return redirect('detalle_cita', cita_id=cita.pk)
+
+    # Extraer dispositivo (CELULAR/LAPTOP/PC -> label legible)
+    dispositivo_map = {'CELULAR': 'Celular', 'LAPTOP': 'Laptop', 'PC': 'PC'}
+    raw = ''
+    if cita.observaciones and cita.observaciones.startswith('Dispositivo: '):
+        raw = cita.observaciones.replace('Dispositivo: ', '', 1)
+    dispositivo_display = dispositivo_map.get(raw, raw) or cita.servicio.tipo_dispositivo.title()
+
+    estado_nombre = cita.estado.nombre if cita.estado else 'Confirmada'
+    estados_progreso = [
+        {'nombre': 'Creada',      'icono': 'check'},
+        {'nombre': 'Confirmada',  'icono': 'calendar'},
+        {'nombre': 'Diagnóstico', 'icono': 'wrench'},
+        {'nombre': 'Finalizada',  'icono': 'flag'},
+    ]
+    estado_actual_idx = next(
+        (i for i, e in enumerate(estados_progreso) if e['nombre'] == estado_nombre), 1
+    )
+
+    return render(request, 'turnos/detalle_cita.html', {
+        'cita': cita,
+        'dispositivo': dispositivo_display,
+        'estado_nombre': estado_nombre,
+        'estados_progreso': estados_progreso,
+        'estado_actual_idx': estado_actual_idx,
     })
 
 
@@ -174,6 +292,70 @@ def ver_turno(request, turno_id):
     """Muestra la vista pública del turno digital."""
     turno = get_object_or_404(Cita, pk=turno_id)
     return render(request, 'turnos/turno_digital.html', {'turno': turno})
+
+
+# ────────────────────────────────────────────────────────────────
+#  DASHBOARD CLIENTE
+# ────────────────────────────────────────────────────────────────
+
+@login_required
+def cliente_inicio(request):
+    """Dashboard principal del cliente (Inicio)"""
+    if request.user.rol != Usuario.Rol.CLIENTE:
+        return redirect('home')
+        
+    citas_usuario = Cita.objects.filter(cliente=request.user).order_by('-fecha', '-hora_inicio')
+    
+    # Calcular KPIs
+    total_citas_activas = citas_usuario.exclude(estado__nombre__in=['Finalizada', 'Cancelada']).count()
+    total_reparaciones = citas_usuario.filter(estado__nombre='Finalizada').count()
+    
+    # Citas recientes (para la lista completa con toggle JS)
+    citas_recientes = citas_usuario
+    
+    context = {
+        'total_citas_activas': total_citas_activas,
+        'total_reparaciones': total_reparaciones,
+        'citas_recientes': citas_recientes,
+    }
+    return render(request, 'turnos/cliente_inicio.html', context)
+
+@login_required
+def cliente_servicios(request):
+    """Catálogo de servicios para el cliente"""
+    if request.user.rol != Usuario.Rol.CLIENTE:
+        return redirect('home')
+    return render(request, 'turnos/cliente_servicios.html')
+
+@login_required
+def cliente_perfil(request):
+    """Perfil del cliente: permite editar datos personales."""
+    if request.user.rol != Usuario.Rol.CLIENTE:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = EditarPerfilForm(
+            request.POST,
+            instance=request.user,
+            current_user=request.user,
+        )
+        if form.is_valid():
+            form.save()
+            messages.success(request, '¡Tus datos personales fueron actualizados correctamente!')
+            return redirect('cliente_perfil')
+        else:
+            messages.error(request, 'Por favor corrige los errores en el formulario.')
+    else:
+        form = EditarPerfilForm(instance=request.user, current_user=request.user)
+
+    return render(request, 'turnos/cliente_perfil.html', {'form': form})
+
+@login_required
+def cliente_soporte(request):
+    """Página de soporte para el cliente"""
+    if request.user.rol != Usuario.Rol.CLIENTE:
+        return redirect('home')
+    return render(request, 'turnos/cliente_soporte.html')
 
 
 @login_required

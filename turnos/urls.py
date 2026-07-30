@@ -16,10 +16,16 @@ urlpatterns = [
     path('servicios/servicio/', views.seleccionar_servicio, name='seleccionar_servicio'),
     path('servicios/fecha-hora/', views.seleccionar_fecha_hora, name='seleccionar_fecha_hora'),
     path('servicios/resumen/', views.resumen_cita, name='resumen_cita'),
+    path('cita/<int:cita_id>/confirmada/', views.cita_confirmada, name='cita_confirmada'),
+    path('cita/<int:cita_id>/', views.detalle_cita, name='detalle_cita'),
 
     # ── Dashboards ────────────────────────────────────────────────
     path('admin-panel/', views.admin_dashboard, name='admin_dashboard'),
     path('tecnico/', views.dashboard_tecnico, name='dashboard_tecnico'),
+    path('cliente/inicio/', views.cliente_inicio, name='cliente_inicio'),
+    path('cliente/servicios/', views.cliente_servicios, name='cliente_servicios'),
+    path('cliente/soporte/', views.cliente_soporte, name='cliente_soporte'),
+    path('cliente/perfil/', views.cliente_perfil, name='cliente_perfil'),
 
     # ── Turnos Digitales ──────────────────────────────────────────
     path('turno/<int:turno_id>/', views.ver_turno, name='ver_turno'),

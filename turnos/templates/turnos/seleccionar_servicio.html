@@ -50,11 +50,7 @@
     </div>
 
     <!-- TARJETA CONTENEDORA -->
-<<<<<<< main
-    <form method="POST" action="" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-6">
-=======
     <form id="wizard-form" method="POST" action="" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-6">
->>>>>>> 25d91660321870a31c18c83addb0a2308ed5f43b
         {% csrf_token %}
         <input type="hidden" name="servicio" id="servicio_input" value="">
 
@@ -134,20 +130,15 @@
     
     <!-- Controles de Navegación -->
     <div class="flex justify-between items-center mb-8">
-        <a href="{% url 'seleccionar_dispositivo' %}" class="bg-white border border-slate-300 text-slate-700 font-medium text-sm px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-slate-50 transition-all">
+        <a href="{% url 'seleccionar_dispositivo' %}" class="text-slate-500 hover:text-slate-800 font-medium text-sm flex items-center gap-2 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
-            <span>Volver</span>
+            Regresar
         </a>
-
         <button type="button" id="btn-siguiente" disabled
             class="bg-[#7888b5] cursor-not-allowed text-white font-medium text-sm px-6 py-2.5 rounded-lg flex items-center gap-2 transition-all"
-<<<<<<< HEAD
-            onclick="document.forms[0].submit()">
-=======
             onclick="document.getElementById('wizard-form').submit()">
->>>>>>> 25d91660321870a31c18c83addb0a2308ed5f43b
             <span>Siguiente</span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>

@@ -76,6 +76,66 @@ class RegistroUsuarioForm(UserCreationForm):
         return usuario
 
 
+class EditarPerfilForm(forms.ModelForm):
+    """
+    Formulario para que el cliente edite sus datos personales:
+    nombre completo, correo y teléfono.
+    """
+    nombre_completo = forms.CharField(
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition',
+            'placeholder': 'Ej. Juan Pérez'
+        }),
+        label="Nombre Completo"
+    )
+    correo = forms.EmailField(
+        max_length=150,
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition',
+            'placeholder': 'correo@ejemplo.com'
+        }),
+        label="Correo Electrónico"
+    )
+    telefono = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition',
+            'placeholder': '+57 300 123 4567'
+        }),
+        label="Teléfono"
+    )
+
+    class Meta:
+        model = Usuario
+        fields = ('nombre_completo', 'correo', 'telefono')
+
+    def __init__(self, *args, **kwargs):
+        # Guardamos referencia al usuario actual para validar correo único
+        self.current_user = kwargs.pop('current_user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean_correo(self):
+        correo = self.cleaned_data.get('correo')
+        qs = Usuario.objects.filter(correo__iexact=correo)
+        if self.current_user:
+            qs = qs.exclude(pk=self.current_user.pk)
+        if qs.exists():
+            raise ValidationError("Ya existe una cuenta asociada a este correo electrónico.")
+        return correo
+
+    def save(self, commit=True):
+        usuario = super().save(commit=False)
+        # Mantener username sincronizado con correo (es el USERNAME_FIELD)
+        usuario.username = usuario.correo
+        if commit:
+            usuario.save()
+        return usuario
+
+
 class CustomLoginForm(AuthenticationForm):
     """
     Formulario de autenticación para inicio de sesión utilizando Correo Electrónico.
