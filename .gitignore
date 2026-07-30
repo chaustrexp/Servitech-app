@@ -36,3 +36,6 @@ Thumbs.db
 server.log
 server_error.log
 server_output.txt
+
+# Variables de entorno
+.env
