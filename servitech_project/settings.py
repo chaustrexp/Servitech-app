@@ -1,8 +1,12 @@
-import os
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Cargar variables de entorno desde el archivo .env
+load_dotenv(BASE_DIR / '.env')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-servitech-secret-key-change-in-production'
@@ -63,11 +67,11 @@ if USE_POSTGRES:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'servitech',     # Nombre de tu base de datos PostgreSQL
-            'USER': 'postgres',      # Tu usuario de PostgreSQL
-            'PASSWORD': 'E1093595859', # ⚠️ Cada quien pone su propia contraseña de PostgreSQL
-            'HOST': 'localhost',     # O la dirección de tu servidor (ej. 127.0.0.1)
-            'PORT': '5432',          # El puerto por defecto de PostgreSQL
+            'NAME': os.getenv('DB_NAME', 'servitech'),
+            'USER': os.getenv('DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''), # Se obtiene del .env
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
         }
     }
 else:

@@ -59,3 +59,62 @@ ServiTech/
 │           ├── dashboard_tecnico.html
 │           └── admin_dashboard.html
 └── README.md
+
+---
+
+## 🛠️ Instrucciones de Instalación (Para Desarrolladores)
+
+Sigue estos pasos para clonar y ejecutar el proyecto en tu máquina local.
+
+### 1. Clonar el repositorio
+Abre tu terminal y ejecuta:
+```bash
+git clone <URL_DEL_REPOSITORIO>
+cd Servitech-app-main
+```
+
+### 2. Crear y activar un entorno virtual
+Es una buena práctica usar un entorno virtual para aislar las dependencias:
+```bash
+# En Windows:
+python -m venv venv
+venv\Scripts\activate
+
+# En macOS/Linux:
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Instalar dependencias
+Con el entorno virtual activado, instala los paquetes necesarios:
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configurar la Base de Datos (PostgreSQL)
+El proyecto utiliza PostgreSQL. Debes crear una base de datos local y configurar tus credenciales:
+
+1. Crea un archivo llamado `.env` en la raíz del proyecto (al mismo nivel que `manage.py`).
+2. Copia el contenido del archivo `.env.example` dentro de tu nuevo `.env`:
+   ```env
+   DB_NAME=servitech
+   DB_USER=postgres
+   DB_PASSWORD=tu_contraseña_aqui
+   DB_HOST=localhost
+   DB_PORT=5432
+   ```
+3. Reemplaza `tu_contraseña_aqui` por tu contraseña real de PostgreSQL.
+4. Asegúrate de crear una base de datos vacía llamada `servitech` (o el nombre que hayas puesto en `DB_NAME`) en tu servidor local de PostgreSQL.
+
+### 5. Aplicar Migraciones
+Django creará las tablas necesarias en la base de datos automáticamente:
+```bash
+python manage.py migrate
+```
+
+### 6. Ejecutar el Servidor
+Inicia el servidor de desarrollo:
+```bash
+python manage.py runserver
+```
+Abre tu navegador y ve a `http://127.0.0.1:8000/`. ¡El proyecto debería estar funcionando!
