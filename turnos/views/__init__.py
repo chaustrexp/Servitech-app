@@ -1,0 +1,19 @@
+from .auth_views import RegistroView, CustomLoginView, home
+from .agendamiento_views import (
+    seleccionar_dispositivo,
+    seleccionar_servicio,
+    seleccionar_fecha_hora,
+    resumen_cita,
+    cita_confirmada,
+    detalle_cita,
+    ver_turno,
+    notificar_retraso
+)
+from .dashboard_views import (
+    admin_dashboard,
+    dashboard_tecnico,
+    cliente_inicio,
+    cliente_servicios,
+    cliente_perfil,
+    cliente_soporte
+)

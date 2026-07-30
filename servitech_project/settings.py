@@ -23,7 +23,6 @@ INSTALLED_APPS = [
 
     # Aplicaciones de ServiTech
     'turnos',
-    'usuarios',
 ]
 
 MIDDLEWARE = [
@@ -63,7 +62,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'servitech',     # Nombre de tu base de datos PostgreSQL
         'USER': 'postgres',      # Tu usuario de PostgreSQL
-        'PASSWORD': '[PASSWORD]', # ⚠️ Cada quien pone su propia contraseña de PostgreSQL
+        'PASSWORD': 'E1093595859', # ⚠️ Cada quien pone su propia contraseña de PostgreSQL
         'HOST': 'localhost',     # O la dirección de tu servidor (ej. 127.0.0.1)
         'PORT': '5432',          # El puerto por defecto de PostgreSQL
     }
