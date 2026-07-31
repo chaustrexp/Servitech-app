@@ -1,50 +1,33 @@
 # 🛠️ Servitech App
 
-![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
-![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-
-Plataforma web enfocada en la gestión eficiente de servicios técnicos, solicitudes e historial de mantenimiento. Desarrollada para optimizar los procesos de seguimiento, control e interacción entre técnicos y clientes.
+Plataforma web diseñada para la gestión integral de servicios técnicos, agendamiento de citas y control de mantenimiento. El sistema permite conectar de forma eficiente a clientes, personal técnico y administradores.
 
 ---
 
-## 🚀 Características Principales
+## 👥 Roles de Usuario y Funcionalidades
 
-* **Gestión de Servicios:** Registro, asignación y seguimiento en tiempo real del estado de cada orden técnica.
-* **Control de Usuarios y Roles:** Autenticación y permisos según el tipo de perfil (Administrador, Técnico, Cliente).
-* **Historial de Atenciones:** Registro detallado de mantenimientos previos y diagnósticos realizados.
-* **Interfaz Dinámica y Responsiva:** Panel adaptado para dispositivos móviles y de escritorio.
+La aplicación está estructurada para dar soporte a tres perfiles principales:
+
+* **🧑‍💻 Cliente:** Explora el catálogo de servicios, selecciona la fecha y hora de atención (`seleccionar_fecha_hora.html`), programa citas (`seleccionar_servicio.html`) y realiza seguimiento al estado de sus solicitudes.
+* **🔧 Técnico:** Consulta el historial de atenciones asignadas, gestiona las órdenes de trabajo e ingresa diagnósticos y actualizaciones en tiempo real.
+* **🛡️ Administrador:** Control total de usuarios, asignación de personal técnico, gestión de agendas y supervisión general de los servicios reportados.
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Stack Tecnológico
 
-* **Backend:** PHP / Laravel
-* **Frontend:** Blade, Tailwind CSS, JavaScript
-* **Base de Datos:** MySQL
-* **Empaquetador de Assets:** Vite
+* **Backend:** Python / Django (Patrón MVT)
+* **Frontend:** HTML5, CSS3, JavaScript (Django Templates)
+* **Base de Datos:** SQLite / PostgreSQL / MySQL
 * **Control de Versiones:** Git & GitHub
 
 ---
 
-## 💻 Requisitos Previos
+## 🚀 Instalación y Configuración Local
 
-Antes de instalar el proyecto, asegúrate de tener instalado en tu entorno local:
+Sigue estos pasos para clonar y ejecutar el proyecto en tu máquina local:
 
-* [PHP](https://www.php.net/) (v8.2 o superior)
-* [Composer](https://getcomposer.org/)
-* [Node.js](https://nodejs.org/) & NPM
-* Servidor MySQL (XAMPP, Laragon, MySQL Workbench, etc.)
-
----
-
-## ⚙️ Instalación y Configuración
-
-Sigue estos pasos para clonar y ejecutar el proyecto localmente:
-
-1. **Clonar el repositorio:**
-   ```bash
-   git clone [https://github.com/chaustrexp/Servitech-app.git](https://github.com/chaustrexp/Servitech-app.git)
-   cd Servitech-app
+### 1. Clonar el repositorio
+```bash
+git clone [https://github.com/chaustrexp/Servitech-app.git](https://github.com/chaustrexp/Servitech-app.git)
+cd Servitech-app
