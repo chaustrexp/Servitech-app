@@ -54,18 +54,27 @@ pip install -r requirements.txt
 ### 4. Configurar la base de datos (PostgreSQL) y variables de entorno
 El proyecto utiliza un archivo `.env` para gestionar la conexión a la base de datos.
 
-1. En la raíz del proyecto (donde está `manage.py`), crea un archivo llamado `.env` basado en el archivo `.env.example`.
-2. Edita tu archivo `.env` para que tenga la siguiente estructura, colocando tu contraseña de PostgreSQL:
+1. En la raíz del proyecto (donde está `manage.py`), copia el archivo `.env.example` y renómbralo como `.env`:
+```bash
+# En Windows:
+copy .env.example .env
+
+# En macOS/Linux:
+cp .env.example .env
+```
+2. Abre el archivo `.env` recién creado y reemplaza `tu_contraseña_aqui` con tu contraseña de PostgreSQL:
 
 ```env
+# ⚠️ IMPORTANTE: USE_POSTGRES=True es obligatorio para conectar con PostgreSQL.
+# Sin esta variable, el proyecto usará SQLite y los usuarios de tu BD no aparecerán.
 USE_POSTGRES=True
 DB_NAME=servitech
 DB_USER=postgres
-DB_PASSWORD=tu_contraseña_aqui
+DB_PASSWORD=tu_contraseña_aqui   # <-- Cambia solo esto
 DB_HOST=localhost
 DB_PORT=5432
 ```
-*(Asegúrate de haber creado previamente una base de datos llamada `servitech` en tu motor de PostgreSQL, o utiliza el nombre que prefieras y configúralo allí).*
+*(Asegúrate de haber creado previamente una base de datos llamada `servitech` en tu motor de PostgreSQL, o utiliza el nombre que prefieras y configúralo en `DB_NAME`).*
 
 ### 5. Aplicar migraciones a la base de datos
 Este comando creará las tablas necesarias en tu base de datos:

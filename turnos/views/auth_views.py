@@ -15,7 +15,7 @@ class RegistroView(SuccessMessageMixin, CreateView):
     """
     model = Usuario
     form_class = RegistroUsuarioForm
-    template_name = 'turnos/registro.html'
+    template_name = 'turnos/auth/registro.html'
     success_url = reverse_lazy('login')
     success_message = "¡Tu cuenta ha sido creada exitosamente! Por favor, inicia sesión."
 
@@ -30,7 +30,7 @@ class CustomLoginView(LoginView):
     Si el usuario ya está autenticado, lo lleva directo al home.
     """
     form_class = CustomLoginForm
-    template_name = 'turnos/login.html'
+    template_name = 'turnos/auth/login.html'
     redirect_authenticated_user = True
 
     def get_success_url(self):

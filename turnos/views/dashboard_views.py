@@ -8,42 +8,53 @@ from ..forms import EditarPerfilForm
 @login_required
 def admin_dashboard(request):
     """Dashboard del administrador."""
-    return render(request, 'turnos/admin_dashboard.html')
+    return render(request, 'turnos/administracion/admin_dashboard.html')
 
 @login_required
 def dashboard_tecnico(request):
     """Dashboard del técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
         return redirect('home')
-    return render(request, 'turnos/tecnico_inicio.html')
+    return render(request, 'turnos/tecnico/tecnico_inicio.html')
 
 @login_required
 def tecnico_agenda(request):
     """Agenda del técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
         return redirect('home')
-    return render(request, 'turnos/tecnico_agenda.html')
+    return render(request, 'turnos/tecnico/tecnico_agenda.html')
 
 @login_required
 def tecnico_dispositivos(request):
     """Gestión de dispositivos para el técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
         return redirect('home')
-    return render(request, 'turnos/tecnico_dispositivos.html')
+    return render(request, 'turnos/tecnico/tecnico_dispositivos.html')
 
 @login_required
 def tecnico_clientes(request):
-    """Directorio de clientes para el técnico."""
+    """Directorio de clientes para el técnico: muestra solo clientes con más de 1 cita."""
     if request.user.rol != Usuario.Rol.TECNICO:
         return redirect('home')
-    return render(request, 'turnos/tecnico_clientes.html')
+
+    from django.db.models import Count
+    clientes = (
+        Usuario.objects
+        .filter(rol=Usuario.Rol.CLIENTE)
+        .annotate(total_citas=Count('citas_cliente'))
+        .filter(total_citas__gt=1)
+        .order_by('-total_citas')
+    )
+
+    return render(request, 'turnos/tecnico/tecnico_clientes.html', {'clientes': clientes})
+
 
 @login_required
 def tecnico_soporte(request):
     """Soporte operativo para el técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
         return redirect('home')
-    return render(request, 'turnos/tecnico_soporte.html')
+    return render(request, 'turnos/tecnico/tecnico_soporte.html')
 
 
 
@@ -65,14 +76,14 @@ def cliente_inicio(request):
         'total_reparaciones': total_reparaciones,
         'citas_recientes': citas_recientes,
     }
-    return render(request, 'turnos/cliente_inicio.html', context)
+    return render(request, 'turnos/cliente/cliente_inicio.html', context)
 
 @login_required
 def cliente_servicios(request):
     """Catálogo de servicios para el cliente"""
     if request.user.rol != Usuario.Rol.CLIENTE:
         return redirect('home')
-    return render(request, 'turnos/cliente_servicios.html')
+    return render(request, 'turnos/cliente/cliente_servicios.html')
 
 @login_required
 def cliente_perfil(request):
@@ -95,11 +106,11 @@ def cliente_perfil(request):
     else:
         form = EditarPerfilForm(instance=request.user, current_user=request.user)
 
-    return render(request, 'turnos/cliente_perfil.html', {'form': form})
+    return render(request, 'turnos/cliente/cliente_perfil.html', {'form': form})
 
 @login_required
 def cliente_soporte(request):
     """Página de soporte para el cliente"""
     if request.user.rol != Usuario.Rol.CLIENTE:
         return redirect('home')
-    return render(request, 'turnos/cliente_soporte.html')
+    return render(request, 'turnos/cliente/cliente_soporte.html')

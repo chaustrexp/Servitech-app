@@ -13,7 +13,7 @@ def seleccionar_dispositivo(request):
         if dispositivo:
             request.session['wizard_dispositivo'] = dispositivo
             return redirect('seleccionar_servicio')
-    return render(request, 'turnos/seleccionar_dispositivo.html')
+    return render(request, 'turnos/cliente/agendamiento/seleccionar_dispositivo.html')
 
 @login_required
 def seleccionar_servicio(request):
@@ -28,7 +28,7 @@ def seleccionar_servicio(request):
             request.session['wizard_servicio'] = servicio
             return redirect('seleccionar_fecha_hora')
             
-    return render(request, 'turnos/seleccionar_servicio.html', {'dispositivo': dispositivo})
+    return render(request, 'turnos/cliente/agendamiento/seleccionar_servicio.html', {'dispositivo': dispositivo})
 
 @login_required
 def seleccionar_fecha_hora(request):
@@ -46,7 +46,7 @@ def seleccionar_fecha_hora(request):
             request.session['wizard_hora'] = hora
             return redirect('resumen_cita')
             
-    return render(request, 'turnos/seleccionar_fecha_hora.html', {
+    return render(request, 'turnos/cliente/agendamiento/seleccionar_fecha_hora.html', {
         'dispositivo': dispositivo,
         'servicio': servicio
     })
@@ -100,7 +100,7 @@ def resumen_cita(request):
 
         return redirect('cita_confirmada', cita_id=cita.pk)
 
-    return render(request, 'turnos/resumen_cita.html', {
+    return render(request, 'turnos/cliente/agendamiento/resumen_cita.html', {
         'dispositivo': dispositivo,
         'servicio': servicio_nombre,
         'fecha': fecha,
@@ -128,7 +128,7 @@ def cita_confirmada(request, cita_id):
         f"&details=Cita+%23ST-{cita.pk}+en+ServiTech"
     )
 
-    return render(request, 'turnos/cita_confirmada.html', {
+    return render(request, 'turnos/cliente/agendamiento/cita_confirmada.html', {
         'cita': cita,
         'dispositivo': dispositivo_display,
         'gcal_url': gcal_url,
@@ -177,7 +177,7 @@ def detalle_cita(request, cita_id):
         (i for i, e in enumerate(estados_progreso) if e['nombre'] == estado_nombre), 1
     )
 
-    return render(request, 'turnos/detalle_cita.html', {
+    return render(request, 'turnos/contingencias/detalle_cita.html', {
         'cita': cita,
         'dispositivo': dispositivo_display,
         'estado_nombre': estado_nombre,
@@ -188,7 +188,7 @@ def detalle_cita(request, cita_id):
 def ver_turno(request, turno_id):
     """Muestra la vista pública del turno digital."""
     turno = get_object_or_404(Cita, pk=turno_id)
-    return render(request, 'turnos/turno_digital.html', {'turno': turno})
+    return render(request, 'turnos/contingencias/turno_digital.html', {'turno': turno})
 
 @login_required
 def notificar_retraso(request, turno_id):

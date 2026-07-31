@@ -1,4 +1,4 @@
-{% extends 'turnos/tecnico_base.html' %}
+{% extends 'turnos/tecnico/tecnico_base.html' %}
 {% load static %}
 
 {% block title %}Clientes - Técnico | ServiTech{% endblock %}
@@ -54,35 +54,29 @@
             </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 text-sm">
+            {% for cliente in clientes %}
             <tr class="hover:bg-slate-50 transition">
-                <td class="py-3.5 px-4 font-bold text-slate-800">Juan Pérez</td>
-                <td class="py-3.5 px-4 text-slate-600 hidden sm:table-cell">juan.perez@gmail.com</td>
-                <td class="py-3.5 px-4 text-slate-600 hidden md:table-cell">+57 300 123 4567</td>
-                <td class="py-3.5 px-4 font-bold text-[#002b75]">3 citas</td>
+                <td class="py-3.5 px-4 font-bold text-slate-800">{{ cliente.nombre_completo }}</td>
+                <td class="py-3.5 px-4 text-slate-600 hidden sm:table-cell">{{ cliente.correo }}</td>
+                <td class="py-3.5 px-4 text-slate-600 hidden md:table-cell">{{ cliente.telefono|default:"Sin teléfono" }}</td>
+                <td class="py-3.5 px-4 font-bold text-[#002b75]">
+                    {{ cliente.total_citas }} cita{{ cliente.total_citas|pluralize }}
+                </td>
                 <td class="py-3.5 px-4 text-right">
-                    <button onclick="mostrarToast('👤 Abriendo perfil de Juan Pérez')" class="text-xs font-bold text-[#002b75] hover:underline">Ver Historial</button>
+                    <button onclick="mostrarToast('👤 Historial de {{ cliente.nombre_completo }}')"
+                            class="text-xs font-bold text-[#002b75] hover:underline">Ver Historial</button>
                 </td>
             </tr>
-            <tr class="hover:bg-slate-50 transition">
-                <td class="py-3.5 px-4 font-bold text-slate-800">María García</td>
-                <td class="py-3.5 px-4 text-slate-600 hidden sm:table-cell">maria.garcia@gmail.com</td>
-                <td class="py-3.5 px-4 text-slate-600 hidden md:table-cell">+57 310 987 6543</td>
-                <td class="py-3.5 px-4 font-bold text-[#002b75]">1 cita</td>
-                <td class="py-3.5 px-4 text-right">
-                    <button onclick="mostrarToast('👤 Abriendo perfil de María García')" class="text-xs font-bold text-[#002b75] hover:underline">Ver Historial</button>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="py-10 px-4 text-center text-slate-400 text-sm">
+                    No hay clientes con más de 1 cita registrada.
                 </td>
             </tr>
-            <tr class="hover:bg-slate-50 transition">
-                <td class="py-3.5 px-4 font-bold text-slate-800">Roberto López</td>
-                <td class="py-3.5 px-4 text-slate-600 hidden sm:table-cell">roberto.lopez@gmail.com</td>
-                <td class="py-3.5 px-4 text-slate-600 hidden md:table-cell">+57 320 456 7890</td>
-                <td class="py-3.5 px-4 font-bold text-[#002b75]">5 citas</td>
-                <td class="py-3.5 px-4 text-right">
-                    <button onclick="mostrarToast('👤 Abriendo perfil de Roberto López')" class="text-xs font-bold text-[#002b75] hover:underline">Ver Historial</button>
-                </td>
-            </tr>
+            {% endfor %}
         </tbody>
     </table>
     </div>
 </div>
 {% endblock %}
+
