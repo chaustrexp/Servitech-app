@@ -12,8 +12,13 @@ from .agendamiento_views import (
 from .dashboard_views import (
     admin_dashboard,
     dashboard_tecnico,
+    tecnico_agenda,
+    tecnico_dispositivos,
+    tecnico_clientes,
+    tecnico_soporte,
     cliente_inicio,
     cliente_servicios,
     cliente_perfil,
     cliente_soporte
 )
+

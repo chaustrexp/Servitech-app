@@ -13,7 +13,39 @@ def admin_dashboard(request):
 @login_required
 def dashboard_tecnico(request):
     """Dashboard del técnico."""
-    return render(request, 'turnos/dashboard_tecnico.html')
+    if request.user.rol != Usuario.Rol.TECNICO:
+        return redirect('home')
+    return render(request, 'turnos/tecnico_inicio.html')
+
+@login_required
+def tecnico_agenda(request):
+    """Agenda del técnico."""
+    if request.user.rol != Usuario.Rol.TECNICO:
+        return redirect('home')
+    return render(request, 'turnos/tecnico_agenda.html')
+
+@login_required
+def tecnico_dispositivos(request):
+    """Gestión de dispositivos para el técnico."""
+    if request.user.rol != Usuario.Rol.TECNICO:
+        return redirect('home')
+    return render(request, 'turnos/tecnico_dispositivos.html')
+
+@login_required
+def tecnico_clientes(request):
+    """Directorio de clientes para el técnico."""
+    if request.user.rol != Usuario.Rol.TECNICO:
+        return redirect('home')
+    return render(request, 'turnos/tecnico_clientes.html')
+
+@login_required
+def tecnico_soporte(request):
+    """Soporte operativo para el técnico."""
+    if request.user.rol != Usuario.Rol.TECNICO:
+        return redirect('home')
+    return render(request, 'turnos/tecnico_soporte.html')
+
+
 
 @login_required
 def cliente_inicio(request):

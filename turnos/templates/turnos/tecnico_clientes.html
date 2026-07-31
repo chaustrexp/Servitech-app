@@ -1,0 +1,88 @@
+{% extends 'turnos/tecnico_base.html' %}
+{% load static %}
+
+{% block title %}Clientes - Técnico | ServiTech{% endblock %}
+
+{% block page_header %}
+<!-- ══════════════════════════════════════════════
+     HEADER UNIFICADO (CLIENTES)
+══════════════════════════════════════════════ -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+    <div>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">Clientes</h1>
+        <p class="text-slate-500 font-medium text-sm mt-0.5">Directorio de clientes y su historial de mantenimientos</p>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Online
+        </span>
+        <button onclick="mostrarToast('🔔 Sin nuevas notificaciones')"
+                class="relative bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+        </button>
+        <button onclick="mostrarToast('⚙️ Configuración de clientes')"
+                class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </button>
+        <button onclick="abrirModalFoto()" class="relative group" title="Cambiar foto de perfil">
+            <img src="{% static 'img/foto de perfil tecnico.png' %}" alt="Foto"
+                 class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-slate-100">
+        </button>
+    </div>
+</div>
+{% endblock page_header %}
+
+{% block content %}
+
+<div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse min-w-[540px]">
+        <thead>
+            <tr class="bg-[#f8fafc] border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <th class="py-3.5 px-4">Cliente</th>
+                <th class="py-3.5 px-4 hidden sm:table-cell">Correo</th>
+                <th class="py-3.5 px-4 hidden md:table-cell">Teléfono</th>
+                <th class="py-3.5 px-4">Servicios</th>
+                <th class="py-3.5 px-4 text-right">Acción</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm">
+            <tr class="hover:bg-slate-50 transition">
+                <td class="py-3.5 px-4 font-bold text-slate-800">Juan Pérez</td>
+                <td class="py-3.5 px-4 text-slate-600 hidden sm:table-cell">juan.perez@gmail.com</td>
+                <td class="py-3.5 px-4 text-slate-600 hidden md:table-cell">+57 300 123 4567</td>
+                <td class="py-3.5 px-4 font-bold text-[#002b75]">3 citas</td>
+                <td class="py-3.5 px-4 text-right">
+                    <button onclick="mostrarToast('👤 Abriendo perfil de Juan Pérez')" class="text-xs font-bold text-[#002b75] hover:underline">Ver Historial</button>
+                </td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition">
+                <td class="py-3.5 px-4 font-bold text-slate-800">María García</td>
+                <td class="py-3.5 px-4 text-slate-600 hidden sm:table-cell">maria.garcia@gmail.com</td>
+                <td class="py-3.5 px-4 text-slate-600 hidden md:table-cell">+57 310 987 6543</td>
+                <td class="py-3.5 px-4 font-bold text-[#002b75]">1 cita</td>
+                <td class="py-3.5 px-4 text-right">
+                    <button onclick="mostrarToast('👤 Abriendo perfil de María García')" class="text-xs font-bold text-[#002b75] hover:underline">Ver Historial</button>
+                </td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition">
+                <td class="py-3.5 px-4 font-bold text-slate-800">Roberto López</td>
+                <td class="py-3.5 px-4 text-slate-600 hidden sm:table-cell">roberto.lopez@gmail.com</td>
+                <td class="py-3.5 px-4 text-slate-600 hidden md:table-cell">+57 320 456 7890</td>
+                <td class="py-3.5 px-4 font-bold text-[#002b75]">5 citas</td>
+                <td class="py-3.5 px-4 text-right">
+                    <button onclick="mostrarToast('👤 Abriendo perfil de Roberto López')" class="text-xs font-bold text-[#002b75] hover:underline">Ver Historial</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

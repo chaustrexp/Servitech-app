@@ -3,6 +3,25 @@
 
 {% block title %}Mi Perfil - ServiTech{% endblock %}
 
+{% block page_header %}
+<!-- ══════════════════════════════════════════════
+     HEADER DE SECCIÓN: MI PERFIL
+══════════════════════════════════════════════ -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div class="flex flex-wrap items-center gap-3">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">Mi Perfil</h1>
+        <div class="h-5 w-px bg-slate-300 hidden md:block"></div>
+        <p class="text-slate-500 font-medium text-sm md:text-base">Gestiona tu información personal y preferencias de cuenta</p>
+    </div>
+    <div class="flex items-center gap-3 flex-shrink-0">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Online
+        </span>
+    </div>
+</div>
+{% endblock page_header %}
+
 {% block content %}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     

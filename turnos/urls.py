@@ -22,6 +22,11 @@ urlpatterns = [
     # ── Dashboards ────────────────────────────────────────────────
     path('admin-panel/', views.admin_dashboard, name='admin_dashboard'),
     path('tecnico/', views.dashboard_tecnico, name='dashboard_tecnico'),
+    path('tecnico/agenda/', views.tecnico_agenda, name='tecnico_agenda'),
+    path('tecnico/dispositivos/', views.tecnico_dispositivos, name='tecnico_dispositivos'),
+    path('tecnico/clientes/', views.tecnico_clientes, name='tecnico_clientes'),
+    path('tecnico/soporte/', views.tecnico_soporte, name='tecnico_soporte'),
+
     path('cliente/inicio/', views.cliente_inicio, name='cliente_inicio'),
     path('cliente/servicios/', views.cliente_servicios, name='cliente_servicios'),
     path('cliente/soporte/', views.cliente_soporte, name='cliente_soporte'),

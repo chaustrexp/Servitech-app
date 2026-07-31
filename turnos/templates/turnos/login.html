@@ -58,7 +58,28 @@
 
         <!-- Título -->
         <h1 class="text-3xl font-extrabold text-[#002b75] text-center tracking-tight mb-2">Bienvenido a ServiTech</h1>
-        <p class="text-slate-500 text-sm text-center mb-8 max-w-[280px] mx-auto">Ingresa tus credenciales para gestionar tus servicios técnicos</p>
+        <p class="text-slate-500 text-sm text-center mb-6 max-w-[280px] mx-auto">Selecciona tu rol e ingresa tus credenciales</p>
+
+        <!-- Selector de Rol (solo visual, el backend redirige automáticamente) -->
+        <div class="flex bg-slate-100 rounded-2xl p-1 mb-7 gap-1">
+            <button type="button" onclick="seleccionarRol('cliente')" id="tab-cliente"
+                    class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-[#002b75] shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                Cliente
+            </button>
+            <button type="button" onclick="seleccionarRol('tecnico')" id="tab-tecnico"
+                    class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-500 hover:text-slate-700">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Técnico
+            </button>
+        </div>
+
+        <!-- Subtítulo dinámico según rol -->
+        <p id="rol-hint" class="text-xs text-slate-400 text-center -mt-4 mb-6 font-medium">Acceso para clientes registrados</p>
 
         <!-- Errores globales -->
         {% if form.non_field_errors %}
@@ -100,11 +121,11 @@
                         name="{{ form.username.html_name }}"
                         id="{{ form.username.id_for_label }}"
                         required
-                        placeholder="ejemplo@servitech.com"
+                        id="input-correo"
+                        placeholder="tucorreo@ejemplo.com"
                         value="{{ form.username.value|default:'' }}"
                         class="input-field w-full pl-12 pr-4 py-3 bg-white border {% if form.username.errors %}border-red-400 focus:ring-red-400/5{% else %}border-slate-200{% endif %} rounded-xl text-sm text-slate-800 placeholder-slate-400"
-                    />
-                </div>
+                    />                </div>
                 {% if form.username.errors %}
                 <p class="text-red-500 text-xs mt-1.5 ml-1">{{ form.username.errors.0 }}</p>
                 {% endif %}
@@ -187,6 +208,40 @@
                 input.type = 'password';
                 icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>`;
             }
+        }
+
+        // ── Selector de rol (solo visual) ──────────────────────────────────
+        const roles = {
+            cliente: {
+                hint: 'Acceso para clientes registrados',
+                placeholder: 'tucorreo@ejemplo.com',
+            },
+            tecnico: {
+                hint: 'Acceso exclusivo para técnicos ServiTech',
+                placeholder: 'tecnico@servitech.com',
+            }
+        };
+
+        function seleccionarRol(rol) {
+            const tabCliente = document.getElementById('tab-cliente');
+            const tabTecnico = document.getElementById('tab-tecnico');
+            const hint       = document.getElementById('rol-hint');
+            const inputCorreo = document.querySelector('input[type="email"]');
+
+            // Reset tabs
+            tabCliente.className = 'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-500 hover:text-slate-700';
+            tabTecnico.className = 'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-500 hover:text-slate-700';
+
+            // Activar tab seleccionado
+            const activeClass = 'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-[#002b75] shadow-sm';
+            if (rol === 'cliente') {
+                tabCliente.className = activeClass;
+            } else {
+                tabTecnico.className = activeClass;
+            }
+
+            hint.textContent = roles[rol].hint;
+            if (inputCorreo) inputCorreo.placeholder = roles[rol].placeholder;
         }
     </script>
 </body>

@@ -1,0 +1,65 @@
+{% extends 'turnos/tecnico_base.html' %}
+{% load static %}
+
+{% block title %}Soporte Operativo - Técnico | ServiTech{% endblock %}
+
+{% block page_header %}
+<!-- ══════════════════════════════════════════════
+     HEADER UNIFICADO (SOPORTE)
+══════════════════════════════════════════════ -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+    <div>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">Soporte Operativo</h1>
+        <p class="text-slate-500 font-medium text-sm mt-0.5">Asistencia interna, reporte de fallos y manuales de taller</p>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Online
+        </span>
+        <button onclick="mostrarToast('🔔 Sin nuevas notificaciones')"
+                class="relative bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+        </button>
+        <button onclick="mostrarToast('⚙️ Configuración de soporte')"
+                class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </button>
+        <button onclick="abrirModalFoto()" class="relative group" title="Cambiar foto de perfil">
+            <img src="{% static 'img/foto de perfil tecnico.png' %}" alt="Foto"
+                 class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-slate-100">
+        </button>
+    </div>
+</div>
+{% endblock page_header %}
+
+{% block content %}
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Contactar Administrador -->
+    <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
+        <h3 class="font-bold text-slate-800 text-lg mb-2">Soporte con Administración</h3>
+        <p class="text-sm text-slate-500 mb-4">Reporta faltante de repuestos, fallas en herramientas o solicitudes de permiso.</p>
+        <button onclick="mostrarToast('💬 Abriendo chat directo con el Administrador')"
+                class="w-full bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl transition text-sm shadow">
+            Contactar Administración
+        </button>
+    </div>
+
+    <!-- Guías y Manuales -->
+    <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
+        <h3 class="font-bold text-slate-800 text-lg mb-2">Base de Conocimiento Taller</h3>
+        <p class="text-sm text-slate-500 mb-4">Accede a esquemáticos, diagramas y guías de desarme rápido.</p>
+        <button onclick="mostrarToast('📚 Abriendo manuales técnicos')"
+                class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition text-sm">
+            Ver Manuales Técnicos
+        </button>
+    </div>
+</div>
+{% endblock %}

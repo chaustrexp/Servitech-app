@@ -1,0 +1,302 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard Técnico - ServiTech{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .nav-item-active { background-color: #eef2ff; color: #002b75; font-weight: 600; }
+        .sidebar-transition { transition: transform 0.3s ease; }
+        .cita-card { transition: box-shadow 0.2s ease, transform 0.2s ease; }
+        .cita-card:hover { box-shadow: 0 8px 25px -5px rgba(0,43,117,0.12); transform: translateY(-1px); }
+        .progress-fill { transition: width 1s ease-in-out; }
+        .modal-backdrop { backdrop-filter: blur(4px); }
+    </style>
+</head>
+<body class="bg-[#f0f4f8] min-h-screen flex">
+
+    <!-- OVERLAY MÓVIL -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar"
+           class="sidebar-transition fixed top-0 left-0 h-full w-56 bg-white border-r border-slate-100 shadow-sm z-40 flex flex-col -translate-x-full md:translate-x-0">
+
+        <!-- Logo + Nombre -->
+        <div class="px-5 pt-6 pb-4 border-b border-slate-100">
+            <a href="{% url 'dashboard_tecnico' %}" class="flex items-center gap-3">
+                <img src="{% static 'img/logo.jpg' %}" alt="ServiTech Logo"
+                     class="w-9 h-9 rounded-xl object-cover shadow-sm border border-slate-200">
+                <span class="text-lg font-extrabold text-[#002b75] tracking-tight">ServiTech</span>
+            </a>
+        </div>
+
+        <!-- Perfil técnico -->
+        <div class="px-5 py-4 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="relative group cursor-pointer" onclick="abrirModalFoto()">
+                    <img id="foto-perfil-sidebar"
+                         src="{% static 'img/foto de perfil tecnico.png' %}"
+                         alt="Foto de perfil"
+                         class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md">
+                    <div class="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-sm font-bold text-slate-800 leading-tight truncate">
+                        {{ request.user.nombre_completo|default:"Técnico" }}
+                    </p>
+                    <div class="flex items-center gap-1 mt-0.5">
+                        <span id="dot-estado" class="w-2 h-2 rounded-full bg-green-400 flex-shrink-0"></span>
+                        <span id="texto-estado-sidebar" class="text-xs text-green-600 font-medium">Disponible</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegación -->
+        <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            <a href="{% url 'dashboard_tecnico' %}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all
+                      {% if request.resolver_match.url_name == 'dashboard_tecnico' %}nav-item-active{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Inicio
+            </a>
+
+            <a href="{% url 'tecnico_agenda' %}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all
+                      {% if request.resolver_match.url_name == 'tecnico_agenda' %}nav-item-active{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                Mi Agenda
+            </a>
+
+            <a href="{% url 'tecnico_dispositivos' %}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all
+                      {% if request.resolver_match.url_name == 'tecnico_dispositivos' %}nav-item-active{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                Dispositivos
+            </a>
+
+            <a href="{% url 'tecnico_clientes' %}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all
+                      {% if request.resolver_match.url_name == 'tecnico_clientes' %}nav-item-active{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Clientes
+            </a>
+
+            <a href="{% url 'tecnico_soporte' %}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all
+                      {% if request.resolver_match.url_name == 'tecnico_soporte' %}nav-item-active{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Soporte
+            </a>
+        </nav>
+
+        <!-- Acciones inferiores -->
+        <div class="px-3 py-4 border-t border-slate-100 space-y-2">
+            <button onclick="if(typeof abrirModalNuevoServicio==='function'){abrirModalNuevoServicio();}else{mostrarToast('➕ Agendar Nuevo Servicio');}"
+                    class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold bg-[#002b75] hover:bg-[#001f54] text-white transition-all shadow">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Nuevo Servicio
+            </button>
+
+            <button id="btn-pausar" onclick="togglePausarTurno()"
+                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all">
+                <svg id="icon-pausar" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span id="texto-pausar">Pausar Turno</span>
+            </button>
+
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    Cerrar Sesión
+                </button>
+            </form>
+        </div>
+
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="flex-1 flex flex-col min-h-screen md:ml-56">
+        <!-- Top bar móvil -->
+        <div class="md:hidden bg-white border-b border-slate-100 px-4 h-14 flex items-center justify-between sticky top-0 z-20">
+            <button onclick="openSidebar()" class="text-slate-600 hover:text-[#002b75] p-1">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            <a href="{% url 'dashboard_tecnico' %}" class="flex items-center gap-2">
+                <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="w-7 h-7 rounded-lg object-cover">
+                <span class="font-extrabold text-[#002b75]">ServiTech</span>
+            </a>
+            <div class="w-8"></div>
+        </div>
+
+        <main class="flex-1 p-6 md:p-8">
+            {% block page_header %}{% endblock %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- MODAL CAMBIAR FOTO -->
+    <div id="modal-foto" class="fixed inset-0 z-50 hidden items-center justify-center">
+        <div class="modal-backdrop absolute inset-0 bg-black/40" onclick="cerrarModalFoto()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 z-10">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-lg font-bold text-slate-800">Cambiar Foto de Perfil</h3>
+                <button onclick="cerrarModalFoto()" class="text-slate-400 hover:text-slate-700 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="flex justify-center mb-5">
+                <div class="relative">
+                    <img id="foto-preview" src="{% static 'img/foto de perfil tecnico.png' %}"
+                         alt="Preview" class="w-28 h-28 rounded-full object-cover border-4 border-[#eef2ff] shadow-md">
+                    <div class="absolute bottom-1 right-1 bg-[#002b75] rounded-full p-1.5 shadow">
+                        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <label class="block">
+                <span class="sr-only">Seleccionar imagen</span>
+                <input type="file" id="input-foto" accept="image/*" onchange="previewFoto(event)"
+                       class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-[#eef2ff] file:text-[#002b75] hover:file:bg-[#dce4f8] cursor-pointer">
+            </label>
+            <p class="text-xs text-slate-400 mt-2">PNG, JPG o WEBP. Máx 5 MB.</p>
+            <div class="flex gap-3 mt-5">
+                <button onclick="cerrarModalFoto()"
+                        class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                    Cancelar
+                </button>
+                <button onclick="guardarFoto()"
+                        class="flex-1 py-2.5 rounded-xl bg-[#002b75] text-white text-sm font-semibold hover:bg-[#001f54] transition shadow">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openSidebar() {
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.remove('hidden');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.add('hidden');
+        }
+
+        let turnoPausado = false;
+        function togglePausarTurno() {
+            turnoPausado = !turnoPausado;
+            const btn      = document.getElementById('btn-pausar');
+            const texto    = document.getElementById('texto-pausar');
+            const iconEl   = document.getElementById('icon-pausar');
+            const dot      = document.getElementById('dot-estado');
+            const estadoSb = document.getElementById('texto-estado-sidebar');
+            const toggleHdr= document.getElementById('toggle-disponible');
+            const textoHdr = document.getElementById('texto-estado-header');
+
+            if (turnoPausado) {
+                texto.textContent = 'Reanudar Turno';
+                btn.className = 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 transition-all';
+                dot.className = 'w-2 h-2 rounded-full bg-amber-400 flex-shrink-0';
+                estadoSb.textContent = 'En Pausa';
+                estadoSb.className = 'text-xs text-amber-600 font-medium';
+                if (toggleHdr) toggleHdr.checked = false;
+                if (textoHdr) { textoHdr.textContent = 'En Pausa'; textoHdr.className = 'text-sm font-semibold text-amber-600'; }
+                iconEl.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+                mostrarToast('⏸️ Turno pausado', 'warning');
+            } else {
+                texto.textContent = 'Pausar Turno';
+                btn.className = 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all';
+                dot.className = 'w-2 h-2 rounded-full bg-green-400 flex-shrink-0';
+                estadoSb.textContent = 'Disponible';
+                estadoSb.className = 'text-xs text-green-600 font-medium';
+                if (toggleHdr) toggleHdr.checked = true;
+                if (textoHdr) { textoHdr.textContent = 'Disponible'; textoHdr.className = 'text-sm font-semibold text-green-600'; }
+                iconEl.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+                mostrarToast('✅ Turno reanudado', 'success');
+            }
+        }
+
+        function abrirModalFoto() {
+            document.getElementById('modal-foto').classList.remove('hidden');
+            document.getElementById('modal-foto').classList.add('flex');
+        }
+        function cerrarModalFoto() {
+            document.getElementById('modal-foto').classList.add('hidden');
+            document.getElementById('modal-foto').classList.remove('flex');
+        }
+        function previewFoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => { document.getElementById('foto-preview').src = e.target.result; };
+            reader.readAsDataURL(file);
+        }
+        function guardarFoto() {
+            const src = document.getElementById('foto-preview').src;
+            document.getElementById('foto-perfil-sidebar').src = src;
+            const hdr = document.getElementById('foto-perfil-header');
+            if (hdr) hdr.src = src;
+            cerrarModalFoto();
+            mostrarToast('✅ Foto de perfil actualizada');
+        }
+
+        function mostrarToast(mensaje, tipo = 'success') {
+            const toast = document.createElement('div');
+            const color = tipo === 'success' ? 'bg-[#002b75]' : tipo === 'warning' ? 'bg-amber-500' : 'bg-red-500';
+            toast.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold text-white ${color}`;
+            toast.textContent = mensaje;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 350); }, 3000);
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

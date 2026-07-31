@@ -1,0 +1,85 @@
+{% extends 'turnos/tecnico_base.html' %}
+{% load static %}
+
+{% block title %}Dispositivos - Técnico | ServiTech{% endblock %}
+
+{% block page_header %}
+<!-- ══════════════════════════════════════════════
+     HEADER UNIFICADO (DISPOSITIVOS)
+══════════════════════════════════════════════ -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+    <div>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">Dispositivos</h1>
+        <p class="text-slate-500 font-medium text-sm mt-0.5">Inventario de equipos en taller y asignaciones</p>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Online
+        </span>
+        <button onclick="mostrarToast('🔔 Sin nuevas notificaciones')"
+                class="relative bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+        </button>
+        <button onclick="mostrarToast('⚙️ Configuración de inventario')"
+                class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </button>
+        <button onclick="abrirModalFoto()" class="relative group" title="Cambiar foto de perfil">
+            <img src="{% static 'img/foto de perfil tecnico.png' %}" alt="Foto"
+                 class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-slate-100">
+        </button>
+    </div>
+</div>
+{% endblock page_header %}
+
+{% block content %}
+
+<!-- Tabla / Cards de Dispositivos -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition">
+        <div class="flex items-center justify-between mb-3">
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Laptop</span>
+            <span class="text-xs text-slate-400 font-medium">ID: #DEV-102</span>
+        </div>
+        <h3 class="font-extrabold text-slate-800 text-lg mb-1">MacBook Pro M2</h3>
+        <p class="text-xs text-slate-500 mb-4">Cliente: Juan Pérez • Pantalla defectuosa</p>
+        <div class="flex justify-between items-center pt-3 border-t border-slate-100">
+            <span class="text-xs font-bold text-amber-600">En Diagnóstico</span>
+            <button onclick="mostrarToast('📱 Viendo detalles del MacBook')" class="text-xs font-bold text-[#002b75] hover:underline">Ver Equipo →</button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition">
+        <div class="flex items-center justify-between mb-3">
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700">Smartphone</span>
+            <span class="text-xs text-slate-400 font-medium">ID: #DEV-108</span>
+        </div>
+        <h3 class="font-extrabold text-slate-800 text-lg mb-1">iPhone 14 Pro</h3>
+        <p class="text-xs text-slate-500 mb-4">Cliente: María García • Cambio de Batería</p>
+        <div class="flex justify-between items-center pt-3 border-t border-slate-100">
+            <span class="text-xs font-bold text-slate-600">Pendiente</span>
+            <button onclick="mostrarToast('📱 Viendo detalles del iPhone')" class="text-xs font-bold text-[#002b75] hover:underline">Ver Equipo →</button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition">
+        <div class="flex items-center justify-between mb-3">
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">Periférico</span>
+            <span class="text-xs text-slate-400 font-medium">ID: #DEV-095</span>
+        </div>
+        <h3 class="font-extrabold text-slate-800 text-lg mb-1">Logitech MX Master 3</h3>
+        <p class="text-xs text-slate-500 mb-4">Cliente: Roberto López • Limpieza Sensor</p>
+        <div class="flex justify-between items-center pt-3 border-t border-slate-100">
+            <span class="text-xs font-bold text-emerald-600">Listo para Entrega</span>
+            <button onclick="mostrarToast('📱 Viendo detalles del Mouse')" class="text-xs font-bold text-[#002b75] hover:underline">Ver Equipo →</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
