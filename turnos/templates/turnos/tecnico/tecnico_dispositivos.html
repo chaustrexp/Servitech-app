@@ -1,39 +1,33 @@
 {% extends 'turnos/tecnico/tecnico_base.html' %}
 {% load static %}
 
-{% block title %}Dispositivos - Técnico | ServiTech{% endblock %}
+{% block title %}Inventario de Repuestos - Técnico | ServiTech{% endblock %}
 
 {% block page_header %}
 <!-- ══════════════════════════════════════════════
-     HEADER UNIFICADO (DISPOSITIVOS)
+     HEADER INVENTARIO
 ══════════════════════════════════════════════ -->
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
     <div>
-        <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">Dispositivos</h1>
-        <p class="text-slate-500 font-medium text-sm mt-0.5">Inventario de equipos en taller y asignaciones</p>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">Inventario de Repuestos</h1>
+        <p class="text-slate-500 font-medium text-sm mt-0.5">Gestión de stock técnico y dispositivos en espera de componentes.</p>
     </div>
-    <div class="flex items-center gap-2 flex-shrink-0">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Online
-        </span>
-        <button onclick="mostrarToast('🔔 Sin nuevas notificaciones')"
-                class="relative bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+    
+    <!-- Botones del Encabezado -->
+    <div class="flex flex-wrap items-center gap-3">
+        <button onclick="abrirModalRepuesto()" 
+                class="flex items-center gap-2 bg-white border border-slate-200 hover:border-[#002b75] text-[#002b75] text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
             </svg>
+            Solicitar Repuesto
         </button>
-        <button onclick="mostrarToast('⚙️ Configuración de inventario')"
-                class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <button onclick="abrirModalEntrada()" 
+                class="flex items-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
             </svg>
-        </button>
-        <button onclick="abrirModalFoto()" class="relative group" title="Cambiar foto de perfil">
-            <img src="{% static 'img/foto de perfil tecnico.png' %}" alt="Foto"
-                 class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-slate-100">
+            Registrar Entrada
         </button>
     </div>
 </div>
@@ -41,45 +35,539 @@
 
 {% block content %}
 
-<!-- Tabla / Cards de Dispositivos -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition">
-        <div class="flex items-center justify-between mb-3">
-            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Laptop</span>
-            <span class="text-xs text-slate-400 font-medium">ID: #DEV-102</span>
+<!-- ══════════════════════════════════════════════
+     CONTENIDO PRINCIPAL: STOCK & EQUIPOS
+══════════════════════════════════════════════ -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    
+    <!-- Columna Izquierda (Tabla de Componentes en Stock) -->
+    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+        
+        <!-- Cabecera de la tabla con pestañas de categoría -->
+        <div class="p-6 pb-4 border-b border-slate-100">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h3 class="font-bold text-slate-800 text-lg">Componentes en Stock</h3>
+                
+                <!-- Filtros Rápidos -->
+                <div class="flex bg-slate-100 rounded-xl p-1 gap-1 border border-slate-200">
+                    <button class="px-4 py-1.5 rounded-lg text-xs font-bold bg-[#002b75] text-white shadow-sm transition-all" onclick="filtrarStock('Todo')">
+                        Todo
+                    </button>
+                    <button class="px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all" onclick="filtrarStock('Pantallas')">
+                        Pantallas
+                    </button>
+                    <button class="px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all" onclick="filtrarStock('Baterias')">
+                        Baterías
+                    </button>
+                </div>
+            </div>
         </div>
-        <h3 class="font-extrabold text-slate-800 text-lg mb-1">MacBook Pro M2</h3>
-        <p class="text-xs text-slate-500 mb-4">Cliente: Juan Pérez • Pantalla defectuosa</p>
-        <div class="flex justify-between items-center pt-3 border-t border-slate-100">
-            <span class="text-xs font-bold text-amber-600">En Diagnóstico</span>
-            <button onclick="mostrarToast('📱 Viendo detalles del MacBook')" class="text-xs font-bold text-[#002b75] hover:underline">Ver Equipo →</button>
+
+        <!-- Tabla -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                        <th class="py-4 px-6">Componente</th>
+                        <th class="py-4 px-4">Categoría</th>
+                        <th class="py-4 px-4 text-center">Stock</th>
+                        <th class="py-4 px-4 text-right">Precio</th>
+                        <th class="py-4 px-6 text-center">Estado</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-sm">
+                    
+                    <!-- Fila 1: Pantalla iPhone 14 -->
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-4 px-6 flex items-center gap-4">
+                            <div class="w-10 h-10 bg-[#eef2ff] rounded-xl flex items-center justify-center flex-shrink-0 text-[#002b75]">
+                                📱
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800">Pantalla iPhone 14</p>
+                                <p class="text-xs text-slate-400">OLED Original Apple</p>
+                            </div>
+                        </td>
+                        <td class="py-4 px-4 text-slate-500 font-medium">Pantallas</td>
+                        <td class="py-4 px-4 text-center font-bold text-slate-800">12 <span class="text-xs text-slate-400 font-normal">unid.</span></td>
+                        <td class="py-4 px-4 text-right font-bold text-[#002b75]">$289.00</td>
+                        <td class="py-4 px-6 text-center">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Disponible
+                            </span>
+                        </td>
+                    </tr>
+
+                    <!-- Fila 2: Batería Samsung S22 -->
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-4 px-6 flex items-center gap-4">
+                            <div class="w-10 h-10 bg-[#eef2ff] rounded-xl flex items-center justify-center flex-shrink-0 text-[#002b75]">
+                                🔋
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800">Batería Samsung S22</p>
+                                <p class="text-xs text-slate-400">3700mAh Li-ion</p>
+                            </div>
+                        </td>
+                        <td class="py-4 px-4 text-slate-500 font-medium">Baterías</td>
+                        <td class="py-4 px-4 text-center font-bold text-red-600">2 <span class="text-xs text-slate-400 font-normal">unid.</span></td>
+                        <td class="py-4 px-4 text-right font-bold text-[#002b75]">$45.50</td>
+                        <td class="py-4 px-6 text-center">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-100">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                Stock Bajo
+                            </span>
+                        </td>
+                    </tr>
+
+                    <!-- Fila 3: Puerto Carga MacBook Pro -->
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-4 px-6 flex items-center gap-4">
+                            <div class="w-10 h-10 bg-[#eef2ff] rounded-xl flex items-center justify-center flex-shrink-0 text-[#002b75]">
+                                🔌
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800">Puerto Carga MacBook Pro</p>
+                                <p class="text-xs text-slate-400">MagSafe 3 Assembly</p>
+                            </div>
+                        </td>
+                        <td class="py-4 px-4 text-slate-500 font-medium">Conectores</td>
+                        <td class="py-4 px-4 text-center font-bold text-slate-800">5 <span class="text-xs text-slate-400 font-normal">unid.</span></td>
+                        <td class="py-4 px-4 text-right font-bold text-[#002b75]">$112.00</td>
+                        <td class="py-4 px-6 text-center">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Disponible
+                            </span>
+                        </td>
+                    </tr>
+
+                    <!-- Fila 4: Módulo Cámara Pixel 7 -->
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-4 px-6 flex items-center gap-4">
+                            <div class="w-10 h-10 bg-[#eef2ff] rounded-xl flex items-center justify-center flex-shrink-0 text-[#002b75]">
+                                📷
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800">Módulo Cámara Pixel 7</p>
+                                <p class="text-xs text-slate-400">Sensor Principal 50MP</p>
+                            </div>
+                        </td>
+                        <td class="py-4 px-4 text-slate-500 font-medium">Cámaras</td>
+                        <td class="py-4 px-4 text-center font-bold text-slate-400">0 <span class="text-xs text-slate-400 font-normal">unid.</span></td>
+                        <td class="py-4 px-4 text-right font-bold text-[#002b75]">$98.00</td>
+                        <td class="py-4 px-6 text-center">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                Agotado
+                            </span>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="p-6 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-medium">Mostrando 4 de 128 componentes</span>
+            <div class="flex gap-2">
+                <button class="p-2 border border-slate-200 hover:border-[#002b75] rounded-xl text-slate-500 hover:text-[#002b75] transition shadow-sm" onclick="mostrarToast('Anterior')">
+                    &lt;
+                </button>
+                <button class="p-2 border border-slate-200 hover:border-[#002b75] rounded-xl text-slate-500 hover:text-[#002b75] transition shadow-sm" onclick="mostrarToast('Siguiente')">
+                    &gt;
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Columna Derecha (Equipos en Espera & Indicador de Valor) -->
+    <div class="space-y-6">
+        
+        <!-- Equipos en Espera -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-slate-800 text-base">Equipos en Espera</h3>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 uppercase">3 Urgent</span>
+            </div>
+
+            <!-- Listado de Equipos -->
+            <div class="space-y-4">
+                
+                <!-- Equipo 1 -->
+                <div class="p-4 bg-[#f8fafc] border border-slate-200/60 rounded-xl relative">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">iPhone 13 Pro Max</p>
+                            <p class="text-xs text-slate-400">Cliente: Marco Rivas</p>
+                        </div>
+                        <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold text-[9px]">ID: 9942</span>
+                    </div>
+                    <div class="p-2 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2 mb-2 text-xs text-red-700">
+                        <span class="flex-shrink-0">⚠️</span>
+                        <p class="font-medium">Falta: Pantalla Super Retina</p>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-medium">En espera: 3 días</p>
+                </div>
+
+                <!-- Equipo 2 -->
+                <div class="p-4 bg-[#f8fafc] border border-slate-200/60 rounded-xl">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">iPad Air 5th Gen</p>
+                            <p class="text-xs text-slate-400">Cliente: Lucía Méndez</p>
+                        </div>
+                        <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold text-[9px]">ID: 9938</span>
+                    </div>
+                    <div class="p-2 bg-blue-50 border border-blue-100 rounded-lg flex items-start gap-2 mb-2 text-xs text-blue-700">
+                        <span class="flex-shrink-0">🚚</span>
+                        <p class="font-medium">Pedido en camino (ETA: Hoy)</p>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-medium">En espera: 1 día</p>
+                </div>
+
+                <!-- Equipo 3 -->
+                <div class="p-4 bg-[#f8fafc] border border-slate-200/60 rounded-xl">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">Xiaomi 12T Pro</p>
+                            <p class="text-xs text-slate-400">Cliente: Alberto Gil</p>
+                        </div>
+                        <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold text-[9px]">ID: 9912</span>
+                    </div>
+                    <div class="p-2 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2 mb-2 text-xs text-red-700">
+                        <span class="flex-shrink-0">⚠️</span>
+                        <p class="font-medium">Falta: Pin de Carga C</p>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-medium">En espera: 5 días</p>
+                </div>
+
+            </div>
+
+            <!-- Botón Ver Todos -->
+            <button onclick="abrirModalPendientes()" 
+                    class="mt-4 w-full py-2.5 rounded-xl border border-slate-200 hover:border-[#002b75] text-[#002b75] font-bold text-xs hover:bg-slate-50 transition flex items-center justify-center gap-2">
+                Ver todos los pendientes
+                <span>↗</span>
+            </button>
+        </div>
+
+        <!-- Indicador de Valor de Inventario -->
+        <div class="bg-[#002b75] rounded-2xl p-6 shadow-sm text-white flex flex-col justify-between relative overflow-hidden">
+            <div>
+                <p class="text-xs text-blue-200 uppercase font-semibold tracking-wider mb-2">Valor del Inventario</p>
+                <p class="text-3xl font-extrabold mb-2">$14,248.50</p>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-white/10 text-green-300">
+                    ↗ +12% este mes
+                </span>
+            </div>
+            <!-- Fondo sutil de ondas o cuadrícula -->
+            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ACTIVIDAD RECIENTE
+══════════════════════════════════════════════ -->
+<h4 class="font-extrabold text-slate-800 text-lg mb-4">Actividad Reciente</h4>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    
+    <!-- Actividad 1 -->
+    <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex items-center gap-4 hover:shadow-md transition">
+        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 text-lg">
+            📥
+        </div>
+        <div>
+            <p class="font-bold text-slate-800 text-xs">Entrada Stock</p>
+            <p class="text-[11px] text-slate-500 font-medium">25x Baterías iPhone</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">Hace 2 horas</p>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition">
-        <div class="flex items-center justify-between mb-3">
-            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700">Smartphone</span>
-            <span class="text-xs text-slate-400 font-medium">ID: #DEV-108</span>
+    <!-- Actividad 2 -->
+    <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex items-center gap-4 hover:shadow-md transition">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-lg">
+            ↗️
         </div>
-        <h3 class="font-extrabold text-slate-800 text-lg mb-1">iPhone 14 Pro</h3>
-        <p class="text-xs text-slate-500 mb-4">Cliente: María García • Cambio de Batería</p>
-        <div class="flex justify-between items-center pt-3 border-t border-slate-100">
-            <span class="text-xs font-bold text-slate-600">Pendiente</span>
-            <button onclick="mostrarToast('📱 Viendo detalles del iPhone')" class="text-xs font-bold text-[#002b75] hover:underline">Ver Equipo →</button>
+        <div>
+            <p class="font-bold text-slate-800 text-xs">Salida Servicio</p>
+            <p class="text-[11px] text-slate-500 font-medium">Pantalla S22 (#981)</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">Hace 4 horas</p>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition">
-        <div class="flex items-center justify-between mb-3">
-            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">Periférico</span>
-            <span class="text-xs text-slate-400 font-medium">ID: #DEV-095</span>
+    <!-- Actividad 3 -->
+    <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex items-center gap-4 hover:shadow-md transition">
+        <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center flex-shrink-0 text-lg">
+            📢
         </div>
-        <h3 class="font-extrabold text-slate-800 text-lg mb-1">Logitech MX Master 3</h3>
-        <p class="text-xs text-slate-500 mb-4">Cliente: Roberto López • Limpieza Sensor</p>
-        <div class="flex justify-between items-center pt-3 border-t border-slate-100">
-            <span class="text-xs font-bold text-emerald-600">Listo para Entrega</span>
-            <button onclick="mostrarToast('📱 Viendo detalles del Mouse')" class="text-xs font-bold text-[#002b75] hover:underline">Ver Equipo →</button>
+        <div>
+            <p class="font-bold text-slate-800 text-xs">Bajo Stock</p>
+            <p class="text-[11px] text-slate-500 font-medium">Cristales Templados</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">Revisión necesaria</p>
         </div>
+    </div>
+
+    <!-- Actividad 4 -->
+    <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex items-center gap-4 hover:shadow-md transition">
+        <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center flex-shrink-0 text-lg">
+            📋
+        </div>
+        <div>
+            <p class="font-bold text-slate-800 text-xs">Conteo Realizado</p>
+            <p class="text-[11px] text-slate-500 font-medium">Bodega A - General</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">Ayer, 18:30</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODALES FUNCIONALES DE INVENTARIO
+══════════════════════════════════════════════ -->
+
+<!-- Modal 1: Solicitar Repuesto -->
+<div id="modal-solicitar-repuesto" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarModalRepuesto()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 z-10">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-slate-800">Solicitar Repuesto</h3>
+            <button onclick="cerrarModalRepuesto()" class="text-slate-400 hover:text-slate-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <form id="form-solicitar" onsubmit="enviarSolicitud(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Componente / Repuesto</label>
+                <input type="text" required placeholder="Ej. Pantalla Super Retina iPhone 13 Pro Max"
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#002b75]">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Cantidad</label>
+                    <input type="number" min="1" value="1" required
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#002b75]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Urgencia</label>
+                    <select class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800">
+                        <option value="Alta">Alta (Crítica)</option>
+                        <option value="Media" selected>Media</option>
+                        <option value="Baja">Baja</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Equipo Asociado (Opcional)</label>
+                <input type="text" placeholder="Ej. iPhone 13 Pro Max (ID: 9942)"
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#002b75]">
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="cerrarModalRepuesto()"
+                        class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">
+                    Enviar Solicitud
+                </button>
+            </div>
+        </form>
     </div>
 </div>
+
+<!-- Modal 2: Registrar Entrada -->
+<div id="modal-registrar-entrada" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarModalEntrada()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 z-10">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-slate-800">Registrar Entrada de Stock</h3>
+            <button onclick="cerrarModalEntrada()" class="text-slate-400 hover:text-slate-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <form id="form-entrada" onsubmit="registrarEntradaStock(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Seleccionar Componente</label>
+                <select class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800">
+                    <option value="1">Pantalla iPhone 14</option>
+                    <option value="2">Batería Samsung S22</option>
+                    <option value="3">Puerto Carga MacBook Pro</option>
+                    <option value="4">Módulo Cámara Pixel 7</option>
+                    <option value="other">Otro componente...</option>
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Cantidad a ingresar</label>
+                    <input type="number" min="1" value="10" required
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#002b75]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Ubicación Bodega</label>
+                    <select class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800">
+                        <option value="A" selected>Bodega A (General)</option>
+                        <option value="B">Bodega B (Accesorios)</option>
+                        <option value="Taller">Taller Principal</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="cerrarModalEntrada()"
+                        class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">
+                    Registrar Entrada
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal 3: Ver todos los pendientes -->
+<div id="modal-ver-pendientes" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarModalPendientes()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6 z-10">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h3 class="text-lg font-bold text-slate-800">Equipos en Espera de Repuestos</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Listado completo de dispositivos retenidos por stock</p>
+            </div>
+            <button onclick="cerrarModalPendientes()" class="text-slate-400 hover:text-slate-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+            <div class="p-3 bg-red-50/50 border border-red-100 rounded-xl flex justify-between items-center">
+                <div>
+                    <p class="font-bold text-slate-800 text-sm">iPhone 13 Pro Max</p>
+                    <p class="text-xs text-red-600 font-semibold">Falta: Pantalla Super Retina</p>
+                </div>
+                <span class="text-xs text-slate-400 font-medium">3 días espera</span>
+            </div>
+            <div class="p-3 bg-blue-50/50 border border-blue-100 rounded-xl flex justify-between items-center">
+                <div>
+                    <p class="font-bold text-slate-800 text-sm">iPad Air 5th Gen</p>
+                    <p class="text-xs text-blue-600 font-semibold">🚚 Pedido en camino (ETA: Hoy)</p>
+                </div>
+                <span class="text-xs text-slate-400 font-medium">1 día espera</span>
+            </div>
+            <div class="p-3 bg-red-50/50 border border-red-100 rounded-xl flex justify-between items-center">
+                <div>
+                    <p class="font-bold text-slate-800 text-sm">Xiaomi 12T Pro</p>
+                    <p class="text-xs text-red-600 font-semibold">Falta: Pin de Carga C</p>
+                </div>
+                <span class="text-xs text-slate-400 font-medium">5 días espera</span>
+            </div>
+            <!-- Otros pendientes simulados -->
+            <div class="p-3 bg-slate-50 border border-slate-200/60 rounded-xl flex justify-between items-center">
+                <div>
+                    <p class="font-bold text-slate-800 text-sm">Nintendo Switch OLED</p>
+                    <p class="text-xs text-slate-500">Falta: Chip Integrado de Audio</p>
+                </div>
+                <span class="text-xs text-slate-400 font-medium">8 días espera</span>
+            </div>
+        </div>
+        <button onclick="cerrarModalPendientes()"
+                class="mt-5 w-full py-2.5 rounded-xl bg-slate-100 text-slate-700 font-semibold text-sm hover:bg-slate-200 transition">
+            Cerrar
+        </button>
+    </div>
+</div>
+
 {% endblock %}
+
+{% block scripts %}
+<script>
+    // ── Funciones abrir/cerrar modales de cabecera y pendientes ──
+    function abrirModalRepuesto() {
+        const m = document.getElementById('modal-solicitar-repuesto');
+        if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+    }
+    function cerrarModalRepuesto() {
+        const m = document.getElementById('modal-solicitar-repuesto');
+        if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    }
+    
+    function abrirModalEntrada() {
+        const m = document.getElementById('modal-registrar-entrada');
+        if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+    }
+    function cerrarModalEntrada() {
+        const m = document.getElementById('modal-registrar-entrada');
+        if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    }
+
+    function abrirModalPendientes() {
+        const m = document.getElementById('modal-ver-pendientes');
+        if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+    }
+    function cerrarModalPendientes() {
+        const m = document.getElementById('modal-ver-pendientes');
+        if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    }
+
+    // ── Envíos de formulario ──
+    function enviarSolicitud(e) {
+        e.preventDefault();
+        cerrarModalRepuesto();
+        mostrarToast('✅ Solicitud de repuesto enviada correctamente', 'success');
+        document.getElementById('form-solicitar').reset();
+    }
+
+    function registrarEntradaStock(e) {
+        e.preventDefault();
+        cerrarModalEntrada();
+        mostrarToast('📦 Entrada de stock registrada con éxito', 'success');
+        document.getElementById('form-entrada').reset();
+    }
+
+    // ── Filtrado de la tabla stock ──
+    function filtrarStock(categoria) {
+        const botones = document.querySelectorAll('.flex.bg-slate-100.rounded-xl.p-1.gap-1 button');
+        botones.forEach(btn => {
+            if (btn.textContent.trim().toLowerCase().includes(categoria.toLowerCase()) || 
+                (categoria === 'Todo' && btn.textContent.trim() === 'Todo')) {
+                btn.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-[#002b75] text-white shadow-sm transition-all";
+            } else {
+                btn.className = "px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all";
+            }
+        });
+
+        const filas = document.querySelectorAll('tbody tr');
+        let contador = 0;
+        filas.forEach(fila => {
+            const celdaCat = fila.querySelector('td:nth-child(2)');
+            if (celdaCat) {
+                const textCat = celdaCat.textContent.trim();
+                if (categoria === 'Todo' || textCat.toLowerCase().includes(categoria.toLowerCase())) {
+                    fila.style.display = '';
+                    contador++;
+                } else {
+                    fila.style.display = 'none';
+                }
+            }
+        });
+
+        const statusSpan = document.querySelector('.p-6.border-t.border-slate-100 span');
+        if (statusSpan) {
+            statusSpan.textContent = `Mostrando ${contador} de ${filas.length} componentes filtrados`;
+        }
+    }
+</script>
+{% endblock %}
+

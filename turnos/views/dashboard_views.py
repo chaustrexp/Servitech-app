@@ -57,6 +57,110 @@ def tecnico_soporte(request):
     return render(request, 'turnos/tecnico/tecnico_soporte.html')
 
 
+@login_required
+def tecnico_reporte_mensual(request):
+    """
+    Genera y descarga el reporte mensual del técnico en formato CSV.
+    Parámetros GET: mes (1-12), anio (ej. 2026)
+    """
+    import csv
+    from datetime import date
+    from django.http import HttpResponse
+
+    if request.user.rol != Usuario.Rol.TECNICO:
+        return redirect('home')
+
+    # Leer parámetros, por defecto el mes actual
+    hoy = date.today()
+    try:
+        mes  = int(request.GET.get('mes',  hoy.month))
+        anio = int(request.GET.get('anio', hoy.year))
+        # Validar rangos
+        if not (1 <= mes <= 12):
+            mes = hoy.month
+        if not (2000 <= anio <= 2100):
+            anio = hoy.year
+    except (ValueError, TypeError):
+        mes, anio = hoy.month, hoy.year
+
+    # Nombres de meses en español
+    MESES_ES = {
+        1:'Enero', 2:'Febrero', 3:'Marzo', 4:'Abril',
+        5:'Mayo', 6:'Junio', 7:'Julio', 8:'Agosto',
+        9:'Septiembre', 10:'Octubre', 11:'Noviembre', 12:'Diciembre'
+    }
+    nombre_mes = MESES_ES.get(mes, str(mes))
+
+    # Consultar citas del técnico en el mes/año solicitado
+    citas = (
+        Cita.objects
+        .filter(tecnico=request.user, fecha__year=anio, fecha__month=mes)
+        .select_related('cliente', 'servicio', 'estado')
+        .order_by('fecha', 'hora_inicio')
+    )
+
+    # Calcular métricas
+    total_citas      = citas.count()
+    finalizadas      = citas.filter(estado__nombre='Finalizada').count()
+    canceladas       = citas.filter(estado__nombre='Cancelada').count()
+    pendientes       = citas.exclude(estado__nombre__in=['Finalizada', 'Cancelada']).count()
+    tasa_completado  = f"{round((finalizadas / total_citas * 100), 1)}%" if total_citas > 0 else "0%"
+
+    # Construir respuesta CSV con BOM para Excel
+    nombre_archivo = f"reporte_{request.user.nombre_completo.replace(' ', '_')}_{nombre_mes}_{anio}.csv"
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
+    response.write('\ufeff')  # BOM UTF-8 para compatibilidad con Excel
+
+    writer = csv.writer(response)
+
+    # ── Encabezado del reporte ──────────────────────────────────
+    writer.writerow([f'REPORTE MENSUAL DE SERVICIOS — ServiTech'])
+    writer.writerow([f'Técnico:',  request.user.nombre_completo])
+    writer.writerow([f'Correo:',   request.user.correo])
+    writer.writerow([f'Período:',  f'{nombre_mes} {anio}'])
+    writer.writerow([f'Generado:', hoy.strftime('%d/%m/%Y')])
+    writer.writerow([])
+
+    # ── Resumen ejecutivo ───────────────────────────────────────
+    writer.writerow(['RESUMEN DEL MES'])
+    writer.writerow(['Total de citas',           total_citas])
+    writer.writerow(['Citas finalizadas',         finalizadas])
+    writer.writerow(['Citas canceladas',          canceladas])
+    writer.writerow(['Citas pendientes/proceso',  pendientes])
+    writer.writerow(['Tasa de completado',         tasa_completado])
+    writer.writerow([])
+
+    # ── Detalle de citas ────────────────────────────────────────
+    writer.writerow(['DETALLE DE CITAS'])
+    writer.writerow([
+        'N°', 'Fecha', 'Hora Inicio', 'Hora Fin',
+        'Cliente', 'Servicio', 'Estado',
+        'Retraso (min)', 'Observaciones'
+    ])
+
+    for idx, cita in enumerate(citas, start=1):
+        writer.writerow([
+            idx,
+            cita.fecha.strftime('%d/%m/%Y'),
+            cita.hora_inicio.strftime('%H:%M'),
+            cita.hora_fin.strftime('%H:%M'),
+            cita.cliente.nombre_completo,
+            cita.servicio.nombre if cita.servicio else '—',
+            cita.estado.nombre   if cita.estado   else '—',
+            cita.minutos_retraso if cita.minutos_retraso else 0,
+            cita.observaciones   if cita.observaciones   else '—',
+        ])
+
+    if total_citas == 0:
+        writer.writerow(['(Sin citas registradas en este período)', '', '', '', '', '', '', '', ''])
+
+    writer.writerow([])
+    writer.writerow(['— Fin del reporte —'])
+
+    return response
+
+
 
 @login_required
 def cliente_inicio(request):

@@ -16,6 +16,7 @@ from .dashboard_views import (
     tecnico_dispositivos,
     tecnico_clientes,
     tecnico_soporte,
+    tecnico_reporte_mensual,
     cliente_inicio,
     cliente_servicios,
     cliente_perfil,

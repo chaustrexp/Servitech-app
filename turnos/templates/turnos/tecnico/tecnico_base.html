@@ -92,11 +92,11 @@
             <a href="{% url 'tecnico_dispositivos' %}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all
                       {% if request.resolver_match.url_name == 'tecnico_dispositivos' %}nav-item-active{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                 </svg>
-                Dispositivos
+                Inventario
             </a>
 
             <a href="{% url 'tecnico_clientes' %}"
@@ -122,12 +122,25 @@
 
         <!-- Acciones inferiores -->
         <div class="px-3 py-4 border-t border-slate-100 space-y-2">
-            <button onclick="if(typeof abrirModalNuevoServicio==='function'){abrirModalNuevoServicio();}else{mostrarToast('➕ Agendar Nuevo Servicio');}"
+            <button onclick="abrirModalNuevoServicio()"
                     class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold bg-[#002b75] hover:bg-[#001f54] text-white transition-all shadow">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
                 Nuevo Servicio
+            </button>
+
+            <button id="btn-pausar" onclick="togglePausarTurno()"
+                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all">
+
+            <!-- Exportar Reporte -->
+            <button onclick="abrirModalReporte()"
+                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-[#eef2ff] hover:text-[#002b75] transition-all">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Exportar Reporte
             </button>
 
             <button id="btn-pausar" onclick="togglePausarTurno()"
@@ -174,6 +187,185 @@
             {% block page_header %}{% endblock %}
             {% block content %}{% endblock %}
         </main>
+    </div>
+
+    <!-- MODAL NUEVO SERVICIO (disponible en todas las páginas del técnico) -->
+    <div id="modal-nuevo-servicio" class="fixed inset-0 z-50 hidden items-center justify-center">
+        <div class="modal-backdrop absolute inset-0 bg-black/40" onclick="cerrarModalNuevoServicio()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 z-10">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-slate-800">Agendar Nuevo Servicio</h3>
+                <button onclick="cerrarModalNuevoServicio()" class="text-slate-400 hover:text-slate-700">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <form onsubmit="guardarNuevoServicio(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Nombre del Servicio / Tarea</label>
+                    <input type="text" id="ns-nombre" required placeholder="Ej: Diagnóstico de Servidor"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#002b75]">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Cliente / Empresa</label>
+                        <input type="text" id="ns-cliente" required placeholder="Ej: Banco Nacional"
+                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#002b75]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Día</label>
+                        <select id="ns-dia" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800">
+                            <option value="Lunes">Lunes</option>
+                            <option value="Martes">Martes</option>
+                            <option value="Miércoles" selected>Miércoles</option>
+                            <option value="Jueves">Jueves</option>
+                            <option value="Viernes">Viernes</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Hora Inicio</label>
+                        <input type="time" id="ns-hora-inicio" value="09:00" required
+                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Hora Fin</label>
+                        <input type="time" id="ns-hora-fin" value="10:30" required
+                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Estado Inicial</label>
+                    <select id="ns-estado" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800">
+                        <option value="DIAGNOSTICO">En Diagnóstico</option>
+                        <option value="PENDIENTE">Pendiente</option>
+                        <option value="FINALIZADO">Finalizado</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="cerrarModalNuevoServicio()"
+                            class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="flex-1 py-2.5 rounded-xl bg-[#002b75] text-white font-semibold text-sm hover:bg-[#001f54] transition shadow">
+                        Agendar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EXPORTAR REPORTE MENSUAL -->
+    <div id="modal-reporte" class="fixed inset-0 z-50 hidden items-center justify-center">
+        <div class="modal-backdrop absolute inset-0 bg-black/40" onclick="cerrarModalReporte()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 z-10">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">Exportar Reporte Mensual</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Descarga tu resumen de servicios en CSV</p>
+                </div>
+                <button onclick="cerrarModalReporte()" class="text-slate-400 hover:text-slate-700 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Icono decorativo -->
+            <div class="flex items-center gap-4 bg-[#eef2ff] rounded-2xl p-4 mb-5">
+                <div class="w-12 h-12 bg-[#002b75] rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-extrabold text-[#002b75]">Reporte de Servicios</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Incluye citas, estados, clientes y métricas del mes seleccionado.</p>
+                </div>
+            </div>
+
+            <!-- Selectores mes / año -->
+            <div class="grid grid-cols-2 gap-3 mb-2">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Mes</label>
+                    <select id="reporte-mes"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-[#002b75] transition-all">
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Año</label>
+                    <select id="reporte-anio"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-[#002b75] transition-all">
+                    </select>
+                </div>
+            </div>
+
+            <!-- Qué incluye -->
+            <div class="bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 mb-5">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">El reporte incluye</p>
+                <ul class="space-y-1">
+                    <li class="flex items-center gap-2 text-xs text-slate-600">
+                        <svg class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        Resumen ejecutivo (totales y tasa de completado)
+                    </li>
+                    <li class="flex items-center gap-2 text-xs text-slate-600">
+                        <svg class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        Detalle de cada cita (fecha, cliente, servicio, estado)
+                    </li>
+                    <li class="flex items-center gap-2 text-xs text-slate-600">
+                        <svg class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        Retrasos y observaciones por cita
+                    </li>
+                    <li class="flex items-center gap-2 text-xs text-slate-600">
+                        <svg class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        Compatible con Excel y Google Sheets
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex gap-3">
+                <button type="button" onclick="cerrarModalReporte()"
+                        class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                    Cancelar
+                </button>
+                <button type="button" onclick="descargarReporte()"
+                        class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-bold text-sm transition shadow flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Descargar CSV
+                </button>
+            </div>
+
+        </div>
     </div>
 
     <!-- MODAL CAMBIAR FOTO -->
@@ -295,6 +487,65 @@
             toast.textContent = mensaje;
             document.body.appendChild(toast);
             setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 350); }, 3000);
+        }
+
+        /* ── Modal Exportar Reporte ── */
+        function _poblarAnios() {
+            const sel = document.getElementById('reporte-anio');
+            if (!sel || sel.options.length > 0) return;
+            const anioActual = new Date().getFullYear();
+            for (let a = anioActual; a >= anioActual - 3; a--) {
+                const opt = document.createElement('option');
+                opt.value = a; opt.textContent = a;
+                sel.appendChild(opt);
+            }
+        }
+        function abrirModalReporte() {
+            _poblarAnios();
+            // Preseleccionar mes actual
+            const hoy = new Date();
+            const selMes  = document.getElementById('reporte-mes');
+            const selAnio = document.getElementById('reporte-anio');
+            if (selMes)  selMes.value  = hoy.getMonth() + 1;
+            if (selAnio) selAnio.value = hoy.getFullYear();
+            const m = document.getElementById('modal-reporte');
+            if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+        }
+        function cerrarModalReporte() {
+            const m = document.getElementById('modal-reporte');
+            if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+        }
+        function descargarReporte() {
+            const mes  = document.getElementById('reporte-mes').value;
+            const anio = document.getElementById('reporte-anio').value;
+            const url  = `/tecnico/reporte/?mes=${mes}&anio=${anio}`;
+            // Disparar descarga sin navegar
+            const a = document.createElement('a');
+            a.href = url; a.download = ''; a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            cerrarModalReporte();
+            const meses = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                           'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+            mostrarToast(`📥 Descargando reporte de ${meses[mes]} ${anio}...`, 'success');
+        }
+
+        /* ── Modal Nuevo Servicio ── */
+        function abrirModalNuevoServicio() {
+            const m = document.getElementById('modal-nuevo-servicio');
+            if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+        }
+        function cerrarModalNuevoServicio() {
+            const m = document.getElementById('modal-nuevo-servicio');
+            if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+        }
+        function guardarNuevoServicio(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('ns-nombre').value;
+            const cliente = document.getElementById('ns-cliente').value;
+            cerrarModalNuevoServicio();
+            mostrarToast(`✅ Servicio "${nombre}" agendado para ${cliente}`, 'success');
         }
     </script>
     {% block scripts %}{% endblock %}

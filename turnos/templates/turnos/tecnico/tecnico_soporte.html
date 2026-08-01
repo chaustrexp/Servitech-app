@@ -1,39 +1,28 @@
 {% extends 'turnos/tecnico/tecnico_base.html' %}
 {% load static %}
 
-{% block title %}Soporte Operativo - Técnico | ServiTech{% endblock %}
+{% block title %}Soporte - Técnico | ServiTech{% endblock %}
 
 {% block page_header %}
 <!-- ══════════════════════════════════════════════
-     HEADER UNIFICADO (SOPORTE)
+     HEADER SOPORTE
 ══════════════════════════════════════════════ -->
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
     <div>
-        <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">Soporte Operativo</h1>
-        <p class="text-slate-500 font-medium text-sm mt-0.5">Asistencia interna, reporte de fallos y manuales de taller</p>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">Panel de Soporte Interno</h1>
+        <p class="text-slate-500 font-medium text-sm mt-0.5">Gestión de herramientas, accesos y guías para personal técnico.</p>
     </div>
-    <div class="flex items-center gap-2 flex-shrink-0">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Online
-        </span>
-        <button onclick="mostrarToast('🔔 Sin nuevas notificaciones')"
-                class="relative bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-            </svg>
+    <!-- KPIs rápidos -->
+    <div class="flex items-center gap-3 flex-shrink-0">
+        <button onclick="abrirKPI('tickets')"
+                class="bg-[#eef2ff] border border-indigo-100 hover:border-[#002b75] rounded-2xl px-5 py-3 text-center min-w-[100px] transition-all cursor-pointer">
+            <p class="text-[10px] font-bold text-[#002b75] uppercase tracking-wider">Tickets Activos</p>
+            <p class="text-3xl font-extrabold text-[#002b75] leading-tight">12</p>
         </button>
-        <button onclick="mostrarToast('⚙️ Configuración de soporte')"
-                class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-        </button>
-        <button onclick="abrirModalFoto()" class="relative group" title="Cambiar foto de perfil">
-            <img src="{% static 'img/foto de perfil tecnico.png' %}" alt="Foto"
-                 class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-slate-100">
+        <button onclick="abrirKPI('disponibilidad')"
+                class="bg-emerald-400 hover:bg-emerald-500 rounded-2xl px-5 py-3 text-center min-w-[120px] transition-all cursor-pointer">
+            <p class="text-[10px] font-bold text-emerald-900 uppercase tracking-wider">Disponibilidad IT</p>
+            <p class="text-3xl font-extrabold text-white leading-tight">98.4%</p>
         </button>
     </div>
 </div>
@@ -41,25 +30,1217 @@
 
 {% block content %}
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Contactar Administrador -->
-    <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-        <h3 class="font-bold text-slate-800 text-lg mb-2">Soporte con Administración</h3>
-        <p class="text-sm text-slate-500 mb-4">Reporta faltante de repuestos, fallas en herramientas o solicitudes de permiso.</p>
-        <button onclick="mostrarToast('💬 Abriendo chat directo con el Administrador')"
-                class="w-full bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl transition text-sm shadow">
-            Contactar Administración
-        </button>
+<!-- ══════════════════════════════════════════════
+     FILA 1: Solicitudes de Soporte + Soporte Directo + Estado Sistemas
+══════════════════════════════════════════════ -->
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">
+
+    <!-- Mis Solicitudes de Soporte (col-span-3) -->
+    <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <!-- Cabecera -->
+        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h3 class="font-bold text-slate-800 text-base">Mis Solicitudes de Soporte</h3>
+            <div class="flex bg-slate-100 rounded-xl p-1 gap-1 border border-slate-200 w-fit">
+                <button onclick="filtrarTickets('todos', this)"
+                        class="ticket-tab px-3 py-1 rounded-lg text-xs font-bold bg-[#002b75] text-white shadow-sm transition-all">Todos</button>
+                <button onclick="filtrarTickets('abierto', this)"
+                        class="ticket-tab px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all">Abiertos</button>
+                <button onclick="filtrarTickets('resuelto', this)"
+                        class="ticket-tab px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all">Resueltos</button>
+            </div>
+        </div>
+
+        <!-- Lista de tickets -->
+        <div id="lista-tickets" class="divide-y divide-slate-100">
+
+            <!-- Ticket 1 -->
+            <div class="ticket-item p-4 hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-4 group"
+                 data-estado="abierto"
+                 onclick="verTicket('Fallo en estación de soldadura #4','Reportado hace 2 horas','Alta','Hardware / Taller','Fallo eléctrico detectado en la estación de soldadura número 4 del taller principal. Se requiere revisión urgente.','abierto')">
+                <div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-slate-800 text-sm truncate">Fallo en estación de soldadura #4</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Reportado hace 2 horas · Urgencia: Alta</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-red-100 text-red-700 uppercase tracking-wider flex-shrink-0">Abierto</span>
+                <svg class="w-4 h-4 text-slate-300 group-hover:text-[#002b75] flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </div>
+
+            <!-- Ticket 2 -->
+            <div class="ticket-item p-4 hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-4 group"
+                 data-estado="revision"
+                 onclick="verTicket('Solicitud de acceso a base de datos de repuestos','Enviado ayer','Media','Sistemas Centrales','Se necesita acceso de lectura a la base de datos de repuestos para consulta de compatibilidades durante diagnóstico.','revision')">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582 4 8 4"/>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-slate-800 text-sm truncate">Solicitud de acceso a base de datos de repuestos</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Enviado ayer · Sistemas Centrales</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-700 uppercase tracking-wider flex-shrink-0">En Revisión</span>
+                <svg class="w-4 h-4 text-slate-300 group-hover:text-[#002b75] flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </div>
+
+            <!-- Ticket 3 -->
+            <div class="ticket-item p-4 hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-4 group"
+                 data-estado="resuelto"
+                 onclick="verTicket('Reposición de multímetros digitales','Finalizado el 15 Oct','Baja','Equipamiento','Solicitud de reposición de 3 multímetros digitales para el taller. Todos los equipos fueron repuestos satisfactoriamente.','resuelto')">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-slate-800 text-sm truncate">Reposición de multímetros digitales</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Finalizado el 15 Oct · Equipamiento</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700 uppercase tracking-wider flex-shrink-0">Resuelto</span>
+                <svg class="w-4 h-4 text-slate-300 group-hover:text-[#002b75] flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </div>
+
+            <!-- Ticket 4 -->
+            <div class="ticket-item p-4 hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-4 group"
+                 data-estado="revision"
+                 onclick="verTicket('Renovación de credencial de acceso taller B','Pendiente de firma administrativa','Media','Administración','La credencial de acceso al taller B venció el 01 de Oct. Se solicita renovación urgente para continuar operaciones.','revision')">
+                <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-slate-800 text-sm truncate">Renovación de credencial de acceso taller B</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Pendiente de firma administrativa</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-700 uppercase tracking-wider flex-shrink-0">En Revisión</span>
+                <svg class="w-4 h-4 text-slate-300 group-hover:text-[#002b75] flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 border-t border-slate-100 flex items-center justify-between">
+            <button onclick="abrirNuevoTicket()"
+                    class="flex items-center gap-2 text-xs font-bold text-[#002b75] hover:underline">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Nueva Solicitud
+            </button>
+            <button onclick="abrirHistorialSoporte()"
+                    class="text-xs font-semibold text-[#002b75] hover:underline">
+                Ver historial completo de soporte →
+            </button>
+        </div>
     </div>
 
-    <!-- Guías y Manuales -->
-    <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-        <h3 class="font-bold text-slate-800 text-lg mb-2">Base de Conocimiento Taller</h3>
-        <p class="text-sm text-slate-500 mb-4">Accede a esquemáticos, diagramas y guías de desarme rápido.</p>
-        <button onclick="mostrarToast('📚 Abriendo manuales técnicos')"
-                class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition text-sm">
-            Ver Manuales Técnicos
+    <!-- Columna derecha: Soporte Directo + Estado Sistemas -->
+    <div class="lg:col-span-2 flex flex-col gap-5">
+
+        <!-- Soporte Directo -->
+        <div class="bg-[#002b75] rounded-2xl p-5 shadow-sm text-white relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+            <div class="relative z-10">
+                <h3 class="font-extrabold text-white text-base mb-1">Soporte Directo</h3>
+                <p class="text-xs text-blue-200 mb-4">¿Tienes un bloqueo crítico? Contacta al Administrador IT de turno.</p>
+                <!-- Admin de turno -->
+                <div class="flex items-center gap-3 bg-white/10 rounded-xl p-3 mb-4">
+                    <img src="{% static 'img/foto de perfil administrador.png' %}" alt="Admin"
+                         class="w-10 h-10 rounded-full object-cover border-2 border-white/30 flex-shrink-0">
+                    <div>
+                        <p class="font-bold text-white text-sm">Marcos Rebolledo</p>
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                            <span class="text-[11px] text-emerald-300 font-medium">En línea ahora</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Botones de contacto -->
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="abrirChat()"
+                            class="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold py-2.5 rounded-xl transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                        Chat
+                    </button>
+                    <button onclick="llamarInterno()"
+                            class="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold py-2.5 rounded-xl transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
+                        Interno
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado de Sistemas -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado de Sistemas</p>
+                <button onclick="refrescarSistemas()" class="text-slate-400 hover:text-[#002b75] transition" title="Refrescar">
+                    <svg id="icon-refresh" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <button onclick="abrirEstadoSistema('Red WiFi Taller','operativo','Conexión estable · 245 Mbps · Sin interrupciones')"
+                        class="w-full flex items-center justify-between hover:bg-slate-50 p-1.5 rounded-xl transition-all">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                        <span class="text-sm font-semibold text-slate-700">Red WiFi Taller</span>
+                    </div>
+                    <span class="text-xs font-extrabold text-emerald-600 uppercase tracking-wider">Operativo</span>
+                </button>
+                <button onclick="abrirEstadoSistema('Base de Datos','operativo','PostgreSQL 15 · Uptime: 99.9% · Último backup: hace 1h')"
+                        class="w-full flex items-center justify-between hover:bg-slate-50 p-1.5 rounded-xl transition-all">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                        <span class="text-sm font-semibold text-slate-700">Base de Datos</span>
+                    </div>
+                    <span class="text-xs font-extrabold text-emerald-600 uppercase tracking-wider">Operativo</span>
+                </button>
+                <button onclick="abrirEstadoSistema('Mantenimiento ERP','mantenimiento','Ventana de mantenimiento programada en 2 horas. Guardar trabajo antes de las 18:00.')"
+                        class="w-full flex items-center justify-between hover:bg-amber-50 p-1.5 rounded-xl transition-all">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse flex-shrink-0"></span>
+                        <span class="text-sm font-semibold text-slate-700">Mantenimiento ERP</span>
+                    </div>
+                    <span class="text-xs font-extrabold text-amber-600 uppercase tracking-wider">En 2H</span>
+                </button>
+                <button onclick="abrirEstadoSistema('Servidor de Archivos','operativo','NAS activo · 2.1 TB disponibles · Sincronizado')"
+                        class="w-full flex items-center justify-between hover:bg-slate-50 p-1.5 rounded-xl transition-all">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                        <span class="text-sm font-semibold text-slate-700">Servidor de Archivos</span>
+                    </div>
+                    <span class="text-xs font-extrabold text-emerald-600 uppercase tracking-wider">Operativo</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FILA 2: RESUMEN DEL DÍA
+══════════════════════════════════════════════ -->
+<div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 mb-6">
+    <div class="flex items-center justify-between mb-5">
+        <div>
+            <h3 class="font-bold text-slate-800 text-base">Resumen del Día</h3>
+            <p id="soporte-fecha" class="text-xs text-slate-400 mt-0.5">Cargando fecha...</p>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            En vivo
+        </span>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <!-- Citas hoy -->
+        <div onclick="abrirResumenMetrica('citas')"
+             class="bg-[#eef2ff] rounded-2xl p-4 text-center cursor-pointer hover:shadow-md hover:scale-105 transition-all">
+            <div class="w-9 h-9 bg-[#002b75]/10 rounded-xl flex items-center justify-center mx-auto mb-2">
+                <svg class="w-5 h-5 text-[#002b75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <p class="text-2xl font-extrabold text-[#002b75]">6</p>
+            <p class="text-[11px] text-slate-500 font-semibold mt-0.5">Citas Hoy</p>
+        </div>
+        <!-- Finalizadas -->
+        <div onclick="abrirResumenMetrica('finalizadas')"
+             class="bg-emerald-50 rounded-2xl p-4 text-center cursor-pointer hover:shadow-md hover:scale-105 transition-all">
+            <div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <p class="text-2xl font-extrabold text-emerald-600">3</p>
+            <p class="text-[11px] text-slate-500 font-semibold mt-0.5">Finalizadas</p>
+        </div>
+        <!-- En proceso -->
+        <div onclick="abrirResumenMetrica('proceso')"
+             class="bg-blue-50 rounded-2xl p-4 text-center cursor-pointer hover:shadow-md hover:scale-105 transition-all">
+            <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+            </div>
+            <p class="text-2xl font-extrabold text-blue-600">1</p>
+            <p class="text-[11px] text-slate-500 font-semibold mt-0.5">En Proceso</p>
+        </div>
+        <!-- Satisfacción -->
+        <div onclick="abrirResumenMetrica('satisfaccion')"
+             class="bg-amber-50 rounded-2xl p-4 text-center cursor-pointer hover:shadow-md hover:scale-105 transition-all">
+            <div class="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                </svg>
+            </div>
+            <p class="text-2xl font-extrabold text-amber-600">96%</p>
+            <p class="text-[11px] text-slate-500 font-semibold mt-0.5">Satisfacción</p>
+        </div>
+    </div>
+
+    <!-- Tarea Actual del Día -->
+    <div class="bg-[#002b75] rounded-2xl p-5 text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                    <p class="text-xs text-blue-200 font-bold uppercase tracking-wider">Tarea Actual</p>
+                </div>
+                <p class="font-extrabold text-white text-base">MacBook Pro M2 — Juan Pérez</p>
+                <p class="text-xs text-blue-200 mt-1">Pantalla identificada como defectuosa · Reemplazo pendiente</p>
+                <!-- Progreso -->
+                <div class="mt-3">
+                    <div class="flex justify-between mb-1.5">
+                        <span class="text-xs text-blue-200">Progreso Diagnóstico</span>
+                        <span class="text-xs font-bold text-white">65%</span>
+                    </div>
+                    <div class="bg-white/20 rounded-full h-2">
+                        <div class="h-2 rounded-full bg-white" style="width:65%" id="barra-progreso-soporte"></div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="abrirModalReparacion()"
+                    class="flex-shrink-0 bg-white hover:bg-slate-50 text-[#002b75] font-bold px-5 py-2.5 rounded-xl text-sm transition shadow">
+                Continuar Reparación
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FILA 3: Centro de Ayuda y Conocimiento
+══════════════════════════════════════════════ -->
+<div class="bg-[#f8fafc] rounded-2xl border border-slate-200 p-6 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+            <h3 class="font-extrabold text-[#002b75] text-lg">Centro de Ayuda y Conocimiento</h3>
+            <p class="text-slate-500 text-sm mt-0.5">Guías rápidas y procedimientos estandarizados de ServiTech.</p>
+        </div>
+        <!-- Buscador guías -->
+        <div class="relative w-full sm:w-72">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" oninput="buscarGuia(this.value)" placeholder="Buscar guías o procedimientos..."
+                   class="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#002b75] shadow-sm transition-all">
+        </div>
+    </div>
+
+    <!-- Categorías de guías -->
+    <div id="grid-guias" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <!-- Seguridad -->
+        <div class="guia-card bg-white rounded-2xl border border-slate-100 p-5 hover:shadow-md hover:border-[#002b75] transition-all cursor-pointer group"
+             data-titulo="Seguridad" onclick="abrirGuia('Seguridad')">
+            <div class="w-10 h-10 bg-[#eef2ff] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#002b75] transition-all">
+                <svg class="w-5 h-5 text-[#002b75] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+            </div>
+            <h4 class="font-extrabold text-slate-800 text-base mb-1">Seguridad</h4>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">Procedimientos de protección y riesgos eléctricos en el taller.</p>
+            <span class="text-xs font-bold text-[#002b75] flex items-center gap-1 group-hover:gap-2 transition-all">
+                Explorar
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                </svg>
+            </span>
+        </div>
+
+        <!-- Desensamble -->
+        <div class="guia-card bg-white rounded-2xl border border-slate-100 p-5 hover:shadow-md hover:border-[#002b75] transition-all cursor-pointer group"
+             data-titulo="Desensamble" onclick="abrirGuia('Desensamble')">
+            <div class="w-10 h-10 bg-[#eef2ff] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#002b75] transition-all">
+                <svg class="w-5 h-5 text-[#002b75] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+            </div>
+            <h4 class="font-extrabold text-slate-800 text-base mb-1">Desensamble</h4>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">Manuales de apertura para dispositivos de alta gama y sellados.</p>
+            <span class="text-xs font-bold text-[#002b75] flex items-center gap-1 group-hover:gap-2 transition-all">
+                Explorar
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                </svg>
+            </span>
+        </div>
+
+        <!-- Inventario -->
+        <div class="guia-card bg-white rounded-2xl border border-slate-100 p-5 hover:shadow-md hover:border-[#002b75] transition-all cursor-pointer group"
+             data-titulo="Inventario" onclick="abrirGuia('Inventario')">
+            <div class="w-10 h-10 bg-[#eef2ff] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#002b75] transition-all">
+                <svg class="w-5 h-5 text-[#002b75] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                </svg>
+            </div>
+            <h4 class="font-extrabold text-slate-800 text-base mb-1">Inventario</h4>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">Uso correcto del software de stock y solicitud de piezas.</p>
+            <span class="text-xs font-bold text-[#002b75] flex items-center gap-1 group-hover:gap-2 transition-all">
+                Explorar
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                </svg>
+            </span>
+        </div>
+
+        <!-- Informes -->
+        <div class="guia-card bg-white rounded-2xl border border-slate-100 p-5 hover:shadow-md hover:border-[#002b75] transition-all cursor-pointer group"
+             data-titulo="Informes" onclick="abrirGuia('Informes')">
+            <div class="w-10 h-10 bg-[#eef2ff] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#002b75] transition-all">
+                <svg class="w-5 h-5 text-[#002b75] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </div>
+            <h4 class="font-extrabold text-slate-800 text-base mb-1">Informes</h4>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">Plantillas para redactar diagnósticos técnicos precisos.</p>
+            <span class="text-xs font-bold text-[#002b75] flex items-center gap-1 group-hover:gap-2 transition-all">
+                Explorar
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                </svg>
+            </span>
+        </div>
+
+    </div>
+    <!-- Sin resultados búsqueda -->
+    <div id="sin-guias" class="hidden py-10 text-center">
+        <p class="font-bold text-slate-500 text-sm">Sin resultados para esa búsqueda</p>
+        <p class="text-xs text-slate-400 mt-1">Intenta con otro término.</p>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODAL: KPI DETALLE
+══════════════════════════════════════════════ -->
+<div id="modal-kpi" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarKPI()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 z-10">
+        <div class="flex items-center justify-between mb-5">
+            <h3 id="kpi-titulo" class="text-base font-extrabold text-slate-800">—</h3>
+            <button onclick="cerrarKPI()" class="text-slate-400 hover:text-slate-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div id="kpi-contenido" class="space-y-3 mb-5"></div>
+        <button onclick="cerrarKPI()" class="w-full py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">Cerrar</button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODAL: HISTORIAL COMPLETO SOPORTE
+══════════════════════════════════════════════ -->
+<div id="modal-historial-soporte" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarHistorialSoporte()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6 z-10 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h3 class="text-lg font-extrabold text-slate-800">Historial Completo de Soporte</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Todas tus solicitudes — últimos 90 días</p>
+            </div>
+            <button onclick="cerrarHistorialSoporte()" class="text-slate-400 hover:text-slate-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="space-y-2">
+            <div class="flex items-center justify-between p-3 bg-red-50 border border-red-100 rounded-xl">
+                <div><p class="text-xs font-bold text-slate-800">Fallo estación soldadura #4</p><p class="text-[11px] text-slate-500">Hace 2 horas · Hardware / Taller</p></div>
+                <span class="text-[10px] font-extrabold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">Abierto</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                <div><p class="text-xs font-bold text-slate-800">Acceso BBDD de repuestos</p><p class="text-[11px] text-slate-500">Ayer · Sistemas Centrales</p></div>
+                <span class="text-[10px] font-extrabold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">En Revisión</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+                <div><p class="text-xs font-bold text-slate-800">Reposición multímetros</p><p class="text-[11px] text-slate-500">15 Oct · Equipamiento</p></div>
+                <span class="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Resuelto</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                <div><p class="text-xs font-bold text-slate-800">Renovación credencial taller B</p><p class="text-[11px] text-slate-500">Pendiente · Administración</p></div>
+                <span class="text-[10px] font-extrabold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">En Revisión</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+                <div><p class="text-xs font-bold text-slate-800">Actualización antivirus equipos</p><p class="text-[11px] text-slate-500">02 Oct · Sistemas</p></div>
+                <span class="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Resuelto</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+                <div><p class="text-xs font-bold text-slate-800">Reemplazo teclado laptop taller</p><p class="text-[11px] text-slate-500">28 Sep · Equipamiento</p></div>
+                <span class="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Resuelto</span>
+            </div>
+        </div>
+        <button onclick="cerrarHistorialSoporte()" class="mt-5 w-full py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">Cerrar</button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODAL: RESUMEN MÉTRICA DEL DÍA
+══════════════════════════════════════════════ -->
+<div id="modal-resumen-metrica" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarResumenMetrica()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 z-10">
+        <div class="flex items-center justify-between mb-5">
+            <h3 id="rm-titulo" class="text-base font-extrabold text-slate-800">—</h3>
+            <button onclick="cerrarResumenMetrica()" class="text-slate-400 hover:text-slate-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div id="rm-contenido" class="space-y-2 mb-5"></div>
+        <button onclick="cerrarResumenMetrica()" class="w-full py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">Cerrar</button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODAL: CONTINUAR REPARACIÓN
+══════════════════════════════════════════════ -->
+<div id="modal-reparacion" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarModalReparacion()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 z-10">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h3 class="text-base font-extrabold text-slate-800">MacBook Pro M2 — Juan Pérez</h3>
+                <p class="text-xs text-slate-400 mt-0.5">ID Reparación: #REP-9981</p>
+            </div>
+            <button onclick="cerrarModalReparacion()" class="text-slate-400 hover:text-slate-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <!-- Progreso -->
+        <div class="bg-[#eef2ff] rounded-xl p-4 mb-4">
+            <div class="flex justify-between mb-2">
+                <span class="text-xs font-bold text-[#002b75]">Progreso general</span>
+                <span id="rep-pct" class="text-xs font-extrabold text-[#002b75]">65%</span>
+            </div>
+            <div class="bg-[#002b75]/10 rounded-full h-2.5 mb-1">
+                <div id="rep-barra" class="h-2.5 rounded-full bg-[#002b75] transition-all duration-700" style="width:0%"></div>
+            </div>
+        </div>
+        <!-- Checklist de pasos -->
+        <div class="space-y-2 mb-5">
+            <div class="flex items-center gap-3 p-2.5 bg-emerald-50 border border-emerald-100 rounded-xl">
+                <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-xs font-semibold text-slate-700">Diagnóstico de hardware completado</span>
+            </div>
+            <div class="flex items-center gap-3 p-2.5 bg-emerald-50 border border-emerald-100 rounded-xl">
+                <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-xs font-semibold text-slate-700">Pantalla identificada como defectuosa</span>
+            </div>
+            <div class="flex items-center gap-3 p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                <svg class="w-4 h-4 text-slate-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-xs font-semibold text-slate-500">Reemplazo de pantalla pendiente</span>
+                <span class="ml-auto text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Pendiente</span>
+            </div>
+            <div class="flex items-center gap-3 p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                <svg class="w-4 h-4 text-slate-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-xs font-semibold text-slate-500">Prueba de funcionamiento final</span>
+                <span class="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">En espera</span>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="cerrarModalReparacion()"
+                    class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                Cerrar
+            </button>
+            <button onclick="marcarPasoContinuar()"
+                    class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-bold text-sm transition shadow">
+                ✓ Marcar paso completado
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODAL: ESTADO SISTEMA DETALLE
+══════════════════════════════════════════════ -->
+<div id="modal-sistema" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarEstadoSistema()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-xs mx-4 p-6 z-10">
+        <div class="flex items-center justify-between mb-4">
+            <h3 id="sys-nombre" class="text-base font-extrabold text-slate-800">—</h3>
+            <button onclick="cerrarEstadoSistema()" class="text-slate-400 hover:text-slate-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div id="sys-badge-wrap" class="mb-4"></div>
+        <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-100 mb-5">
+            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Detalle</p>
+            <p id="sys-detalle" class="text-sm text-slate-700">—</p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="cerrarEstadoSistema()"
+                    class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                Cerrar
+            </button>
+            <button onclick="cerrarEstadoSistema(); abrirNuevoTicket();"
+                    class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">
+                Reportar Fallo
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODAL: DETALLE TICKET
+══════════════════════════════════════════════ -->
+<div id="modal-ticket" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarTicket()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 z-10">
+        <div class="flex items-start justify-between mb-4">
+            <div class="flex-1 pr-4">
+                <h3 id="tk-titulo" class="text-base font-extrabold text-slate-800 leading-snug">—</h3>
+                <span id="tk-badge" class="inline-block mt-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider">—</span>
+            </div>
+            <button onclick="cerrarTicket()" class="text-slate-400 hover:text-slate-700 flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="space-y-3 mb-5">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Reportado</p>
+                    <p id="tk-fecha" class="text-sm font-bold text-slate-700 mt-0.5">—</p>
+                </div>
+                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Urgencia</p>
+                    <p id="tk-urgencia" class="text-sm font-bold text-slate-700 mt-0.5">—</p>
+                </div>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Área</p>
+                <p id="tk-area" class="text-sm font-bold text-slate-700 mt-0.5">—</p>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-100">
+                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Descripción</p>
+                <p id="tk-desc" class="text-sm text-slate-600 leading-relaxed">—</p>
+            </div>
+        </div>
+        <div id="tk-acciones" class="flex gap-3"></div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODAL: NUEVO TICKET
+══════════════════════════════════════════════ -->
+<div id="modal-nuevo-ticket" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarNuevoTicket()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 z-10">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-slate-800">Nueva Solicitud de Soporte</h3>
+            <button onclick="cerrarNuevoTicket()" class="text-slate-400 hover:text-slate-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <form onsubmit="enviarTicket(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Título del problema</label>
+                <input type="text" id="nt-titulo" required placeholder="Ej: Fallo en equipo de soldadura"
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-[#002b75]">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Área / Sistema</label>
+                    <select id="nt-area" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#002b75]">
+                        <option>Hardware / Taller</option>
+                        <option>Sistemas Centrales</option>
+                        <option>Equipamiento</option>
+                        <option>Administración</option>
+                        <option>Red / Conectividad</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Urgencia</label>
+                    <select id="nt-urgencia" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#002b75]">
+                        <option value="Alta">Alta (Crítica)</option>
+                        <option value="Media" selected>Media</option>
+                        <option value="Baja">Baja</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Descripción detallada</label>
+                <textarea id="nt-desc" rows="3" required placeholder="Describe el problema con el mayor detalle posible..."
+                          class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-[#002b75] resize-none"></textarea>
+            </div>
+            <div class="flex gap-3 pt-1">
+                <button type="button" onclick="cerrarNuevoTicket()"
+                        class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">
+                    Enviar Solicitud
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODAL: CHAT CON SOPORTE
+══════════════════════════════════════════════ -->
+<div id="modal-chat" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarChat()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 z-10 flex flex-col overflow-hidden" style="height:480px">
+        <!-- Cabecera chat -->
+        <div class="bg-[#002b75] p-4 flex items-center gap-3 flex-shrink-0">
+            <img src="{% static 'img/foto de perfil administrador.png' %}" alt="Admin"
+                 class="w-9 h-9 rounded-full object-cover border-2 border-white/30 flex-shrink-0">
+            <div class="flex-1">
+                <p class="font-bold text-white text-sm">Marcos Rebolledo</p>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span class="text-[11px] text-blue-200">En línea</span>
+                </div>
+            </div>
+            <button onclick="cerrarChat()" class="text-white/60 hover:text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <!-- Mensajes -->
+        <div id="chat-mensajes" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
+            <div class="flex items-start gap-2">
+                <img src="{% static 'img/foto de perfil administrador.png' %}" class="w-7 h-7 rounded-full object-cover flex-shrink-0 mt-0.5">
+                <div class="bg-white border border-slate-100 rounded-2xl rounded-tl-sm px-3 py-2 max-w-[75%] shadow-sm">
+                    <p class="text-xs text-slate-700">Hola, soy Marcos. ¿En qué puedo ayudarte hoy?</p>
+                    <p class="text-[10px] text-slate-400 mt-1">Ahora</p>
+                </div>
+            </div>
+        </div>
+        <!-- Input mensaje -->
+        <div class="p-3 bg-white border-t border-slate-100 flex items-center gap-2 flex-shrink-0">
+            <input type="text" id="chat-input" placeholder="Escribe un mensaje..."
+                   onkeydown="if(event.key==='Enter') enviarChatMsg()"
+                   class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#002b75] transition-all">
+            <button onclick="enviarChatMsg()"
+                    class="w-9 h-9 bg-[#002b75] hover:bg-[#001f54] text-white rounded-xl flex items-center justify-center flex-shrink-0 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODAL: GUÍA DE CONOCIMIENTO
+══════════════════════════════════════════════ -->
+<div id="modal-guia" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarGuia()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6 z-10 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h3 id="guia-titulo" class="text-lg font-extrabold text-slate-800">—</h3>
+                <p id="guia-subtitulo" class="text-xs text-slate-400 mt-0.5">—</p>
+            </div>
+            <button onclick="cerrarGuia()" class="text-slate-400 hover:text-slate-700 flex-shrink-0 ml-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div id="guia-contenido" class="space-y-3"></div>
+        <button onclick="cerrarGuia()"
+                class="mt-5 w-full py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">
+            Cerrar
         </button>
     </div>
 </div>
+
+<!-- ══════════════════════════════════════════════
+     MODAL: LLAMADA INTERNA
+══════════════════════════════════════════════ -->
+<div id="modal-llamada-interna" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarLlamadaInterna()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-xs mx-4 p-6 z-10 text-center">
+        <div class="w-16 h-16 bg-[#eef2ff] rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <svg class="w-8 h-8 text-[#002b75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+            </svg>
+        </div>
+        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Llamada interna a</p>
+        <p class="text-lg font-extrabold text-slate-800 mb-1">Marcos Rebolledo</p>
+        <p class="text-sm text-slate-500 mb-5">Interno: ext. 201</p>
+        <div class="flex gap-3">
+            <button onclick="cerrarLlamadaInterna()"
+                    class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                Cancelar
+            </button>
+            <button onclick="confirmarLlamadaInterna()"
+                    class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-bold text-sm transition shadow">
+                Llamar
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+    /* ── Fecha resumen del día ── */
+    const _dias  = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    const _meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const _hoy   = new Date();
+    const el = document.getElementById('soporte-fecha');
+    if (el) el.textContent = `${_dias[_hoy.getDay()]}, ${_hoy.getDate()} de ${_meses[_hoy.getMonth()]} de ${_hoy.getFullYear()}`;
+
+    /* ── Animación barra de progreso al cargar ── */
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const b = document.getElementById('barra-progreso-soporte');
+            if (b) { b.style.transition = 'width 1s ease-in-out'; b.style.width = '65%'; }
+        }, 400);
+    });
+
+    /* ══════════════════════════════════════
+       FILTRO TABS TICKETS
+    ══════════════════════════════════════ */
+    function filtrarTickets(estado, btn) {
+        document.querySelectorAll('.ticket-tab').forEach(b => {
+            b.className = 'ticket-tab px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all';
+        });
+        btn.className = 'ticket-tab px-3 py-1 rounded-lg text-xs font-bold bg-[#002b75] text-white shadow-sm transition-all';
+        document.querySelectorAll('.ticket-item').forEach(item => {
+            const est = item.dataset.estado || '';
+            item.style.display = (estado === 'todos' || est === estado) ? '' : 'none';
+        });
+    }
+
+    /* ══════════════════════════════════════
+       MODAL DETALLE TICKET
+    ══════════════════════════════════════ */
+    const _badgeCfg = {
+        abierto:  { cls: 'bg-red-100 text-red-700',    txt: 'Abierto' },
+        revision: { cls: 'bg-amber-100 text-amber-700', txt: 'En Revisión' },
+        resuelto: { cls: 'bg-emerald-100 text-emerald-700', txt: 'Resuelto' },
+    };
+
+    function verTicket(titulo, fecha, urgencia, area, desc, estado) {
+        document.getElementById('tk-titulo').textContent    = titulo;
+        document.getElementById('tk-fecha').textContent     = fecha;
+        document.getElementById('tk-urgencia').textContent  = urgencia;
+        document.getElementById('tk-area').textContent      = area;
+        document.getElementById('tk-desc').textContent      = desc;
+        const cfg = _badgeCfg[estado] || _badgeCfg.revision;
+        const badge = document.getElementById('tk-badge');
+        badge.textContent = cfg.txt;
+        badge.className   = `inline-block mt-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${cfg.cls}`;
+        // Acciones según estado
+        const acc = document.getElementById('tk-acciones');
+        if (estado === 'resuelto') {
+            acc.innerHTML = `<button onclick="cerrarTicket()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">Cerrar</button>
+                             <button onclick="cerrarTicket(); mostrarToast('📋 Abriendo reporte...');" class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">Ver Reporte</button>`;
+        } else {
+            acc.innerHTML = `<button onclick="cerrarTicket()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">Cerrar</button>
+                             <button onclick="cerrarTicket(); mostrarToast('📩 Seguimiento enviado al área de soporte', 'success');" class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">Hacer Seguimiento</button>`;
+        }
+        const m = document.getElementById('modal-ticket');
+        m.classList.remove('hidden'); m.classList.add('flex');
+    }
+    function cerrarTicket() {
+        const m = document.getElementById('modal-ticket');
+        m.classList.add('hidden'); m.classList.remove('flex');
+    }
+
+    /* ══════════════════════════════════════
+       MODAL NUEVO TICKET
+    ══════════════════════════════════════ */
+    function abrirNuevoTicket() {
+        const m = document.getElementById('modal-nuevo-ticket');
+        m.classList.remove('hidden'); m.classList.add('flex');
+    }
+    function cerrarNuevoTicket() {
+        const m = document.getElementById('modal-nuevo-ticket');
+        m.classList.add('hidden'); m.classList.remove('flex');
+    }
+    function enviarTicket(e) {
+        e.preventDefault();
+        const titulo = document.getElementById('nt-titulo').value;
+        cerrarNuevoTicket();
+        mostrarToast(`✅ Solicitud "${titulo}" enviada al equipo de soporte`, 'success');
+        e.target.reset();
+    }
+
+    /* ══════════════════════════════════════
+       CHAT SOPORTE DIRECTO
+    ══════════════════════════════════════ */
+    function abrirChat() {
+        const m = document.getElementById('modal-chat');
+        m.classList.remove('hidden'); m.classList.add('flex');
+        setTimeout(() => { document.getElementById('chat-input').focus(); }, 100);
+    }
+    function cerrarChat() {
+        const m = document.getElementById('modal-chat');
+        m.classList.add('hidden'); m.classList.remove('flex');
+    }
+    function enviarChatMsg() {
+        const input = document.getElementById('chat-input');
+        const texto = input.value.trim();
+        if (!texto) return;
+        const contenedor = document.getElementById('chat-mensajes');
+        // Mensaje del técnico (derecha)
+        const msgTec = document.createElement('div');
+        msgTec.className = 'flex justify-end';
+        msgTec.innerHTML = `<div class="bg-[#002b75] rounded-2xl rounded-tr-sm px-3 py-2 max-w-[75%] shadow-sm">
+            <p class="text-xs text-white">${texto}</p>
+            <p class="text-[10px] text-blue-200 mt-1 text-right">Ahora</p>
+        </div>`;
+        contenedor.appendChild(msgTec);
+        input.value = '';
+        contenedor.scrollTop = contenedor.scrollHeight;
+        // Respuesta automática del admin
+        setTimeout(() => {
+            const respuestas = [
+                'Recibido, estoy revisando el problema.',
+                'Entendido, dame un momento para verificarlo.',
+                'Ya lo veo en el sistema. Te confirmo en breve.',
+                '¿Puedes darme más detalles sobre el error?',
+                'Voy a escalar esto al equipo de IT. Un momento.'
+            ];
+            const resp = respuestas[Math.floor(Math.random() * respuestas.length)];
+            const msgAdmin = document.createElement('div');
+            msgAdmin.className = 'flex items-start gap-2';
+            msgAdmin.innerHTML = `<img src="{% static 'img/foto de perfil administrador.png' %}" class="w-7 h-7 rounded-full object-cover flex-shrink-0 mt-0.5">
+                <div class="bg-white border border-slate-100 rounded-2xl rounded-tl-sm px-3 py-2 max-w-[75%] shadow-sm">
+                    <p class="text-xs text-slate-700">${resp}</p>
+                    <p class="text-[10px] text-slate-400 mt-1">Ahora</p>
+                </div>`;
+            contenedor.appendChild(msgAdmin);
+            contenedor.scrollTop = contenedor.scrollHeight;
+        }, 1200);
+    }
+
+    /* ══════════════════════════════════════
+       LLAMADA INTERNA
+    ══════════════════════════════════════ */
+    function llamarInterno() {
+        const m = document.getElementById('modal-llamada-interna');
+        m.classList.remove('hidden'); m.classList.add('flex');
+    }
+    function cerrarLlamadaInterna() {
+        const m = document.getElementById('modal-llamada-interna');
+        m.classList.add('hidden'); m.classList.remove('flex');
+    }
+    function confirmarLlamadaInterna() {
+        cerrarLlamadaInterna();
+        mostrarToast('📞 Conectando llamada interna con Marcos Rebolledo...');
+    }
+
+    /* ══════════════════════════════════════
+       BUSCADOR DE GUÍAS
+    ══════════════════════════════════════ */
+    function buscarGuia(q) {
+        const term = q.toLowerCase().trim();
+        const cards = document.querySelectorAll('.guia-card');
+        let vis = 0;
+        cards.forEach(c => {
+            const titulo = (c.dataset.titulo || '').toLowerCase();
+            const show = !term || titulo.includes(term);
+            c.style.display = show ? '' : 'none';
+            if (show) vis++;
+        });
+        document.getElementById('sin-guias').classList.toggle('hidden', vis > 0 || !term);
+        document.getElementById('grid-guias').classList.toggle('hidden', vis === 0 && !!term);
+    }
+
+    /* ══════════════════════════════════════
+       MODAL GUÍA DE CONOCIMIENTO
+    ══════════════════════════════════════ */
+    const _guias = {
+        'Seguridad': {
+            sub: '8 procedimientos · Actualizado: 10 Oct 2026',
+            items: [
+                { num: '01', titulo: 'EPP obligatorio en el taller', desc: 'Uso de guantes dieléctricos, gafas de protección y calzado antiestático en todo momento.' },
+                { num: '02', titulo: 'Protocolo ante descarga eléctrica', desc: 'Pasos inmediatos: desconectar fuente, llamar a emergencias, no mover al accidentado.' },
+                { num: '03', titulo: 'Manejo de soldadores y estaciones', desc: 'Temperatura máxima permitida: 380°C. Siempre usar soporte y nunca dejar sin supervisión.' },
+                { num: '04', titulo: 'Almacenamiento de baterías de litio', desc: 'Guardar en bolsas antiestáticas, lejos de fuentes de calor. Nunca apilar más de 3 unidades.' },
+            ]
+        },
+        'Desensamble': {
+            sub: '12 manuales · Actualizado: 08 Nov 2026',
+            items: [
+                { num: '01', titulo: 'iPhone 14/15 Series', desc: 'Usar ventosa de 1.5kg, palanca de plástico. Temperatura de apertura: 70°C durante 90 segundos.' },
+                { num: '02', titulo: 'MacBook Pro M1/M2/M3', desc: 'Requiere destornillador pentalobe P5. Retirar batería antes de cualquier intervención interna.' },
+                { num: '03', titulo: 'Samsung Galaxy S22/S23/S24', desc: 'Estructura sellada con adhesivo. Precalentar a 65°C. Usar herramienta de corte especial.' },
+                { num: '04', titulo: 'iPad Air / Pro (USB-C)', desc: 'Pantalla fijada con adhesivo doble cara. Reemplazar adhesivo al rearmar. Incluye cable flex frágil.' },
+            ]
+        },
+        'Inventario': {
+            sub: '5 procedimientos · Actualizado: 15 Oct 2026',
+            items: [
+                { num: '01', titulo: 'Cómo registrar entrada de stock', desc: 'Ir a Inventario → Registrar Entrada. Escanear código o ingresar manualmente. Confirmar ubicación en bodega.' },
+                { num: '02', titulo: 'Solicitar repuesto a proveedor', desc: 'Inventario → Solicitar Repuesto. Completar formulario con urgencia y dispositivo asociado. Aprobación del jefe de taller.' },
+                { num: '03', titulo: 'Control de stock mínimo', desc: 'El sistema alerta cuando el stock cae bajo el umbral. Verificar semanalmente cada lunes antes de las 9:00.' },
+            ]
+        },
+        'Informes': {
+            sub: '6 plantillas · Actualizado: 12 Nov 2026',
+            items: [
+                { num: '01', titulo: 'Diagnóstico inicial', desc: 'Debe incluir: modelo, número de serie, síntoma reportado, pruebas realizadas, componentes sospechosos y recomendación.' },
+                { num: '02', titulo: 'Informe de reparación completada', desc: 'Detallar piezas reemplazadas, costo de partes, tiempo empleado y garantía aplicada. Firma obligatoria del técnico.' },
+                { num: '03', titulo: 'Reporte de falla no reparable', desc: 'Incluir evidencia fotográfica, motivo técnico de la no reparación y cotización de reemplazo sugerida.' },
+            ]
+        },
+    };
+
+    function abrirGuia(categoria) {
+        const data = _guias[categoria];
+        if (!data) return;
+        document.getElementById('guia-titulo').textContent    = categoria;
+        document.getElementById('guia-subtitulo').textContent = data.sub;
+        document.getElementById('guia-contenido').innerHTML   = data.items.map(item => `
+            <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 hover:border-[#002b75] transition-all cursor-default">
+                <div class="flex items-start gap-3">
+                    <span class="text-xs font-extrabold text-[#002b75] bg-[#eef2ff] rounded-lg px-2 py-1 flex-shrink-0">${item.num}</span>
+                    <div>
+                        <p class="font-bold text-slate-800 text-sm">${item.titulo}</p>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">${item.desc}</p>
+                    </div>
+                </div>
+            </div>`).join('');
+        const m = document.getElementById('modal-guia');
+        m.classList.remove('hidden'); m.classList.add('flex');
+    }
+    function cerrarGuia() {
+        const m = document.getElementById('modal-guia');
+        m.classList.add('hidden'); m.classList.remove('flex');
+    }
+
+    /* ══════════════════════════════════════
+       REFRESCAR ESTADO SISTEMAS
+    ══════════════════════════════════════ */
+    function refrescarSistemas() {
+        const icon = document.getElementById('icon-refresh');
+        icon.style.transition = 'transform 0.6s';
+        icon.style.transform  = 'rotate(360deg)';
+        setTimeout(() => { icon.style.transform = 'rotate(0deg)'; icon.style.transition = ''; }, 650);
+        mostrarToast('🔄 Estado de sistemas actualizado');
+    }
+
+    /* ══════════════════════════════════════
+       MODAL KPI (Tickets Activos / Disponibilidad)
+    ══════════════════════════════════════ */
+    const _kpiData = {
+        tickets: {
+            titulo: 'Tickets Activos',
+            items: [
+                { label: 'Abiertos',     valor: '5',  color: 'text-red-600',    bg: 'bg-red-50 border-red-100' },
+                { label: 'En Revisión',  valor: '7',  color: 'text-amber-600',  bg: 'bg-amber-50 border-amber-100' },
+                { label: 'Resueltos hoy',valor: '3',  color: 'text-emerald-600',bg: 'bg-emerald-50 border-emerald-100' },
+                { label: 'Tiempo prom. resolución', valor: '4.2h', color: 'text-[#002b75]', bg: 'bg-[#eef2ff] border-indigo-100' },
+            ]
+        },
+        disponibilidad: {
+            titulo: 'Disponibilidad IT',
+            items: [
+                { label: 'Uptime del mes',   valor: '98.4%', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100' },
+                { label: 'Incidentes totales',valor: '2',    color: 'text-red-600',     bg: 'bg-red-50 border-red-100' },
+                { label: 'Tiempo caída',     valor: '11 min',color: 'text-amber-600',   bg: 'bg-amber-50 border-amber-100' },
+                { label: 'SLA objetivo',     valor: '99.5%', color: 'text-[#002b75]',   bg: 'bg-[#eef2ff] border-indigo-100' },
+            ]
+        }
+    };
+    function abrirKPI(tipo) {
+        const data = _kpiData[tipo];
+        if (!data) return;
+        document.getElementById('kpi-titulo').textContent = data.titulo;
+        document.getElementById('kpi-contenido').innerHTML = data.items.map(i => `
+            <div class="flex items-center justify-between p-3 ${i.bg} border rounded-xl">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">${i.label}</p>
+                <p class="text-base font-extrabold ${i.color}">${i.valor}</p>
+            </div>`).join('');
+        const m = document.getElementById('modal-kpi');
+        m.classList.remove('hidden'); m.classList.add('flex');
+    }
+    function cerrarKPI() {
+        const m = document.getElementById('modal-kpi');
+        m.classList.add('hidden'); m.classList.remove('flex');
+    }
+
+    /* ══════════════════════════════════════
+       MODAL HISTORIAL COMPLETO SOPORTE
+    ══════════════════════════════════════ */
+    function abrirHistorialSoporte() {
+        const m = document.getElementById('modal-historial-soporte');
+        m.classList.remove('hidden'); m.classList.add('flex');
+    }
+    function cerrarHistorialSoporte() {
+        const m = document.getElementById('modal-historial-soporte');
+        m.classList.add('hidden'); m.classList.remove('flex');
+    }
+
+    /* ══════════════════════════════════════
+       MODAL MÉTRICAS RESUMEN DEL DÍA
+    ══════════════════════════════════════ */
+    const _metricaData = {
+        citas: {
+            titulo: 'Citas de Hoy',
+            items: [
+                { label: '10:00 — Ana Torres',    sub: 'MacBook Pro · Pantalla parpadeante', estado: 'Pendiente',    color: 'text-amber-700',   bg: 'bg-amber-50 border-amber-100' },
+                { label: '13:00 — Carlos Mendoza', sub: 'Samsung S24 · Cambio de pantalla',  estado: 'Pendiente',    color: 'text-amber-700',   bg: 'bg-amber-50 border-amber-100' },
+                { label: '09:00 — Juan Pérez',     sub: 'MacBook Pro M2 · Diagnóstico',      estado: 'En proceso',   color: 'text-blue-700',    bg: 'bg-blue-50 border-blue-100' },
+                { label: '11:00 — María García',   sub: 'Dell XPS 15 · Rendimiento',         estado: 'Finalizado',   color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' },
+                { label: '14:00 — Roberto López',  sub: 'iPhone 14 Pro · Batería',           estado: 'Finalizado',   color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' },
+                { label: '15:30 — Lucía Pérez',    sub: 'iPad Air · Cristal roto',           estado: 'Finalizado',   color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' },
+            ]
+        },
+        finalizadas: {
+            titulo: 'Citas Finalizadas Hoy',
+            items: [
+                { label: 'Juan Pérez',    sub: 'MacBook Pro M2 · Diagnóstico completo',   estado: 'Finalizado', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' },
+                { label: 'María García',  sub: 'Dell XPS 15 · Optimización de software', estado: 'Finalizado', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' },
+                { label: 'Lucía Pérez',   sub: 'iPad Air · Cambio de cristal',           estado: 'Finalizado', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' },
+            ]
+        },
+        proceso: {
+            titulo: 'En Proceso Ahora',
+            items: [
+                { label: 'Juan Pérez',  sub: 'MacBook Pro M2 — Reemplazo de pantalla', estado: '65% completado', color: 'text-blue-700', bg: 'bg-blue-50 border-blue-100' },
+            ]
+        },
+        satisfaccion: {
+            titulo: 'Satisfacción del Cliente',
+            items: [
+                { label: 'Promedio del día',     valor: '96%',  color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100' },
+                { label: 'Promedio semanal',     valor: '94%',  color: 'text-emerald-600', bg: 'bg-slate-50 border-slate-100' },
+                { label: 'Servicios evaluados',  valor: '3/3',  color: 'text-[#002b75]',   bg: 'bg-[#eef2ff] border-indigo-100' },
+                { label: 'Comentarios positivos',valor: '3',    color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100' },
+            ]
+        }
+    };
+    function abrirResumenMetrica(tipo) {
+        const data = _metricaData[tipo];
+        if (!data) return;
+        document.getElementById('rm-titulo').textContent = data.titulo;
+        document.getElementById('rm-contenido').innerHTML = data.items.map(i => {
+            if (i.valor) {
+                return `<div class="flex items-center justify-between p-3 ${i.bg} border rounded-xl">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">${i.label}</p>
+                    <p class="text-base font-extrabold ${i.color}">${i.valor}</p>
+                </div>`;
+            }
+            return `<div class="p-3 ${i.bg} border rounded-xl">
+                <div class="flex items-center justify-between mb-0.5">
+                    <p class="text-xs font-bold text-slate-700">${i.label}</p>
+                    <span class="text-[10px] font-extrabold ${i.color} px-2 py-0.5 rounded-full bg-white/60">${i.estado}</span>
+                </div>
+                <p class="text-[11px] text-slate-500">${i.sub}</p>
+            </div>`;
+        }).join('');
+        const m = document.getElementById('modal-resumen-metrica');
+        m.classList.remove('hidden'); m.classList.add('flex');
+    }
+    function cerrarResumenMetrica() {
+        const m = document.getElementById('modal-resumen-metrica');
+        m.classList.add('hidden'); m.classList.remove('flex');
+    }
+
+    /* ══════════════════════════════════════
+       MODAL CONTINUAR REPARACIÓN
+    ══════════════════════════════════════ */
+    let _pasoActual = 2; // 0-index, pasos 0 y 1 ya completados
+    function abrirModalReparacion() {
+        const m = document.getElementById('modal-reparacion');
+        m.classList.remove('hidden'); m.classList.add('flex');
+        // Animar barra al abrir
+        setTimeout(() => {
+            const b = document.getElementById('rep-barra');
+            if (b) b.style.width = '65%';
+        }, 100);
+    }
+    function cerrarModalReparacion() {
+        const m = document.getElementById('modal-reparacion');
+        m.classList.add('hidden'); m.classList.remove('flex');
+    }
+    function marcarPasoContinuar() {
+        const pasos = [
+            { pct: 80,  msg: '✅ Reemplazo de pantalla marcado como completado' },
+            { pct: 100, msg: '🎉 ¡Reparación completada! Lista para entrega' },
+        ];
+        if (_pasoActual >= pasos.length) {
+            mostrarToast('✅ Todos los pasos ya están completados', 'success');
+            return;
+        }
+        const paso = pasos[_pasoActual];
+        _pasoActual++;
+        // Actualizar barra y porcentaje
+        const barra = document.getElementById('rep-barra');
+        const pct   = document.getElementById('rep-pct');
+        const soporte = document.getElementById('barra-progreso-soporte');
+        if (barra) barra.style.width = paso.pct + '%';
+        if (pct)   pct.textContent   = paso.pct + '%';
+        if (soporte) soporte.style.width = paso.pct + '%';
+        mostrarToast(paso.msg, 'success');
+        if (paso.pct === 100) {
+            cerrarModalReparacion();
+        }
+    }
+
+    /* ══════════════════════════════════════
+       MODAL ESTADO SISTEMA DETALLE
+    ══════════════════════════════════════ */
+    function abrirEstadoSistema(nombre, tipo, detalle) {
+        document.getElementById('sys-nombre').textContent  = nombre;
+        document.getElementById('sys-detalle').textContent = detalle;
+        const cfg = {
+            operativo:     { cls: 'bg-emerald-100 text-emerald-700', txt: '● Operativo' },
+            mantenimiento: { cls: 'bg-amber-100 text-amber-700',     txt: '⚠ Mantenimiento programado' },
+            error:         { cls: 'bg-red-100 text-red-700',         txt: '✕ Fuera de servicio' },
+        };
+        const c = cfg[tipo] || cfg.operativo;
+        document.getElementById('sys-badge-wrap').innerHTML =
+            `<span class="inline-block px-3 py-1 rounded-full text-xs font-extrabold ${c.cls}">${c.txt}</span>`;
+        const m = document.getElementById('modal-sistema');
+        m.classList.remove('hidden'); m.classList.add('flex');
+    }
+    function cerrarEstadoSistema() {
+        const m = document.getElementById('modal-sistema');
+        m.classList.add('hidden'); m.classList.remove('flex');
+    }
+
+</script>
 {% endblock %}
