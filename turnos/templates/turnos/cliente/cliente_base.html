@@ -1,12 +1,10 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Dashboard Cliente - ServiTech{% endblock %}</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,182 +13,154 @@
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .nav-item { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:500; color:#64748b; transition:all .15s; text-decoration:none; }
+        .nav-item:hover { background:#f1f5f9; color:#1e293b; }
+        .nav-item.active { background:#eff6ff; color:#002b75; font-weight:600; }
+        .sidebar-transition { transition: transform 0.3s ease; }
     </style>
 </head>
+<body class="bg-[#f4f7fb] min-h-screen flex overflow-x-hidden">
 
-<body class="bg-[#f4f7fb] font-sans min-h-screen flex flex-col text-slate-800 overflow-x-hidden">
+    <!-- Overlay móvil -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
 
-    <!-- Header Cliente -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
-        <div class="max-w-6xl mx-auto px-4 md:px-10 h-16 flex justify-between items-center">
-            
-            <!-- Logo + Navegación -->
-            <div class="flex items-center gap-4 md:gap-10">
-                <!-- Logo -->
-                <a href="{% url 'cliente_inicio' %}" class="flex items-center gap-2">
-                    <img src="{% static 'img/logo.jpg' %}" alt="ServiTech Logo" class="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm">
-                    <span class="text-xl font-extrabold text-[#002b75] tracking-tight">ServiTech</span>
-                </a>
+    <!-- ══════════════ SIDEBAR ══════════════ -->
+    <aside id="sidebar"
+           class="sidebar-transition fixed top-0 left-0 h-full w-[200px] bg-white border-r border-slate-100 z-40 flex flex-col -translate-x-full md:translate-x-0">
 
-                <!-- Nav Links -->
-                <nav class="hidden md:flex items-center h-16 gap-6 text-sm font-medium">
-                    <a href="{% url 'cliente_inicio' %}" 
-                       class="h-full flex items-center {% if request.resolver_match.url_name == 'cliente_inicio' %}text-[#002b75] border-b-2 border-[#002b75]{% else %}text-slate-500 hover:text-slate-800{% endif %} transition-colors">
-                        Inicio
-                    </a>
-                    <a href="{% url 'cliente_servicios' %}" 
-                       class="h-full flex items-center {% if request.resolver_match.url_name == 'cliente_servicios' %}text-[#002b75] border-b-2 border-[#002b75]{% else %}text-slate-500 hover:text-slate-800{% endif %} transition-colors">
-                        Servicios
-                    </a>
-                    <a href="{% url 'cliente_soporte' %}" 
-                       class="h-full flex items-center {% if request.resolver_match.url_name == 'cliente_soporte' %}text-[#002b75] border-b-2 border-[#002b75]{% else %}text-slate-500 hover:text-slate-800{% endif %} transition-colors">
-                        Soporte
-                    </a>
-                    <a href="{% url 'cliente_perfil' %}" 
-                       class="h-full flex items-center {% if request.resolver_match.url_name == 'cliente_perfil' %}text-[#002b75] border-b-2 border-[#002b75]{% else %}text-slate-500 hover:text-slate-800{% endif %} transition-colors">
-                        Mi Perfil
-                    </a>
-                </nav>
-                </nav>
-            </div>
+        <!-- Logo -->
+        <div class="px-5 pt-6 pb-5 border-b border-slate-100">
+            <a href="{% url 'cliente_inicio' %}" class="flex items-center gap-3">
+                <img src="{% static 'img/logo.jpg' %}" alt="ServiTech"
+                     class="w-9 h-9 rounded-xl object-cover border border-slate-200 shadow-sm">
+                <span class="text-lg font-extrabold text-[#002b75] tracking-tight">ServiTech</span>
+            </a>
+        </div>
 
-            <!-- Acciones Derecha -->
-            <div class="flex items-center gap-4 relative">
-                
-                <!-- Botón Menú Móvil (Solo visible en pantallas pequeñas) -->
-                <button onclick="toggleMobileMenu()" class="md:hidden text-slate-500 hover:text-[#002b75] p-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                </button>
-                
-                <!-- Notificaciones Dropdown -->
-                <div class="relative">
-                    <button id="btn-notificaciones" onclick="toggleDropdown('dropdown-notificaciones')" class="relative text-slate-400 hover:text-[#002b75] transition p-2 rounded-full hover:bg-slate-50">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
-                    <!-- Contenido Dropdown -->
-                    <div id="dropdown-notificaciones" class="hidden absolute right-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-xl border border-slate-100 z-50 transform origin-top-right transition-all">
-                        <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-                            <h3 class="font-bold text-slate-800">Notificaciones</h3>
-                            <button class="text-xs text-[#002b75] hover:underline">Marcar leídas</button>
-                        </div>
-                        <div class="p-2">
-                            <a href="#" class="block p-3 hover:bg-slate-50 rounded-xl transition">
-                                <p class="text-sm font-semibold text-slate-800">Bienvenido a ServiTech</p>
-                                <p class="text-xs text-slate-500 mt-1">Explora nuestros servicios de reparación.</p>
-                            </a>
-                            <a href="#" class="block p-3 hover:bg-slate-50 rounded-xl transition">
-                                <p class="text-sm font-semibold text-slate-800">Promoción del mes</p>
-                                <p class="text-xs text-slate-500 mt-1">10% de descuento en mantenimientos.</p>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Ajustes -->
-                <a href="{% url 'cliente_perfil' %}" class="text-slate-400 hover:text-[#002b75] transition p-2 rounded-full hover:bg-slate-50 hidden sm:block">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <!-- Nav -->
+        <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+
+            <a href="{% url 'cliente_inicio' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'cliente_inicio' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10-3a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1v-7z"/>
+                </svg>
+                Dashboard
+            </a>
+
+            <a href="{% url 'cliente_soporte' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'cliente_soporte' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Soporte Técnico
+            </a>
+
+            <a href="{% url 'cliente_servicios' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'cliente_servicios' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                Servicios
+            </a>
+
+            <a href="{% url 'cliente_perfil' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'cliente_perfil' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                Mi Perfil
+            </a>
+        </nav>
+
+        <!-- Agendar Cita + Cerrar Sesión -->
+        <div class="px-3 pb-5 pt-3 border-t border-slate-100 space-y-2">
+            <a href="{% url 'seleccionar_dispositivo' %}"
+               class="w-full flex items-center justify-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 px-4 rounded-xl transition text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                </svg>
+                Agendar Cita
+            </a>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:bg-red-50 hover:text-red-600 transition">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
-                </a>
+                    Cerrar Sesión
+                </button>
+            </form>
+        </div>
+    </aside>
 
-                <!-- Perfil Dropdown -->
-                <div class="relative ml-2">
-                    <button onclick="toggleDropdown('dropdown-perfil')" class="w-9 h-9 rounded-full bg-slate-200 overflow-hidden border-2 border-white shadow-sm focus:outline-none focus:border-[#002b75] transition-all">
-                        <img src="{% static 'img/foto de perfil cliente.png' %}" 
-                             alt="Avatar" class="w-full h-full object-cover">
-                    </button>
-                    <!-- Contenido Dropdown -->
-                    <div id="dropdown-perfil" class="hidden absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden">
-                        <div class="p-4 bg-[#f8f9fc] border-b border-slate-100">
-                            <p class="text-sm font-bold text-slate-800 truncate">{{ user.nombre_completo|default:user.correo }}</p>
-                            <p class="text-xs text-slate-500 truncate">{{ user.correo }}</p>
-                        </div>
-                        <div class="p-2">
-                            <a href="{% url 'cliente_perfil' %}" class="flex items-center gap-2 p-2.5 hover:bg-slate-50 rounded-lg text-sm text-slate-700 font-medium transition">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                Mi Perfil
-                            </a>
-                            <form method="post" action="{% url 'logout' %}" class="w-full mt-1">
-                                {% csrf_token %}
-                                <button type="submit" class="w-full flex items-center gap-2 p-2.5 hover:bg-red-50 hover:text-red-600 rounded-lg text-sm text-slate-700 font-medium transition">
-                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                                    Cerrar Sesión
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+    <!-- ══════════════ CONTENIDO ══════════════ -->
+    <div class="flex-1 flex flex-col min-h-screen md:ml-[200px]">
+
+        <!-- Top bar móvil -->
+        <div class="md:hidden bg-white border-b border-slate-100 px-4 h-14 flex items-center justify-between sticky top-0 z-20">
+            <button onclick="openSidebar()" class="text-slate-600 hover:text-[#002b75] p-1">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            <a href="{% url 'cliente_inicio' %}" class="flex items-center gap-2">
+                <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="w-7 h-7 rounded-lg object-cover">
+                <span class="font-extrabold text-[#002b75]">ServiTech</span>
+            </a>
+            <div class="w-8"></div>
+        </div>
+
+        <main class="flex-1 p-5 md:p-7 max-w-6xl mx-auto w-full">
+            {% block page_header %}{% endblock %}
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-slate-200 py-4 px-6 md:px-10">
+            <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-400">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-[#002b75]">ServiTech</span>
+                    <span>© 2026 ServiTech. Todos los derechos reservados.</span>
+                </div>
+                <div class="flex gap-5">
+                    <a href="#" class="hover:text-slate-600 transition">Aviso Legal</a>
+                    <a href="#" class="hover:text-slate-600 transition">Privacidad</a>
+                    <a href="#" class="hover:text-slate-600 transition">Contacto</a>
+                    <a href="#" class="hover:text-slate-600 transition">Términos</a>
                 </div>
             </div>
-        </div>
+        </footer>
+    </div>
 
-        <!-- Menú Móvil (Oculto por defecto) -->
-        <div id="mobile-menu" class="md:hidden hidden absolute top-16 left-0 w-full bg-white border-b border-slate-200 shadow-xl z-50 transform origin-top transition-all">
-            <nav class="flex flex-col px-6 py-4 gap-2 text-sm font-medium">
-                <a href="{% url 'cliente_inicio' %}" class="px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'cliente_inicio' %}bg-[#eef2ff] text-[#002b75] font-bold{% else %}text-slate-600 hover:bg-slate-50{% endif %} transition-colors">Inicio</a>
-                <a href="{% url 'cliente_servicios' %}" class="px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'cliente_servicios' %}bg-[#eef2ff] text-[#002b75] font-bold{% else %}text-slate-600 hover:bg-slate-50{% endif %} transition-colors">Servicios</a>
-                <a href="{% url 'cliente_soporte' %}" class="px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'cliente_soporte' %}bg-[#eef2ff] text-[#002b75] font-bold{% else %}text-slate-600 hover:bg-slate-50{% endif %} transition-colors">Soporte</a>
-                <a href="{% url 'cliente_perfil' %}" class="px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'cliente_perfil' %}bg-[#eef2ff] text-[#002b75] font-bold{% else %}text-slate-600 hover:bg-slate-50{% endif %} transition-colors">Mi Perfil</a>
-            </nav>
-        </div>
-    </header>
+    <!-- Toast -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[100] space-y-2 pointer-events-none"></div>
 
-    <!-- Bloque para banners de ancho completo (ej. Soporte) -->
-    {% block top_banner %}{% endblock %}
-
-    <!-- Contenido Principal -->
-    <main class="flex-grow py-6 md:py-8 px-4 md:px-10 max-w-6xl mx-auto w-full">
-        {% block page_header %}{% endblock %}
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer Simple -->
-    <footer class="bg-[#f0f4f8] py-6 px-10 text-xs text-slate-500 border-t border-slate-200 mt-10">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-4">
-                <span class="text-[#002b75] font-bold text-sm">ServiTech</span>
-                <span>&copy; 2026 ServiTech. Todos los derechos reservados.</span>
-            </div>
-            <div class="flex space-x-6">
-                <a href="#" class="hover:text-slate-800 transition">Aviso Legal</a>
-                <a href="#" class="hover:text-slate-800 transition">Privacidad</a>
-                <a href="#" class="hover:text-slate-800 transition">Contacto</a>
-                <a href="#" class="hover:text-slate-800 transition">Términos</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Scripts Base -->
     <script>
-        function toggleDropdown(id) {
-            const dropdown = document.getElementById(id);
-            // Cierra otros dropdowns
-            document.querySelectorAll('[id^="dropdown-"]').forEach(el => {
-                if(el.id !== id) el.classList.add('hidden');
-            });
-            dropdown.classList.toggle('hidden');
+        function openSidebar() {
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.remove('hidden');
         }
-
-        // Alternar menú móvil
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobile-menu');
-            if (menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-            } else {
-                menu.classList.add('hidden');
-            }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.add('hidden');
         }
-
-        // Cerrar dropdowns si se hace clic fuera
-        window.addEventListener('click', function(e) {
-            if (!e.target.closest('.relative')) {
-                document.querySelectorAll('[id^="dropdown-"]').forEach(el => {
-                    el.classList.add('hidden');
-                });
-            }
-        });
+        function mostrarToast(msg, tipo='info') {
+            const c={success:'bg-emerald-600',warning:'bg-amber-500',error:'bg-red-600',info:'bg-[#002b75]'};
+            const t=document.getElementById('toast-container');
+            const el=document.createElement('div');
+            el.className=`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-white text-sm font-medium ${c[tipo]||c.info} transform translate-y-4 opacity-0 transition-all duration-300`;
+            el.textContent=msg; t.appendChild(el);
+            requestAnimationFrame(()=>el.classList.remove('translate-y-4','opacity-0'));
+            setTimeout(()=>{el.classList.add('opacity-0','translate-y-4');setTimeout(()=>el.remove(),300);},3500);
+        }
     </script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -26,47 +26,17 @@ class RegistroView(SuccessMessageMixin, CreateView):
         return super().dispatch(request, *args, **kwargs)
 
 class CustomLoginView(LoginView):
-    """
-    Login con soporte de sesiones separadas por rol.
-    Permite tener activos simultáneamente un Cliente y un Técnico en pestañas distintas.
-    La sesión expira automáticamente al cerrar la pestaña/navegador (SESSION_EXPIRE_AT_BROWSER_CLOSE=True).
-    Si el usuario marca "Recordarme", la sesión persiste.
-    """
     form_class = CustomLoginForm
     template_name = 'turnos/auth/login.html'
-    redirect_authenticated_user = False  # Desactivamos la redirección automática para manejarla nosotros
-
-    def dispatch(self, request, *args, **kwargs):
-        role_context = request.POST.get('role_context') or request.GET.get('role_context', 'cliente')
-
-        # Si el usuario ya está autenticado en esta cookie de sesión concreta,
-        # redirigir directamente a su dashboard
-        if request.user.is_authenticated:
-            rol = request.user.rol
-            # Si el rol activo en esta sesión coincide con el solicitado, redirigir
-            if role_context == 'tecnico' and rol == Usuario.Rol.TECNICO:
-                return redirect('dashboard_tecnico')
-            elif role_context == 'cliente' and rol in [Usuario.Rol.CLIENTE, Usuario.Rol.RECEPCIONISTA]:
-                return redirect('cliente_inicio')
-            elif role_context == 'admin' and rol == Usuario.Rol.ADMINISTRADOR:
-                return redirect('admin_dashboard')
-            # Si hay una sesión activa con distinto rol, permitir continuar para iniciar otra sesión
-
-        return super().dispatch(request, *args, **kwargs)
+    redirect_authenticated_user = False
 
     def get_success_url(self):
+        # Siempre redirigir a home, ignorar ?next=
         return reverse_lazy('home')
 
     def form_valid(self, form):
-        """
-        Manejar 'Recordarme' y redirigir DIRECTAMENTE al dashboard del rol.
-        Saltamos la ruta neutra '/' para que el middleware encuentre la cookie correcta
-        en la redirección (la misma cookie guardada durante el POST del login).
-        """
         user = form.get_user()
         remember_me = self.request.POST.get('remember')
-
-        # Configurar duración de la sesión según "Recordarme"
         if remember_me:
             self.request.session.set_expiry(60 * 60 * 24 * 14)
         else:
@@ -74,13 +44,17 @@ class CustomLoginView(LoginView):
 
         auth_login(self.request, user)
 
-        # Redirigir directamente al portal correcto según el rol del usuario
+        print(f"[LOGIN] Usuario: {user.correo} | Rol: {user.rol} | Activo: {user.is_active}")
+
         rol = user.rol
         if rol == Usuario.Rol.ADMINISTRADOR:
+            print("[LOGIN] Redirigiendo a admin_dashboard")
             return redirect('admin_dashboard')
         elif rol == Usuario.Rol.TECNICO:
+            print("[LOGIN] Redirigiendo a dashboard_tecnico")
             return redirect('dashboard_tecnico')
         else:
+            print("[LOGIN] Redirigiendo a cliente_inicio")
             return redirect('cliente_inicio')
 
     def form_invalid(self, form):
@@ -100,6 +74,11 @@ def home(request):
         return redirect('admin_dashboard')
     elif rol == Usuario.Rol.TECNICO:
         return redirect('dashboard_tecnico')
-    else:
+    elif rol == Usuario.Rol.CLIENTE:
         return redirect('cliente_inicio')
+    else:
+        # Rol no reconocido — evita el bucle, va al login con mensaje
+        from django.contrib.auth import logout
+        logout(request)
+        return redirect('login')
 

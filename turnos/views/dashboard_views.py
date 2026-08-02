@@ -1,14 +1,74 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Count
+from datetime import date, timedelta
+import calendar
 
-from ..models import Cita, Usuario, Repuesto
+from ..models import Cita, Usuario, Repuesto, Servicio, Especialidad
 from ..forms import EditarPerfilForm
 
+
+# ─────────────────────────────────────────────
+#  DASHBOARD ADMINISTRADOR
+# ─────────────────────────────────────────────
 @login_required
 def admin_dashboard(request):
-    """Dashboard del administrador."""
-    return render(request, 'turnos/administracion/admin_dashboard.html')
+    """Dashboard principal del administrador con métricas reales."""
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return redirect('home')
+
+    hoy = date.today()
+
+    # ── KPIs ──
+    total_citas     = Cita.objects.filter(fecha__year=hoy.year, fecha__month=hoy.month).count()
+    total_tecnicos  = Usuario.objects.filter(rol=Usuario.Rol.TECNICO, activo=True).count()
+    total_usuarios  = Usuario.objects.filter(activo=True).count()
+    total_servicios = Servicio.objects.filter(activo=True).count()
+
+    # Citas de hoy
+    citas_hoy = Cita.objects.filter(fecha=hoy).count()
+
+    # ── Actividad reciente (últimas 6 citas) ──
+    actividad_reciente = (
+        Cita.objects
+        .select_related('cliente', 'servicio', 'estado', 'tecnico')
+        .order_by('-fecha_creacion')[:6]
+    )
+
+    # ── Repuestos con stock bajo (menos de 3 unidades) ──
+    stock_bajo = Repuesto.objects.filter(activo=True, stock__lt=3).order_by('stock')[:3]
+
+    # ── Tendencias por día de la semana (semana actual) ──
+    inicio_semana = hoy - timedelta(days=hoy.weekday())  # lunes
+    tendencias = []
+    dias_label = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+    for i in range(7):
+        dia = inicio_semana + timedelta(days=i)
+        total_dia = Cita.objects.filter(fecha=dia).count()
+        finalizadas_dia = Cita.objects.filter(fecha=dia, estado__nombre__iexact='Finalizada').count()
+        tendencias.append({
+            'label': dias_label[i],
+            'total': total_dia,
+            'finalizadas': finalizadas_dia,
+            'es_hoy': dia == hoy,
+        })
+
+    # Máximo para calcular porcentajes de las barras
+    max_tendencia = max((t['total'] for t in tendencias), default=1) or 1
+
+    context = {
+        'total_citas':        total_citas,
+        'total_tecnicos':     total_tecnicos,
+        'total_usuarios':     total_usuarios,
+        'total_servicios':    total_servicios,
+        'citas_hoy':          citas_hoy,
+        'actividad_reciente': actividad_reciente,
+        'stock_bajo':         stock_bajo,
+        'tendencias':         tendencias,
+        'max_tendencia':      max_tendencia,
+    }
+    return render(request, 'turnos/administracion/admin_dashboard.html', context)
 
 @login_required
 def dashboard_tecnico(request):
@@ -547,3 +607,201 @@ def agregar_repuesto(request):
             messages.error(request, f'Error al agregar repuesto: {str(e)}')
 
     return redirect('tecnico_dispositivos')
+
+
+# ─────────────────────────────────────────────
+#  GESTIÓN DE USUARIOS (ADMIN)
+# ─────────────────────────────────────────────
+@login_required
+def admin_usuarios(request):
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return redirect('home')
+    usuarios = Usuario.objects.all().order_by('-fecha_registro')
+    return render(request, 'turnos/administracion/admin_usuarios.html', {'usuarios': usuarios})
+
+
+@login_required
+def admin_crear_usuario(request):
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return redirect('home')
+    if request.method == 'POST':
+        nombre   = request.POST.get('nombre_completo', '').strip()
+        correo   = request.POST.get('correo', '').strip()
+        telefono = request.POST.get('telefono', '').strip()
+        rol      = request.POST.get('rol', Usuario.Rol.CLIENTE)
+        password = request.POST.get('password', '')
+        if not nombre or not correo or not password:
+            messages.error(request, 'Nombre, correo y contraseña son obligatorios.')
+        elif Usuario.objects.filter(correo=correo).exists():
+            messages.error(request, f'Ya existe un usuario con el correo {correo}.')
+        else:
+            try:
+                Usuario.objects.create_user(correo=correo, password=password,
+                    nombre_completo=nombre, telefono=telefono or None, rol=rol)
+                messages.success(request, f'Usuario "{nombre}" creado correctamente.')
+            except Exception as e:
+                messages.error(request, f'Error: {e}')
+    return redirect('admin_usuarios')
+
+
+@login_required
+def admin_editar_usuario(request, usuario_id):
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return redirect('home')
+    usuario = get_object_or_404(Usuario, pk=usuario_id)
+    if request.method == 'POST':
+        usuario.nombre_completo = request.POST.get('nombre_completo', usuario.nombre_completo).strip()
+        usuario.correo          = request.POST.get('correo', usuario.correo).strip()
+        usuario.telefono        = request.POST.get('telefono', '').strip() or None
+        usuario.rol             = request.POST.get('rol', usuario.rol)
+        try:
+            usuario.save()
+            messages.success(request, f'Usuario "{usuario.nombre_completo}" actualizado.')
+        except Exception as e:
+            messages.error(request, f'Error: {e}')
+    return redirect('admin_usuarios')
+
+
+@login_required
+def admin_toggle_usuario(request, usuario_id):
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return redirect('home')
+    usuario = get_object_or_404(Usuario, pk=usuario_id)
+    if request.method == 'POST':
+        if usuario.pk == request.user.pk:
+            messages.error(request, 'No puedes desactivar tu propia cuenta.')
+        else:
+            usuario.activo = not usuario.activo
+            usuario.save()
+            messages.success(request, f'Usuario "{usuario.nombre_completo}" {"activado" if usuario.activo else "desactivado"}.')
+    return redirect('admin_usuarios')
+
+
+# ─────────────────────────────────────────────
+#  CATÁLOGO DE SERVICIOS (ADMIN)
+# ─────────────────────────────────────────────
+@login_required
+def admin_servicios(request):
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return redirect('home')
+    servicios      = Servicio.objects.select_related('especialidad').order_by('tipo_dispositivo', 'nombre')
+    especialidades = Especialidad.objects.filter(activo=True).order_by('nombre')
+    return render(request, 'turnos/administracion/admin_servicios.html',
+                  {'servicios': servicios, 'especialidades': especialidades})
+
+
+@login_required
+def admin_crear_servicio(request):
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return redirect('home')
+    if request.method == 'POST':
+        nombre   = request.POST.get('nombre', '').strip()
+        desc     = request.POST.get('descripcion', '').strip()
+        tipo     = request.POST.get('tipo_dispositivo', 'CELULAR')
+        duracion = int(request.POST.get('duracion_minutos', 60))
+        buffer   = int(request.POST.get('buffer_minutos', 0))
+        esp_id   = request.POST.get('especialidad_id')
+        if not nombre:
+            messages.error(request, 'El nombre es obligatorio.')
+        else:
+            try:
+                especialidad = get_object_or_404(Especialidad, pk=esp_id)
+                Servicio.objects.create(nombre=nombre, descripcion=desc or None,
+                    tipo_dispositivo=tipo, duracion_minutos=duracion,
+                    buffer_minutos=buffer, especialidad=especialidad)
+                messages.success(request, f'Servicio "{nombre}" creado.')
+            except Exception as e:
+                messages.error(request, f'Error: {e}')
+    return redirect('admin_servicios')
+
+
+@login_required
+def admin_editar_servicio(request, servicio_id):
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return redirect('home')
+    servicio = get_object_or_404(Servicio, pk=servicio_id)
+    if request.method == 'POST':
+        servicio.nombre           = request.POST.get('nombre', servicio.nombre).strip()
+        servicio.descripcion      = request.POST.get('descripcion', '').strip() or None
+        servicio.tipo_dispositivo = request.POST.get('tipo_dispositivo', servicio.tipo_dispositivo)
+        servicio.duracion_minutos = int(request.POST.get('duracion_minutos', servicio.duracion_minutos))
+        servicio.buffer_minutos   = int(request.POST.get('buffer_minutos', servicio.buffer_minutos))
+        esp_id = request.POST.get('especialidad_id')
+        if esp_id:
+            servicio.especialidad = get_object_or_404(Especialidad, pk=esp_id)
+        try:
+            servicio.save()
+            messages.success(request, f'Servicio "{servicio.nombre}" actualizado.')
+        except Exception as e:
+            messages.error(request, f'Error: {e}')
+    return redirect('admin_servicios')
+
+
+@login_required
+def admin_toggle_servicio(request, servicio_id):
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return redirect('home')
+    servicio = get_object_or_404(Servicio, pk=servicio_id)
+    if request.method == 'POST':
+        servicio.activo = not servicio.activo
+        servicio.save()
+        messages.success(request, f'Servicio "{servicio.nombre}" {"activado" if servicio.activo else "desactivado"}.')
+    return redirect('admin_servicios')
+
+
+# ─────────────────────────────────────────────
+#  CITAS (ADMIN)
+# ─────────────────────────────────────────────
+@login_required
+def admin_citas(request):
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return redirect('home')
+    citas = Cita.objects.select_related('cliente', 'tecnico', 'servicio', 'estado').order_by('-fecha', '-hora_inicio')
+    return render(request, 'turnos/administracion/admin_citas.html',
+                  {'citas': citas, 'total_citas': citas.count()})
+
+
+# ─────────────────────────────────────────────
+#  REPORTES (ADMIN)
+# ─────────────────────────────────────────────
+@login_required
+def admin_reportes(request):
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return redirect('home')
+    hoy = date.today()
+    citas_mes_qs = Cita.objects.filter(fecha__year=hoy.year, fecha__month=hoy.month)
+    total       = citas_mes_qs.count()
+    finalizadas = citas_mes_qs.filter(estado__nombre__iexact='Finalizada').count()
+    canceladas  = citas_mes_qs.filter(estado__nombre__iexact='Cancelada').count()
+    tasa_exito  = round(finalizadas / total * 100, 1) if total > 0 else 0
+
+    servicios_populares = (Cita.objects
+        .filter(fecha__year=hoy.year, fecha__month=hoy.month)
+        .values('servicio__nombre').annotate(total=Count('id')).order_by('-total')[:5])
+
+    tecnicos_top = (Cita.objects
+        .filter(fecha__year=hoy.year, fecha__month=hoy.month, tecnico__isnull=False)
+        .values('tecnico__nombre_completo').annotate(total=Count('id')).order_by('-total')[:5])
+
+    MESES_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+    citas_por_mes = []
+    max_val = 1
+    for i in range(5, -1, -1):
+        primer_dia = date(hoy.year, hoy.month, 1)
+        mes_obj = primer_dia
+        for _ in range(i):
+            mes_obj = (mes_obj.replace(day=1) - timedelta(days=1)).replace(day=1)
+        ultimo = calendar.monthrange(mes_obj.year, mes_obj.month)[1]
+        cnt = Cita.objects.filter(fecha__gte=mes_obj, fecha__lte=mes_obj.replace(day=ultimo)).count()
+        citas_por_mes.append({'mes_label': MESES_ES[mes_obj.month - 1], 'total': cnt})
+        if cnt > max_val:
+            max_val = cnt
+
+    context = {
+        'reporte': {'total': total, 'finalizadas': finalizadas, 'canceladas': canceladas, 'tasa_exito': tasa_exito},
+        'servicios_populares': servicios_populares,
+        'tecnicos_top':        tecnicos_top,
+        'citas_por_mes':       citas_por_mes,
+        'citas_por_mes_max':   max_val,
+    }
+    return render(request, 'turnos/administracion/admin_reportes.html', context)

@@ -1,410 +1,329 @@
 {% extends 'turnos/cliente/cliente_base.html' %}
+{% load static %}
 
 {% block title %}Inicio - ServiTech{% endblock %}
 
 {% block page_header %}
-<!-- ══════════════════════════════════════════════
-     HEADER DE SECCIÓN: INICIO
-══════════════════════════════════════════════ -->
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-    <div class="flex flex-wrap items-center gap-3">
-        <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">
-            Hola, {{ request.user.nombre_completo|default:"Cliente" }}
-        </h1>
-        <div class="h-5 w-px bg-slate-300 hidden md:block"></div>
-        <p class="text-slate-500 font-medium text-sm md:text-base">Bienvenido de nuevo. Tienes una actualización en tu reparación actual.</p>
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+    <div>
+        <div class="flex items-center gap-3 flex-wrap">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">
+                Hola, {{ request.user.nombre_completo|default:"Cliente"|truncatewords:2 }}
+            </h1>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                EN LÍNEA
+            </span>
+        </div>
+        <p class="text-slate-500 text-sm mt-1">Bienvenido de nuevo. Tienes una actualización en tu reparación actual.</p>
     </div>
-    <div class="flex items-center gap-3 flex-shrink-0">
-        <!-- Badge Online -->
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Online
-        </span>
-        <!-- Botón Agendar Cita -->
-        <a href="{% url 'seleccionar_dispositivo' %}"
-           class="flex items-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2 px-4 rounded-xl transition-all shadow text-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Agendar Cita
-        </a>
-    </div>
+    <a href="{% url 'seleccionar_dispositivo' %}"
+       class="flex items-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 px-5 rounded-xl transition shadow text-sm flex-shrink-0 w-fit">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+        </svg>
+        Agendar Cita
+    </a>
 </div>
-{% endblock page_header %}
+{% endblock %}
 
 {% block content %}
 
-<!-- Acciones Rápidas removidas a petición del usuario -->
+<!-- GRID PRINCIPAL: Columna izquierda (2/3) + Columna derecha (1/3) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-<!-- KPIs / Tarjetas Resumen -->
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
-    <!-- Citas activas -->
-    <div class="bg-white rounded-[2rem] border border-slate-100 p-5 md:p-8 shadow-sm">
-        <div class="w-12 h-12 rounded-2xl bg-[#eef2ff] flex items-center justify-center text-[#002b75] mb-4">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-        </div>
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">CITAS ACTIVAS</p>
-        <p class="text-4xl font-extrabold text-[#002b75] leading-none">{{ total_citas_activas }}</p>
-    </div>
+    <!-- ══ COLUMNA IZQUIERDA ══ -->
+    <div class="lg:col-span-2 space-y-5">
 
-    <!-- Reparaciones -->
-    <div class="bg-white rounded-[2rem] border border-slate-100 p-5 md:p-8 shadow-sm">
-        <div class="w-12 h-12 rounded-2xl bg-[#f0fdf4] flex items-center justify-center text-[#0d7348] mb-4">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-        </div>
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">REPARACIONES</p>
-        <p class="text-4xl font-extrabold text-[#002b75] leading-none">{{ total_reparaciones }}</p>
-    </div>
+        <!-- KPIs -->
+        <div class="grid grid-cols-3 gap-4">
 
-    <!-- Puntos ServiTech -->
-    <div class="bg-white rounded-[2rem] border border-slate-100 p-5 md:p-8 shadow-sm">
-        <div class="w-12 h-12 rounded-2xl bg-[#eef2ff] flex items-center justify-center text-[#002b75] mb-4">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-            </svg>
-        </div>
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">SERVITECH PTS</p>
-        <p class="text-4xl font-extrabold text-[#002b75] leading-none">850</p>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-8">
-    
-    <!-- Columna Izquierda: Estado de Citas -->
-    <div class="lg:col-span-2">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-extrabold text-slate-800">Estado de Citas</h2>
-            <button onclick="toggleCitas()" id="btn-todas-citas" class="text-sm font-bold text-[#002b75] hover:underline focus:outline-none">Ver todas</button>
-        </div>
-
-        <div class="space-y-4" id="contenedor-citas">
-            {% for cita in citas_recientes %}
-            <!-- Tarjeta Cita -->
-            <a href="{% url 'detalle_cita' cita.pk %}" class="cita-item {% if forloop.counter > 3 %}hidden{% endif %} bg-white border border-slate-200 rounded-2xl p-4 md:p-5 flex items-center justify-between hover:border-[#002b75] hover:shadow-md transition-all group cursor-pointer block">
-                <div class="flex items-center gap-3 md:gap-5 min-w-0">
-                    <!-- Icono / Imagen placeholder -->
-                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0 border border-slate-200 overflow-hidden">
-                        {% if 'Celular' in cita.servicio.nombre or 'Pantalla' in cita.servicio.nombre %}
-                            <img src="https://images.unsplash.com/photo-1512428559087-560fa5ceab42?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Celular" class="w-full h-full object-cover">
-                        {% elif 'Laptop' in cita.servicio.nombre or 'Teclado' in cita.servicio.nombre %}
-                            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Laptop" class="w-full h-full object-cover">
-                        {% elif 'PC' in cita.servicio.nombre or 'Escritorio' in cita.servicio.nombre %}
-                            <img src="https://images.unsplash.com/photo-1555680202-c86f0e12f086?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="PC" class="w-full h-full object-cover">
-                        {% elif 'Consola' in cita.servicio.nombre or 'Mando' in cita.servicio.nombre %}
-                            <img src="https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Consola" class="w-full h-full object-cover">
-                        {% else %}
-                            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Servicio" class="w-full h-full object-cover">
-                        {% endif %}
-                    </div>
-                    
-                    <div>
-                        <div class="flex items-center gap-3 mb-1">
-                            <!-- Badge de estado (similar al mockup) -->
-                            {% if cita.estado.nombre == 'Confirmada' %}
-                                <span class="bg-[#d0dbf6] text-[#002b75] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">CONFIRMADA</span>
-                            {% elif cita.estado.nombre == 'Diagnóstico' %}
-                                <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">EN DIAGNÓSTICO</span>
-                            {% elif cita.estado.nombre == 'Finalizada' %}
-                                <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">LISTA PARA ENTREGA</span>
-                            {% else %}
-                                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">PENDIENTE</span>
-                            {% endif %}
-                            
-                            <span class="text-xs text-slate-400 font-medium">ID: #ST-{{ cita.pk|stringformat:"04d" }}</span>
-                        </div>
-                        
-                        <!-- Extraer dispositivo -->
-                        {% if cita.observaciones and 'Dispositivo: ' in cita.observaciones %}
-                            <h3 class="font-extrabold text-slate-800 text-lg">{{ cita.observaciones|cut:"Dispositivo: " }} - {{ cita.servicio.nombre }}</h3>
-                        {% else %}
-                            <h3 class="font-extrabold text-slate-800 text-lg">{{ cita.servicio.tipo_dispositivo.title }} - {{ cita.servicio.nombre }}</h3>
-                        {% endif %}
-                        
-                        <div class="flex items-center gap-1.5 mt-1 text-sm text-slate-500 font-medium">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span>
-                                {% if cita.estado.nombre == 'Finalizada' %}
-                                Reparación finalizada con éxito • Listo para recoger
-                                {% else %}
-                                Cita programada para: {{ cita.fecha|date:"j M" }}, {{ cita.hora_inicio|time:"g:i A" }}
-                                {% endif %}
-                            </span>
-                        </div>
-                    </div>
+            <!-- Citas Activas -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <div class="w-10 h-10 rounded-xl bg-[#eef2ff] flex items-center justify-center text-[#002b75] mb-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
                 </div>
-                <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-[#002b75] group-hover:text-white transition-colors flex-shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </div>
-            </a>
-            {% empty %}
-            <div class="bg-white border border-slate-200 rounded-2xl p-10 text-center text-slate-500">
-                No tienes citas activas ni historial de reparaciones.
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Citas Activas</p>
+                <p class="text-4xl font-extrabold text-[#002b75]">{{ total_citas_activas }}</p>
             </div>
-            {% endfor %}
-        </div>
-    </div>
 
-    <!-- Columna Derecha: Mis Dispositivos & Banner -->
-    <div class="space-y-6">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-extrabold text-slate-800">Mis Dispositivos</h2>
-            <button onclick="openModal('modal-dispositivo')" class="text-slate-400 hover:text-[#002b75] transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+            <!-- Reparaciones -->
+            <div class="bg-white rounded-2xl border border-emerald-200 p-5 shadow-sm">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 mb-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </div>
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Reparaciones</p>
+                <p class="text-4xl font-extrabold text-[#002b75]">{{ total_reparaciones }}</p>
+            </div>
+
+            <!-- ServiTech PTS -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500 mb-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                    </svg>
+                </div>
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">ServiTech PTS</p>
+                <p class="text-4xl font-extrabold text-[#002b75]">850</p>
+            </div>
+        </div>
+
+        <!-- Estado de Citas -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-slate-800">Estado de Citas</h2>
+                <button onclick="toggleCitas()" id="btn-ver-todas"
+                        class="text-xs font-bold text-[#002b75] hover:underline">Ver todas</button>
+            </div>
+
+            <div id="contenedor-citas" class="space-y-3">
+                {% for cita in citas_recientes %}
+                <a href="{% url 'detalle_cita' cita.pk %}"
+                   class="cita-item {% if forloop.counter > 3 %}hidden{% endif %} flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-[#002b75] hover:shadow-sm transition-all group">
+
+                    <!-- Imagen dispositivo -->
+                    <div class="w-16 h-16 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0 border border-slate-200">
+                        {% if 'Celular' in cita.observaciones|default:'' or 'CELULAR' in cita.servicio.tipo_dispositivo %}
+                        <img src="https://images.unsplash.com/photo-1512428559087-560fa5ceab42?w=150&q=80" alt="Celular" class="w-full h-full object-cover">
+                        {% elif 'LAPTOP' in cita.servicio.tipo_dispositivo %}
+                        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=150&q=80" alt="Laptop" class="w-full h-full object-cover">
+                        {% else %}
+                        <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=150&q=80" alt="Servicio" class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+
+                    <!-- Info -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap mb-1">
+                            {% if cita.estado.nombre == 'Confirmada' %}
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">CONFIRMADA</span>
+                            {% elif cita.estado.nombre == 'Finalizada' %}
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">FINALIZADA</span>
+                            {% elif cita.estado.nombre == 'Cancelada' %}
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700">CANCELADA</span>
+                            {% else %}
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">{{ cita.estado.nombre|upper }}</span>
+                            {% endif %}
+                            <span class="text-xs text-slate-400">ID: #ST-{{ cita.pk|stringformat:"04d" }}</span>
+                        </div>
+                        <p class="font-bold text-slate-800 text-sm truncate">
+                            {{ cita.servicio.get_tipo_dispositivo_display }} - {{ cita.servicio.nombre }}
+                        </p>
+                        <div class="flex items-center gap-1.5 mt-1 text-xs text-slate-500">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Cita programada para: {{ cita.fecha|date:"d M" }}, {{ cita.hora_inicio|time:"g:i A" }}
+                        </div>
+                    </div>
+
+                    <!-- Flecha -->
+                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-[#002b75] group-hover:text-white transition flex-shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="text-center py-10 text-slate-400">
+                    <svg class="w-10 h-10 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <p class="text-sm">No tienes citas registradas.</p>
+                    <a href="{% url 'seleccionar_dispositivo' %}" class="text-[#002b75] font-bold text-sm hover:underline mt-1 inline-block">
+                        + Agendar tu primera cita
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Banner Nivel Platinum -->
+        <div class="relative bg-gradient-to-r from-[#001a4d] to-[#003399] rounded-2xl overflow-hidden p-6 flex flex-col sm:flex-row items-center justify-between gap-5 shadow-sm">
+            <div class="absolute inset-0 opacity-10 pointer-events-none"
+                 style="background: radial-gradient(circle at 80% 50%, #fff 0%, transparent 50%)"></div>
+            <div class="relative z-10 flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0 border border-white/20">
+                    <svg class="w-5 h-5 text-amber-300" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-white font-extrabold text-base">Nivel Platinum</p>
+                    <p class="text-blue-200 text-sm mt-0.5">Te faltan 150 puntos para tu próximo servicio gratuito. Mantén tu equipo en óptimas condiciones.</p>
+                    <!-- Barra de progreso -->
+                    <div class="mt-3 flex items-center gap-3">
+                        <span class="text-blue-300 text-xs font-semibold">850 PTS</span>
+                        <div class="flex-1 h-2 bg-white/20 rounded-full overflow-hidden" style="min-width:120px;">
+                            <div class="h-2 bg-emerald-400 rounded-full" style="width: 85%"></div>
+                        </div>
+                        <span class="text-blue-300 text-xs font-semibold">1000 PTS</span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="abrirBeneficios()"
+                    class="relative z-10 bg-white text-[#002b75] font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-blue-50 transition shadow flex-shrink-0 whitespace-nowrap">
+                Ver Beneficios
             </button>
         </div>
+    </div>
 
-        <div id="lista-dispositivos" class="space-y-6">
-            <!-- Dispositivo 1 -->
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 relative">
-                <span class="absolute top-4 right-4 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">DISPONIBLE</span>
-                <div class="w-10 h-10 rounded-lg bg-[#eef2ff] text-[#002b75] flex items-center justify-center mb-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                </div>
-                <h3 class="font-extrabold text-slate-800 text-base">MacBook Pro M2</h3>
-                <p class="text-xs text-slate-500 mb-6">Apple • 2023</p>
-                <div class="flex items-center justify-between border-t border-slate-100 pt-3">
-                    <span class="text-xs text-slate-500">Último servicio: Jul 2024</span>
-                    <a href="javascript:void(0)" onclick="openModal('modal-detalles-dispositivo')" class="text-xs font-bold text-[#002b75] hover:underline">Detalles</a>
-                </div>
+    <!-- ══ COLUMNA DERECHA ══ -->
+    <div class="space-y-5">
+
+        <!-- Mis Dispositivos -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-slate-800">Mis Dispositivos</h2>
+                <button onclick="abrirModalDispositivo()"
+                        class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-[#eef2ff] flex items-center justify-center text-slate-400 hover:text-[#002b75] transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                </button>
             </div>
-    
-            <!-- Dispositivo 2 -->
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 relative">
-                <span class="absolute top-4 right-4 bg-[#eef2ff] text-[#002b75] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">EN TALLER</span>
-                <div class="w-10 h-10 rounded-lg bg-[#eef2ff] text-[#002b75] flex items-center justify-center mb-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+
+            <div class="space-y-3" id="lista-dispositivos">
+
+                <!-- Dispositivo 1 -->
+                <div class="border border-slate-200 rounded-xl p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-9 h-9 rounded-lg bg-[#eef2ff] flex items-center justify-center text-[#002b75]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">DISPONIBLE</span>
+                    </div>
+                    <p class="font-bold text-slate-800 text-sm">MacBook Pro M2</p>
+                    <p class="text-xs text-slate-400 mb-3">Apple • 2023</p>
+                    <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+                        <span class="text-xs text-slate-400">Último servicio: Jul 2024</span>
+                        <button class="text-xs font-bold text-[#002b75] hover:underline">Detalles</button>
+                    </div>
                 </div>
-                <h3 class="font-extrabold text-slate-800 text-base">iPhone 14 Pro</h3>
-                <p class="text-xs text-slate-500 mb-6">Apple • 2022</p>
-                <div class="flex items-center justify-between border-t border-slate-100 pt-3">
-                    <span class="text-xs text-slate-500">Último servicio: En curso</span>
-                    <a href="javascript:void(0)" onclick="openModal('modal-detalles-dispositivo')" class="text-xs font-bold text-[#002b75] hover:underline">Detalles</a>
+
+                <!-- Dispositivo 2 -->
+                <div class="border border-slate-200 rounded-xl p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-9 h-9 rounded-lg bg-[#eef2ff] flex items-center justify-center text-[#002b75]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">EN TALLER</span>
+                    </div>
+                    <p class="font-bold text-slate-800 text-sm">iPhone 14 Pro</p>
+                    <p class="text-xs text-slate-400 mb-3">Apple • 2022</p>
+                    <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+                        <span class="text-xs text-slate-400">Último servicio: En curso</span>
+                        <button class="text-xs font-bold text-[#002b75] hover:underline">Detalles</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Banner Platinum -->
-        <div class="bg-gradient-to-br from-[#002b75] to-[#0d1f5c] rounded-2xl p-6 text-white relative overflow-hidden mt-8 shadow-lg">
-            <div class="relative z-10">
-                <h3 class="font-extrabold text-lg mb-2">Nivel Platinum</h3>
-                <p class="text-blue-100 text-sm mb-4 max-w-[80%]">Te faltan 150 puntos para tu próximo servicio gratuito.</p>
-                <div class="w-full bg-white/20 rounded-full h-2 mb-6">
-                    <div class="bg-white h-2 rounded-full" style="width: 85%"></div>
-                </div>
-                <button onclick="openModal('modal-platinum')" class="inline-block bg-white text-[#002b75] text-xs font-bold px-4 py-2 rounded-lg hover:bg-slate-50 transition">Ver Beneficios</button>
+        <!-- Tip del Técnico -->
+        <div class="bg-[#eef2ff] rounded-2xl border border-[#c7d4f5] p-5">
+            <div class="flex items-center gap-2 mb-3">
+                <svg class="w-5 h-5 text-[#002b75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+                <p class="text-sm font-bold text-[#002b75]">Tip del Técnico</p>
             </div>
-            <svg class="absolute -bottom-6 -right-6 w-32 h-32 text-white opacity-10" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-            </svg>
+            <p class="text-xs text-slate-600 leading-relaxed">
+                ¿Sabías que una limpieza de hardware cada 6 meses puede extender la vida útil de tu laptop hasta un 30%? Agenda un mantenimiento preventivo.
+            </p>
         </div>
     </div>
 </div>
 
-<!-- Modal: Agregar Dispositivo -->
-<div id="modal-dispositivo" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
-    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeModal('modal-dispositivo')"></div>
-    <div class="relative bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden transform scale-95 transition-transform duration-300 modal-content p-6">
-        <h3 class="text-xl font-bold text-slate-800 mb-1">Agregar Dispositivo</h3>
-        <p class="text-xs text-slate-500 mb-6">Registra un nuevo equipo en tu cuenta.</p>
-        
+<!-- Modal Agregar Dispositivo -->
+<div id="modal-dispositivo" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarModalDispositivo()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 z-10">
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="text-lg font-bold text-slate-800">Agregar Dispositivo</h3>
+            <button onclick="cerrarModalDispositivo()" class="text-slate-400 hover:text-slate-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
         <form onsubmit="agregarDispositivo(event)" class="space-y-4">
             <div>
-                <label class="block text-xs font-bold text-slate-600 mb-1">Tipo de Dispositivo</label>
-                <select class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:border-[#002b75] focus:ring-1 focus:ring-[#002b75] outline-none" required>
+                <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Tipo</label>
+                <select class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#002b75]">
                     <option value="">Selecciona un tipo</option>
-                    <option value="celular">Celular / Smartphone</option>
                     <option value="laptop">Laptop</option>
+                    <option value="celular">Celular</option>
                     <option value="pc">PC de Escritorio</option>
-                    <option value="consola">Consola de Videojuegos</option>
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-600 mb-1">Marca</label>
-                <input type="text" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:border-[#002b75] focus:ring-1 focus:ring-[#002b75] outline-none" placeholder="Ej. Apple, Samsung, Dell" required>
+                <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Marca</label>
+                <input type="text" placeholder="Ej. Apple, Samsung"
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#002b75]">
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-600 mb-1">Modelo</label>
-                <input type="text" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:border-[#002b75] focus:ring-1 focus:ring-[#002b75] outline-none" placeholder="Ej. iPhone 14 Pro, XPS 15" required>
+                <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Modelo</label>
+                <input type="text" placeholder="Ej. MacBook Pro M2"
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#002b75]">
             </div>
-            <div class="pt-4 flex gap-3">
-                <button type="button" onclick="closeModal('modal-dispositivo')" class="flex-1 border border-slate-200 text-slate-600 font-bold py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-sm">Cancelar</button>
-                <button type="submit" class="flex-1 bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl shadow transition-colors text-sm">Guardar Dispositivo</button>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="cerrarModalDispositivo()"
+                        class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="flex-1 py-2.5 rounded-xl bg-[#002b75] text-white font-semibold text-sm hover:bg-[#001f54] transition shadow">
+                    Guardar
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Modal: Beneficios Platinum -->
-<div id="modal-platinum" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
-    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeModal('modal-platinum')"></div>
-    <div class="relative bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden transform scale-95 transition-transform duration-300 modal-content">
-        <div class="bg-[#002b75] p-6 text-center text-white relative overflow-hidden">
-            <svg class="absolute top-0 right-0 w-32 h-32 opacity-10 transform translate-x-10 -translate-y-10" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-            </svg>
-            <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3 backdrop-blur-sm relative z-10">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-            </div>
-            <h3 class="text-2xl font-extrabold relative z-10">Beneficios Platinum</h3>
-            <p class="text-blue-100 text-sm relative z-10 mt-1">¡Estás a solo 150 puntos de lograrlo!</p>
-        </div>
-        <div class="p-6">
-            <ul class="space-y-4 mb-6">
-                <li class="flex items-start gap-3">
-                    <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 text-green-600">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-bold text-slate-800">Servicio anual gratuito</p>
-                        <p class="text-xs text-slate-500">Un mantenimiento preventivo gratis al año para cualquier equipo.</p>
-                    </div>
-                </li>
-                <li class="flex items-start gap-3">
-                    <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 text-green-600">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-bold text-slate-800">Atención prioritaria</p>
-                        <p class="text-xs text-slate-500">Tus equipos se saltan la fila y son diagnosticados en < 1 hora.</p>
-                    </div>
-                </li>
-                <li class="flex items-start gap-3">
-                    <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 text-green-600">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-bold text-slate-800">15% de descuento en partes</p>
-                        <p class="text-xs text-slate-500">Ahorra en todas las refacciones originales.</p>
-                    </div>
-                </li>
-            </ul>
-            <button onclick="closeModal('modal-platinum')" class="w-full bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-3 rounded-xl shadow transition-colors text-sm">Entendido</button>
-        </div>
-    </div>
-</div>
+{% endblock %}
 
-<!-- Modal: Detalles del Dispositivo -->
-<div id="modal-detalles-dispositivo" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
-    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeModal('modal-detalles-dispositivo')"></div>
-    <div class="relative bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden transform scale-95 transition-transform duration-300 modal-content">
-        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-            <h3 class="text-xl font-bold text-slate-800">Detalles del Dispositivo</h3>
-            <button onclick="closeModal('modal-detalles-dispositivo')" class="text-slate-400 hover:text-slate-600">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-        <div class="p-6 space-y-5">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-xl bg-[#eef2ff] text-[#002b75] flex items-center justify-center">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                </div>
-                <div>
-                    <h4 class="font-extrabold text-slate-800 text-lg">MacBook Pro M2</h4>
-                    <p class="text-sm text-slate-500">Apple • Laptop</p>
-                </div>
-            </div>
-            
-            <div class="bg-slate-50 rounded-xl p-4 space-y-3">
-                <div class="flex justify-between">
-                    <span class="text-xs text-slate-500 font-bold">FECHA DE REGISTRO</span>
-                    <span class="text-xs text-slate-800 font-medium">10 de Julio, 2024</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-xs text-slate-500 font-bold">NÚMERO DE SERIE</span>
-                    <span class="text-xs text-slate-800 font-medium">C02XXXXX</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-xs text-slate-500 font-bold">ESTADO ACTUAL</span>
-                    <span class="text-xs text-green-600 font-bold bg-green-100 px-2 py-0.5 rounded-md">DISPONIBLE</span>
-                </div>
-            </div>
-
-            <div class="pt-2">
-                <button onclick="closeModal('modal-detalles-dispositivo')" class="w-full border border-slate-200 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-50 transition-colors text-sm">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
+{% block scripts %}
 <script>
-    // Mostrar todas las citas (expande la lista si hay más de 3)
+    /* Toggle citas */
     let mostrandoTodas = false;
     function toggleCitas() {
         const citas = document.querySelectorAll('.cita-item');
-        const btn = document.getElementById('btn-todas-citas');
-        
-        if (mostrandoTodas) {
-            citas.forEach((cita, index) => {
-                if (index > 2) cita.classList.add('hidden');
-            });
-            btn.textContent = 'Ver todas';
-            mostrandoTodas = false;
-        } else {
-            citas.forEach(cita => cita.classList.remove('hidden'));
-            btn.textContent = 'Ver menos';
-            mostrandoTodas = true;
-        }
+        const btn   = document.getElementById('btn-ver-todas');
+        mostrandoTodas = !mostrandoTodas;
+        citas.forEach((c, i) => { if (i >= 3) c.classList.toggle('hidden', !mostrandoTodas); });
+        btn.textContent = mostrandoTodas ? 'Ver menos' : 'Ver todas';
     }
 
-    // Modales
-    function openModal(id) {
-        const modal = document.getElementById(id);
-        const content = modal.querySelector('.modal-content');
-        
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.remove('opacity-0');
-            content.classList.remove('scale-95');
-        }, 10);
+    /* Modal dispositivo */
+    function abrirModalDispositivo() {
+        const m = document.getElementById('modal-dispositivo');
+        m.classList.remove('hidden'); m.classList.add('flex');
     }
-    
-    function closeModal(id) {
-        const modal = document.getElementById(id);
-        const content = modal.querySelector('.modal-content');
-        
-        modal.classList.add('opacity-0');
-        content.classList.add('scale-95');
-        
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 300);
+    function cerrarModalDispositivo() {
+        const m = document.getElementById('modal-dispositivo');
+        m.classList.add('hidden'); m.classList.remove('flex');
     }
-    
-    // Función para agregar un nuevo dispositivo a la lista
-    function agregarDispositivo(event) {
-        event.preventDefault();
-        const form = event.target;
-        const select = form.querySelector('select');
-        const tipo = select.options[select.selectedIndex].text;
-        const marca = form.querySelectorAll('input')[0].value;
-        const modelo = form.querySelectorAll('input')[1].value;
-        
-        const lista = document.getElementById('lista-dispositivos');
-        const div = document.createElement('div');
-        div.className = 'bg-white border border-slate-200 rounded-2xl p-5 relative shadow-sm border-l-4 border-l-green-500 transform transition-all';
-        div.innerHTML = `
-            <span class="absolute top-4 right-4 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">NUEVO</span>
-            <div class="w-10 h-10 rounded-lg bg-[#eef2ff] text-[#002b75] flex items-center justify-center mb-4">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-            </div>
-            <h3 class="font-extrabold text-slate-800 text-base">${marca} ${modelo}</h3>
-            <p class="text-xs text-slate-500 mb-6">${tipo} • Hoy</p>
-            <div class="flex items-center justify-between border-t border-slate-100 pt-3">
-                <span class="text-xs text-slate-500">Último servicio: Ninguno</span>
-                <a href="javascript:void(0)" onclick="openModal('modal-detalles-dispositivo')" class="text-xs font-bold text-[#002b75] hover:underline">Detalles</a>
-            </div>
-        `;
-        
-        // Insertarlo al inicio de la lista
-        lista.insertBefore(div, lista.firstChild);
-        
-        // Cerrar modal y limpiar
-        closeModal('modal-dispositivo');
-        form.reset();
+    function agregarDispositivo(e) {
+        e.preventDefault();
+        cerrarModalDispositivo();
+        mostrarToast('✅ Dispositivo agregado correctamente', 'success');
+    }
+
+    /* Modal beneficios */
+    function abrirBeneficios() {
+        mostrarToast('⭐ Beneficios Platinum: servicio gratuito anual, atención prioritaria y 15% descuento en partes.', 'info');
     }
 </script>
 {% endblock %}
