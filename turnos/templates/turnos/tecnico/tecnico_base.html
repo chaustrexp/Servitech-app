@@ -21,7 +21,7 @@
         .modal-backdrop { backdrop-filter: blur(4px); }
     </style>
 </head>
-<body class="bg-[#f0f4f8] min-h-screen flex">
+<body class="bg-[#f0f4f8] min-h-screen flex overflow-x-hidden">
 
     <!-- OVERLAY MÓVIL -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
@@ -118,6 +118,16 @@
                 </svg>
                 Soporte
             </a>
+
+            <a href="{% url 'tecnico_perfil' %}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all
+                      {% if request.resolver_match.url_name == 'tecnico_perfil' %}nav-item-active{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                Mi Perfil
+            </a>
         </nav>
 
         <!-- Acciones inferiores -->
@@ -129,9 +139,6 @@
                 </svg>
                 Nuevo Servicio
             </button>
-
-            <button id="btn-pausar" onclick="togglePausarTurno()"
-                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all">
 
             <!-- Exportar Reporte -->
             <button onclick="abrirModalReporte()"
@@ -183,7 +190,7 @@
             <div class="w-8"></div>
         </div>
 
-        <main class="flex-1 p-6 md:p-8">
+        <main class="flex-1 p-4 md:p-6 lg:p-8">
             {% block page_header %}{% endblock %}
             {% block content %}{% endblock %}
         </main>
@@ -267,8 +274,7 @@
             <div class="flex items-center justify-between mb-5">
                 <div>
                     <h3 class="text-lg font-bold text-slate-800">Exportar Reporte Mensual</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Descarga tu resumen de servicios en CSV</p>
-                </div>
+                    <p class="text-xs text-slate-400 mt-0.5">Visualiza e imprime tu resumen como PDF</p>                </div>
                 <button onclick="cerrarModalReporte()" class="text-slate-400 hover:text-slate-700 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -285,8 +291,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-sm font-extrabold text-[#002b75]">Reporte de Servicios</p>
-                    <p class="text-xs text-slate-500 mt-0.5">Incluye citas, estados, clientes y métricas del mes seleccionado.</p>
+                    <p class="text-sm font-extrabold text-[#002b75]">Reporte de Servicios (.xlsx)</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Se descarga como Excel — compatible con Excel, Google Sheets y LibreOffice.</p>
                 </div>
             </div>
 
@@ -326,13 +332,13 @@
                         <svg class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                         </svg>
-                        Resumen ejecutivo (totales y tasa de completado)
+                        KPIs del mes con barra de progreso
                     </li>
                     <li class="flex items-center gap-2 text-xs text-slate-600">
                         <svg class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                         </svg>
-                        Detalle de cada cita (fecha, cliente, servicio, estado)
+                        Tabla detallada con estados en color
                     </li>
                     <li class="flex items-center gap-2 text-xs text-slate-600">
                         <svg class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -344,7 +350,7 @@
                         <svg class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                         </svg>
-                        Compatible con Excel y Google Sheets
+                        Guardable como PDF desde el navegador
                     </li>
                 </ul>
             </div>
@@ -359,9 +365,9 @@
                         class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-bold text-sm transition shadow flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                     </svg>
-                    Descargar CSV
+                    Ver Reporte
                 </button>
             </div>
 
@@ -432,6 +438,7 @@
             const estadoSb = document.getElementById('texto-estado-sidebar');
             const toggleHdr= document.getElementById('toggle-disponible');
             const textoHdr = document.getElementById('texto-estado-header');
+            const modalPausa = document.getElementById('modal-pausa-turno');
 
             if (turnoPausado) {
                 texto.textContent = 'Reanudar Turno';
@@ -442,6 +449,13 @@
                 if (toggleHdr) toggleHdr.checked = false;
                 if (textoHdr) { textoHdr.textContent = 'En Pausa'; textoHdr.className = 'text-sm font-semibold text-amber-600'; }
                 iconEl.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+                
+                // Mostrar el modal de bloqueo por pausa
+                if (modalPausa) {
+                    modalPausa.classList.remove('hidden');
+                    modalPausa.classList.add('flex');
+                }
+                
                 mostrarToast('⏸️ Turno pausado', 'warning');
             } else {
                 texto.textContent = 'Pausar Turno';
@@ -452,6 +466,13 @@
                 if (toggleHdr) toggleHdr.checked = true;
                 if (textoHdr) { textoHdr.textContent = 'Disponible'; textoHdr.className = 'text-sm font-semibold text-green-600'; }
                 iconEl.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+                
+                // Ocultar el modal de bloqueo por pausa
+                if (modalPausa) {
+                    modalPausa.classList.add('hidden');
+                    modalPausa.classList.remove('flex');
+                }
+                
                 mostrarToast('✅ Turno reanudado', 'success');
             }
         }
@@ -519,16 +540,12 @@
             const mes  = document.getElementById('reporte-mes').value;
             const anio = document.getElementById('reporte-anio').value;
             const url  = `/tecnico/reporte/?mes=${mes}&anio=${anio}`;
-            // Disparar descarga sin navegar
-            const a = document.createElement('a');
-            a.href = url; a.download = ''; a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            // Abrir en pestaña nueva para ver/imprimir/guardar como PDF
+            window.open(url, '_blank');
             cerrarModalReporte();
             const meses = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
                            'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-            mostrarToast(`📥 Descargando reporte de ${meses[mes]} ${anio}...`, 'success');
+            mostrarToast(`📄 Reporte de ${meses[mes]} ${anio} abierto`, 'success');
         }
 
         /* ── Modal Nuevo Servicio ── */
@@ -548,6 +565,23 @@
             mostrarToast(`✅ Servicio "${nombre}" agendado para ${cliente}`, 'success');
         }
     </script>
+    <!-- MODAL BLOQUEO POR PAUSA (Turno Pausado) -->
+    <div id="modal-pausa-turno" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/80 backdrop-blur-md">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-8 text-center border border-slate-100">
+            <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h3 class="text-xl font-extrabold text-slate-800 mb-2">Turno en Pausa</h3>
+            <p class="text-slate-500 text-sm mb-6 leading-relaxed">Te encuentras en modo pausa. No es posible realizar gestiones ni trabajar en servicios en este momento.</p>
+            <button onclick="togglePausarTurno()" 
+                    class="w-full py-3 bg-[#002b75] hover:bg-[#001f54] text-white font-bold rounded-xl transition shadow-md hover:shadow-lg">
+                Reanudar Turno
+            </button>
+        </div>
+    </div>
+
     {% block scripts %}{% endblock %}
 </body>
 </html>

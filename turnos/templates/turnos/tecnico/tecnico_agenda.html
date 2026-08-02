@@ -4,50 +4,11 @@
 {% block title %}Mi Agenda - Técnico | ServiTech{% endblock %}
 
 {% block page_header %}
-<!-- ══════════════════════════════════════════════
-     HEADER "MI AGENDA"
-══════════════════════════════════════════════ -->
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-    <!-- Título + Subtítulo -->
-    <div>
-        <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">Mi Agenda</h1>
-        <p id="rango-fecha" class="text-slate-500 font-medium text-sm mt-0.5">Semana del 14 al 18 de Octubre</p>
-    </div>
-
-    <!-- Acciones derechas -->
-    <div class="flex items-center gap-2 flex-shrink-0">
-        <!-- Badge Online -->
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Online
-        </span>
-
-        <!-- Campana notificaciones -->
-        <button onclick="toggleNotificaciones()"
-                class="relative bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-            </svg>
-            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-        </button>
-
-        <!-- Ajustes -->
-        <button onclick="mostrarToast('⚙️ Configuración de agenda')"
-                class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-        </button>
-
-        <!-- Avatar usuario -->
-        <button onclick="abrirModalFoto()" class="relative group">
-            <img src="{% static 'img/foto de perfil tecnico.png' %}"
-                 alt="Foto"
-                 class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-slate-100">
-        </button>
-    </div>
+<!-- Minimal header: Título | Subtítulo -->
+<div class="flex items-center gap-0 mb-6 md:mb-8">
+    <h1 class="text-base sm:text-lg font-bold text-[#002b75] leading-tight whitespace-nowrap">Mi Agenda</h1>
+    <span class="mx-3 text-slate-300 font-light text-lg select-none">|</span>
+    <p id="rango-fecha" class="text-slate-400 text-xs sm:text-sm font-normal leading-tight">Semana del 14 al 18 de Octubre</p>
 </div>
 {% endblock page_header %}
 
@@ -90,7 +51,7 @@
     </div>
 
     <!-- Filtros + Sincronizar -->
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 w-full sm:w-auto">
         <!-- Dropdown Filtrar por estado -->
         <select id="filtro-estado" onchange="filtrarPorEstado(this.value)"
                 class="flex-1 sm:flex-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:border-[#002b75] transition-all cursor-pointer">
@@ -117,16 +78,10 @@
 <!-- ══════════════════════════════════════════════
      TABLA / GRID CALENDARIO SEMANAL
 ══════════════════════════════════════════════ -->
-<!-- Hint scroll en móvil -->
-<p class="sm:hidden text-xs text-slate-400 text-center mb-2 flex items-center justify-center gap-1">
-    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-    </svg>
-    Desliza para ver todos los días
-</p>
-<div class="relative bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-6">
-    <div class="overflow-x-auto -webkit-overflow-scrolling-touch">
-        <div class="min-w-[600px]">
+<!-- VISTA DESKTOP: Se muestra de sm en adelante -->
+<div class="hidden sm:block relative bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-6">
+    <div class="overflow-x-auto" style="-webkit-overflow-scrolling:touch">
+        <div class="min-w-[560px]">
 
             <!-- Encabezados de días -->
             <div class="grid grid-cols-6 border-b border-slate-100 bg-[#f8fafc]">
@@ -275,9 +230,9 @@
         </div>
     </div>
 
-    <!-- Botón flotante FAB (+) -->
+    <!-- Botón flotante FAB (+) — solo visible en md+ dentro del calendario -->
     <button onclick="abrirModalNuevoServicio()"
-            class="absolute bottom-6 right-6 w-12 h-12 bg-[#002b75] hover:bg-[#001f54] text-white rounded-full flex items-center justify-center shadow-lg transition-all transform hover:scale-105"
+            class="hidden md:flex absolute bottom-6 right-6 w-12 h-12 bg-[#002b75] hover:bg-[#001f54] text-white rounded-full items-center justify-center shadow-lg transition-all transform hover:scale-105"
             title="Agendar nuevo servicio">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
@@ -285,12 +240,154 @@
     </button>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     FILA INFERIOR: Resumen + Próxima Visita + Notas
-══════════════════════════════════════════════ -->
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+<!-- VISTA MÓVIL: Se muestra únicamente en pantallas pequeñas (xs/sm) -->
+<div class="sm:hidden space-y-4 mb-6">
+    <!-- Selector de Día (Pestañas horizontales deslizables) -->
+    <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-none" style="-webkit-overflow-scrolling:touch">
+        <button onclick="seleccionarDiaMovil('LUN')" id="btn-dia-LUN" class="flex-1 min-w-[70px] flex flex-col items-center p-3 rounded-2xl border transition-all text-center bg-white border-slate-200 text-slate-600 font-medium">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Lun</span>
+            <span class="text-lg font-extrabold mt-0.5">14</span>
+        </button>
+        <button onclick="seleccionarDiaMovil('MAR')" id="btn-dia-MAR" class="flex-1 min-w-[70px] flex flex-col items-center p-3 rounded-2xl border transition-all text-center bg-white border-slate-200 text-slate-600 font-medium">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Mar</span>
+            <span class="text-lg font-extrabold mt-0.5">15</span>
+        </button>
+        <button onclick="seleccionarDiaMovil('MIE')" id="btn-dia-MIE" class="flex-1 min-w-[70px] flex flex-col items-center p-3 rounded-2xl border transition-all text-center bg-[#eef2ff] border-[#002b75] text-[#002b75] font-semibold">
+            <span class="text-[10px] uppercase font-bold text-[#002b75]/70">Mié</span>
+            <span class="text-lg font-extrabold mt-0.5">16</span>
+        </button>
+        <button onclick="seleccionarDiaMovil('JUE')" id="btn-dia-JUE" class="flex-1 min-w-[70px] flex flex-col items-center p-3 rounded-2xl border transition-all text-center bg-white border-slate-200 text-slate-600 font-medium">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Jue</span>
+            <span class="text-lg font-extrabold mt-0.5">17</span>
+        </button>
+        <button onclick="seleccionarDiaMovil('VIE')" id="btn-dia-VIE" class="flex-1 min-w-[70px] flex flex-col items-center p-3 rounded-2xl border transition-all text-center bg-white border-slate-200 text-slate-600 font-medium">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Vie</span>
+            <span class="text-lg font-extrabold mt-0.5">18</span>
+        </button>
+    </div>
 
-    <!-- Card 2: Próxima Visita (Tarjeta Azul) -->
+    <!-- Contenedor de la línea de tiempo del día seleccionado -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+        
+        <!-- Timeline LUNES -->
+        <div id="timeline-LUN" class="timeline-dia hidden space-y-4">
+            <!-- 09:00 -->
+            <div class="flex gap-3">
+                <div class="w-12 text-right py-1">
+                    <span class="text-xs font-semibold text-slate-400">09:00</span>
+                </div>
+                <div class="flex-1 border-l-2 border-slate-100 pl-4 pb-2 relative">
+                    <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-slate-300 rounded-full"></div>
+                    <div onclick="verDetalleEvento('Reparación HVAC', 'Residencial Torres', '09:00 - 10:30', 'Lunes 14 Oct', 'DIAGNOSTICO')"
+                         class="evento-card bg-[#eef2ff] border-l-4 border-[#002b75] rounded-xl p-3 cursor-pointer hover:shadow-md transition">
+                        <p class="font-bold text-[#002b75] text-sm">Reparación HVAC</p>
+                        <p class="text-xs text-slate-500 mt-1">Residencial Torres</p>
+                        <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#002b75]/10 text-[#002b75]">En Diagnóstico</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 14:00 -->
+            <div class="flex gap-3">
+                <div class="w-12 text-right py-1">
+                    <span class="text-xs font-semibold text-slate-400">14:00</span>
+                </div>
+                <div class="flex-1 border-l-2 border-slate-100 pl-4 pb-2 relative">
+                    <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-slate-300 rounded-full"></div>
+                    <div onclick="verDetalleEvento('Revisión UPS', 'Banco Regional', '14:00 - 15:00', 'Lunes 14 Oct', 'PENDIENTE')"
+                         class="evento-card bg-[#eef2ff] border-l-4 border-[#002b75] rounded-xl p-3 cursor-pointer hover:shadow-md transition">
+                        <p class="font-bold text-[#002b75] text-sm">Revisión UPS</p>
+                        <p class="text-xs text-slate-500 mt-1">Banco Regional</p>
+                        <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#002b75]/10 text-[#002b75]">Pendiente</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline MARTES -->
+        <div id="timeline-MAR" class="timeline-dia hidden space-y-4">
+            <!-- 10:00 -->
+            <div class="flex gap-3">
+                <div class="w-12 text-right py-1">
+                    <span class="text-xs font-semibold text-slate-400">10:00</span>
+                </div>
+                <div class="flex-1 border-l-2 border-slate-100 pl-4 pb-2 relative">
+                    <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-slate-300 rounded-full"></div>
+                    <div onclick="verDetalleEvento('Instalación Rack', 'DataCenter Global', '10:00 - 11:30', 'Martes 15 Oct', 'FINALIZADO')"
+                         class="evento-card bg-[#f0fdf4] border-l-4 border-emerald-500 rounded-xl p-3 cursor-pointer hover:shadow-md transition">
+                        <p class="font-bold text-emerald-800 text-sm">Instalación Rack</p>
+                        <p class="text-xs text-emerald-600 mt-1">DataCenter Global</p>
+                        <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Finalizado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline MIÉRCOLES -->
+        <div id="timeline-MIE" class="timeline-dia space-y-4">
+            <!-- 14:00 -->
+            <div class="flex gap-3">
+                <div class="w-12 text-right py-1">
+                    <span class="text-xs font-semibold text-slate-400">14:00</span>
+                </div>
+                <div class="flex-1 border-l-2 border-slate-100 pl-4 pb-2 relative">
+                    <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-slate-300 rounded-full"></div>
+                    <div onclick="verDetalleEvento('Cableado Estruct.', 'Oficina Central', '14:00 - 15:30', 'Miércoles 16 Oct', 'DIAGNOSTICO')"
+                         class="evento-card bg-[#eef2ff] border-l-4 border-[#002b75] rounded-xl p-3 cursor-pointer hover:shadow-md transition">
+                        <p class="font-bold text-[#002b75] text-sm">Cableado Estruct.</p>
+                        <p class="text-xs text-slate-500 mt-1">Oficina Central</p>
+                        <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#002b75]/10 text-[#002b75]">En Diagnóstico</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline JUEVES -->
+        <div id="timeline-JUE" class="timeline-dia hidden space-y-4">
+            <div class="text-center py-8 text-slate-400">
+                <svg class="w-12 h-12 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <p class="text-sm font-medium">No hay servicios agendados para este día</p>
+            </div>
+        </div>
+
+        <!-- Timeline VIERNES -->
+        <div id="timeline-VIE" class="timeline-dia hidden space-y-4">
+            <!-- 14:00 -->
+            <div class="flex gap-3">
+                <div class="w-12 text-right py-1">
+                    <span class="text-xs font-semibold text-slate-400">14:00</span>
+                </div>
+                <div class="flex-1 border-l-2 border-slate-100 pl-4 pb-2 relative">
+                    <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-slate-300 rounded-full"></div>
+                    <div onclick="verDetalleEvento('Soporte Remoto', 'Sucursal Sur', '14:00 - 15:00', 'Viernes 18 Oct', 'FINALIZADO')"
+                         class="evento-card bg-[#f0fdf4] border-l-4 border-emerald-500 rounded-xl p-3 cursor-pointer hover:shadow-md transition">
+                        <p class="font-bold text-emerald-800 text-sm">Soporte Remoto</p>
+                        <p class="text-xs text-emerald-600 mt-1">Sucursal Sur</p>
+                        <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Finalizado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- FAB móvil — fuera del calendario para no quedar tapado por scroll -->
+<button onclick="abrirModalNuevoServicio()"
+        class="md:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-[#002b75] hover:bg-[#001f54] text-white rounded-full flex items-center justify-center shadow-xl transition-all transform hover:scale-105"
+        title="Agendar nuevo servicio">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+    </svg>
+</button>
+
+<!-- ══════════════════════════════════════════════
+     FILA INFERIOR: Próxima Visita + Notas
+══════════════════════════════════════════════ -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-20 md:mb-6">
+
+    <!-- Card: Próxima Visita (Tarjeta Azul) -->
     <div class="bg-[#002b75] rounded-2xl p-5 shadow-sm text-white flex flex-col justify-between relative overflow-hidden">
         <div>
             <p class="text-xs text-blue-200 uppercase font-semibold tracking-wider mb-1">Próxima Visita</p>
@@ -316,8 +413,8 @@
         </div>
     </div>
 
-    <!-- Card 3: Notas Rápidas -->
-    <div class="bg-[#eef2ff] rounded-2xl p-5 shadow-sm border border-indigo-100 flex flex-col justify-between sm:col-span-2 lg:col-span-1">
+    <!-- Card: Notas Rápidas -->
+    <div class="bg-[#eef2ff] rounded-2xl p-5 shadow-sm border border-indigo-100 flex flex-col justify-between">
         <div>
             <h3 class="font-bold text-slate-800 text-base mb-3">Notas Rápidas</h3>
             <textarea id="nota-rapida"
@@ -328,7 +425,7 @@
 
         <div class="flex justify-end mt-3">
             <button onclick="guardarNotaRapida()"
-                    class="bg-[#002b75] hover:bg-[#001f54] text-white px-4 py-2 rounded-xl shadow transition-all flex items-center gap-2 text-sm font-semibold"
+                    class="w-full sm:w-auto justify-center bg-[#002b75] hover:bg-[#001f54] text-white px-4 py-2.5 rounded-xl shadow transition-all flex items-center gap-2 text-sm font-semibold"
                     title="Guardar nota">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -339,6 +436,9 @@
         </div>
     </div>
 </div>
+
+<!-- Espaciador inferior para evitar que el FAB y la barra del navegador móvil tapen el contenido -->
+<div class="h-28 sm:hidden"></div>
 
 <!-- ══════════════════════════════════════════════
      MODAL NUEVO SERVICIO / AGENDAR CITA
@@ -507,7 +607,7 @@
     function cambiarVistaCalendario(vista) {
         const btnSemana = document.getElementById('btn-vista-semana');
         const btnDia = document.getElementById('btn-vista-dia');
-
+ 
         if (vista === 'semana') {
             btnSemana.className = 'px-4 py-1.5 rounded-lg text-sm font-semibold bg-white text-[#002b75] shadow-sm transition-all';
             btnDia.className = 'px-4 py-1.5 rounded-lg text-sm font-semibold text-slate-500 hover:text-slate-700 transition-all';
@@ -518,6 +618,48 @@
             btnSemana.className = 'px-4 py-1.5 rounded-lg text-sm font-semibold text-slate-500 hover:text-slate-700 transition-all';
             document.getElementById('rango-fecha').textContent = 'Miércoles 16 de Octubre';
             mostrarToast('📆 Vista diaria activa');
+            
+            // Si cambian a vista diaria, seleccionamos Miércoles por defecto en móvil
+            seleccionarDiaMovil('MIE');
+        }
+    }
+
+    /* ── Selección de Día Vista Móvil ── */
+    function seleccionarDiaMovil(dia) {
+        // Ocultar todos los timelines de la vista móvil
+        const timelines = document.querySelectorAll('.timeline-dia');
+        timelines.forEach(t => t.classList.add('hidden'));
+
+        // Mostrar el timeline seleccionado
+        const targetTimeline = document.getElementById(`timeline-${dia}`);
+        if (targetTimeline) {
+            targetTimeline.classList.remove('hidden');
+        }
+
+        // Resetear estilos de todos los botones de día en móvil
+        const dias = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE'];
+        dias.forEach(d => {
+            const btn = document.getElementById(`btn-dia-${d}`);
+            if (btn) {
+                if (d === dia) {
+                    btn.className = 'flex-1 min-w-[70px] flex flex-col items-center p-3 rounded-2xl border transition-all text-center bg-[#eef2ff] border-[#002b75] text-[#002b75] font-semibold shadow-sm scale-105';
+                } else {
+                    btn.className = 'flex-1 min-w-[70px] flex flex-col items-center p-3 rounded-2xl border transition-all text-center bg-white border-slate-200 text-slate-600 font-medium hover:border-slate-300';
+                }
+            }
+        });
+        
+        // Sincronizar el título de rango de fecha para la vista móvil
+        const rangoFecha = document.getElementById('rango-fecha');
+        if (rangoFecha) {
+            const nombresCompletos = { LUN: 'Lunes 14', MAR: 'Martes 15', MIE: 'Miércoles 16', JUE: 'Jueves 17', VIE: 'Viernes 18' };
+            rangoFecha.textContent = `${nombresCompletos[dia]} de Octubre`;
+        }
+        
+        // Sincronizar el estado del filtro de estado sobre el nuevo timeline visible
+        const filtro = document.getElementById('filtro-estado');
+        if (filtro) {
+            filtrarPorEstado(filtro.value);
         }
     }
 

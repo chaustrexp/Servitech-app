@@ -27,6 +27,9 @@ urlpatterns = [
     path('tecnico/clientes/', views.tecnico_clientes, name='tecnico_clientes'),
     path('tecnico/soporte/', views.tecnico_soporte, name='tecnico_soporte'),
     path('tecnico/reporte/', views.tecnico_reporte_mensual, name='tecnico_reporte_mensual'),
+    path('tecnico/perfil/', views.tecnico_perfil, name='tecnico_perfil'),
+    path('tecnico/inventario/exportar/', views.exportar_inventario_excel, name='exportar_inventario_excel'),
+    path('tecnico/inventario/agregar/', views.agregar_repuesto, name='agregar_repuesto'),
 
     path('cliente/inicio/', views.cliente_inicio, name='cliente_inicio'),
     path('cliente/servicios/', views.cliente_servicios, name='cliente_servicios'),

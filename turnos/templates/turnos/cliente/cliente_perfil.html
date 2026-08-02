@@ -23,13 +23,13 @@
 {% endblock page_header %}
 
 {% block content %}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-8">
     
     <!-- Columna Izquierda: Perfil y Notificaciones -->
     <div class="space-y-6">
         
         <!-- Tarjeta de Perfil -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-8 flex flex-col items-center text-center shadow-sm relative">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 flex flex-col items-center text-center shadow-sm relative">
             <div class="relative mb-4">
                 <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-slate-100 relative group cursor-pointer" onclick="document.getElementById('profile-upload').click()">
                     <img id="profile-preview" src="{% static 'img/foto de perfil cliente.png' %}" 
@@ -75,7 +75,7 @@
         </div>
 
         <!-- Notificaciones -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
             <h3 class="flex items-center gap-3 text-lg font-bold text-slate-800 mb-6">
                 <svg class="w-5 h-5 text-[#002b75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                 Notificaciones
@@ -104,7 +104,7 @@
     <div class="lg:col-span-2 space-y-8">
 
         <!-- Editar Datos Personales -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
             <div class="mb-6">
                 <h2 class="text-xl font-bold text-slate-800">Datos Personales</h2>
                 <p class="text-sm text-slate-500">Actualiza tu nombre, correo y teléfono de contacto.</p>
@@ -177,7 +177,7 @@
         </div>
 
         <!-- Direcciones Guardadas -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800">Direcciones Guardadas</h2>
@@ -224,8 +224,8 @@
         </div>
 
         <!-- Métodos de Pago -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-            <div class="flex items-center justify-between mb-6">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800">Métodos de Pago</h2>
                     <p class="text-sm text-slate-500">Administra tus tarjetas y cuentas de facturación.</p>
@@ -238,17 +238,17 @@
             
             <div class="space-y-4 mb-6">
                 <!-- Tarjeta 1 -->
-                <div class="border border-slate-200 rounded-xl p-5 flex items-center justify-between bg-white hover:border-[#002b75] transition-colors cursor-pointer group">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-9 bg-[#141414] rounded-md flex items-center justify-center border border-slate-300">
+                <div class="border border-slate-200 rounded-xl p-4 flex items-center justify-between bg-white hover:border-[#002b75] transition-colors cursor-pointer group gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-14 h-9 bg-[#141414] rounded-md flex items-center justify-center border border-slate-300 flex-shrink-0">
                             <span class="text-white font-bold italic text-xs tracking-widest">VISA</span>
                         </div>
-                        <div>
-                            <p class="font-bold text-slate-800 text-sm mb-0.5">Visa terminada en 4242</p>
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-800 text-sm mb-0.5 truncate">Visa terminada en 4242</p>
                             <p class="text-xs text-slate-400">Expira el 12/26</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-4 text-slate-400">
+                    <div class="flex items-center gap-2 text-slate-400 flex-shrink-0">
                         <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <div class="relative">
                             <button onclick="toggleCardMenu('menu-visa')" class="hover:text-slate-800 p-1 rounded-full hover:bg-slate-100 transition">
@@ -274,18 +274,18 @@
                 </div>
 
                 <!-- Tarjeta 2 -->
-                <div class="border border-slate-200 rounded-xl p-5 flex items-center justify-between bg-[#f8f9fc]">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-9 bg-slate-800 rounded-md flex items-center justify-center border border-slate-300 overflow-hidden relative">
+                <div class="border border-slate-200 rounded-xl p-4 flex items-center justify-between bg-[#f8f9fc] gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-14 h-9 bg-slate-800 rounded-md flex items-center justify-center border border-slate-300 overflow-hidden relative flex-shrink-0">
                             <div class="w-4 h-4 rounded-full bg-red-500 absolute left-2 opacity-90"></div>
                             <div class="w-4 h-4 rounded-full bg-yellow-500 absolute right-2 opacity-90"></div>
                         </div>
-                        <div>
-                            <p class="font-bold text-slate-800 text-sm mb-0.5">Mastercard terminada en 8891</p>
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-800 text-sm mb-0.5 truncate">Mastercard terminada en 8891</p>
                             <p class="text-xs text-slate-400">Expira el 05/25</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 flex-shrink-0">
                         <span onclick="alert('Tarjeta Mastercard marcada como principal')" class="text-xs font-bold text-[#002b75] hover:underline cursor-pointer">Hacer principal</span>
                         <div class="relative">
                             <button onclick="toggleCardMenu('menu-mc')" class="text-slate-400 hover:text-slate-800 p-1 rounded-full hover:bg-slate-100 transition">

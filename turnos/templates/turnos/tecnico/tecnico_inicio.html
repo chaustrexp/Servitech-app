@@ -4,82 +4,27 @@
 {% block title %}Inicio - Técnico | ServiTech{% endblock %}
 
 {% block page_header %}
-<!-- ══════════════════════════════════════════════
-     HEADER DE SECCIÓN: INICIO
-══════════════════════════════════════════════ -->
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
-    <div>
-        <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">
-            {{ request.user.nombre_completo|default:"Técnico" }}
-        </h1>
-        <p class="text-slate-500 font-medium text-sm mt-0.5 flex items-center gap-2 flex-wrap">
-            <span>Especialista en Hardware</span>
-            <span class="text-slate-300">•</span>
-            <span id="fecha-actual"></span>
-        </p>
-    </div>
-    <div class="flex items-center gap-2 flex-shrink-0">
-        <!-- Toggle Estado -->
-        <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-1.5 shadow-sm">
-            <span class="text-xs text-slate-500 font-medium hidden sm:inline">Estado:</span>
-            <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="toggle-disponible" class="sr-only peer" checked onchange="toggleDesdeHeader(this)">
-                <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:bg-[#002b75] transition-all"></div>
-                <div class="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full shadow transition-all peer-checked:translate-x-4"></div>
-            </label>
-            <span id="texto-estado-header" class="text-xs font-semibold text-green-600">Online</span>
-        </div>
-        <!-- Campana notificaciones -->
-        <div class="relative">
-            <button onclick="toggleNotificaciones()"
-                    class="relative bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                </svg>
-                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
-            <!-- Dropdown notificaciones -->
-            <div id="dropdown-notif" class="hidden absolute right-0 top-12 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 z-50">
-                <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-800 text-sm">Notificaciones</h3>
-                    <button onclick="marcarLeidas()" class="text-xs text-[#002b75] hover:underline">Marcar leídas</button>
-                </div>
-                <div class="p-2 space-y-1">
-                    <div class="p-3 bg-amber-50 rounded-xl border border-amber-100">
-                        <p class="text-sm font-semibold text-slate-800">⚠️ Cliente con retraso</p>
-                        <p class="text-xs text-slate-500 mt-0.5">Juan Pérez avisó que llegará 10 min tarde</p>
-                    </div>
-                    <div class="p-3 hover:bg-slate-50 rounded-xl transition">
-                        <p class="text-sm font-semibold text-slate-800">📋 Nueva cita asignada</p>
-                        <p class="text-xs text-slate-500 mt-0.5">Diagnóstico de PC - mañana 10:00</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Ajustes -->
-        <button onclick="mostrarToast('⚙️ Ajustes del técnico')"
-                class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm text-slate-500 hover:text-[#002b75] hover:border-[#002b75] transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-        </button>
-        <!-- Avatar usuario -->
-        <button onclick="abrirModalFoto()" class="relative group" title="Cambiar foto de perfil">
-            <img id="foto-perfil-header"
-                 src="{% static 'img/foto de perfil tecnico.png' %}"
-                 alt="Foto"
-                 class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-slate-100">
-        </button>
-    </div>
+<!-- ═══════════════════════════════════════════
+     HEADER MINIMAL — Título | Subtítulo
+═══════════════════════════════════════════ -->
+<div class="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-0 mb-6 md:mb-8">
+    <h1 class="text-base sm:text-lg font-bold text-[#002b75] leading-tight whitespace-nowrap">
+        <span id="saludo-hora">Hola</span>,&nbsp;{{ request.user.nombre_completo|default:"Técnico"|truncatewords:1 }}
+    </h1>
+    <span class="hidden xs:inline mx-3 text-slate-300 font-light text-lg select-none">|</span>
+    <p class="text-slate-400 text-xs sm:text-sm font-normal leading-tight">
+        <span id="subtitulo-dinamico">Bienvenido de nuevo.</span>
+        <span id="texto-citas-hoy">Tienes citas pendientes para hoy.</span>
+    </p>
 </div>
 {% endblock page_header %}
 
+
+
 {% block content %}
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
     <!-- Citas Hoy -->
-    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center gap-4">
+    <div class="bg-white rounded-2xl border border-slate-100 p-4 md:p-5 shadow-sm flex items-center gap-3 md:gap-4">
         <div class="w-11 h-11 rounded-2xl bg-[#eef2ff] flex items-center justify-center flex-shrink-0">
             <svg class="w-5 h-5 text-[#002b75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -88,12 +33,12 @@
         </div>
         <div>
             <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Citas Hoy</p>
-            <p class="text-3xl font-extrabold text-[#002b75]">6</p>
+            <p class="text-2xl md:text-3xl font-extrabold text-[#002b75]">6</p>
         </div>
     </div>
 
     <!-- En Proceso -->
-    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center gap-4">
+    <div class="bg-white rounded-2xl border border-slate-100 p-4 md:p-5 shadow-sm flex items-center gap-3 md:gap-4">
         <div class="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0">
             <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -102,12 +47,12 @@
         </div>
         <div>
             <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide">En Proceso</p>
-            <p class="text-3xl font-extrabold text-blue-600">1</p>
+            <p class="text-2xl md:text-3xl font-extrabold text-blue-600">1</p>
         </div>
     </div>
 
     <!-- Finalizadas -->
-    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center gap-4">
+    <div class="bg-white rounded-2xl border border-slate-100 p-4 md:p-5 shadow-sm flex items-center gap-3 md:gap-4">
         <div class="w-11 h-11 rounded-2xl bg-green-50 flex items-center justify-center flex-shrink-0">
             <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -116,12 +61,12 @@
         </div>
         <div>
             <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Finalizadas</p>
-            <p class="text-3xl font-extrabold text-green-600">3</p>
+            <p class="text-2xl md:text-3xl font-extrabold text-green-600">3</p>
         </div>
     </div>
 
     <!-- Retrasos -->
-    <div class="bg-white rounded-2xl border border-red-100 p-5 shadow-sm flex items-center gap-4">
+    <div class="bg-white rounded-2xl border border-red-100 p-4 md:p-5 shadow-sm flex items-center gap-3 md:gap-4">
         <div class="w-11 h-11 rounded-2xl bg-red-50 flex items-center justify-center flex-shrink-0">
             <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -130,7 +75,7 @@
         </div>
         <div>
             <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Retrasos</p>
-            <p class="text-3xl font-extrabold text-red-500">1</p>
+            <p class="text-2xl md:text-3xl font-extrabold text-red-500">1</p>
         </div>
     </div>
 </div>
@@ -141,12 +86,12 @@
 <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 mb-6">
 
     <!-- Cabecera -->
-    <div class="flex items-center justify-between mb-5">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div>
-            <h2 class="text-xl font-bold text-slate-800">Citas Disponibles</h2>
+            <h2 class="text-lg md:text-xl font-bold text-slate-800">Citas Disponibles</h2>
             <p class="text-xs text-slate-400 mt-0.5">Selecciona y acepta cualquier cita para agregarla a tu agenda</p>
         </div>
-        <span id="badge-citas-disponibles" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+        <span id="badge-citas-disponibles" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 w-fit">
             <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
             <span id="contador-disponibles">5 disponibles</span>
         </span>
@@ -413,38 +358,38 @@
     <!-- Rendimiento Semanal -->
     <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
         <h3 class="text-lg font-bold text-slate-800 mb-5">Rendimiento Semanal</h3>
-        <div class="flex items-end gap-2 h-40">
+        <div class="flex items-end gap-1.5 md:gap-2 h-32 md:h-40">
             <!-- Barras del gráfico -->
             <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#dce6f5] rounded-t-lg" style="height:55%"></div>
-                <span class="text-xs text-slate-400 font-medium">Lun</span>
+                <div class="w-full bg-[#dce6f5] rounded-t-lg min-h-[4px]" style="height:55%"></div>
+                <span class="text-[10px] md:text-xs text-slate-400 font-medium">Lun</span>
             </div>
             <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#dce6f5] rounded-t-lg" style="height:40%"></div>
-                <span class="text-xs text-slate-400 font-medium">Mar</span>
+                <div class="w-full bg-[#dce6f5] rounded-t-lg min-h-[4px]" style="height:40%"></div>
+                <span class="text-[10px] md:text-xs text-slate-400 font-medium">Mar</span>
             </div>
             <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#dce6f5] rounded-t-lg" style="height:80%"></div>
-                <span class="text-xs text-slate-400 font-medium">Mié</span>
+                <div class="w-full bg-[#dce6f5] rounded-t-lg min-h-[4px]" style="height:80%"></div>
+                <span class="text-[10px] md:text-xs text-slate-400 font-medium">Mié</span>
             </div>
             <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#002b75] rounded-t-lg" style="height:65%"></div>
-                <span class="text-xs text-[#002b75] font-bold">Jue</span>
+                <div class="w-full bg-[#002b75] rounded-t-lg min-h-[4px]" style="height:65%"></div>
+                <span class="text-[10px] md:text-xs text-[#002b75] font-bold">Jue</span>
             </div>
             <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#dce6f5] rounded-t-lg" style="height:20%"></div>
-                <span class="text-xs text-slate-400 font-medium">Vie</span>
+                <div class="w-full bg-[#dce6f5] rounded-t-lg min-h-[4px]" style="height:20%"></div>
+                <span class="text-[10px] md:text-xs text-slate-400 font-medium">Vie</span>
             </div>
             <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#dce6f5] rounded-t-lg" style="height:5%"></div>
-                <span class="text-xs text-slate-400 font-medium">Sáb</span>
+                <div class="w-full bg-[#dce6f5] rounded-t-lg min-h-[4px]" style="height:5%"></div>
+                <span class="text-[10px] md:text-xs text-slate-400 font-medium">Sáb</span>
             </div>
             <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#dce6f5] rounded-t-lg" style="height:5%"></div>
-                <span class="text-xs text-slate-400 font-medium">Dom</span>
+                <div class="w-full bg-[#dce6f5] rounded-t-lg min-h-[4px]" style="height:5%"></div>
+                <span class="text-[10px] md:text-xs text-slate-400 font-medium">Dom</span>
             </div>
         </div>
-        <div class="mt-4 grid grid-cols-3 gap-3">
+        <div class="mt-4 grid grid-cols-3 gap-2 md:gap-3">
             <div class="bg-[#f4f7fb] rounded-xl p-3 text-center">
                 <p class="text-xs text-slate-500 font-medium">Total semana</p>
                 <p class="text-xl font-extrabold text-[#002b75]">18</p>
@@ -491,6 +436,7 @@
                 </svg>
                 Pantalla identificada como defectuosa
             </div>
+            <div class="flex items-center gap-2 text-sm text-blue-200/60">
                 <svg class="w-4 h-4 text-white/30 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -550,12 +496,24 @@
 
 {% block scripts %}
 <script>
-    /* ── Fecha actual ── */
+    /* ── Fecha actual y Saludo ── */
     const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
     const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
     const hoy = new Date();
-    document.getElementById('fecha-actual').textContent =
-        `${dias[hoy.getDay()]}, ${hoy.getDate()} de ${meses[hoy.getMonth()]}`;
+    const fechaEl = document.getElementById('fecha-actual');
+    if (fechaEl) fechaEl.textContent = `${dias[hoy.getDay()]}, ${hoy.getDate()} de ${meses[hoy.getMonth()]}`;
+
+    const h = hoy.getHours();
+    let saludo = "Hola";
+    let subtitulo = "Bienvenido de nuevo.";
+    if (h >= 5 && h < 12)        { saludo = "Buenos días";   subtitulo = "Que tengas un excelente día de trabajo."; }
+    else if (h >= 12 && h < 18)  { saludo = "Buenas tardes"; subtitulo = "Sigue así, vas muy bien hoy."; }
+    else                          { saludo = "Buenas noches"; subtitulo = "Recuerda revisar tu agenda de mañana."; }
+
+    const salEl = document.getElementById('saludo-hora');
+    if (salEl) salEl.textContent = saludo;
+    const subEl = document.getElementById('subtitulo-dinamico');
+    if (subEl) subEl.textContent = subtitulo;
 
     /* ── Toggle estado desde header ── */
     function toggleDesdeHeader(checkbox) {

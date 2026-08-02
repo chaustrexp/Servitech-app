@@ -20,6 +20,9 @@ from .dashboard_views import (
     cliente_inicio,
     cliente_servicios,
     cliente_perfil,
-    cliente_soporte
+    cliente_soporte,
+    tecnico_perfil,
+    exportar_inventario_excel,
+    agregar_repuesto
 )
 

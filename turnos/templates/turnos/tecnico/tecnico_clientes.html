@@ -33,16 +33,16 @@
         </div>
     </div>
     <!-- Acciones derechas -->
-    <div class="flex items-center gap-3 flex-shrink-0 mt-1">
+    <div class="flex flex-wrap items-center gap-2 mt-1">
         <button onclick="abrirModalFiltros()"
-                class="flex items-center gap-2 bg-white border border-slate-200 hover:border-[#002b75] text-slate-700 hover:text-[#002b75] text-sm font-semibold px-4 py-2 rounded-xl shadow-sm transition-all">
+                class="flex items-center gap-2 bg-white border border-slate-200 hover:border-[#002b75] text-slate-700 hover:text-[#002b75] text-sm font-semibold px-3 py-2 rounded-xl shadow-sm transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
             </svg>
             Filtros
         </button>
         <button onclick="abrirModalNuevoCliente()"
-                class="flex items-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow transition-all">
+                class="flex items-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white text-sm font-semibold px-3 py-2 rounded-xl shadow transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
             </svg>
@@ -310,7 +310,7 @@
         <h3 class="font-bold text-slate-800 text-base">Insights de Clientes</h3>
 
         <!-- Métricas rápidas -->
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <button onclick="abrirInsight('crecimiento')"
                         class="bg-emerald-50 border border-emerald-100 hover:border-emerald-300 rounded-xl p-3 text-left transition-all cursor-pointer w-full">
                     <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">Crecimiento</p>

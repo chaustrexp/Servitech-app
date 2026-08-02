@@ -4,27 +4,11 @@
 {% block title %}Soporte - Técnico | ServiTech{% endblock %}
 
 {% block page_header %}
-<!-- ══════════════════════════════════════════════
-     HEADER SOPORTE
-══════════════════════════════════════════════ -->
-<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
-    <div>
-        <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">Panel de Soporte Interno</h1>
-        <p class="text-slate-500 font-medium text-sm mt-0.5">Gestión de herramientas, accesos y guías para personal técnico.</p>
-    </div>
-    <!-- KPIs rápidos -->
-    <div class="flex items-center gap-3 flex-shrink-0">
-        <button onclick="abrirKPI('tickets')"
-                class="bg-[#eef2ff] border border-indigo-100 hover:border-[#002b75] rounded-2xl px-5 py-3 text-center min-w-[100px] transition-all cursor-pointer">
-            <p class="text-[10px] font-bold text-[#002b75] uppercase tracking-wider">Tickets Activos</p>
-            <p class="text-3xl font-extrabold text-[#002b75] leading-tight">12</p>
-        </button>
-        <button onclick="abrirKPI('disponibilidad')"
-                class="bg-emerald-400 hover:bg-emerald-500 rounded-2xl px-5 py-3 text-center min-w-[120px] transition-all cursor-pointer">
-            <p class="text-[10px] font-bold text-emerald-900 uppercase tracking-wider">Disponibilidad IT</p>
-            <p class="text-3xl font-extrabold text-white leading-tight">98.4%</p>
-        </button>
-    </div>
+<!-- Minimal header: Título | Subtítulo -->
+<div class="flex items-center gap-0 mb-6 md:mb-8">
+    <h1 class="text-base sm:text-lg font-bold text-[#002b75] leading-tight whitespace-nowrap">Panel de Soporte</h1>
+    <span class="mx-3 text-slate-300 font-light text-lg select-none">|</span>
+    <p class="text-slate-400 text-xs sm:text-sm font-normal leading-tight">Herramientas, accesos y guías para personal técnico.</p>
 </div>
 {% endblock page_header %}
 
@@ -240,7 +224,7 @@
 <!-- ══════════════════════════════════════════════
      FILA 2: RESUMEN DEL DÍA
 ══════════════════════════════════════════════ -->
-<div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 mb-6">
+<div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 mb-6 text-slate-800">
     <div class="flex items-center justify-between mb-5">
         <div>
             <h3 class="font-bold text-slate-800 text-base">Resumen del Día</h3>
@@ -251,50 +235,30 @@
             En vivo
         </span>
     </div>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <!-- Citas hoy -->
-        <div onclick="abrirResumenMetrica('citas')"
-             class="bg-[#eef2ff] rounded-2xl p-4 text-center cursor-pointer hover:shadow-md hover:scale-105 transition-all">
-            <div class="w-9 h-9 bg-[#002b75]/10 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <svg class="w-5 h-5 text-[#002b75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <!-- Columna 1: Estadísticas numéricas -->
+        <div class="md:col-span-1 space-y-3">
+            <div onclick="abrirResumenMetrica('citas')" class="flex items-center justify-between p-4 bg-[#eef2ff] rounded-2xl border border-slate-100 cursor-pointer hover:shadow transition">
+                <span class="text-xs font-bold text-[#002b75]">Citas de Hoy</span>
+                <span class="text-xl font-black text-[#002b75]">6</span>
             </div>
-            <p class="text-2xl font-extrabold text-[#002b75]">6</p>
-            <p class="text-[11px] text-slate-500 font-semibold mt-0.5">Citas Hoy</p>
+            <div onclick="abrirResumenMetrica('finalizadas')" class="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl border border-emerald-100 cursor-pointer hover:shadow transition">
+                <span class="text-xs font-bold text-emerald-700">Finalizadas</span>
+                <span class="text-xl font-black text-emerald-600">3</span>
+            </div>
+            <div onclick="abrirResumenMetrica('proceso')" class="flex items-center justify-between p-4 bg-blue-50 rounded-2xl border border-blue-100 cursor-pointer hover:shadow transition">
+                <span class="text-xs font-bold text-blue-700">En Proceso</span>
+                <span class="text-xl font-black text-blue-600">1</span>
+            </div>
+            <div onclick="abrirResumenMetrica('satisfaccion')" class="flex items-center justify-between p-4 bg-amber-50 rounded-2xl border border-amber-100 cursor-pointer hover:shadow transition">
+                <span class="text-xs font-bold text-amber-700">Satisfacción</span>
+                <span class="text-xl font-black text-amber-600">96%</span>
+            </div>
         </div>
-        <!-- Finalizadas -->
-        <div onclick="abrirResumenMetrica('finalizadas')"
-             class="bg-emerald-50 rounded-2xl p-4 text-center cursor-pointer hover:shadow-md hover:scale-105 transition-all">
-            <div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <p class="text-2xl font-extrabold text-emerald-600">3</p>
-            <p class="text-[11px] text-slate-500 font-semibold mt-0.5">Finalizadas</p>
-        </div>
-        <!-- En proceso -->
-        <div onclick="abrirResumenMetrica('proceso')"
-             class="bg-blue-50 rounded-2xl p-4 text-center cursor-pointer hover:shadow-md hover:scale-105 transition-all">
-            <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-            </div>
-            <p class="text-2xl font-extrabold text-blue-600">1</p>
-            <p class="text-[11px] text-slate-500 font-semibold mt-0.5">En Proceso</p>
-        </div>
-        <!-- Satisfacción -->
-        <div onclick="abrirResumenMetrica('satisfaccion')"
-             class="bg-amber-50 rounded-2xl p-4 text-center cursor-pointer hover:shadow-md hover:scale-105 transition-all">
-            <div class="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                </svg>
-            </div>
-            <p class="text-2xl font-extrabold text-amber-600">96%</p>
-            <p class="text-[11px] text-slate-500 font-semibold mt-0.5">Satisfacción</p>
+        <!-- Columna 2: Gráfico de Donut interactivo -->
+        <div class="md:col-span-2 flex justify-center items-center h-64 relative">
+            <canvas id="grafico-resumen-dia" class="max-h-56"></canvas>
         </div>
     </div>
 
@@ -819,7 +783,58 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+
+    /* ── Gráfico de Donut: Resumen del Día ── */
+    (function() {
+        const ctx = document.getElementById('grafico-resumen-dia');
+        if (!ctx) return;
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Finalizadas', 'En Proceso', 'Pendientes', 'Canceladas'],
+                datasets: [{
+                    data: [3, 1, 2, 0],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.85)',
+                        'rgba(59, 130, 246, 0.85)',
+                        'rgba(0, 43, 117, 0.85)',
+                        'rgba(239, 68, 68, 0.75)'
+                    ],
+                    borderColor: ['#10b981','#3b82f6','#002b75','#ef4444'],
+                    borderWidth: 1.5,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '72%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            font: { size: 11, weight: '600' },
+                            color: '#475569',
+                            padding: 14
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const pct = total > 0 ? Math.round(context.parsed / total * 100) : 0;
+                                return ` ${context.label}: ${context.parsed} (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    })();
 
     /* ── Fecha resumen del día ── */
     const _dias  = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
