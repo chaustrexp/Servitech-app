@@ -119,8 +119,10 @@
     <!-- ════════════════════════════════════════════════════════════════════════════════════ -->
 
     <!-- Contenido Principal -->
-    <main class="flex-grow py-10 px-4">
-        {% block content %}{% endblock %}
+    <main class="flex-grow py-8 md:py-12 px-4">
+        <div class="max-w-5xl mx-auto">
+            {% block content %}{% endblock %}
+        </div>
     </main>
 
     <!-- Footer Wizard -->

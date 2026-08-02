@@ -3,7 +3,7 @@
 {% block title %}Selecciona tu Dispositivo - ServiTech{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto pt-8">
+<div class="max-w-3xl mx-auto pt-4">
 
     <!-- Encabezado ServiTech -->
     <div class="text-center mb-10">
@@ -13,40 +13,39 @@
 
     <!-- STEPPER (PASOS DEL WIZARD) -->
     <div class="mb-10">
-        <div class="relative flex items-center justify-between max-w-3xl mx-auto px-4">
-            <!-- Línea conectora de fondo -->
-            <div class="absolute left-0 top-4 w-full h-[1px] bg-slate-400 -z-10"></div>
+        <div class="relative flex items-center justify-between max-w-2xl mx-auto px-4">
+            <div class="absolute left-0 top-4 w-full h-[2px] bg-slate-200 -z-10"></div>
 
             <!-- Paso 1 (Activo) -->
-            <div class="flex flex-col items-center bg-slate-50 px-2">
-                <div class="w-8 h-8 rounded-full bg-white border border-slate-300 text-slate-800 font-bold flex items-center justify-center text-sm">
+            <div class="flex flex-col items-center z-10">
+                <div class="w-9 h-9 rounded-full bg-[#002b75] text-white font-bold flex items-center justify-center text-sm shadow ring-4 ring-blue-100">
                     1
                 </div>
                 <span class="text-xs font-bold text-[#002b75] mt-2">Dispositivo</span>
             </div>
 
             <!-- Paso 2 -->
-            <div class="flex flex-col items-center bg-slate-50 px-2">
-                <div class="w-8 h-8 rounded-full bg-white border border-slate-300 text-slate-800 font-bold flex items-center justify-center text-sm">
+            <div class="flex flex-col items-center z-10">
+                <div class="w-9 h-9 rounded-full bg-white border-2 border-slate-300 text-slate-400 font-bold flex items-center justify-center text-sm">
                     2
                 </div>
-                <span class="text-xs font-medium text-slate-600 mt-2">Servicio</span>
+                <span class="text-xs font-medium text-slate-400 mt-2">Servicio</span>
             </div>
 
             <!-- Paso 3 -->
-            <div class="flex flex-col items-center bg-slate-50 px-2">
-                <div class="w-8 h-8 rounded-full bg-white border border-slate-300 text-slate-800 font-bold flex items-center justify-center text-sm">
+            <div class="flex flex-col items-center z-10">
+                <div class="w-9 h-9 rounded-full bg-white border-2 border-slate-300 text-slate-400 font-bold flex items-center justify-center text-sm">
                     3
                 </div>
-                <span class="text-xs font-medium text-slate-600 mt-2">Fecha y Hora</span>
+                <span class="text-xs font-medium text-slate-400 mt-2">Fecha y Hora</span>
             </div>
 
             <!-- Paso 4 -->
-            <div class="flex flex-col items-center bg-slate-50 px-2">
-                <div class="w-8 h-8 rounded-full bg-white border border-slate-300 text-slate-800 font-bold flex items-center justify-center text-sm">
+            <div class="flex flex-col items-center z-10">
+                <div class="w-9 h-9 rounded-full bg-white border-2 border-slate-300 text-slate-400 font-bold flex items-center justify-center text-sm">
                     4
                 </div>
-                <span class="text-xs font-medium text-slate-600 mt-2">Resumen</span>
+                <span class="text-xs font-medium text-slate-400 mt-2">Resumen</span>
             </div>
         </div>
     </div>

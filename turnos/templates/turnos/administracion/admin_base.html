@@ -1,0 +1,175 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Panel de Administración - ServiTech{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .nav-item { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:500; color:#64748b; transition:all .15s; cursor:pointer; text-decoration:none; }
+        .nav-item:hover { background:#f1f5f9; color:#1e293b; }
+        .nav-item.active { background:#eff6ff; color:#1d4ed8; font-weight:600; }
+        .sidebar-transition { transition: transform 0.3s ease; }
+        #toast-container { position:fixed; bottom:24px; right:24px; z-index:100; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] min-h-screen flex overflow-x-hidden">
+
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar-transition fixed top-0 left-0 h-full w-[200px] bg-white border-r border-slate-100 z-40 flex flex-col -translate-x-full md:translate-x-0">
+
+        <!-- Logo -->
+        <div class="px-5 pt-6 pb-5 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-[#1d4ed8] flex items-center justify-center flex-shrink-0">
+                    <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="w-7 h-7 rounded-lg object-cover">
+                </div>
+                <div class="leading-tight min-w-0">
+                    <p class="text-sm font-extrabold text-slate-800 tracking-tight">ServiTech</p>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Panel de</p>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest -mt-0.5">Administración</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nav -->
+        <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+            <a href="{% url 'admin_dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10-3a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1v-7z"/></svg>
+                Inicio
+            </a>
+            <a href="{% url 'admin_citas' %}" class="nav-item {% if request.resolver_match.url_name == 'admin_citas' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Citas
+            </a>
+            <a href="{% url 'admin_usuarios' %}" class="nav-item {% if request.resolver_match.url_name == 'admin_usuarios' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Usuarios
+            </a>
+            <a href="{% url 'admin_servicios' %}" class="nav-item {% if request.resolver_match.url_name == 'admin_servicios' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h7"/></svg>
+                Catálogo
+            </a>
+            <a href="{% url 'admin_reportes' %}" class="nav-item {% if request.resolver_match.url_name == 'admin_reportes' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Reportes
+            </a>
+        </nav>
+
+        <!-- Nueva Cita + Logout -->
+        <div class="px-3 pb-5 pt-3 border-t border-slate-100 space-y-2">
+            <a href="{% url 'seleccionar_dispositivo' %}"
+               class="w-full flex items-center justify-center gap-2 bg-[#1d4ed8] hover:bg-[#1e40af] text-white font-bold py-2.5 px-4 rounded-xl transition text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                Nueva Cita
+            </a>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-red-50 hover:text-red-600 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    Cerrar Sesión
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO -->
+    <div class="flex-1 flex flex-col min-h-screen md:ml-[200px]">
+
+        <!-- TOP BAR -->
+        <header class="bg-white border-b border-slate-100 sticky top-0 z-20 px-6 h-[60px] flex items-center gap-4">
+            <button onclick="openSidebar()" class="md:hidden text-slate-500 p-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <div class="flex-1 max-w-md mx-auto hidden sm:block">
+                <div class="relative">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="text" placeholder="Buscar citas, técnicos o reportes..."
+                           class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-blue-300 transition">
+                </div>
+            </div>
+            <div class="flex items-center gap-3 ml-auto">
+                <!-- Notificaciones -->
+                <div class="relative">
+                    <button onclick="toggleNotifAdmin()" class="relative p-2 rounded-xl hover:bg-slate-50 text-slate-500 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                    <!-- Dropdown notificaciones -->
+                    <div id="dropdown-notif-admin" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 z-50">
+                        <div class="p-4 border-b border-slate-100 flex justify-between items-center">
+                            <h3 class="font-bold text-slate-800 text-sm">Notificaciones</h3>
+                            <button onclick="toggleNotifAdmin()" class="text-xs font-bold text-[#1d4ed8] hover:underline">Cerrar</button>
+                        </div>
+                        <div class="p-2 space-y-1 max-h-64 overflow-y-auto">
+                            <div class="p-3 hover:bg-slate-50 rounded-xl">
+                                <p class="text-xs font-bold text-slate-800">Sistema operativo</p>
+                                <p class="text-[11px] text-slate-400 mt-0.5">Todos los servicios funcionando con normalidad.</p>
+                            </div>
+                            <div class="p-3 hover:bg-slate-50 rounded-xl">
+                                <p class="text-xs font-bold text-slate-800">Nuevas citas registradas</p>
+                                <p class="text-[11px] text-slate-400 mt-0.5">{{ total_citas }} citas este mes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings → ir a catálogo -->
+                <a href="{% url 'admin_servicios' %}" class="p-2 rounded-xl hover:bg-slate-50 text-slate-500 transition" title="Configuración de servicios">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </a>
+                <div class="flex items-center gap-2.5 pl-2 border-l border-slate-100">
+                    <div class="text-right hidden sm:block leading-tight">
+                        <p class="text-sm font-bold text-slate-800">{{ request.user.nombre_completo|default:"Admin"|truncatewords:2 }}</p>
+                        <p class="text-[11px] text-slate-400">ServiTech HQ</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full overflow-hidden bg-[#1d4ed8] flex-shrink-0">
+                        <img src="{% static 'img/foto de perfil administrador.png' %}" alt="Admin" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 p-5 md:p-7">
+            {% block page_header %}{% endblock %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script>
+        function openSidebar() { document.getElementById('sidebar').classList.remove('-translate-x-full'); document.getElementById('sidebar-overlay').classList.remove('hidden'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.add('-translate-x-full'); document.getElementById('sidebar-overlay').classList.add('hidden'); }
+        function toggleNotifAdmin() {
+            const d = document.getElementById('dropdown-notif-admin');
+            d.classList.toggle('hidden');
+        }
+        document.addEventListener('click', e => {
+            const d = document.getElementById('dropdown-notif-admin');
+            if (d && !e.target.closest('[onclick="toggleNotifAdmin()"]') && !d.contains(e.target)) {
+                d.classList.add('hidden');
+            }
+        });
+        function mostrarToast(msg, tipo='info') {
+            const c={success:'bg-emerald-600',warning:'bg-amber-500',error:'bg-red-600',info:'bg-[#1d4ed8]'};
+            const t=document.getElementById('toast-container');
+            const el=document.createElement('div');
+            el.className=`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-white text-sm font-medium ${c[tipo]||c.info} transform translate-y-4 opacity-0 transition-all duration-300`;
+            el.textContent=msg; t.appendChild(el);
+            requestAnimationFrame(()=>el.classList.remove('translate-y-4','opacity-0'));
+            setTimeout(()=>{el.classList.add('opacity-0','translate-y-4');setTimeout(()=>el.remove(),300);},3500);
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

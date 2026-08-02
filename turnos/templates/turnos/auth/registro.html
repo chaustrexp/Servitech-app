@@ -1,246 +1,274 @@
 {% load static %}
 <!doctype html>
 <html lang="es">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ServiTech - Crear Cuenta</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at 15% 15%, rgba(224, 236, 252, 0.8) 0%, transparent 40%),
-                        radial-gradient(circle at 85% 85%, rgba(224, 236, 252, 0.8) 0%, transparent 40%),
-                        #f8fafc;
-        }
-
-        .input-field {
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .input-field:focus {
-            border-color: #002b75;
-            box-shadow: 0 0 0 4px rgba(0,43,117,0.06);
-            outline: none;
-        }
-
-        .btn-register {
-            background-color: #002b75;
-            transition: background-color 0.15s, transform 0.1s;
-        }
-        .btn-register:hover {
-            background-color: #001f54;
-        }
-        .btn-register:active {
-            transform: scale(0.98);
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .card { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        body { font-family: 'Inter', sans-serif; }
+        #video-fondo { position:fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:-2; }
+        #video-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,15,50,0.60); z-index:-1; }
+        .input-field { transition: border-color 0.2s, box-shadow 0.2s; }
+        .input-field:focus { border-color:#002b75; box-shadow:0 0 0 3px rgba(0,43,117,0.08); outline:none; }
+        .btn-register { background: linear-gradient(135deg,#002b75 0%,#0044cc 100%); transition: opacity .15s, transform .1s; }
+        .btn-register:hover { opacity:.92; }
+        .btn-register:active { transform:scale(.98); }
+        @keyframes slideInRight { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes slideInLeft  { from{opacity:0;transform:translateX(-30px)} to{opacity:1;transform:translateX(0)} }
+        .panel-izq { animation: slideInLeft  0.6s cubic-bezier(0.16,1,0.3,1) both; }
+        .panel-der { animation: slideInRight 0.6s cubic-bezier(0.16,1,0.3,1) both; }
     </style>
-  </head>
-  <body class="min-h-screen flex items-center justify-center px-4 py-10">
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <!-- CARD CENTRADA -->
-    <div class="card w-full max-w-md bg-white rounded-3xl border border-slate-100 shadow-xl shadow-[#002b75]/5 p-8 md:p-10 my-8">
+    <video id="video-fondo" autoplay loop playsinline>
+        <source src="{% static 'img/fondo para login.mp4' %}" type="video/mp4">
+    </video>
+    <div id="video-overlay"></div>
 
-      <!-- Logo -->
-      <div class="flex flex-col items-center mb-6">
-          <img
-              src="{% static 'img/logo.jpg' %}"
-              alt="ServiTech"
-              class="h-20 w-auto object-contain rounded-2xl shadow-md mb-4"
-          />
-      </div>
+    <!-- Botón activar sonido -->
+    <button id="btn-sonido" onclick="activarSonido()"
+            class="fixed bottom-6 right-6 z-50 hidden items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/25 text-white text-xs font-semibold px-4 py-2 rounded-full transition shadow-lg">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12M9 9H6a1 1 0 00-1 1v4a1 1 0 001 1h3l4 4V5L9 9z"/>
+        </svg>
+        Activar sonido
+    </button>
 
-      <!-- TÍTULO -->
-      <h1 class="text-3xl font-extrabold text-[#002b75] text-center tracking-tight mb-2">Crear cuenta técnica</h1>
-      <p class="text-slate-500 text-sm text-center mb-8 max-w-[280px] mx-auto">Regístrate para agendar y gestionar tus servicios técnicos</p>
+    <!-- CONTENEDOR RECTANGULAR -->
+    <div class="w-full max-w-5xl flex rounded-2xl overflow-hidden shadow-2xl shadow-black/40">
 
-      <!-- ERRORES GLOBALES -->
-      {% if form.non_field_errors %}
-      <div class="mb-5 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm space-y-1.5 shadow-sm">
-        {% for error in form.non_field_errors %}
-        <p class="flex items-center gap-2 font-medium">
-          <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0 text-red-500"></i>
-          {{ error }}
-        </p>
-        {% endfor %}
-      </div>
-      {% endif %}
+        <!-- PANEL IZQUIERDO: Branding -->
+        <div class="panel-izq hidden md:flex flex-col justify-between w-[45%] bg-gradient-to-br from-[#001a4d] to-[#003399] p-10 relative overflow-hidden">
+            <div class="absolute -top-16 -left-16 w-64 h-64 rounded-full bg-white/5 pointer-events-none"></div>
+            <div class="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-white/5 pointer-events-none"></div>
 
-      {% if messages %}
-      <div class="mb-5 space-y-2">
-        {% for message in messages %}
-        <div class="p-4 rounded-2xl text-sm font-medium bg-blue-50 text-blue-800 border border-blue-200 shadow-sm">
-          {{ message }}
-        </div>
-        {% endfor %}
-      </div>
-      {% endif %}
+            <!-- Logo -->
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-10">
+                    <img src="{% static 'img/logo.jpg' %}" alt="ServiTech"
+                         class="w-12 h-12 rounded-xl object-cover border-2 border-white/20 shadow-lg">
+                    <div>
+                        <p class="text-white font-extrabold text-xl tracking-tight leading-none">ServiTech</p>
+                        <p class="text-blue-300 text-xs font-medium mt-0.5">Gestión Técnica</p>
+                    </div>
+                </div>
+                <h2 class="text-white font-extrabold text-3xl leading-snug mb-4">
+                    Crea tu<br>cuenta
+                </h2>
+                <p class="text-blue-200 text-sm leading-relaxed max-w-xs">
+                    Únete a ServiTech y empieza a gestionar tus dispositivos y citas de servicio técnico.
+                </p>
+            </div>
 
-      <!-- FORMULARIO -->
-      <form method="post" action="{% url 'registro' %}" class="space-y-5" novalidate>
-        {% csrf_token %}
+            <!-- Beneficios -->
+            <div class="relative z-10 space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <p class="text-blue-100 text-xs font-medium">Agenda citas en minutos</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                    </div>
+                    <p class="text-blue-100 text-xs font-medium">Notificaciones en tiempo real</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                    <p class="text-blue-100 text-xs font-medium">Historial completo de reparaciones</p>
+                </div>
+            </div>
 
-        <!-- Nombre Completo -->
-        <div>
-          <label for="{{ form.nombre_completo.id_for_label }}" class="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wider">
-            Nombre Completo
-          </label>
-          <div class="relative">
-            <i data-lucide="user" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-            <input
-              type="text"
-              name="{{ form.nombre_completo.html_name }}"
-              id="{{ form.nombre_completo.id_for_label }}"
-              placeholder="Ej. Juan Pérez"
-              value="{{ form.nombre_completo.value|default:'' }}"
-              class="input-field w-full pl-12 pr-4 py-3 bg-white border {% if form.nombre_completo.errors %}border-red-400 focus:ring-red-400/5{% else %}border-slate-200{% endif %} rounded-xl text-sm text-slate-888 placeholder-slate-400"
-            />
-          </div>
-          {% if form.nombre_completo.errors %}
-          <p class="text-red-500 text-xs mt-1.5 ml-1">{{ form.nombre_completo.errors.0 }}</p>
-          {% endif %}
-        </div>
-
-        <!-- Correo Electrónico -->
-        <div>
-          <label for="{{ form.email.id_for_label }}" class="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wider">
-            Correo Electrónico
-          </label>
-          <div class="relative">
-            <i data-lucide="mail" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-            <input
-              type="email"
-              name="{{ form.email.html_name }}"
-              id="{{ form.email.id_for_label }}"
-              placeholder="ejemplo@servitech.com"
-              value="{{ form.email.value|default:'' }}"
-              class="input-field w-full pl-12 pr-4 py-3 bg-white border {% if form.email.errors %}border-red-400 focus:ring-red-400/5{% else %}border-slate-200{% endif %} rounded-xl text-sm text-slate-888 placeholder-slate-400"
-            />
-          </div>
-          {% if form.email.errors %}
-          <p class="text-red-500 text-xs mt-1.5 ml-1">{{ form.email.errors.0 }}</p>
-          {% endif %}
+            <p class="relative z-10 text-blue-300/60 text-[11px] mt-6">© 2026 ServiTech. Todos los derechos reservados.</p>
         </div>
 
-        <!-- Teléfono -->
-        <div>
-          <label for="{{ form.telefono.id_for_label }}" class="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wider">
-            Teléfono <span class="font-normal text-slate-400 lowercase">(opcional)</span>
-          </label>
-          <div class="relative">
-            <i data-lucide="phone" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-            <input
-              type="tel"
-              name="{{ form.telefono.html_name }}"
-              id="{{ form.telefono.id_for_label }}"
-              placeholder="+57 300 123 4567"
-              value="{{ form.telefono.value|default:'' }}"
-              class="input-field w-full pl-12 pr-4 py-3 bg-white border {% if form.telefono.errors %}border-red-400 focus:ring-red-400/5{% else %}border-slate-200{% endif %} rounded-xl text-sm text-slate-888 placeholder-slate-400"
-            />
-          </div>
-          {% if form.telefono.errors %}
-          <p class="text-red-500 text-xs mt-1.5 ml-1">{{ form.telefono.errors.0 }}</p>
-          {% endif %}
+        <!-- PANEL DERECHO: Formulario -->
+        <div class="panel-der flex-1 bg-white flex flex-col justify-center px-8 md:px-10 py-8 overflow-y-auto">
+
+            <!-- Logo móvil -->
+            <div class="flex items-center gap-3 mb-6 md:hidden">
+                <img src="{% static 'img/logo.jpg' %}" alt="ServiTech" class="w-10 h-10 rounded-xl object-cover border border-slate-200">
+                <span class="text-xl font-extrabold text-[#002b75]">ServiTech</span>
+            </div>
+
+            <h1 class="text-2xl font-extrabold text-slate-800 mb-1">Crear Cuenta</h1>
+            <p class="text-slate-400 text-sm mb-6">Completa tus datos para registrarte como cliente.</p>
+
+            <!-- Errores globales -->
+            {% if form.non_field_errors %}
+            <div class="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2">
+                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span>{% for error in form.non_field_errors %}{{ error }}{% endfor %}</span>
+            </div>
+            {% endif %}
+
+            {% if messages %}
+            <div class="mb-4 space-y-2">
+                {% for message in messages %}
+                <div class="p-3 rounded-xl text-xs font-medium border
+                    {% if message.tags == 'error' %}bg-red-50 text-red-700 border-red-200
+                    {% else %}bg-green-50 text-green-700 border-green-200{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Formulario -->
+            <form method="post" action="{% url 'registro' %}" class="space-y-4" novalidate>
+                {% csrf_token %}
+
+                <!-- Nombre Completo -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Nombre Completo</label>
+                    <div class="relative">
+                        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        <input type="text" name="{{ form.nombre_completo.html_name }}" id="{{ form.nombre_completo.id_for_label }}"
+                               placeholder="Ej. Juan Pérez" value="{{ form.nombre_completo.value|default:'' }}"
+                               class="input-field w-full pl-10 pr-4 py-2.5 bg-slate-50 border {% if form.nombre_completo.errors %}border-red-400{% else %}border-slate-200{% endif %} rounded-xl text-sm text-slate-800 placeholder-slate-400">
+                    </div>
+                    {% if form.nombre_completo.errors %}<p class="text-red-500 text-xs mt-1">{{ form.nombre_completo.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Correo -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Correo Electrónico</label>
+                    <div class="relative">
+                        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
+                        </svg>
+                        <input type="email" name="{{ form.email.html_name }}" id="{{ form.email.id_for_label }}"
+                               placeholder="correo@ejemplo.com" value="{{ form.email.value|default:'' }}"
+                               class="input-field w-full pl-10 pr-4 py-2.5 bg-slate-50 border {% if form.email.errors %}border-red-400{% else %}border-slate-200{% endif %} rounded-xl text-sm text-slate-800 placeholder-slate-400">
+                    </div>
+                    {% if form.email.errors %}<p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Teléfono -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">
+                        Teléfono <span class="font-normal text-slate-400 normal-case">(opcional)</span>
+                    </label>
+                    <div class="relative">
+                        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/>
+                        </svg>
+                        <input type="tel" name="{{ form.telefono.html_name }}" id="{{ form.telefono.id_for_label }}"
+                               placeholder="+57 300 123 4567" value="{{ form.telefono.value|default:'' }}"
+                               class="input-field w-full pl-10 pr-4 py-2.5 bg-slate-50 border {% if form.telefono.errors %}border-red-400{% else %}border-slate-200{% endif %} rounded-xl text-sm text-slate-800 placeholder-slate-400">
+                    </div>
+                    {% if form.telefono.errors %}<p class="text-red-500 text-xs mt-1">{{ form.telefono.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Contraseña -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Contraseña</label>
+                    <div class="relative">
+                        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                        </svg>
+                        <input type="password" name="{{ form.password1.html_name }}" id="reg-password1"
+                               placeholder="Mínimo 8 caracteres"
+                               class="input-field w-full pl-10 pr-10 py-2.5 bg-slate-50 border {% if form.password1.errors %}border-red-400{% else %}border-slate-200{% endif %} rounded-xl text-sm text-slate-800 placeholder-slate-400">
+                        <button type="button" onclick="togglePwd('reg-password1','eye1')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition">
+                            <svg id="eye1" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    {% if form.password1.errors %}<p class="text-red-500 text-xs mt-1">{{ form.password1.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Confirmar Contraseña -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Confirmar Contraseña</label>
+                    <div class="relative">
+                        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                        </svg>
+                        <input type="password" name="{{ form.password2.html_name }}" id="reg-password2"
+                               placeholder="Repite tu contraseña"
+                               class="input-field w-full pl-10 pr-10 py-2.5 bg-slate-50 border {% if form.password2.errors %}border-red-400{% else %}border-slate-200{% endif %} rounded-xl text-sm text-slate-800 placeholder-slate-400">
+                        <button type="button" onclick="togglePwd('reg-password2','eye2')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition">
+                            <svg id="eye2" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    {% if form.password2.errors %}<p class="text-red-500 text-xs mt-1">{{ form.password2.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Botón registrarse -->
+                <button type="submit"
+                        class="btn-register w-full text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-md mt-2 text-sm">
+                    Crear Cuenta
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Divisor + Login -->
+            <div class="flex items-center gap-3 my-5">
+                <div class="flex-1 h-px bg-slate-100"></div>
+                <span class="text-xs text-slate-400">¿Ya tienes cuenta?</span>
+                <div class="flex-1 h-px bg-slate-100"></div>
+            </div>
+            <a href="{% url 'login' %}"
+               class="w-full block text-center border border-slate-200 hover:border-[#002b75] hover:text-[#002b75] text-slate-500 font-semibold py-2.5 rounded-xl transition text-sm">
+                Iniciar Sesión
+            </a>
         </div>
-
-        <!-- Contraseña -->
-        <div>
-          <label for="{{ form.password1.id_for_label }}" class="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wider">
-            Contraseña
-          </label>
-          <div class="relative">
-            <i data-lucide="lock" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-            <input
-              type="password"
-              name="{{ form.password1.html_name }}"
-              id="reg-password1"
-              placeholder="Mínimo 8 caracteres"
-              class="input-field w-full pl-12 pr-12 py-3 bg-white border {% if form.password1.errors %}border-red-400 focus:ring-red-400/5{% else %}border-slate-200{% endif %} rounded-xl text-sm text-slate-888 placeholder-slate-400"
-            />
-            <button type="button" onclick="togglePassword('reg-password1','eye-reg1')" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition">
-              <i id="eye-reg1" data-lucide="eye" class="w-5 h-5"></i>
-            </button>
-          </div>
-          {% if form.password1.errors %}
-          <p class="text-red-500 text-xs mt-1.5 ml-1">{{ form.password1.errors.0 }}</p>
-          {% endif %}
-        </div>
-
-        <!-- Confirmar Contraseña -->
-        <div>
-          <label for="{{ form.password2.id_for_label }}" class="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wider">
-            Confirmar Contraseña
-          </label>
-          <div class="relative">
-            <i data-lucide="lock" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-            <input
-              type="password"
-              name="{{ form.password2.html_name }}"
-              id="reg-password2"
-              placeholder="Repite tu contraseña"
-              class="input-field w-full pl-12 pr-12 py-3 bg-white border {% if form.password2.errors %}border-red-400 focus:ring-red-400/5{% else %}border-slate-200{% endif %} rounded-xl text-sm text-slate-888 placeholder-slate-400"
-            />
-            <button type="button" onclick="togglePassword('reg-password2','eye-reg2')" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition">
-              <i id="eye-reg2" data-lucide="eye" class="w-5 h-5"></i>
-            </button>
-          </div>
-          {% if form.password2.errors %}
-          <p class="text-red-500 text-xs mt-1.5 ml-1">{{ form.password2.errors.0 }}</p>
-          {% endif %}
-        </div>
-
-        <!-- Botón -->
-        <button
-          type="submit"
-          class="btn-register w-full text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-[#002b75]/10 mt-6"
-        >
-          <span>Registrarme</span>
-          <i data-lucide="user-plus" class="w-5 h-5"></i>
-        </button>
-      </form>
-
-      <!-- Divisor -->
-      <div class="flex items-center gap-3 my-6">
-          <div class="flex-1 h-px bg-slate-100"></div>
-          <span class="text-xs text-slate-400 font-medium">¿Ya tienes una cuenta?</span>
-          <div class="flex-1 h-px bg-slate-100"></div>
-      </div>
-
-      <!-- Volver al login -->
-      <a href="{% url 'login' %}" class="w-full block text-center border border-slate-200 hover:border-[#002b75] hover:text-[#002b75] text-slate-600 font-semibold py-3 rounded-xl transition-all text-sm shadow-sm hover:shadow-md">
-          Iniciar Sesión
-      </a>
-
     </div>
 
-    <!-- FOOTER -->
-    <footer class="fixed bottom-4 text-xs text-slate-400 text-center font-medium">
-      © 2026 ServiTech. Todos los derechos reservados.
-    </footer>
-
     <script>
-      lucide.createIcons();
-
-      function togglePassword(inputId, iconId) {
-        const input = document.getElementById(inputId);
-        const icon = document.getElementById(iconId);
-        if (input.type === "password") {
-          input.type = "text";
-          icon.setAttribute("data-lucide", "eye-off");
-        } else {
-          input.type = "password";
-          icon.setAttribute("data-lucide", "eye");
+        /* Video */
+        const video = document.getElementById('video-fondo');
+        const btnS  = document.getElementById('btn-sonido');
+        video.play().then(() => btnS.classList.add('hidden')).catch(() => {
+            video.muted = true; video.play();
+            btnS.classList.remove('hidden'); btnS.classList.add('flex');
+        });
+        function activarSonido() {
+            video.muted = false; video.play();
+            btnS.style.opacity = '0';
+            setTimeout(() => btnS.classList.add('hidden'), 300);
         }
-        lucide.createIcons();
-      }
+
+        /* Toggle contraseña */
+        function togglePwd(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon  = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 01-4.293 5.774M6.228 6.228L17.772 17.772m0 0a3 3 0 11-4.243-4.243m4.243 4.243l-4.243-4.243"/>`;
+            } else {
+                input.type = 'password';
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>`;
+            }
+        }
     </script>
-  </body>
+</body>
 </html>
