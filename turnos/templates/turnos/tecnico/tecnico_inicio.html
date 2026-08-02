@@ -33,7 +33,7 @@
         </div>
         <div>
             <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Citas Hoy</p>
-            <p class="text-2xl md:text-3xl font-extrabold text-[#002b75]">6</p>
+            <p class="text-2xl md:text-3xl font-extrabold text-[#002b75]">{{ citas_hoy_count|default:0 }}</p>
         </div>
     </div>
 
@@ -47,7 +47,7 @@
         </div>
         <div>
             <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide">En Proceso</p>
-            <p class="text-2xl md:text-3xl font-extrabold text-blue-600">1</p>
+            <p class="text-2xl md:text-3xl font-extrabold text-blue-600">{{ en_proceso_count|default:0 }}</p>
         </div>
     </div>
 
@@ -61,7 +61,7 @@
         </div>
         <div>
             <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Finalizadas</p>
-            <p class="text-2xl md:text-3xl font-extrabold text-green-600">3</p>
+            <p class="text-2xl md:text-3xl font-extrabold text-green-600">{{ finalizadas_count|default:0 }}</p>
         </div>
     </div>
 
@@ -75,7 +75,7 @@
         </div>
         <div>
             <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Retrasos</p>
-            <p class="text-2xl md:text-3xl font-extrabold text-red-500">1</p>
+            <p class="text-2xl md:text-3xl font-extrabold text-red-500">{{ retrasos_count|default:0 }}</p>
         </div>
     </div>
 </div>
@@ -93,52 +93,58 @@
         </div>
         <span id="badge-citas-disponibles" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 w-fit">
             <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-            <span id="contador-disponibles">5 disponibles</span>
+            <span id="contador-disponibles">{{ total_disponibles|default:0 }} disponibles</span>
         </span>
     </div>
 
     <!-- Lista de citas disponibles -->
     <div id="lista-citas-disponibles" class="space-y-3">
 
-        <!-- CITA DISPONIBLE 1 -->
-        <div class="cita-disponible border border-slate-200 hover:border-[#002b75] rounded-2xl p-4 transition-all group" data-id="1">
+        {% for cita in citas_disponibles %}
+        <div class="cita-disponible border border-slate-200 hover:border-[#002b75] rounded-2xl p-4 transition-all group" data-id="{{ cita.id }}">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div class="flex items-start gap-4">
                     <!-- Fecha/Hora -->
                     <div class="text-center flex-shrink-0 bg-[#eef2ff] rounded-xl px-3 py-2 min-w-[64px]">
-                        <p class="text-xs text-[#002b75] font-bold uppercase">Hoy</p>
-                        <p class="text-xl font-extrabold text-[#002b75]">10:00</p>
-                        <p class="text-[10px] text-slate-400">11:30</p>
+                        <p class="text-xs text-[#002b75] font-bold uppercase">
+                            {% if cita.fecha == hoy %}Hoy{% else %}{{ cita.fecha|date:"D d/m" }}{% endif %}
+                        </p>
+                        <p class="text-xl font-extrabold text-[#002b75]">{{ cita.hora_inicio|time:"H:i" }}</p>
+                        <p class="text-[10px] text-slate-400">{{ cita.hora_fin|time:"H:i" }}</p>
                     </div>
                     <!-- Info -->
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 flex-wrap mb-1">
-                            <p class="font-bold text-slate-800">Ana Torres</p>
-                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">PENDIENTE</span>
+                            <p class="font-bold text-slate-800">{{ cita.cliente.nombre_completo }}</p>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">
+                                {{ cita.estado.nombre|upper }}
+                            </span>
                         </div>
                         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
                             <span class="flex items-center gap-1.5">
                                 <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                 </svg>
-                                MacBook Pro M2
+                                {{ cita.servicio.nombre }}
                             </span>
+                            {% if cita.observaciones %}
                             <span class="flex items-center gap-1.5">
                                 <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 </svg>
-                                Pantalla parpadeante
+                                {{ cita.observaciones|truncatechars:45 }}
                             </span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
                 <!-- Acciones -->
                 <div class="flex gap-2 flex-shrink-0">
-                    <button onclick="verDetallesCita('Ana Torres', 'MacBook Pro M2', 'Pantalla parpadeante', 'Hoy 10:00 - 11:30')"
+                    <button onclick="verDetallesCita('{{ cita.cliente.nombre_completo|escapejs }}', '{{ cita.servicio.nombre|escapejs }}', '{{ cita.observaciones|default:''|escapejs }}', '{{ cita.fecha }} {{ cita.hora_inicio|time:'H:i' }}')"
                             class="border border-slate-200 hover:border-[#002b75] hover:text-[#002b75] text-slate-600 text-sm font-bold px-3 py-2 rounded-xl transition-all">
                         Ver Detalles
                     </button>
-                    <button onclick="aceptarCita(this, 1)"
+                    <button onclick="aceptarCita(this, {{ cita.id }})"
                             class="flex items-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white text-sm font-bold px-4 py-2 rounded-xl transition-all shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
@@ -148,190 +154,7 @@
                 </div>
             </div>
         </div>
-
-        <!-- CITA DISPONIBLE 2 -->
-        <div class="cita-disponible border border-slate-200 hover:border-[#002b75] rounded-2xl p-4 transition-all group" data-id="2">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <div class="flex items-start gap-4">
-                    <div class="text-center flex-shrink-0 bg-[#eef2ff] rounded-xl px-3 py-2 min-w-[64px]">
-                        <p class="text-xs text-[#002b75] font-bold uppercase">Hoy</p>
-                        <p class="text-xl font-extrabold text-[#002b75]">13:00</p>
-                        <p class="text-[10px] text-slate-400">14:00</p>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 flex-wrap mb-1">
-                            <p class="font-bold text-slate-800">Carlos Mendoza</p>
-                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">PENDIENTE</span>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
-                            <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                </svg>
-                                Samsung Galaxy S24
-                            </span>
-                            <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                                Cambio de pantalla
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex gap-2 flex-shrink-0">
-                    <button onclick="verDetallesCita('Carlos Mendoza', 'Samsung Galaxy S24', 'Cambio de pantalla', 'Hoy 13:00 - 14:00')"
-                            class="border border-slate-200 hover:border-[#002b75] hover:text-[#002b75] text-slate-600 text-sm font-bold px-3 py-2 rounded-xl transition-all">
-                        Ver Detalles
-                    </button>
-                    <button onclick="aceptarCita(this, 2)"
-                            class="flex items-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white text-sm font-bold px-4 py-2 rounded-xl transition-all shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        Aceptar Cita
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- CITA DISPONIBLE 3 -->
-        <div class="cita-disponible border border-slate-200 hover:border-[#002b75] rounded-2xl p-4 transition-all group" data-id="3">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <div class="flex items-start gap-4">
-                    <div class="text-center flex-shrink-0 bg-sky-50 rounded-xl px-3 py-2 min-w-[64px]">
-                        <p class="text-xs text-sky-700 font-bold uppercase">Mañana</p>
-                        <p class="text-xl font-extrabold text-sky-700">09:30</p>
-                        <p class="text-[10px] text-slate-400">10:30</p>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 flex-wrap mb-1">
-                            <p class="font-bold text-slate-800">María García</p>
-                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">PENDIENTE</span>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
-                            <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                </svg>
-                                Dell XPS 15
-                            </span>
-                            <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                                Diagnóstico rendimiento
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex gap-2 flex-shrink-0">
-                    <button onclick="verDetallesCita('María García', 'Dell XPS 15', 'Diagnóstico de rendimiento', 'Mañana 09:30 - 10:30')"
-                            class="border border-slate-200 hover:border-[#002b75] hover:text-[#002b75] text-slate-600 text-sm font-bold px-3 py-2 rounded-xl transition-all">
-                        Ver Detalles
-                    </button>
-                    <button onclick="aceptarCita(this, 3)"
-                            class="flex items-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white text-sm font-bold px-4 py-2 rounded-xl transition-all shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        Aceptar Cita
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- CITA DISPONIBLE 4 -->
-        <div class="cita-disponible border border-slate-200 hover:border-[#002b75] rounded-2xl p-4 transition-all group" data-id="4">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <div class="flex items-start gap-4">
-                    <div class="text-center flex-shrink-0 bg-sky-50 rounded-xl px-3 py-2 min-w-[64px]">
-                        <p class="text-xs text-sky-700 font-bold uppercase">Mañana</p>
-                        <p class="text-xl font-extrabold text-sky-700">11:00</p>
-                        <p class="text-[10px] text-slate-400">12:30</p>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 flex-wrap mb-1">
-                            <p class="font-bold text-slate-800">Roberto López</p>
-                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">PENDIENTE</span>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
-                            <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                </svg>
-                                iPhone 14 Pro
-                            </span>
-                            <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                                Cambio de batería
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex gap-2 flex-shrink-0">
-                    <button onclick="verDetallesCita('Roberto López', 'iPhone 14 Pro', 'Cambio de batería', 'Mañana 11:00 - 12:30')"
-                            class="border border-slate-200 hover:border-[#002b75] hover:text-[#002b75] text-slate-600 text-sm font-bold px-3 py-2 rounded-xl transition-all">
-                        Ver Detalles
-                    </button>
-                    <button onclick="aceptarCita(this, 4)"
-                            class="flex items-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white text-sm font-bold px-4 py-2 rounded-xl transition-all shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        Aceptar Cita
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- CITA DISPONIBLE 5 -->
-        <div class="cita-disponible border border-slate-200 hover:border-[#002b75] rounded-2xl p-4 transition-all group" data-id="5">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <div class="flex items-start gap-4">
-                    <div class="text-center flex-shrink-0 bg-purple-50 rounded-xl px-3 py-2 min-w-[64px]">
-                        <p class="text-xs text-purple-700 font-bold uppercase">Jue</p>
-                        <p class="text-xl font-extrabold text-purple-700">14:00</p>
-                        <p class="text-[10px] text-slate-400">15:00</p>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 flex-wrap mb-1">
-                            <p class="font-bold text-slate-800">Juan Pérez</p>
-                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">PENDIENTE</span>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
-                            <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                </svg>
-                                Logitech MX Master 3
-                            </span>
-                            <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                                Limpieza de sensor
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex gap-2 flex-shrink-0">
-                    <button onclick="verDetallesCita('Juan Pérez', 'Logitech MX Master 3', 'Limpieza de sensor', 'Jueves 14:00 - 15:00')"
-                            class="border border-slate-200 hover:border-[#002b75] hover:text-[#002b75] text-slate-600 text-sm font-bold px-3 py-2 rounded-xl transition-all">
-                        Ver Detalles
-                    </button>
-                    <button onclick="aceptarCita(this, 5)"
-                            class="flex items-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white text-sm font-bold px-4 py-2 rounded-xl transition-all shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        Aceptar Cita
-                    </button>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
 
         <!-- Estado vacío (oculto por defecto) -->
         <div id="estado-vacio" class="hidden py-12 text-center">

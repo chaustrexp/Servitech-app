@@ -105,6 +105,7 @@
 
         <!-- Formulario -->
         <form method="post" action="{% url 'login' %}" class="space-y-5" novalidate>
+            <input type="hidden" name="role_context" id="role_context" value="cliente">
             {% csrf_token %}
 
             <!-- Correo -->
@@ -225,8 +226,9 @@
         function seleccionarRol(rol) {
             const tabCliente = document.getElementById('tab-cliente');
             const tabTecnico = document.getElementById('tab-tecnico');
-            const hint       = document.getElementById('rol-hint');
+            const hint        = document.getElementById('rol-hint');
             const inputCorreo = document.querySelector('input[type="email"]');
+            const roleCtx     = document.getElementById('role_context');
 
             // Reset tabs
             tabCliente.className = 'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-500 hover:text-slate-700';
@@ -239,6 +241,9 @@
             } else {
                 tabTecnico.className = activeClass;
             }
+
+            // Actualizar el campo oculto role_context para que el backend identifique el rol
+            if (roleCtx) roleCtx.value = rol;
 
             hint.textContent = roles[rol].hint;
             if (inputCorreo) inputCorreo.placeholder = roles[rol].placeholder;

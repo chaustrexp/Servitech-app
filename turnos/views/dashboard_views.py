@@ -12,10 +12,46 @@ def admin_dashboard(request):
 
 @login_required
 def dashboard_tecnico(request):
-    """Dashboard del técnico."""
+    """Dashboard del técnico: obtiene citas reales desde la base de datos PostgreSQL."""
     if request.user.rol != Usuario.Rol.TECNICO:
         return redirect('home')
-    return render(request, 'turnos/tecnico/tecnico_inicio.html')
+
+    from datetime import date
+    hoy = date.today()
+
+    # Citas programadas para hoy
+    citas_hoy_count = Cita.objects.filter(fecha=hoy).count()
+
+    # Citas en proceso (En diagnóstico o En reparación)
+    en_proceso_count = Cita.objects.filter(
+        estado__nombre__in=['EN_DIAGNOSTICO', 'EN_REPARACION', 'En Diagnóstico', 'En Reparación']
+    ).count()
+
+    # Citas finalizadas
+    finalizadas_count = Cita.objects.filter(
+        estado__nombre__iexact='finalizada'
+    ).count()
+
+    # Citas con retraso
+    retrasos_count = Cita.objects.filter(
+        estado__nombre__iexact='retrasada'
+    ).count()
+
+    # Citas disponibles (Pendientes)
+    citas_disponibles = Cita.objects.filter(
+        estado__nombre__iexact='pendiente'
+    ).select_related('cliente', 'servicio', 'estado').order_by('fecha', 'hora_inicio')
+
+    context = {
+        'citas_hoy_count': citas_hoy_count,
+        'en_proceso_count': en_proceso_count,
+        'finalizadas_count': finalizadas_count,
+        'retrasos_count': retrasos_count,
+        'citas_disponibles': citas_disponibles,
+        'total_disponibles': citas_disponibles.count(),
+        'hoy': hoy,
+    }
+    return render(request, 'turnos/tecnico/tecnico_inicio.html', context)
 
 @login_required
 def tecnico_agenda(request):
@@ -46,20 +82,82 @@ def tecnico_dispositivos(request):
 
 @login_required
 def tecnico_clientes(request):
-    """Directorio de clientes para el técnico: muestra solo clientes con más de 1 cita."""
+    """Directorio de clientes para el técnico: muestra todos los clientes registrados."""
     if request.user.rol != Usuario.Rol.TECNICO:
         return redirect('home')
 
-    from django.db.models import Count
+    from django.db.models import Count, Max, Subquery, OuterRef
+    from turnos.models.citas import Cita
+
+    # Subquery: nombre del último servicio de cada cliente
+    ultimo_servicio_sq = (
+        Cita.objects
+        .filter(cliente=OuterRef('pk'))
+        .order_by('-fecha', '-hora_inicio')
+        .values('servicio__nombre')[:1]
+    )
+
     clientes = (
         Usuario.objects
         .filter(rol=Usuario.Rol.CLIENTE)
-        .annotate(total_citas=Count('citas_cliente'))
-        .filter(total_citas__gt=1)
-        .order_by('-total_citas')
+        .annotate(
+            total_citas=Count('citas_cliente', distinct=True),
+            ultima_fecha=Max('citas_cliente__fecha'),
+            ultimo_servicio=Subquery(ultimo_servicio_sq),
+        )
+        .order_by('-total_citas', 'nombre_completo')
     )
 
-    return render(request, 'turnos/tecnico/tecnico_clientes.html', {'clientes': clientes})
+    # Clasificación de nivel según cantidad de citas
+    def nivel_cliente(citas):
+        if citas >= 8:
+            return {'label': 'Platinum', 'bg': 'bg-purple-100', 'text': 'text-purple-700'}
+        elif citas >= 4:
+            return {'label': 'Gold', 'bg': 'bg-yellow-100', 'text': 'text-yellow-700'}
+        elif citas >= 2:
+            return {'label': 'Silver', 'bg': 'bg-slate-100', 'text': 'text-slate-600'}
+        else:
+            return {'label': 'Nuevo', 'bg': 'bg-emerald-100', 'text': 'text-emerald-700'}
+
+    # Agregar nivel a cada cliente (como atributo dinámico)
+    clientes_con_nivel = []
+    for c in clientes:
+        c.nivel = nivel_cliente(c.total_citas)
+        c.tag_filtro = _tag_filtro(c)
+        clientes_con_nivel.append(c)
+
+    total_clientes = len(clientes_con_nivel)
+    nuevos_mes = sum(
+        1 for c in clientes_con_nivel
+        if c.fecha_registro and c.fecha_registro.month == __import__('datetime').date.today().month
+    )
+
+    context = {
+        'clientes': clientes_con_nivel,
+        'total_clientes': total_clientes,
+        'nuevos_mes': nuevos_mes,
+    }
+    return render(request, 'turnos/tecnico/tecnico_clientes.html', context)
+
+
+def _tag_filtro(cliente):
+    """Genera las etiquetas de filtro (recientes, fieles, inactivos) para data-tag."""
+    import datetime
+    tags = []
+    hoy = datetime.date.today()
+
+    if cliente.ultima_fecha:
+        dias = (hoy - cliente.ultima_fecha).days
+        if dias <= 30:
+            tags.append('recientes')
+        elif dias > 90:
+            tags.append('inactivos')
+
+    if cliente.total_citas >= 3:
+        tags.append('fieles')
+
+    return ' '.join(tags) if tags else 'todos'
+
 
 
 @login_required

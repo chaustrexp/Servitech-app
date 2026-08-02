@@ -59,24 +59,29 @@
 ══════════════════════════════════════════════ -->
 <div id="grid-clientes" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
 
-    <!-- ── Cliente 1: PLATINUM ── -->
+    {% for cliente in clientes %}
     <div class="cliente-card bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-all"
-         data-nombre="Elena Rodríguez" data-telefono="+34 612 345 678" data-tag="recientes fieles top">
+         data-nombre="{{ cliente.nombre_completo }}"
+         data-telefono="{{ cliente.telefono|default:'' }}"
+         data-tag="{{ cliente.tag_filtro }}">
 
         <!-- Fila superior: foto + nombre + badge -->
         <div class="flex items-start gap-3">
-            <img src="{% static 'img/foto de perfil cliente.png' %}" alt="Elena"
-                 class="w-13 h-13 w-12 h-12 rounded-full object-cover border-2 border-white shadow flex-shrink-0 ring-2 ring-purple-100">
+            <div class="w-12 h-12 rounded-full bg-[#eef2ff] border-2 border-white shadow flex-shrink-0 flex items-center justify-center text-[#002b75] font-extrabold text-lg uppercase">
+                {{ cliente.nombre_completo|first }}
+            </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap mb-0.5">
-                    <p class="font-extrabold text-slate-800 text-base leading-tight">Elena Rodríguez</p>
-                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-purple-100 text-purple-700 tracking-widest uppercase">Platinum</span>
+                    <p class="font-extrabold text-slate-800 text-base leading-tight">{{ cliente.nombre_completo }}</p>
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold {{ cliente.nivel.bg }} {{ cliente.nivel.text }} tracking-widest uppercase">
+                        {{ cliente.nivel.label }}
+                    </span>
                 </div>
                 <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
                     <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                     </svg>
-                    +34 612 345 678
+                    {{ cliente.telefono|default:"Sin teléfono" }}
                 </div>
             </div>
         </div>
@@ -85,164 +90,67 @@
         <div class="bg-[#f8fafc] rounded-xl p-3 border border-slate-100">
             <div class="flex items-center justify-between mb-1">
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Historial</span>
-                <span class="text-[11px] font-bold text-[#002b75]">12 Servicios</span>
+                <span class="text-[11px] font-bold text-[#002b75]">{{ cliente.total_citas }} Servicio{{ cliente.total_citas|pluralize }}</span>
             </div>
-            <p class="text-xs text-slate-500 italic truncate">Último: Mantenimiento de servidor central...</p>
-            <!-- Tags de especialidad -->
-            <div class="flex gap-1.5 mt-2 flex-wrap">
-                <span class="px-2 py-0.5 bg-[#eef2ff] text-[#002b75] text-[10px] font-bold rounded-md tracking-wide">MAC FAN</span>
-                <span class="px-2 py-0.5 bg-[#eef2ff] text-[#002b75] text-[10px] font-bold rounded-md tracking-wide">IPHONE EXPERT</span>
-            </div>
+            {% if cliente.ultimo_servicio %}
+            <p class="text-xs text-slate-500 italic truncate">Último: {{ cliente.ultimo_servicio }}</p>
+            {% else %}
+            <p class="text-xs text-slate-400 italic">Sin servicios registrados</p>
+            {% endif %}
             <div class="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400">
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
-                Último contacto: 15 Oct
+                {% if cliente.ultima_fecha %}
+                    Último contacto: {{ cliente.ultima_fecha|date:"d M" }}
+                {% else %}
+                    Registrado: {{ cliente.fecha_registro|date:"d M Y" }}
+                {% endif %}
             </div>
         </div>
 
         <!-- Acciones -->
         <div class="flex items-center gap-2 pt-1">
-            <button onclick="enviarMensaje('Elena Rodríguez')"
+            <button onclick="enviarMensaje('{{ cliente.nombre_completo }}')"
                     class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition" title="Enviar mensaje">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                 </svg>
             </button>
-            <button onclick="abrirHistorial('Elena Rodríguez', 'Platinum', 12, 'Mantenimiento de servidor central', '+34 612 345 678')"
+            <button onclick="abrirHistorial('{{ cliente.nombre_completo }}', '{{ cliente.nivel.label }}', {{ cliente.total_citas }}, '{{ cliente.ultimo_servicio|default:"Sin servicios" }}', '{{ cliente.telefono|default:"N/A" }}')"
                     class="flex-1 flex items-center justify-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white text-xs font-bold py-2.5 rounded-xl transition shadow-sm">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 Ver Historial
             </button>
-            <button onclick="llamarCliente('+34 612 345 678', 'Elena Rodríguez')"
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    <!-- ── Cliente 2: GOLD ── -->
-    <div class="cliente-card bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-all"
-         data-nombre="Marcos Sanchis" data-telefono="+34 688 122 900" data-tag="recientes top">
-        <div class="flex items-start gap-3">
-            <img src="{% static 'img/foto de perfil cliente.png' %}" alt="Marcos"
-                 class="w-12 h-12 rounded-full object-cover border-2 border-white shadow flex-shrink-0 ring-2 ring-yellow-100">
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 flex-wrap mb-0.5">
-                    <p class="font-extrabold text-slate-800 text-base leading-tight">Marcos Sanchis</p>
-                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-yellow-100 text-yellow-700 tracking-widest uppercase">Gold</span>
-                </div>
-                <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                    <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                    </svg>
-                    +34 688 122 900
-                </div>
-            </div>
-        </div>
-        <div class="bg-[#f8fafc] rounded-xl p-3 border border-slate-100">
-            <div class="flex items-center justify-between mb-1">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Historial</span>
-                <span class="text-[11px] font-bold text-[#002b75]">5 Servicios</span>
-            </div>
-            <p class="text-xs text-slate-500 italic truncate">Último: Reparación Laptop pantalla rota...</p>
-            <div class="flex gap-1.5 mt-2 flex-wrap">
-                <span class="px-2 py-0.5 bg-[#eef2ff] text-[#002b75] text-[10px] font-bold rounded-md tracking-wide">PC GAMER</span>
-            </div>
-            <div class="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                Último contacto: 08 Nov
-            </div>
-        </div>
-        <div class="flex items-center gap-2 pt-1">
-            <button onclick="enviarMensaje('Marcos Sanchis')"
-                    class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition" title="Enviar mensaje">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                </svg>
-            </button>
-            <button onclick="abrirHistorial('Marcos Sanchis', 'Gold', 5, 'Reparación Laptop pantalla rota', '+34 688 122 900')"
-                    class="flex-1 flex items-center justify-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white text-xs font-bold py-2.5 rounded-xl transition shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Ver Historial
-            </button>
-            <button onclick="llamarCliente('+34 688 122 900', 'Marcos Sanchis')"
+            {% if cliente.telefono %}
+            <button onclick="llamarCliente('{{ cliente.telefono }}', '{{ cliente.nombre_completo }}')"
                     class="p-2 bg-white border border-slate-200 hover:border-[#002b75] hover:text-[#002b75] text-slate-500 rounded-xl transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                 </svg>
             </button>
+            {% endif %}
         </div>
     </div>
-
-    <!-- ── Cliente 3: SILVER ── -->
-    <div class="cliente-card bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-all"
-         data-nombre="Javier Gómez" data-telefono="+34 600 001 002" data-tag="inactivos riesgo">
-        <div class="flex items-start gap-3">
-            <img src="{% static 'img/foto de perfil cliente.png' %}" alt="Javier"
-                 class="w-12 h-12 rounded-full object-cover border-2 border-white shadow flex-shrink-0 ring-2 ring-slate-100">
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 flex-wrap mb-0.5">
-                    <p class="font-extrabold text-slate-800 text-base leading-tight">Javier Gómez</p>
-                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-100 text-slate-600 tracking-widest uppercase">Silver</span>
-                </div>
-                <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                    <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                    </svg>
-                    +34 600 001 002
-                </div>
-            </div>
+    {% empty %}
+    <div class="col-span-3 py-10 text-center">
+        <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
         </div>
-        <div class="bg-[#f8fafc] rounded-xl p-3 border border-slate-100">
-            <div class="flex items-center justify-between mb-1">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Historial</span>
-                <span class="text-[11px] font-bold text-[#002b75]">2 Servicios</span>
-            </div>
-            <p class="text-xs text-slate-500 italic truncate">Último: Instalación Red empresarial...</p>
-            <div class="flex gap-1.5 mt-2 flex-wrap">
-                <span class="px-2 py-0.5 bg-[#eef2ff] text-[#002b75] text-[10px] font-bold rounded-md tracking-wide">NETWORK PRO</span>
-            </div>
-            <div class="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                Último contacto: 01 Oct
-            </div>
-        </div>
-        <div class="flex items-center gap-2 pt-1">
-            <button onclick="enviarMensaje('Javier Gómez')"
-                    class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition" title="Enviar mensaje">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                </svg>
-            </button>
-            <button onclick="abrirHistorial('Javier Gómez', 'Silver', 2, 'Instalación Red empresarial', '+34 600 001 002')"
-                    class="flex-1 flex items-center justify-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white text-xs font-bold py-2.5 rounded-xl transition shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Ver Historial
-            </button>
-            <button onclick="llamarCliente('+34 600 001 002', 'Javier Gómez')"
-                    class="p-2 bg-white border border-slate-200 hover:border-[#002b75] hover:text-[#002b75] text-slate-500 rounded-xl transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                </svg>
-            </button>
-        </div>
+        <p class="font-bold text-slate-600 text-sm">No hay clientes registrados</p>
+        <p class="text-xs text-slate-400 mt-1">Agrega un nuevo cliente para comenzar.</p>
     </div>
+    {% endfor %}
 
 </div>
 
-<!-- Estado vacío -->
+
+
+<!-- Estado vacío (filtros JS) -->
 <div id="sin-resultados" class="hidden py-10 text-center mb-6">
     <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
         <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,6 +160,7 @@
     <p class="font-bold text-slate-600 text-sm">Sin clientes en esta categoría</p>
     <p class="text-xs text-slate-400 mt-1">Prueba otra pestaña o agrega un nuevo cliente.</p>
 </div>
+
 
 <!-- ══════════════════════════════════════════════
      FILA MEDIA: Actividad Reciente + Insights
