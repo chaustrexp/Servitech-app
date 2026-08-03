@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Especialidad, Servicio, EstadoCita, HorarioTecnico, Cita, HistorialCita, Notificacion, Usuario
+from .models import Especialidad, Servicio, EstadoCita, HorarioTecnico, Cita, HistorialCita, Notificacion, Usuario, Repuesto, Inventario
 
 
 @admin.register(Usuario)
@@ -32,3 +32,5 @@ admin.site.register(HorarioTecnico)
 admin.site.register(Cita)
 admin.site.register(HistorialCita)
 admin.site.register(Notificacion)
+admin.site.register(Repuesto)
+admin.site.register(Inventario)
