@@ -99,6 +99,12 @@
                 <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Fecha y Hora</p>
                 <p class="font-bold text-[#002b75]">{{ cita.fecha|date:"j M" }}, {{ cita.hora_inicio|time:"g:i A" }}</p>
             </div>
+            {% if cita.observaciones %}
+            <div class="col-span-2">
+                <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Notas / Observaciones</p>
+                <p class="font-medium text-slate-700 text-sm italic">{{ cita.observaciones }}</p>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Separador -->

@@ -85,6 +85,8 @@ def resumen_cita(request):
 
         estado, _ = EstadoCita.objects.get_or_create(nombre='Confirmada')
 
+        notas_usuario = (request.POST.get('observaciones') or request.POST.get('notas') or '').strip()
+
         cita = Cita.objects.create(
             cliente=request.user,
             servicio=servicio_obj,
@@ -92,7 +94,7 @@ def resumen_cita(request):
             fecha=fecha_obj,
             hora_inicio=hora_inicio,
             hora_fin=hora_fin,
-            observaciones=f'Dispositivo: {dispositivo}',
+            observaciones=notas_usuario if notas_usuario else None,
         )
 
         for key in ['wizard_dispositivo', 'wizard_servicio', 'wizard_fecha', 'wizard_hora']:
@@ -113,10 +115,8 @@ def cita_confirmada(request, cita_id):
     cita = get_object_or_404(Cita, pk=cita_id, cliente=request.user)
 
     dispositivo_map = {'CELULAR': 'Celular', 'LAPTOP': 'Laptop', 'PC': 'PC'}
-    raw = ''
-    if cita.observaciones and cita.observaciones.startswith('Dispositivo: '):
-        raw = cita.observaciones.replace('Dispositivo: ', '', 1)
-    dispositivo_display = dispositivo_map.get(raw, raw) or cita.servicio.tipo_dispositivo.title()
+    tipo_disp = cita.servicio.tipo_dispositivo.upper() if cita.servicio and cita.servicio.tipo_dispositivo else ''
+    dispositivo_display = dispositivo_map.get(tipo_disp, cita.servicio.tipo_dispositivo.title() if cita.servicio and cita.servicio.tipo_dispositivo else 'Equipo')
 
     fecha_str = cita.fecha.strftime('%Y%m%d')
     hi_str = cita.hora_inicio.strftime('%H%M%S')
@@ -161,10 +161,8 @@ def detalle_cita(request, cita_id):
         return redirect('detalle_cita', cita_id=cita.pk)
 
     dispositivo_map = {'CELULAR': 'Celular', 'LAPTOP': 'Laptop', 'PC': 'PC'}
-    raw = ''
-    if cita.observaciones and cita.observaciones.startswith('Dispositivo: '):
-        raw = cita.observaciones.replace('Dispositivo: ', '', 1)
-    dispositivo_display = dispositivo_map.get(raw, raw) or cita.servicio.tipo_dispositivo.title()
+    tipo_disp = cita.servicio.tipo_dispositivo.upper() if cita.servicio and cita.servicio.tipo_dispositivo else ''
+    dispositivo_display = dispositivo_map.get(tipo_disp, cita.servicio.tipo_dispositivo.title() if cita.servicio and cita.servicio.tipo_dispositivo else 'Equipo')
 
     estado_nombre = cita.estado.nombre if cita.estado else 'Confirmada'
     estados_progreso = [
