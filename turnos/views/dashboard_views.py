@@ -97,9 +97,15 @@ def dashboard_tecnico(request):
         estado__nombre__iexact='retrasada'
     ).count()
 
-    # Citas disponibles (Pendientes)
+    # Citas disponibles para tomar: sin técnico asignado, en estado PENDIENTE, CONFIRMADA o REAGENDADA
+    ESTADOS_DISPONIBLES = [
+        'PENDIENTE', 'Pendiente', 'pendiente',
+        'CONFIRMADA', 'Confirmada', 'confirmada',
+        'REAGENDADA', 'Reagendada', 'reagendada',
+    ]
     citas_disponibles = Cita.objects.filter(
-        estado__nombre__iexact='pendiente'
+        estado__nombre__in=ESTADOS_DISPONIBLES,
+        tecnico__isnull=True
     ).select_related('cliente', 'servicio', 'estado').order_by('fecha', 'hora_inicio')
 
     context = {
