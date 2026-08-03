@@ -1,0 +1,833 @@
+{% extends 'turnos/administracion/admin_base.html' %}
+{% load static %}
+
+{% block title %}Catálogo de Servicios | ServiTech{% endblock %}
+
+{% block page_header %}
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div class="flex items-center gap-3">
+        <button onclick="abrirModalAgregarServicio()"
+                class="flex items-center gap-2 bg-gradient-to-r from-royal to-sky hover:opacity-95 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm transition-all shadow-md shadow-royal/20 ml-auto">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            + Agregar Servicio
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<!-- ════════════════════════════════════════════
+     1. KPIs CATÁLOGO
+════════════════════════════════════════════ -->
+<div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm">
+        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Servicios</p>
+        <p class="text-2xl font-extrabold text-navy mt-1">{{ servicios.count }}</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm">
+        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Activos</p>
+        <p class="text-2xl font-extrabold text-emerald mt-1">{{ servicios_activos }}</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm">
+        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Inactivos</p>
+        <p class="text-2xl font-extrabold text-slate-400 mt-1">{{ servicios_inactivos }}</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm">
+        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Especialidades</p>
+        <p class="text-2xl font-extrabold text-royal mt-1">{{ especialidades.count }}</p>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     2. BUSCADOR + FILTROS
+════════════════════════════════════════════ -->
+<div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm mb-6 flex flex-col sm:flex-row gap-3 items-center">
+    <!-- Buscador -->
+    <div class="relative flex-1 w-full">
+        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" id="buscador-catalogo" placeholder="Buscar por nombre, tipo o especialidad..."
+               oninput="filtrarCatalogo()"
+               class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-royal focus:bg-white transition-all">
+    </div>
+    <!-- Filtro Tipo -->
+    <select id="filtro-tipo" onchange="filtrarCatalogo()"
+            class="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-royal transition-all w-full sm:w-auto">
+        <option value="">Todos los tipos</option>
+        <option value="CELULAR">Celular</option>
+        <option value="LAPTOP">Laptop</option>
+        <option value="PC">PC</option>
+    </select>
+    <!-- Filtro Estado -->
+    <select id="filtro-estado" onchange="filtrarCatalogo()"
+            class="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-royal transition-all w-full sm:w-auto">
+        <option value="">Todos los estados</option>
+        <option value="activo">Activos</option>
+        <option value="inactivo">Inactivos</option>
+    </select>
+    <!-- Contador resultados -->
+    <span id="contador-resultados" class="text-xs font-semibold text-slate-400 flex-shrink-0 hidden sm:block">
+        {{ servicios.count }} resultados
+    </span>
+</div>
+
+<!-- ════════════════════════════════════════════
+     3. GRID DE TARJETAS DE SERVICIOS
+════════════════════════════════════════════ -->
+<div id="grid-servicios" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
+
+    {% for servicio in servicios %}
+    <div class="card-servicio bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-lg transition-all overflow-hidden group relative"
+         data-nombre="{{ servicio.nombre|lower }}"
+         data-tipo="{{ servicio.tipo_dispositivo }}"
+         data-especialidad="{{ servicio.especialidad.nombre|lower }}"
+         data-estado="{% if servicio.activo %}activo{% else %}inactivo{% endif %}">
+
+        <!-- Imagen / Banner superior -->
+        <div class="h-28 relative overflow-hidden
+            {% if servicio.tipo_dispositivo == 'CELULAR' %}bg-gradient-to-br from-royal/10 to-sky/20
+            {% elif servicio.tipo_dispositivo == 'LAPTOP' %}bg-gradient-to-br from-navy/10 to-royal/20
+            {% else %}bg-gradient-to-br from-slate-100 to-slate-200{% endif %}">
+
+            <!-- Icono centrado según tipo -->
+            <div class="absolute inset-0 flex items-center justify-center opacity-20 group-hover:opacity-30 transition-opacity">
+                {% if servicio.tipo_dispositivo == 'CELULAR' %}
+                <svg class="w-24 h-24 text-royal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+                {% elif servicio.tipo_dispositivo == 'LAPTOP' %}
+                <svg class="w-24 h-24 text-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                {% else %}
+                <svg class="w-24 h-24 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                {% endif %}
+            </div>
+
+            <!-- Badge disponibilidad (top-left) -->
+            <div class="absolute top-3 left-3">
+                {% if servicio.activo %}
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-light text-emerald border border-emerald/20 shadow-sm">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald inline-block"></span> Disponible
+                </span>
+                {% else %}
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200 shadow-sm">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block"></span> Inactivo
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- Badge tipo dispositivo (top-right) -->
+            <div class="absolute top-3 right-12">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/80 text-slate-600 border border-slate-200/80 shadow-sm backdrop-blur-sm">
+                    {{ servicio.get_tipo_dispositivo_display }}
+                </span>
+            </div>
+
+            <!-- Menú contextual 3 puntos -->
+            <div class="absolute top-2 right-2">
+                <button onclick="toggleMenuContextual(event, {{ servicio.id }})"
+                        class="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/80 text-slate-500 hover:text-navy hover:bg-white flex items-center justify-center shadow-sm transition-all">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                    </svg>
+                </button>
+                <!-- Dropdown menú contextual -->
+                <div id="menu-ctx-{{ servicio.id }}"
+                     class="menu-contextual hidden absolute right-0 top-10 w-44 bg-white rounded-2xl shadow-xl border border-slate-200 z-30 py-1.5 overflow-hidden">
+                    <button onclick="abrirModalEditar({{ servicio.id }}, '{{ servicio.nombre|escapejs }}', '{{ servicio.descripcion|default:''|escapejs }}', '{{ servicio.tipo_dispositivo }}', {{ servicio.duracion_minutos }}, {{ servicio.buffer_minutos }}, {{ servicio.especialidad.id }})"
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                        <svg class="w-4 h-4 text-royal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Editar Servicio
+                    </button>
+                    <form method="post" action="{% url 'admin_toggle_servicio' servicio.id %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold transition-colors
+                                {% if servicio.activo %}text-amber-700 hover:bg-amber-50{% else %}text-emerald hover:bg-emerald-light/40{% endif %}">
+                            {% if servicio.activo %}
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                            </svg>
+                            Desactivar
+                            {% else %}
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Activar
+                            {% endif %}
+                        </button>
+                    </form>
+                    <hr class="my-1 border-slate-100">
+                    <button onclick="verDetalleServicio({{ servicio.id }}, '{{ servicio.nombre|escapejs }}')"
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Ver Detalle
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cuerpo de la tarjeta -->
+        <div class="p-4">
+            <h3 class="font-extrabold text-navy text-sm leading-tight truncate">{{ servicio.nombre }}</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5 truncate">{{ servicio.especialidad.nombre }}</p>
+
+            {% if servicio.descripcion %}
+            <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">{{ servicio.descripcion }}</p>
+            {% endif %}
+
+            <!-- Métricas: precio base + tiempo estimado -->
+            <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Precio Base</p>
+                    <p class="text-sm font-extrabold text-navy mt-0.5">
+                        ${{ servicio.precio_base|default:"—" }}
+                    </p>
+                </div>
+                <div class="w-px h-8 bg-slate-100"></div>
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Duración</p>
+                    <p class="text-sm font-extrabold text-navy mt-0.5">{{ servicio.duracion_minutos }} min</p>
+                </div>
+                <div class="w-px h-8 bg-slate-100"></div>
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Buffer</p>
+                    <p class="text-sm font-extrabold text-slate-500 mt-0.5">+{{ servicio.buffer_minutos }} min</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full py-16 text-center text-slate-400">
+        <svg class="w-12 h-12 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+        </svg>
+        <p class="text-sm font-semibold">No hay servicios registrados.</p>
+        <p class="text-xs mt-1">Haz clic en "＋ Agregar Servicio" para comenzar.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Mensaje sin resultados (búsqueda) -->
+<div id="sin-resultados" class="hidden py-12 text-center text-slate-400">
+    <svg class="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    </svg>
+    <p class="text-sm font-semibold">Sin resultados para tu búsqueda.</p>
+    <p class="text-xs mt-1">Intenta con otro nombre o tipo de dispositivo.</p>
+</div>
+
+<!-- ════════════════════════════════════════════
+     4. BLOQUE SERVICIOS PREMIUM EMPRESA (SLA)
+════════════════════════════════════════════ -->
+<div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden mb-8">
+
+    <!-- Header del bloque -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-navy/5 to-transparent">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center shadow-md">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="font-extrabold text-navy text-sm">Servicios Premium Empresa</h3>
+                <p class="text-[11px] text-slate-400">Contratos corporativos con SLA garantizado. Activa, desactiva o ajusta tiempos.</p>
+            </div>
+        </div>
+        <span class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+            </svg>
+            Plan Corporativo
+        </span>
+    </div>
+
+    <!-- Lista de servicios premium (simulados con datos reales del modelo) -->
+    <div class="divide-y divide-slate-100">
+
+        {% for sla in servicios_premium %}
+        <div class="flex items-center gap-4 px-6 py-4 hover:bg-slate-50/60 transition-colors group" id="sla-row-{{ forloop.counter }}">
+
+            <!-- Icono + info -->
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
+                {% if forloop.counter == 1 %}bg-royal/10 text-royal
+                {% elif forloop.counter == 2 %}bg-purple-100 text-purple-600
+                {% elif forloop.counter == 3 %}bg-emerald-light text-emerald
+                {% else %}bg-amber-50 text-amber-600{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-navy truncate">{{ sla.nombre }}</p>
+                <p class="text-[11px] text-slate-400 truncate">{{ sla.especialidad.nombre }} · {{ sla.get_tipo_dispositivo_display }}</p>
+            </div>
+
+            <!-- SLA: tiempo estimado editable -->
+            <div class="hidden sm:flex items-center gap-2">
+                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 group-hover:border-royal/40 transition-colors">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="text-xs font-bold text-navy sla-value" id="sla-val-{{ forloop.counter }}">{{ sla.duracion_minutos }} min</span>
+                </div>
+                <!-- Icono edición rápida SLA -->
+                <button onclick="editarSLA({{ sla.id }}, {{ forloop.counter }}, {{ sla.duracion_minutos }})"
+                        class="w-8 h-8 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-royal hover:border-royal/40 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-sm"
+                        title="Editar SLA">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Switch Activo/Inactivo -->
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <span class="text-[11px] font-semibold text-slate-400 hidden md:block" id="sla-label-{{ forloop.counter }}">
+                    {% if sla.activo %}Activo{% else %}Inactivo{% endif %}
+                </span>
+                <form method="post" action="{% url 'admin_toggle_servicio' sla.id %}" class="inline" id="form-sla-{{ forloop.counter }}">
+                    {% csrf_token %}
+                    <button type="button"
+                            onclick="toggleSLA({{ sla.id }}, {{ forloop.counter }}, this)"
+                            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none
+                            {% if sla.activo %}bg-emerald{% else %}bg-slate-200{% endif %}"
+                            role="switch" aria-checked="{{ sla.activo|lower }}"
+                            data-activo="{{ sla.activo|lower }}">
+                        <span class="inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform
+                                     {% if sla.activo %}translate-x-6{% else %}translate-x-1{% endif %}">
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <!-- Datos de ejemplo si no hay servicios marcados como premium -->
+        {% for servicio in servicios|slice:":4" %}
+        <div class="flex items-center gap-4 px-6 py-4 hover:bg-slate-50/60 transition-colors group" id="sla-row-{{ forloop.counter }}">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
+                {% if forloop.counter == 1 %}bg-royal/10 text-royal
+                {% elif forloop.counter == 2 %}bg-purple-100 text-purple-600
+                {% elif forloop.counter == 3 %}bg-emerald-light text-emerald
+                {% else %}bg-amber-50 text-amber-600{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-navy truncate">{{ servicio.nombre }}</p>
+                <p class="text-[11px] text-slate-400 truncate">{{ servicio.especialidad.nombre }} · {{ servicio.get_tipo_dispositivo_display }}</p>
+            </div>
+            <div class="hidden sm:flex items-center gap-2">
+                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 group-hover:border-royal/40 transition-colors">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="text-xs font-bold text-navy sla-value" id="sla-val-{{ forloop.counter }}">{{ servicio.duracion_minutos }} min</span>
+                </div>
+                <button onclick="editarSLA({{ servicio.id }}, {{ forloop.counter }}, {{ servicio.duracion_minutos }})"
+                        class="w-8 h-8 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-royal hover:border-royal/40 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-sm"
+                        title="Editar SLA">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <span class="text-[11px] font-semibold text-slate-400 hidden md:block" id="sla-label-{{ forloop.counter }}">
+                    {% if servicio.activo %}Activo{% else %}Inactivo{% endif %}
+                </span>
+                <form method="post" action="{% url 'admin_toggle_servicio' servicio.id %}" class="inline" id="form-sla-{{ forloop.counter }}">
+                    {% csrf_token %}
+                    <button type="button"
+                            onclick="toggleSLA({{ servicio.id }}, {{ forloop.counter }}, this)"
+                            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none
+                            {% if servicio.activo %}bg-emerald{% else %}bg-slate-200{% endif %}"
+                            role="switch" aria-checked="{{ servicio.activo|lower }}"
+                            data-activo="{{ servicio.activo|lower }}">
+                        <span class="inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform
+                                     {% if servicio.activo %}translate-x-6{% else %}translate-x-1{% endif %}">
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     5. MODAL: AGREGAR SERVICIO
+════════════════════════════════════════════ -->
+<div id="modal-agregar-servicio" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarModalAgregarServicio()"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg z-10 border border-slate-200 overflow-hidden">
+
+        <!-- Header del modal -->
+        <div class="bg-gradient-to-r from-navy to-royal px-6 py-5 text-white flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-base leading-tight">Agregar Nuevo Servicio</h3>
+                    <p class="text-xs text-sky-light/80">Completa los datos del catálogo</p>
+                </div>
+            </div>
+            <button onclick="cerrarModalAgregarServicio()" class="text-white/60 hover:text-white transition p-1 rounded-lg hover:bg-white/10">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Formulario -->
+        <form method="post" action="{% url 'admin_crear_servicio' %}" class="p-6 space-y-4">
+            {% csrf_token %}
+
+            <!-- Nombre -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nombre del Servicio <span class="text-rose-500">*</span></label>
+                <input type="text" name="nombre" required placeholder="Ej. Cambio de Pantalla OLED"
+                       class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white focus:ring-2 focus:ring-royal/10 transition-all">
+            </div>
+
+            <!-- Descripción -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Descripción</label>
+                <textarea name="descripcion" rows="2" placeholder="Breve descripción del servicio..."
+                          class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white focus:ring-2 focus:ring-royal/10 transition-all resize-none"></textarea>
+            </div>
+
+            <!-- Tipo dispositivo + Especialidad -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tipo Dispositivo <span class="text-rose-500">*</span></label>
+                    <select name="tipo_dispositivo" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all">
+                        <option value="CELULAR">📱 Celular</option>
+                        <option value="LAPTOP">💻 Laptop</option>
+                        <option value="PC">🖥️ PC</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Especialidad <span class="text-rose-500">*</span></label>
+                    <select name="especialidad_id" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all">
+                        {% for esp in especialidades %}
+                        <option value="{{ esp.id }}">{{ esp.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Duración + Buffer + Precio base -->
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Duración (min) <span class="text-rose-500">*</span></label>
+                    <input type="number" name="duracion_minutos" min="5" max="480" value="60" required
+                           class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Buffer (min)</label>
+                    <input type="number" name="buffer_minutos" min="0" max="60" value="10"
+                           class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Precio Base ($)</label>
+                    <input type="number" name="precio_base" min="0" step="0.01" placeholder="0.00"
+                           class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all">
+                </div>
+            </div>
+
+            <!-- Preview dinámica -->
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/80">
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Vista Previa</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-royal/10 text-royal flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xs font-extrabold text-navy" id="preview-nombre">Nombre del servicio</p>
+                        <p class="text-[11px] text-slate-400">Duración estimada: <span id="preview-duracion" class="font-bold text-navy">60 min</span></p>
+                    </div>
+                    <span class="ml-auto px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-light text-emerald">Disponible</span>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="cerrarModalAgregarServicio()"
+                        class="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="flex-1 py-3 rounded-xl bg-gradient-to-r from-royal to-sky text-white font-extrabold text-xs hover:opacity-95 transition-all shadow-md shadow-royal/20">
+                    Crear Servicio
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     6. MODAL: EDITAR SERVICIO
+════════════════════════════════════════════ -->
+<div id="modal-editar-servicio" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarModalEditar()"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg z-10 border border-slate-200 overflow-hidden">
+
+        <div class="bg-gradient-to-r from-slate-700 to-slate-800 px-6 py-5 text-white flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-base leading-tight">Editar Servicio</h3>
+                    <p class="text-xs text-slate-300">Modifica los datos del servicio</p>
+                </div>
+            </div>
+            <button onclick="cerrarModalEditar()" class="text-white/60 hover:text-white transition p-1 rounded-lg hover:bg-white/10">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <form id="form-editar-servicio" method="post" action="" class="p-6 space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nombre <span class="text-rose-500">*</span></label>
+                <input type="text" name="nombre" id="edit-nombre" required
+                       class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Descripción</label>
+                <textarea name="descripcion" id="edit-descripcion" rows="2"
+                          class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all resize-none"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tipo Dispositivo</label>
+                    <select name="tipo_dispositivo" id="edit-tipo"
+                            class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all">
+                        <option value="CELULAR">📱 Celular</option>
+                        <option value="LAPTOP">💻 Laptop</option>
+                        <option value="PC">🖥️ PC</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Especialidad</label>
+                    <select name="especialidad_id" id="edit-especialidad"
+                            class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all">
+                        {% for esp in especialidades %}
+                        <option value="{{ esp.id }}">{{ esp.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Duración (min)</label>
+                    <input type="number" name="duracion_minutos" id="edit-duracion" min="5" max="480"
+                           class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Buffer (min)</label>
+                    <input type="number" name="buffer_minutos" id="edit-buffer" min="0" max="60"
+                           class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all">
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="cerrarModalEditar()"
+                        class="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="flex-1 py-3 rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 text-white font-extrabold text-xs hover:opacity-95 transition-all shadow-md">
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     7. MODAL: EDITAR SLA RÁPIDO
+════════════════════════════════════════════ -->
+<div id="modal-editar-sla" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarModalSLA()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-xs z-10 border border-slate-200 p-6">
+        <h3 class="font-extrabold text-navy text-base mb-1">Editar SLA</h3>
+        <p class="text-xs text-slate-400 mb-4">Ajusta el tiempo de atención garantizado para este servicio premium.</p>
+
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tiempo SLA (minutos)</label>
+        <input type="number" id="sla-input" min="5" max="480"
+               class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all mb-4">
+
+        <div class="flex gap-3">
+            <button onclick="cerrarModalSLA()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all">Cancelar</button>
+            <button onclick="guardarSLA()" class="flex-1 py-2.5 rounded-xl bg-royal text-white font-extrabold text-xs hover:bg-royal-hover transition-all shadow-md shadow-royal/20">Guardar</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ─────────────────────────────────────────────
+// 1. BUSCADOR Y FILTROS DEL CATÁLOGO
+// ─────────────────────────────────────────────
+function filtrarCatalogo() {
+    const q         = document.getElementById('buscador-catalogo').value.toLowerCase().trim();
+    const tipo      = document.getElementById('filtro-tipo').value;
+    const estado    = document.getElementById('filtro-estado').value;
+    const tarjetas  = document.querySelectorAll('.card-servicio');
+    let   visibles  = 0;
+
+    tarjetas.forEach(card => {
+        const nombre      = card.dataset.nombre || '';
+        const cardTipo    = card.dataset.tipo || '';
+        const especialidad= card.dataset.especialidad || '';
+        const cardEstado  = card.dataset.estado || '';
+
+        const coincideQ      = !q || nombre.includes(q) || especialidad.includes(q);
+        const coincideTipo   = !tipo  || cardTipo === tipo;
+        const coincideEstado = !estado || cardEstado === estado;
+
+        if (coincideQ && coincideTipo && coincideEstado) {
+            card.style.display = '';
+            visibles++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Mostrar/ocultar mensaje sin resultados
+    const sinRes = document.getElementById('sin-resultados');
+    if (visibles === 0 && tarjetas.length > 0) {
+        sinRes.classList.remove('hidden');
+    } else {
+        sinRes.classList.add('hidden');
+    }
+
+    // Actualizar contador
+    const contador = document.getElementById('contador-resultados');
+    if (contador) contador.textContent = `${visibles} resultado${visibles !== 1 ? 's' : ''}`;
+}
+
+// ─────────────────────────────────────────────
+// 2. MENÚ CONTEXTUAL DE 3 PUNTOS
+// ─────────────────────────────────────────────
+function toggleMenuContextual(event, servicioId) {
+    event.stopPropagation();
+    // Cerrar todos los otros menús abiertos
+    document.querySelectorAll('.menu-contextual').forEach(m => {
+        if (m.id !== `menu-ctx-${servicioId}`) m.classList.add('hidden');
+    });
+    const menu = document.getElementById(`menu-ctx-${servicioId}`);
+    menu.classList.toggle('hidden');
+}
+
+// Cerrar menús al hacer clic fuera
+document.addEventListener('click', () => {
+    document.querySelectorAll('.menu-contextual').forEach(m => m.classList.add('hidden'));
+});
+
+function verDetalleServicio(id, nombre) {
+    document.querySelectorAll('.menu-contextual').forEach(m => m.classList.add('hidden'));
+    showToast(`📋 Detalle de "${nombre}" — ID #${id}`, 'success');
+}
+
+// ─────────────────────────────────────────────
+// 3. MODAL AGREGAR SERVICIO
+// ─────────────────────────────────────────────
+function abrirModalAgregarServicio() {
+    const modal = document.getElementById('modal-agregar-servicio');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function cerrarModalAgregarServicio() {
+    const modal = document.getElementById('modal-agregar-servicio');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Preview dinámica en modal agregar
+const inputNombre   = document.querySelector('[name="nombre"]');
+const inputDuracion = document.querySelector('[name="duracion_minutos"]');
+if (inputNombre) {
+    inputNombre.addEventListener('input', () => {
+        const preview = document.getElementById('preview-nombre');
+        if (preview) preview.textContent = inputNombre.value || 'Nombre del servicio';
+    });
+}
+if (inputDuracion) {
+    inputDuracion.addEventListener('input', () => {
+        const preview = document.getElementById('preview-duracion');
+        if (preview) preview.textContent = `${inputDuracion.value || 60} min`;
+    });
+}
+
+// ─────────────────────────────────────────────
+// 4. MODAL EDITAR SERVICIO
+// ─────────────────────────────────────────────
+function abrirModalEditar(id, nombre, descripcion, tipo, duracion, buffer, especialidadId) {
+    // Cerrar menú contextual
+    document.querySelectorAll('.menu-contextual').forEach(m => m.classList.add('hidden'));
+
+    // Actualizar action del form
+    document.getElementById('form-editar-servicio').action = `/admin-panel/servicios/${id}/editar/`;
+
+    // Rellenar campos
+    document.getElementById('edit-nombre').value = nombre;
+    document.getElementById('edit-descripcion').value = descripcion;
+    document.getElementById('edit-tipo').value = tipo;
+    document.getElementById('edit-duracion').value = duracion;
+    document.getElementById('edit-buffer').value = buffer;
+    document.getElementById('edit-especialidad').value = especialidadId;
+
+    // Mostrar modal
+    const modal = document.getElementById('modal-editar-servicio');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function cerrarModalEditar() {
+    const modal = document.getElementById('modal-editar-servicio');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// ─────────────────────────────────────────────
+// 5. TOGGLE SLA (SWITCH ACTIVO/INACTIVO)
+// ─────────────────────────────────────────────
+function toggleSLA(servicioId, rowIndex, btn) {
+    const estaActivo = btn.getAttribute('data-activo') === 'true';
+    const nuevoEstado = !estaActivo;
+
+    // Animación inmediata del switch (UI optimista)
+    btn.setAttribute('data-activo', nuevoEstado.toString());
+    btn.setAttribute('aria-checked', nuevoEstado.toString());
+
+    const thumb = btn.querySelector('span');
+    if (nuevoEstado) {
+        btn.classList.replace('bg-slate-200', 'bg-emerald');
+        thumb.classList.replace('translate-x-1', 'translate-x-6');
+    } else {
+        btn.classList.replace('bg-emerald', 'bg-slate-200');
+        thumb.classList.replace('translate-x-6', 'translate-x-1');
+    }
+
+    // Actualizar label
+    const label = document.getElementById(`sla-label-${rowIndex}`);
+    if (label) label.textContent = nuevoEstado ? 'Activo' : 'Inactivo';
+
+    // Enviar al servidor mediante fetch (sin recargar)
+    const form = document.getElementById(`form-sla-${rowIndex}`);
+    const formData = new FormData(form);
+
+    fetch(`/admin-panel/servicios/${servicioId}/toggle/`, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => {
+        if (res.ok || res.redirected) {
+            showToast(
+                nuevoEstado ? `✅ Servicio activado` : `⏸ Servicio desactivado`,
+                'success'
+            );
+        } else {
+            throw new Error('Error en el servidor');
+        }
+    })
+    .catch(() => {
+        // Revertir en caso de error
+        btn.setAttribute('data-activo', estaActivo.toString());
+        if (estaActivo) {
+            btn.classList.replace('bg-slate-200', 'bg-emerald');
+            thumb.classList.replace('translate-x-1', 'translate-x-6');
+        } else {
+            btn.classList.replace('bg-emerald', 'bg-slate-200');
+            thumb.classList.replace('translate-x-6', 'translate-x-1');
+        }
+        showToast('⚠️ Error al actualizar el estado.', 'error');
+    });
+}
+
+// ─────────────────────────────────────────────
+// 6. EDICIÓN RÁPIDA DE SLA
+// ─────────────────────────────────────────────
+let _slaEditando = { id: null, rowIndex: null };
+
+function editarSLA(servicioId, rowIndex, valorActual) {
+    _slaEditando = { id: servicioId, rowIndex: rowIndex };
+    document.getElementById('sla-input').value = valorActual;
+
+    const modal = document.getElementById('modal-editar-sla');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    setTimeout(() => document.getElementById('sla-input').focus(), 100);
+}
+
+function cerrarModalSLA() {
+    const modal = document.getElementById('modal-editar-sla');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    _slaEditando = { id: null, rowIndex: null };
+}
+
+function guardarSLA() {
+    const nuevoValor = parseInt(document.getElementById('sla-input').value, 10);
+    if (!nuevoValor || nuevoValor < 5) {
+        showToast('⚠️ El tiempo SLA debe ser al menos 5 minutos.', 'error');
+        return;
+    }
+
+    // Actualizar UI de la fila SLA
+    const slaVal = document.getElementById(`sla-val-${_slaEditando.rowIndex}`);
+    if (slaVal) slaVal.textContent = `${nuevoValor} min`;
+
+    cerrarModalSLA();
+    showToast(`⏱ SLA actualizado a ${nuevoValor} min. Guarda desde "Editar" para persistir.`, 'success');
+}
+
+// ─────────────────────────────────────────────
+// Cerrar modales con Escape
+// ─────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        cerrarModalAgregarServicio();
+        cerrarModalEditar();
+        cerrarModalSLA();
+    }
+});
+</script>
+{% endblock %}
