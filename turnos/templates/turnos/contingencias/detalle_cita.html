@@ -116,9 +116,15 @@
                         </p>
                         <p class="text-xs text-slate-500">Centro de Servicio Principal</p>
                     </div>
-                </div>
             </div>
         </div>
+
+        {% if cita.observaciones %}
+        <div class="mt-4 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+            <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Notas / Observaciones del Cliente</p>
+            <p class="font-medium text-slate-700 text-sm italic">{{ cita.observaciones }}</p>
+        </div>
+        {% endif %}
 
         <!-- Separador dashed -->
         <div class="border-t border-dashed border-slate-200 my-6"></div>
