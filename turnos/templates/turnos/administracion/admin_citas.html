@@ -1,0 +1,459 @@
+{% extends 'turnos/administracion/admin_base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Citas - Panel de Administración | ServiTech{% endblock %}
+
+{% block page_header %}
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div>
+        <div class="flex items-center gap-2">
+            <h1 class="text-xl font-extrabold text-navy tracking-tight">Gestión de Citas y Turnos</h1>
+            <span id="badge-total-citas" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-royal/10 text-royal border border-royal/20">
+                {{ total_citas|default:"12" }} Citas Registradas
+            </span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">
+            Administra, filtra y exporta el historial completo de citas técnicas.
+        </p>
+    </div>
+
+    <!-- Botones de Acción Global -->
+    <div class="flex flex-wrap items-center gap-2.5">
+        <button onclick="exportarCitasExcel()"
+                class="flex items-center gap-2 bg-emerald hover:bg-emerald/90 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition-all shadow-md shadow-emerald/20">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span>Exportar (.xlsx)</span>
+        </button>
+
+        <button onclick="window.print()"
+                class="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-3.5 py-2 rounded-xl text-xs transition-all shadow-sm">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            <span>Imprimir</span>
+        </button>
+
+        <button onclick="abrirModalNuevaCita()"
+                class="flex items-center gap-2 bg-gradient-to-r from-royal to-sky hover:opacity-95 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-md shadow-royal/20">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            <span>+ Nueva Cita</span>
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<!-- ════════════════════════════════════════════
+     1. FILTROS AVANZADOS
+════════════════════════════════════════════ -->
+<div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+
+        <!-- Buscador por cliente o ID -->
+        <div class="lg:col-span-2">
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Buscar por cliente / ID</label>
+            <div class="relative">
+                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" id="filtro-texto" onkeyup="aplicarFiltros()" placeholder="Nombre de cliente o folio..."
+                       class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-royal focus:bg-white transition">
+            </div>
+        </div>
+
+        <!-- Filtro Estado -->
+        <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Estado</label>
+            <select id="filtro-estado" onchange="aplicarFiltros()"
+                    class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-royal focus:bg-white cursor-pointer transition">
+                <option value="TODOS">Todos los estados</option>
+                <option value="PENDIENTE">PENDIENTE</option>
+                <option value="CONFIRMADA">CONFIRMADA</option>
+                <option value="EN_DIAGNOSTICO">EN DIAGNÓSTICO</option>
+                <option value="EN_REPARACION">EN REPARACIÓN</option>
+                <option value="FINALIZADA">FINALIZADA</option>
+                <option value="CANCELADA">CANCELADA</option>
+            </select>
+        </div>
+
+        <!-- Filtro Técnico -->
+        <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Técnico Asignado</label>
+            <select id="filtro-tecnico" onchange="aplicarFiltros()"
+                    class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-royal focus:bg-white cursor-pointer transition">
+                <option value="TODOS">Todos los técnicos</option>
+                <option value="Carlos Mendoza">Carlos Mendoza</option>
+                <option value="Ana Torres">Ana Torres</option>
+                <option value="Sin Asignar">Sin Asignar</option>
+            </select>
+        </div>
+
+        <!-- Botón Limpiar -->
+        <div class="flex items-end">
+            <button onclick="limpiarFiltros()"
+                    class="w-full py-2 px-3 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span>Limpiar</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     2. TABLA DE CITAS
+════════════════════════════════════════════ -->
+<div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden mb-6">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <th class="py-3.5 px-5">ID Cita</th>
+                    <th class="py-3.5 px-5">Cliente</th>
+                    <th class="py-3.5 px-5">Servicio / Dispositivo</th>
+                    <th class="py-3.5 px-5">Fecha & Hora</th>
+                    <th class="py-3.5 px-5">Técnico</th>
+                    <th class="py-3.5 px-5">Estado</th>
+                    <th class="py-3.5 px-5 text-right">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-citas-body" class="divide-y divide-slate-100 text-xs sm:text-sm">
+                <!-- Se renderiza dinámicamente desde JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p id="info-paginacion" class="text-xs font-semibold text-slate-500">
+            Mostrando 1 a 5 de 10 citas
+        </p>
+        <div class="flex items-center gap-1.5" id="controles-paginacion">
+            <!-- Botones dinámicos JS -->
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     3. MODAL REASIGNAR TÉCNICO
+════════════════════════════════════════════ -->
+<div id="modal-reasignar" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarModalReasignar()"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm z-10 overflow-hidden border border-slate-200 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-extrabold text-navy text-base">Reasignar Técnico</h3>
+            <button onclick="cerrarModalReasignar()" class="text-slate-400 hover:text-slate-600">✕</button>
+        </div>
+        <p id="reasignar-info-cita" class="text-xs text-slate-500 mb-4">Cita #101 · Cliente: Carlos Mendoza</p>
+
+        <div class="mb-4">
+            <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Nuevo Técnico</label>
+            <select id="select-nuevo-tecnico" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-royal">
+                <option value="Carlos Mendoza">Carlos Mendoza</option>
+                <option value="Ana Torres">Ana Torres</option>
+                <option value="Sin Asignar">Sin Asignar</option>
+            </select>
+        </div>
+
+        <div class="flex gap-3">
+            <button onclick="cerrarModalReasignar()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50">Cancelar</button>
+            <button onclick="confirmarReasignacion()" class="flex-1 py-2.5 rounded-xl bg-royal hover:bg-royal-hover text-white font-bold text-xs shadow-md">Guardar</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ─────────────────────────────────────────────
+// DATASET DE CITAS (Mezcla de BD y Mocks completos)
+// ─────────────────────────────────────────────
+let CITAS_BD = [
+    {% if citas %}
+        {% for c in citas %}
+        {
+            id: "{{ c.id }}",
+            cliente: "{{ c.cliente.nombre_completo|escapejs }}",
+            servicio: "{{ c.servicio.nombre|escapejs }}",
+            dispositivo: "{{ c.servicio.tipo_dispositivo|default:'Dispositivo'|escapejs }}",
+            fecha: "{{ c.fecha|date:'d/m/Y' }}",
+            hora: "{{ c.hora_inicio|time:'H:i' }} - {{ c.hora_fin|time:'H:i' }}",
+            tecnico: "{{ c.tecnico.nombre_completo|default:'Sin Asignar'|escapejs }}",
+            estado: "{{ c.estado.nombre|upper|escapejs }}",
+            observaciones: "{{ c.observaciones|default:''|escapejs }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    {% else %}
+        { id: "101", cliente: "Carlos Mendoza", servicio: "Cambio de Pantalla OLED", dispositivo: "Celular", fecha: "03/08/2026", hora: "09:00 - 10:00", tecnico: "Carlos Mendoza", estado: "PENDIENTE", observaciones: "Pantalla rota por caída" },
+        { id: "102", cliente: "María García", servicio: "Mantenimiento Laptop HP", dispositivo: "Laptop", fecha: "03/08/2026", hora: "10:30 - 11:30", tecnico: "Ana Torres", estado: "CONFIRMADA", observaciones: "Limpieza interna y pasta térmica" },
+        { id: "103", cliente: "Roberto López", servicio: "Reparación de Placa Base", dispositivo: "PC Escritorio", fecha: "04/08/2026", hora: "11:00 - 12:30", tecnico: "Sin Asignar", estado: "EN_DIAGNOSTICO", observaciones: "No enciende después de tormenta" },
+        { id: "104", cliente: "Sofía Ramírez", servicio: "Formateo e Instalación OS", dispositivo: "Laptop", fecha: "04/08/2026", hora: "14:00 - 15:00", tecnico: "Carlos Mendoza", estado: "EN_REPARACION", observaciones: "Respaldo de información previa" },
+        { id: "105", cliente: "Juan Bayona", servicio: "Cambio de Batería Macbook", dispositivo: "Laptop", fecha: "05/08/2026", hora: "15:30 - 16:30", tecnico: "Ana Torres", estado: "FINALIZADA", observaciones: "Batería inflada remplazada" },
+        { id: "106", cliente: "Cristian Chaustre", servicio: "Optimización de Sistema", dispositivo: "PC Escritorio", fecha: "05/08/2026", hora: "16:30 - 17:30", tecnico: "Carlos Mendoza", estado: "CANCELADA", observaciones: "Cliente canceló por viaje" }
+    {% endif %}
+];
+
+let citasFiltradas = [...CITAS_BD];
+let paginaActual = 1;
+const porPagina = 5;
+let citaSeleccionadaId = null;
+
+// ─────────────────────────────────────────────
+// RENDERIZADO Y PAGINACIÓN
+// ─────────────────────────────────────────────
+function renderizarTabla() {
+    const tbody = document.getElementById('tabla-citas-body');
+    tbody.innerHTML = '';
+
+    const inicio = (paginaActual - 1) * porPagina;
+    const fin = inicio + porPagina;
+    const paginadas = citasFiltradas.slice(inicio, fin);
+
+    if (paginadas.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="py-12 text-center text-slate-400 font-medium">
+                    🔍 No se encontraron citas con los filtros aplicados.
+                </td>
+            </tr>`;
+        actualizarPaginacion(0);
+        return;
+    }
+
+    paginadas.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition-colors border-b border-slate-100';
+
+        let estadoBadge = '';
+        const est = c.estado.toUpperCase();
+        if (est.includes('FINALIZ')) estadoBadge = 'bg-emerald-light text-emerald border-emerald/30';
+        else if (est.includes('CANCEL')) estadoBadge = 'bg-rose-50 text-rose-600 border-rose-200';
+        else if (est.includes('DIAGNOS')) estadoBadge = 'bg-purple-50 text-purple-700 border-purple-200';
+        else if (est.includes('REPARAC')) estadoBadge = 'bg-amber-50 text-amber-700 border-amber-200';
+        else if (est.includes('CONFIRM')) estadoBadge = 'bg-sky-light text-sky border-sky/30';
+        else estadoBadge = 'bg-royal/10 text-royal border-royal/20';
+
+        tr.innerHTML = `
+            <td class="py-4 px-5 font-bold text-navy">#${c.id}</td>
+            <td class="py-4 px-5">
+                <p class="font-bold text-slate-800 leading-tight">${c.cliente}</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">${c.observaciones ? '📝 ' + c.observaciones.substring(0, 30) + '...' : 'Sin notas'}</p>
+            </td>
+            <td class="py-4 px-5">
+                <p class="font-semibold text-slate-700">${c.servicio}</p>
+                <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">${c.dispositivo}</span>
+            </td>
+            <td class="py-4 px-5">
+                <p class="font-bold text-slate-700">${c.fecha}</p>
+                <p class="text-[11px] text-slate-400">${c.hora}</p>
+            </td>
+            <td class="py-4 px-5">
+                <span class="text-xs font-semibold ${c.tecnico === 'Sin Asignar' ? 'text-amber-600 italic' : 'text-slate-700'}">
+                    👤 ${c.tecnico}
+                </span>
+            </td>
+            <td class="py-4 px-5">
+                <span class="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded-full border ${estadoBadge}">
+                    ${c.estado}
+                </span>
+            </td>
+            <td class="py-4 px-5 text-right relative">
+                <button onclick="toggleMenuAcciones('${c.id}', event)" class="p-1.5 rounded-xl hover:bg-slate-100 text-slate-500 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                    </svg>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    actualizarPaginacion(citasFiltradas.length);
+}
+
+function actualizarPaginacion(total) {
+    const info = document.getElementById('info-paginacion');
+    const contenedor = document.getElementById('controles-paginacion');
+    contenedor.innerHTML = '';
+
+    if (total === 0) {
+        info.textContent = 'Mostrando 0 de 0 citas';
+        return;
+    }
+
+    const totalPaginas = Math.ceil(total / porPagina);
+    const inicio = (paginaActual - 1) * porPagina + 1;
+    const fin = Math.min(paginaActual * porPagina, total);
+    info.textContent = `Mostrando ${inicio} a ${fin} de ${total} citas`;
+
+    // Botón Anterior
+    const btnAnt = document.createElement('button');
+    btnAnt.className = `px-3 py-1 rounded-xl border border-slate-200 text-xs font-bold ${paginaActual === 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-600'}`;
+    btnAnt.textContent = '« Ant';
+    btnAnt.onclick = () => { if (paginaActual > 1) { paginaActual--; renderizarTabla(); } };
+    contenedor.appendChild(btnAnt);
+
+    // Botones de número
+    for (let i = 1; i <= totalPaginas; i++) {
+        const btnNum = document.createElement('button');
+        btnNum.className = `px-3 py-1 rounded-xl text-xs font-bold ${i === paginaActual ? 'bg-navy text-white shadow-sm' : 'border border-slate-200 text-slate-600 hover:bg-slate-100'}`;
+        btnNum.textContent = i;
+        btnNum.onclick = () => { paginaActual = i; renderizarTabla(); };
+        contenedor.appendChild(btnNum);
+    }
+
+    // Botón Siguiente
+    const btnSig = document.createElement('button');
+    btnSig.className = `px-3 py-1 rounded-xl border border-slate-200 text-xs font-bold ${paginaActual === totalPaginas ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-600'}`;
+    btnSig.textContent = 'Sig »';
+    btnSig.onclick = () => { if (paginaActual < totalPaginas) { paginaActual++; renderizarTabla(); } };
+    contenedor.appendChild(btnSig);
+}
+
+// ─────────────────────────────────────────────
+// FILTROS AVANZADOS
+// ─────────────────────────────────────────────
+function aplicarFiltros() {
+    const txt = document.getElementById('filtro-texto').value.toLowerCase();
+    const est = document.getElementById('filtro-estado').value;
+    const tec = document.getElementById('filtro-tecnico').value;
+
+    citasFiltradas = CITAS_BD.filter(c => {
+        const matchTxt = c.cliente.toLowerCase().includes(txt) || c.id.toString().includes(txt);
+        const matchEst = est === 'TODOS' || c.estado.toUpperCase().includes(est.replace('_',' '));
+        const matchTec = tec === 'TODOS' || c.tecnico === tec;
+        return matchTxt && matchEst && matchTec;
+    });
+
+    paginaActual = 1;
+    renderizarTabla();
+}
+
+function limpiarFiltros() {
+    document.getElementById('filtro-texto').value = '';
+    document.getElementById('filtro-estado').value = 'TODOS';
+    document.getElementById('filtro-tecnico').value = 'TODOS';
+    citasFiltradas = [...CITAS_BD];
+    paginaActual = 1;
+    renderizarTabla();
+}
+
+// ─────────────────────────────────────────────
+// ACCIONES Y MODAL DE REASIGNAR
+// ─────────────────────────────────────────────
+function toggleMenuAcciones(id, event) {
+    event.stopPropagation();
+    citaSeleccionadaId = id;
+    abrirModalReasignar(id);
+}
+
+function abrirModalReasignar(id) {
+    const cita = CITAS_BD.find(c => c.id === id);
+    if (!cita) return;
+    document.getElementById('reasignar-info-cita').textContent = `Cita #${cita.id} · Cliente: ${cita.cliente}`;
+    document.getElementById('select-nuevo-tecnico').value = cita.tecnico;
+    const m = document.getElementById('modal-reasignar');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+}
+
+function cerrarModalReasignar() {
+    const m = document.getElementById('modal-reasignar');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+}
+
+function confirmarReasignacion() {
+    const nuevoTec = document.getElementById('select-nuevo-tecnico').value;
+    const cita = CITAS_BD.find(c => c.id === citaSeleccionadaId);
+    if (cita) {
+        cita.tecnico = nuevoTec;
+        cerrarModalReasignar();
+        renderizarTabla();
+        showToast(`👤 Técnico reasignado a ${nuevoTec} para Cita #${cita.id}`, "success");
+    }
+}
+
+// ─────────────────────────────────────────────
+// EXPORTACIÓN A EXCEL CON EXCELJS (Estilizado)
+// ─────────────────────────────────────────────
+async function exportarCitasExcel() {
+    try {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Citas ServiTech');
+
+        // Definir Columnas
+        worksheet.columns = [
+            { header: 'ID Cita', key: 'id', width: 12 },
+            { header: 'Cliente', key: 'cliente', width: 25 },
+            { header: 'Servicio', key: 'servicio', width: 28 },
+            { header: 'Dispositivo', key: 'dispositivo', width: 16 },
+            { header: 'Fecha', key: 'fecha', width: 14 },
+            { header: 'Horario', key: 'hora', width: 18 },
+            { header: 'Técnico Asignado', key: 'tecnico', width: 22 },
+            { header: 'Estado', key: 'estado', width: 16 },
+            { header: 'Observaciones', key: 'observaciones', width: 30 }
+        ];
+
+        // Formato Encabezado Corporativo (#001E50)
+        const headerRow = worksheet.getRow(1);
+        headerRow.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFF' } };
+        headerRow.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '001E50' }
+        };
+        headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+        headerRow.height = 28;
+
+        // Agregar Datos
+        citasFiltradas.forEach((c, index) => {
+            const row = worksheet.addRow(c);
+            row.height = 22;
+            row.alignment = { vertical: 'middle', horizontal: 'left' };
+
+            // Alternar fondo de filas
+            if (index % 2 === 1) {
+                row.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'F8FAFC' }
+                };
+            }
+
+            // Aplicar Bordes
+            row.eachCell((cell) => {
+                cell.border = {
+                    top: { style: 'thin', color: { argb: 'E2E8F0' } },
+                    left: { style: 'thin', color: { argb: 'E2E8F0' } },
+                    bottom: { style: 'thin', color: { argb: 'E2E8F0' } },
+                    right: { style: 'thin', color: { argb: 'E2E8F0' } }
+                };
+            });
+        });
+
+        // Descargar Archivo
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(blob, `Reporte_Citas_ServiTech_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+        showToast("📊 Archivo Excel generado y descargado con éxito.", "success");
+    } catch (e) {
+        console.error(e);
+        showToast("⚠️ Error al exportar archivo Excel", "error");
+    }
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', () => {
+    renderizarTabla();
+});
+</script>
+{% endblock %}

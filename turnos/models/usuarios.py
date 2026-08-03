@@ -48,9 +48,15 @@ class Usuario(AbstractUser):
 
     objects = UsuarioManager()
 
+    @property
+    def es_admin(self):
+        return self.rol in [self.Rol.ADMINISTRADOR, 'ADMIN']
+
     def save(self, *args, **kwargs):
         if not self.username:
             self.username = self.correo
+        if self.rol == 'ADMIN':
+            self.rol = self.Rol.ADMINISTRADOR
         self.is_active = self.activo
         super().save(*args, **kwargs)
 

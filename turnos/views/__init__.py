@@ -22,6 +22,8 @@ from .dashboard_views import (
     admin_toggle_servicio,
     admin_citas,
     admin_reportes,
+    admin_tecnicos,
+    admin_inventario,
     # Técnico
     dashboard_tecnico,
     tecnico_agenda,
