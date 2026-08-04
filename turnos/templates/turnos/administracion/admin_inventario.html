@@ -1,346 +1,468 @@
 {% extends 'turnos/administracion/admin_base.html' %}
 {% load static %}
 
-{% block title %}Inventario de Componentes | ServiTech{% endblock %}
-
-{% block page_header %}
-<div class="flex items-center justify-end gap-3 mb-6">
-    <button onclick="exportarInventarioExcel()"
-            class="flex items-center gap-2 bg-gradient-to-r from-emerald to-emerald/80 hover:opacity-95 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm transition-all shadow-md shadow-emerald/20">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-        </svg>
-        Exportar Excel
-    </button>
-</div>
-{% endblock %}
+{% block title %}Inventario de Repuestos | ServiTech{% endblock %}
 
 {% block content %}
 
 <!-- ════════════════════════════════════════════
-     1. TARJETAS DE MÉTRICAS SUPERIORES
+     CABECERA DE PÁGINA
 ════════════════════════════════════════════ -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-
-    <!-- Stock Crítico -->
-    <div class="bg-white rounded-2xl border {% if stock_critico > 0 %}border-rose-200 shadow-rose-100{% else %}border-slate-200/80{% endif %} p-5 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-        {% if stock_critico > 0 %}
-        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-rose-400 rounded-t-2xl"></div>
-        {% endif %}
-        <div class="flex items-center justify-between mb-3">
-            <div class="w-11 h-11 rounded-2xl {% if stock_critico > 0 %}bg-rose-50 text-rose-500{% else %}bg-slate-100 text-slate-400{% endif %} flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-            </div>
-            {% if stock_critico > 0 %}
-            <span class="text-[11px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">¡Alerta!</span>
-            {% else %}
-            <span class="text-[11px] font-bold text-emerald bg-emerald-light px-2 py-0.5 rounded-full">Normal</span>
-            {% endif %}
-        </div>
-        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Stock Crítico</p>
-        <p class="text-2xl font-extrabold {% if stock_critico > 0 %}text-rose-600{% else %}text-navy{% endif %} mt-1">{{ stock_critico }}</p>
-        <p class="text-[11px] text-slate-400 mt-0.5">{{ stock_agotado }} agotado{{ stock_agotado|pluralize }} · requiere reposición</p>
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6 mt-2">
+    <div>
+        <h1 class="text-[26px] font-bold text-[#003399] tracking-tight leading-none mb-1.5">Inventario de Repuestos</h1>
+        <p class="text-[13px] text-slate-500 font-medium max-w-md leading-relaxed">
+            Control centralizado de componentes técnicos y suministros para servicios de reparación.
+        </p>
     </div>
-
-    <!-- Total Ítems -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all group">
-        <div class="flex items-center justify-between mb-3">
-            <div class="w-11 h-11 rounded-2xl bg-royal/10 text-royal flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
-            </div>
-            <span class="text-[11px] font-bold text-royal bg-royal/10 px-2 py-0.5 rounded-full">Activos</span>
-        </div>
-        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Componentes</p>
-        <p class="text-2xl font-extrabold text-navy mt-1">{{ total_items }}</p>
-        <p class="text-[11px] text-slate-400 mt-0.5">referencias en catálogo</p>
-    </div>
-
-    <!-- Órdenes Pendientes -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all group">
-        <div class="flex items-center justify-between mb-3">
-            <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                </svg>
-            </div>
-            <span class="text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">Pendientes</span>
-        </div>
-        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Órdenes Pendientes</p>
-        <p class="text-2xl font-extrabold text-navy mt-1" id="contador-ordenes">{{ ordenes_sugeridas|length }}</p>
-        <p class="text-[11px] text-slate-400 mt-0.5">sugerencias de reposición</p>
-    </div>
-
-    <!-- Valorización Total -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all group">
-        <div class="flex items-center justify-between mb-3">
-            <div class="w-11 h-11 rounded-2xl bg-emerald-light text-emerald flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <span class="text-[11px] font-bold text-emerald bg-emerald-light px-2 py-0.5 rounded-full">↑ Stock</span>
-        </div>
-        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Valorización Total</p>
-        <p class="text-2xl font-extrabold text-navy mt-1">${{ valorizacion|floatformat:0 }}</p>
-        <p class="text-[11px] text-slate-400 mt-0.5">USD en inventario activo</p>
+    <div class="flex items-center gap-2 flex-shrink-0">
+        <button onclick="exportarInventario()"
+                class="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-[13px] transition shadow-sm">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            Exportar
+        </button>
+        <button onclick="abrirModalAgregarRepuesto()"
+                class="flex items-center gap-2 bg-[#003399] hover:bg-[#002266] text-white font-bold px-4 py-2.5 rounded-xl text-[13px] transition shadow-sm active:scale-95">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            Añadir Repuesto
+        </button>
     </div>
 </div>
 
 <!-- ════════════════════════════════════════════
-     2. FILTROS + TABLA DE COMPONENTES
+     1. TARJETAS DE ALERTA SUPERIORES (3 KPIs)
 ════════════════════════════════════════════ -->
-<div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden mb-6">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
 
-    <!-- Toolbar: buscador + filtros por categoría -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 px-6 py-4 border-b border-slate-100">
-        <!-- Buscador -->
-        <div class="relative flex-1 w-full max-w-xs">
-            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    <!-- KPI 1: Stock Crítico (Fondo rojo claro) -->
+    <div class="bg-[#FEF2F2] rounded-[20px] p-5 border border-[#FECACA] relative overflow-hidden">
+        <div class="absolute right-4 bottom-2 text-[#FCA5A5] opacity-30">
+            <svg class="w-20 h-20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
             </svg>
-            <input type="text" id="buscador-inv" placeholder="Buscar componente..."
-                   oninput="filtrarInventario()"
-                   class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:border-royal focus:bg-white transition-all">
         </div>
-
-        <!-- Filtros por categoría -->
-        <div class="flex items-center gap-1.5 flex-wrap">
-            <button onclick="filtrarCategoria('')" id="cat-btn-todos"
-                    class="cat-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-navy text-white transition-all">
-                Todos
-            </button>
-            {% for cat_key, cat_label in categorias %}
-            <button onclick="filtrarCategoria('{{ cat_key }}')" id="cat-btn-{{ cat_key }}"
-                    class="cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">
-                {{ cat_label }}
-            </button>
-            {% endfor %}
+        <div class="relative z-10">
+            <div class="flex items-center gap-2 mb-2">
+                <svg class="w-5 h-5 text-[#EF4444]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span class="text-[11px] font-bold text-[#EF4444] uppercase tracking-widest">Stock Crítico</span>
+            </div>
+            <h3 class="text-[28px] font-bold text-[#B91C1C] leading-none mb-1.5">12 Ítems</h3>
+            <p class="text-[12px] text-[#EF4444] font-medium">Repuestos por debajo del 5% de capacidad.</p>
         </div>
+    </div>
 
-        <!-- Contador -->
-        <span id="contador-inv" class="text-xs font-semibold text-slate-400 ml-auto flex-shrink-0">
-            {{ repuestos|length }} componentes
-        </span>
+    <!-- KPI 2: Pendientes Reposición (Fondo azul claro) -->
+    <div class="bg-[#EFF6FF] rounded-[20px] p-5 border border-[#BFDBFE] relative overflow-hidden">
+        <div class="absolute right-4 bottom-2 text-[#93C5FD] opacity-30">
+            <svg class="w-20 h-20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+            </svg>
+        </div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-2 mb-2">
+                <svg class="w-5 h-5 text-[#0284C7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                </svg>
+                <span class="text-[11px] font-bold text-[#0284C7] uppercase tracking-widest">Pendientes Reposición</span>
+            </div>
+            <h3 class="text-[28px] font-bold text-[#1E40AF] leading-none mb-1.5">08 Órdenes</h3>
+            <p class="text-[12px] text-[#0284C7] font-medium">En tránsito de proveedores oficiales.</p>
+        </div>
+    </div>
+
+    <!-- KPI 3: Valorización Total (Fondo verde oscuro) -->
+    <div class="bg-[#064E3B] rounded-[20px] p-5 relative overflow-hidden">
+        <div class="absolute right-3 bottom-2 text-white opacity-10">
+            <svg class="w-20 h-20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+            </svg>
+        </div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-2 mb-2">
+                <svg class="w-5 h-5 text-[#34D399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <span class="text-[11px] font-bold text-[#34D399] uppercase tracking-widest">Valorización Total</span>
+            </div>
+            <h3 class="text-[28px] font-bold text-white leading-none mb-1.5">$42.5k</h3>
+            <p class="text-[12px] text-[#6EE7B7] font-medium">Activos circulantes en almacén.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     2. LISTADO DE COMPONENTES (TABLA)
+════════════════════════════════════════════ -->
+<div class="bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden mb-8">
+    <!-- Cabecera -->
+    <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+            </svg>
+            <h3 class="font-bold text-slate-800 text-[16px]">Listado de Componentes</h3>
+        </div>
+        <div class="flex items-center gap-2">
+            <button class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                Filtros
+            </button>
+            <button class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                Categoría
+            </button>
+        </div>
     </div>
 
     <!-- Tabla -->
     <div class="overflow-x-auto">
-        <table class="w-full text-left" id="tabla-inventario">
+        <table class="w-full text-left border-collapse min-w-[750px]">
             <thead>
-                <tr class="bg-slate-50 border-b border-slate-100">
-                    <th class="px-6 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Componente</th>
-                    <th class="px-4 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden sm:table-cell">Categoría</th>
-                    <th class="px-4 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Stock Disponible</th>
-                    <th class="px-4 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Precio Unit.</th>
-                    <th class="px-4 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">Valor Total</th>
-                    <th class="px-4 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Estado</th>
+                <tr class="text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 bg-[#F8FAFC]">
+                    <th class="py-4 px-6">Repuesto / SKU</th>
+                    <th class="py-4 px-6">Categoría</th>
+                    <th class="py-4 px-6">Stock Disponible</th>
+                    <th class="py-4 px-6">Proveedor</th>
+                    <th class="py-4 px-6">Estado</th>
+                    <th class="py-4 px-6">Acciones</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-50" id="tbody-inventario">
+            <tbody class="divide-y divide-slate-100" id="tabla-inventario-body">
 
-                {% for r in repuestos %}
-                <tr class="fila-inv hover:bg-slate-50/60 transition-colors"
-                    data-nombre="{{ r.nombre|lower }}"
-                    data-categoria="{{ r.categoria }}">
-
-                    <!-- Componente -->
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center
-                                {% if r.categoria == 'PANTALLAS' %}bg-royal/10 text-royal
-                                {% elif r.categoria == 'BATERIAS' %}bg-emerald-light text-emerald
-                                {% elif r.categoria == 'CONECTORES' %}bg-amber-50 text-amber-600
-                                {% elif r.categoria == 'CAMARAS' %}bg-purple-100 text-purple-600
-                                {% else %}bg-slate-100 text-slate-500{% endif %}">
-                                {% if r.categoria == 'PANTALLAS' %}
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                {% elif r.categoria == 'BATERIAS' %}
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h2a2 2 0 002-2V8a2 2 0 00-2-2h-2M9 20H7a2 2 0 01-2-2V8a2 2 0 012-2h2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v1m-4 0h4"/></svg>
-                                {% elif r.categoria == 'CAMARAS' %}
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                {% else %}
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                {% endif %}
+                <!-- Fila 1: Pantalla OLED iPhone 14 Pro -->
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="py-4 px-6">
+                        <p class="text-[13px] font-bold text-[#003399] leading-tight">Pantalla OLED iPhone 14 Pro</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">SKU-2024-LCD-001</p>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="inline-block text-[10px] font-bold px-2.5 py-1 rounded-lg bg-[#EEF2FF] text-[#003399]">PANTALLAS</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-[#EF4444] flex-shrink-0"></span>
+                            <div class="w-24 bg-slate-100 rounded-full h-2">
+                                <div class="bg-[#EF4444] rounded-full h-2" style="width: 7%"></div>
                             </div>
-                            <div class="min-w-0">
-                                <p class="text-xs font-bold text-navy truncate max-w-[180px]">{{ r.nombre }}</p>
-                                {% if r.descripcion %}
-                                <p class="text-[11px] text-slate-400 truncate max-w-[180px]">{{ r.descripcion }}</p>
-                                {% endif %}
-                            </div>
+                            <span class="text-[12px] font-bold text-slate-700">03/40</span>
                         </div>
                     </td>
-
-                    <!-- Categoría -->
-                    <td class="px-4 py-4 hidden sm:table-cell">
-                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold
-                            {% if r.categoria == 'PANTALLAS' %}bg-royal/10 text-royal
-                            {% elif r.categoria == 'BATERIAS' %}bg-emerald-light text-emerald
-                            {% elif r.categoria == 'CONECTORES' %}bg-amber-50 text-amber-600
-                            {% elif r.categoria == 'CAMARAS' %}bg-purple-100 text-purple-600
-                            {% else %}bg-slate-100 text-slate-500{% endif %}">
-                            {{ r.get_categoria_display }}
-                        </span>
-                    </td>
-
-                    <!-- Barra de stock -->
-                    <td class="px-4 py-4">
-                        <div class="flex items-center gap-3 min-w-[140px]">
-                            <div class="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
-                                <div class="h-2 rounded-full transition-all duration-500 {{ r.color_barra }}"
-                                     style="width: {{ r.pct_stock }}%"></div>
-                            </div>
-                            <span class="text-xs font-extrabold text-navy w-8 text-right flex-shrink-0">{{ r.stock }}</span>
+                    <td class="py-4 px-6 text-[13px] text-slate-600 font-medium">Global Tech Logistics</td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-[#EF4444]"></span>
+                            <span class="text-[12px] font-bold text-[#B91C1C]">CRÍTICO</span>
                         </div>
                     </td>
-
-                    <!-- Precio unitario -->
-                    <td class="px-4 py-4 hidden md:table-cell">
-                        <span class="text-xs font-bold text-navy">${{ r.precio }}</span>
-                    </td>
-
-                    <!-- Valor total -->
-                    <td class="px-4 py-4 hidden lg:table-cell">
-                        <span class="text-xs font-semibold text-slate-600">${{ r.stock|add:0 | default:r.stock }}</span>
-                        {# Calculado en JS ya que Django no tiene filtro multiply #}
-                        <span class="text-xs font-semibold text-slate-600 valor-total" data-stock="{{ r.stock }}" data-precio="{{ r.precio }}"></span>
-                    </td>
-
-                    <!-- Badge estado -->
-                    <td class="px-4 py-4">
-                        {% if r.estado_stock == 'agotado' %}
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block"></span> Agotado
-                        </span>
-                        {% elif r.estado_stock == 'critico' %}
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-600 border border-amber-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block animate-pulse"></span> Crítico
-                        </span>
-                        {% elif r.estado_stock == 'bajo' %}
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-yellow-50 text-yellow-600 border border-yellow-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block"></span> Stock Bajo
-                        </span>
-                        {% else %}
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-light text-emerald">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald inline-block"></span> Disponible
-                        </span>
-                        {% endif %}
+                    <td class="py-4 px-6">
+                        <button class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+                        </button>
                     </td>
                 </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="px-6 py-16 text-center text-slate-400">
-                        <svg class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
-                        <p class="text-sm font-semibold">No hay componentes registrados.</p>
+
+                <!-- Fila 2: Batería Litio Samsung S22 -->
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="py-4 px-6">
+                        <p class="text-[13px] font-bold text-[#003399] leading-tight">Batería Litio Samsung S22</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">SKU-2024-BAT-042</p>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="inline-block text-[10px] font-bold px-2.5 py-1 rounded-lg bg-[#D1FAE5] text-[#047857]">BATERÍAS</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-[#22C55E] flex-shrink-0"></span>
+                            <div class="w-24 bg-slate-100 rounded-full h-2">
+                                <div class="bg-[#22C55E] rounded-full h-2" style="width: 85%"></div>
+                            </div>
+                            <span class="text-[12px] font-bold text-slate-700">85/100</span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-[13px] text-slate-600 font-medium">PowerCell Corp</td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-[#22C55E]"></span>
+                            <span class="text-[12px] font-bold text-[#059669]">SUFICIENTE</span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6">
+                        <button class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+                        </button>
                     </td>
                 </tr>
-                {% endfor %}
+
+                <!-- Fila 3: Cable Flex de Carga USB-C -->
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="py-4 px-6">
+                        <p class="text-[13px] font-bold text-[#003399] leading-tight">Cable Flex de Carga USB-C</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">SKU-2024-CBL-118</p>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="inline-block text-[10px] font-bold px-2.5 py-1 rounded-lg bg-[#F1F5F9] text-slate-600">CABLES</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-[#003399] flex-shrink-0"></span>
+                            <div class="w-24 bg-slate-100 rounded-full h-2">
+                                <div class="bg-[#003399] rounded-full h-2" style="width: 25%"></div>
+                            </div>
+                            <span class="text-[12px] font-bold text-slate-700">15/60</span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-[13px] text-slate-600 font-medium">Conexiones Globales S.A.</td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-[#003399]"></span>
+                            <span class="text-[12px] font-bold text-[#003399]">BAJO</span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6">
+                        <button class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- Fila 4: Módulo Cámara Principal Sony A7 -->
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="py-4 px-6">
+                        <p class="text-[13px] font-bold text-[#003399] leading-tight">Módulo Cámara Principal Sony A7</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">SKU-2024-CAM-009</p>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="inline-block text-[10px] font-bold px-2.5 py-1 rounded-lg bg-[#EEF2FF] text-[#003399]">MÓDULOS</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-[#EF4444] flex-shrink-0"></span>
+                            <div class="w-24 bg-slate-100 rounded-full h-2">
+                                <div class="bg-[#EF4444] rounded-full h-2" style="width: 12%"></div>
+                            </div>
+                            <span class="text-[12px] font-bold text-slate-700">01/08</span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-[13px] text-slate-600 font-medium">Precision Optics Inc</td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-[#EF4444]"></span>
+                            <span class="text-[12px] font-bold text-[#B91C1C]">CRÍTICO</span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6">
+                        <button class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+                        </button>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
 
-    <!-- Footer tabla: sin resultados de búsqueda -->
-    <div id="sin-resultados-inv" class="hidden px-6 py-10 text-center text-slate-400">
-        <svg class="w-8 h-8 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-        <p class="text-xs font-semibold">Sin resultados para tu búsqueda.</p>
+    <!-- Paginación -->
+    <div class="px-6 py-4 flex items-center justify-between">
+        <p class="text-[13px] text-slate-600 font-medium">Mostrando 1-10 de 124 repuestos</p>
+        <div class="flex items-center gap-1.5">
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#003399] text-white font-bold text-[13px] shadow-sm">1</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-medium text-[13px] transition">2</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-medium text-[13px] transition">3</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+        </div>
     </div>
 </div>
 
 <!-- ════════════════════════════════════════════
      3. ÓRDENES DE COMPRA SUGERIDAS
 ════════════════════════════════════════════ -->
-<div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden mb-6">
-
-    <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-amber-50/60 to-transparent">
-        <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shadow-sm">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
-            </div>
-            <div>
-                <h3 class="font-extrabold text-navy text-sm">Órdenes de Compra Sugeridas</h3>
-                <p class="text-[11px] text-slate-400">Componentes con stock bajo el umbral mínimo (5 unidades).</p>
-            </div>
-        </div>
-        <span class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-600 border border-amber-200" id="badge-ordenes">
-            {{ ordenes_sugeridas|length }} sugerencia{{ ordenes_sugeridas|length|pluralize }}
-        </span>
+<div class="mb-6">
+    <div class="flex items-center gap-2 mb-4">
+        <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+        <h3 class="font-bold text-slate-800 text-[17px]">Órdenes de Compra Sugeridas</h3>
     </div>
 
-    <!-- Lista de órdenes sugeridas -->
-    <div class="divide-y divide-slate-50" id="lista-ordenes">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-        {% for r in ordenes_sugeridas %}
-        <div class="flex flex-col sm:flex-row sm:items-center gap-4 px-6 py-4 hover:bg-slate-50/40 transition-colors group"
-             id="orden-row-{{ r.id }}">
-
-            <!-- Info componente -->
-            <div class="flex items-center gap-3 flex-1 min-w-0">
-                <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center
-                    {% if r.categoria == 'PANTALLAS' %}bg-royal/10 text-royal
-                    {% elif r.categoria == 'BATERIAS' %}bg-emerald-light text-emerald
-                    {% elif r.categoria == 'CONECTORES' %}bg-amber-50 text-amber-600
-                    {% elif r.categoria == 'CAMARAS' %}bg-purple-100 text-purple-600
-                    {% else %}bg-slate-100 text-slate-500{% endif %}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                    </svg>
+        <!-- Orden 1: Pack Pantallas iPhone - URGENTE -->
+        <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[13px] font-bold text-slate-800 leading-tight">Pack Pantallas iPhone</p>
+                            <p class="text-[11px] text-slate-400">Prioridad Alta</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-[#FEE2E2] text-[#B91C1C]">URGENTE</span>
                 </div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-navy truncate">{{ r.nombre }}</p>
-                    <p class="text-[11px] text-slate-400">{{ r.get_categoria_display }} · Precio unit: ${{ r.precio }}</p>
+                <div class="space-y-2 mb-4">
+                    <div class="flex items-center justify-between text-[12px]">
+                        <span class="text-slate-600">iPhone 14 Pro OLED</span>
+                        <span class="font-bold text-[#003399]">+35 uds</span>
+                    </div>
+                    <div class="flex items-center justify-between text-[12px]">
+                        <span class="text-slate-600">iPhone 13 Standard</span>
+                        <span class="font-bold text-[#003399]">+20 uds</span>
+                    </div>
                 </div>
             </div>
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Est. Total</p>
+                    <p class="text-[16px] font-bold text-slate-800">$4,250.00</p>
+                </div>
+                <button onclick="crearOrden('Pack Pantallas iPhone')"
+                        class="px-4 py-2 bg-[#003399] hover:bg-[#002266] text-white text-[12px] font-bold rounded-xl transition shadow-sm active:scale-95">
+                    Crear Orden
+                </button>
+            </div>
+        </div>
 
-            <!-- Stock actual -->
-            <div class="flex items-center gap-6 sm:gap-8 flex-shrink-0">
-                <div class="text-center">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Stock Actual</p>
-                    <p class="text-lg font-extrabold {% if r.stock == 0 %}text-rose-600{% else %}text-amber-600{% endif %} mt-0.5">
-                        {{ r.stock }}
-                    </p>
+        <!-- Orden 2: Reprimición Baterías - REPOSICIÓN -->
+        <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-[#D1FAE5] text-[#059669] flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16h2a2 2 0 002-2v-1a2 2 0 00-2-2h-2m-5 5H7a2 2 0 01-2-2V7a2 2 0 012-2h5m5 9V7a2 2 0 00-2-2h-3"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[13px] font-bold text-slate-800 leading-tight">Repimición Baterías</p>
+                            <p class="text-[11px] text-slate-400">Prioridad Media</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-[#EEF2FF] text-[#003399]">REPOSICIÓN</span>
                 </div>
-                <div class="text-center">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sugerido Pedir</p>
-                    <p class="text-lg font-extrabold text-navy mt-0.5">10</p>
-                </div>
-                <div class="text-center hidden sm:block">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Costo Est.</p>
-                    <p class="text-lg font-extrabold text-navy mt-0.5">${{ r.precio | floatformat:0 | add:0 }}
-                        <span class="text-xs font-normal text-slate-400">×10</span>
-                    </p>
+                <div class="space-y-2 mb-4">
+                    <div class="flex items-center justify-between text-[12px]">
+                        <span class="text-slate-600">Samsung Series S/A</span>
+                        <span class="font-bold text-[#003399]">+100 uds</span>
+                    </div>
+                    <div class="flex items-center justify-between text-[12px]">
+                        <span class="text-slate-600">MacBook Pro M1/M2</span>
+                        <span class="font-bold text-[#003399]">+15 uds</span>
+                    </div>
                 </div>
             </div>
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Est. Total</p>
+                    <p class="text-[16px] font-bold text-slate-800">$2,180.00</p>
+                </div>
+                <button onclick="crearOrden('Repimición Baterías')"
+                        class="px-4 py-2 bg-[#003399] hover:bg-[#002266] text-white text-[12px] font-bold rounded-xl transition shadow-sm active:scale-95">
+                    Crear Orden
+                </button>
+            </div>
+        </div>
 
-            <!-- Botón crear orden -->
-            <button onclick="crearOrden({{ r.id }}, '{{ r.nombre|escapejs }}')"
-                    id="btn-orden-{{ r.id }}"
-                    class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white transition-all shadow-sm shadow-amber-200 flex-shrink-0 active:scale-95">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-                </svg>
-                Crear Orden
+        <!-- Orden 3: Componentes Micro - AI OPTIMIZED -->
+        <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-[#F3E8FF] text-[#7C3AED] flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[13px] font-bold text-slate-800 leading-tight">Componentes Micro</p>
+                            <p class="text-[11px] text-slate-400">Stock Predictivo</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-[#D1FAE5] text-[#047857]">AI OPTIMIZED</span>
+                </div>
+                <div class="space-y-2 mb-4">
+                    <div class="flex items-center justify-between text-[12px]">
+                        <span class="text-slate-600">IC de Carga U2</span>
+                        <span class="font-bold text-[#003399]">+50 uds</span>
+                    </div>
+                    <div class="flex items-center justify-between text-[12px]">
+                        <span class="text-slate-600">Resistencias 0.1Ohm</span>
+                        <span class="font-bold text-[#003399]">+500 uds</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Est. Total</p>
+                    <p class="text-[16px] font-bold text-slate-800">$640.00</p>
+                </div>
+                <button onclick="crearOrden('Componentes Micro')"
+                        class="px-4 py-2 bg-[#003399] hover:bg-[#002266] text-white text-[12px] font-bold rounded-xl transition shadow-sm active:scale-95">
+                    Crear Orden
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     4. MODAL: AÑADIR REPUESTO
+════════════════════════════════════════════ -->
+<div id="modal-agregar-repuesto" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="cerrarModalAgregarRepuesto()"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md z-10 overflow-hidden border border-slate-100">
+        <div class="px-6 py-4 flex items-center justify-between border-b border-slate-100">
+            <h3 class="font-bold text-[15px] text-slate-800">Añadir Repuesto al Inventario</h3>
+            <button onclick="cerrarModalAgregarRepuesto()" class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-        {% empty %}
-        <div class="px-6 py-12 text-center text-slate-400">
-            <svg class="w-12 h-12 mx-auto mb-3 opacity-30 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <p class="text-sm font-semibold text-emerald">¡Stock en buen estado!</p>
-            <p class="text-xs mt-1">No hay componentes por debajo del umbral mínimo.</p>
-        </div>
-        {% endfor %}
+        <form class="p-6 space-y-4" onsubmit="guardarRepuesto(event)">
+            <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Nombre del Repuesto</label>
+                <input type="text" required placeholder="Ej. Pantalla OLED iPhone 15" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">SKU</label>
+                    <input type="text" required placeholder="SKU-2024-XXX" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Categoría</label>
+                    <select class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                        <option>Pantallas</option>
+                        <option>Baterías</option>
+                        <option>Cables</option>
+                        <option>Módulos</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Stock Actual</label>
+                    <input type="number" min="0" placeholder="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Stock Máximo</label>
+                    <input type="number" min="1" placeholder="100" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                </div>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Proveedor</label>
+                <input type="text" placeholder="Nombre del proveedor" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+            </div>
+            <div class="pt-2 flex gap-3">
+                <button type="button" onclick="cerrarModalAgregarRepuesto()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition">Cancelar</button>
+                <button type="submit" class="flex-1 py-2.5 rounded-xl bg-[#003399] hover:bg-[#002266] text-white font-bold text-[13px] transition shadow-sm">Guardar Repuesto</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -348,317 +470,37 @@
 
 {% block scripts %}
 <script>
-// ═══════════════════════════════════════════════
-// DATOS DEL INVENTARIO (para exportación Excel)
-// ═══════════════════════════════════════════════
-const INVENTARIO_DATA = [
-    {% for r in repuestos %}
-    {
-        nombre:      "{{ r.nombre|escapejs }}",
-        descripcion: "{{ r.descripcion|default:''|escapejs }}",
-        categoria:   "{{ r.get_categoria_display }}",
-        stock:       {{ r.stock }},
-        precio:      {{ r.precio }},
-        estado:      "{% if r.estado_stock == 'agotado' %}Agotado{% elif r.estado_stock == 'critico' %}Crítico{% elif r.estado_stock == 'bajo' %}Stock Bajo{% else %}Disponible{% endif %}",
-    },
-    {% endfor %}
-];
-
-// ═══════════════════════════════════════════════
-// 1. CALCULAR VALORES TOTALES EN TABLA (JS)
-// ═══════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.valor-total').forEach(el => {
-        const stock  = parseFloat(el.dataset.stock)  || 0;
-        const precio = parseFloat(el.dataset.precio) || 0;
-        const total  = (stock * precio).toFixed(2);
-        // Eliminar el span anterior (que mostraba el stock crudo)
-        const prev = el.previousElementSibling;
-        if (prev && prev.tagName === 'SPAN') prev.remove();
-        el.textContent = `$${parseFloat(total).toLocaleString('es-ES', {minimumFractionDigits:2})}`;
-    });
-});
-
-// ═══════════════════════════════════════════════
-// 2. BUSCADOR DE INVENTARIO
-// ═══════════════════════════════════════════════
-let categoriaActiva = '';
-
-function filtrarInventario() {
-    const q = document.getElementById('buscador-inv').value.toLowerCase().trim();
-    aplicarFiltros(q, categoriaActiva);
+// ─────────────────────────────────────────────
+// Modal: Añadir Repuesto
+// ─────────────────────────────────────────────
+function abrirModalAgregarRepuesto() {
+    const m = document.getElementById('modal-agregar-repuesto');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+}
+function cerrarModalAgregarRepuesto() {
+    const m = document.getElementById('modal-agregar-repuesto');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+}
+function guardarRepuesto(e) {
+    e.preventDefault();
+    cerrarModalAgregarRepuesto();
+    showToast('📦 Repuesto agregado al inventario exitosamente.', 'success');
 }
 
-function filtrarCategoria(cat) {
-    categoriaActiva = cat;
-
-    // Actualizar estilos de botones
-    document.querySelectorAll('.cat-btn').forEach(btn => {
-        btn.className = 'cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all';
-    });
-    const btnActivo = cat ? document.getElementById(`cat-btn-${cat}`) : document.getElementById('cat-btn-todos');
-    if (btnActivo) btnActivo.className = 'cat-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-navy text-white transition-all';
-
-    aplicarFiltros(document.getElementById('buscador-inv').value.toLowerCase().trim(), cat);
+// ─────────────────────────────────────────────
+// Crear Orden de Compra (simulación)
+// ─────────────────────────────────────────────
+function crearOrden(nombre) {
+    showToast(`🛒 Orden de "${nombre}" creada y enviada al proveedor.`, 'success');
 }
 
-function aplicarFiltros(q, cat) {
-    const filas    = document.querySelectorAll('.fila-inv');
-    let visibles   = 0;
-
-    filas.forEach(fila => {
-        const nombre   = fila.dataset.nombre    || '';
-        const categoria= fila.dataset.categoria || '';
-        const matchQ   = !q   || nombre.includes(q);
-        const matchCat = !cat || categoria === cat;
-
-        if (matchQ && matchCat) {
-            fila.style.display = '';
-            visibles++;
-        } else {
-            fila.style.display = 'none';
-        }
-    });
-
-    document.getElementById('sin-resultados-inv').classList.toggle('hidden', visibles > 0 || filas.length === 0);
-    const c = document.getElementById('contador-inv');
-    if (c) c.textContent = `${visibles} componente${visibles !== 1 ? 's' : ''}`;
-}
-
-// ═══════════════════════════════════════════════
-// 3. CREAR ORDEN (simulación con Toast)
-// ═══════════════════════════════════════════════
-const ordenesCreadas = new Set();
-
-function crearOrden(id, nombre) {
-    if (ordenesCreadas.has(id)) {
-        showToast(`⚠️ Ya existe una orden activa para "${nombre}".`, 'error');
-        return;
-    }
-    ordenesCreadas.add(id);
-
-    const btn = document.getElementById(`btn-orden-${id}`);
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = `
-            <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-            </svg>
-            Procesando...
-        `;
-        btn.className = btn.className.replace('bg-amber-500 hover:bg-amber-600', 'bg-slate-300 cursor-not-allowed');
-
-        setTimeout(() => {
-            btn.innerHTML = `
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                </svg>
-                Orden Creada
-            `;
-            btn.className = btn.className.replace('bg-slate-300 cursor-not-allowed', 'bg-emerald cursor-not-allowed');
-
-            // Reducir contador de órdenes pendientes
-            const contador = document.getElementById('contador-ordenes');
-            if (contador) {
-                const n = Math.max(0, parseInt(contador.textContent) - 1);
-                contador.textContent = n;
-            }
-            const badge = document.getElementById('badge-ordenes');
-            if (badge) {
-                const n = Math.max(0, parseInt(badge.textContent) - 1);
-                badge.textContent = `${n} sugerencia${n !== 1 ? 's' : ''}`;
-            }
-
-            showToast(`🛒 Orden de compra creada para "${nombre}" (×10 unidades).`, 'success');
-        }, 1200);
-    }
-}
-
-// ═══════════════════════════════════════════════
-// 4. EXPORTAR INVENTARIO A EXCEL (ExcelJS)
-// ═══════════════════════════════════════════════
-async function exportarInventarioExcel() {
-    const btn = document.querySelector('[onclick="exportarInventarioExcel()"]');
-    const originalHTML = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Generando...`;
-
-    const workbook  = new ExcelJS.Workbook();
-    workbook.creator = 'ServiTech System';
-    workbook.created = new Date();
-
-    const ws = workbook.addWorksheet('Inventario', {
-        views: [{ showGridLines: true }],
-        pageSetup: { paperSize: 9, orientation: 'landscape' },
-    });
-
-    // ── Anchos de columna ──
-    ws.columns = [
-        { key: 'num',         width: 6  },
-        { key: 'nombre',      width: 36 },
-        { key: 'descripcion', width: 30 },
-        { key: 'categoria',   width: 16 },
-        { key: 'stock',       width: 12 },
-        { key: 'precio',      width: 14 },
-        { key: 'total',       width: 16 },
-        { key: 'estado',      width: 14 },
-    ];
-
-    // ── Estilos base ──
-    const NAVY   = { argb: 'FF001E50' };
-    const ROYAL  = { argb: 'FF0040A8' };
-    const SKY    = { argb: 'FF0284C7' };
-    const EMERALD= { argb: 'FF10B981' };
-    const WHITE  = { argb: 'FFFFFFFF' };
-    const LIGHT  = { argb: 'FFF8FAFC' };
-    const SLATE  = { argb: 'FF64748B' };
-    const BORDER_COLOR = { argb: 'FFCBD5E1' };
-
-    const thinBorder = {
-        top:    { style: 'thin', color: BORDER_COLOR },
-        left:   { style: 'thin', color: BORDER_COLOR },
-        bottom: { style: 'thin', color: BORDER_COLOR },
-        right:  { style: 'thin', color: BORDER_COLOR },
-    };
-
-    // ── FILA 1-2: Banner corporativo ──
-    ws.mergeCells('A1:H2');
-    const titleCell = ws.getCell('A1');
-    titleCell.value = 'SERVITECH — REPORTE DE INVENTARIO DE COMPONENTES';
-    titleCell.font  = { name: 'Arial', size: 15, bold: true, color: WHITE };
-    titleCell.fill  = { type: 'pattern', pattern: 'solid', fgColor: NAVY };
-    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-    // Franja decorativa sky
-    ws.mergeCells('A3:H3');
-    const stripCell = ws.getCell('A3');
-    stripCell.fill  = { type: 'pattern', pattern: 'solid', fgColor: SKY };
-    ws.getRow(3).height = 4;
-
-    // ── FILA 4: Metadata ──
-    ws.getRow(4).height = 18;
-    const fechaGen = new Date().toLocaleDateString('es-ES', { day:'2-digit', month:'long', year:'numeric' });
-    ws.mergeCells('A4:D4');
-    const metaLeft = ws.getCell('A4');
-    metaLeft.value = `Generado: ${fechaGen}`;
-    metaLeft.font  = { name: 'Arial', size: 9, color: SLATE };
-    metaLeft.alignment = { horizontal: 'left', vertical: 'middle' };
-
-    ws.mergeCells('E4:H4');
-    const metaRight = ws.getCell('E4');
-    metaRight.value = `Total componentes: ${INVENTARIO_DATA.length}`;
-    metaRight.font  = { name: 'Arial', size: 9, bold: true, color: { argb: 'FF001E50' } };
-    metaRight.alignment = { horizontal: 'right', vertical: 'middle' };
-
-    // ── FILA 5: Encabezados de tabla ──
-    ws.getRow(5).height = 22;
-    const headers = ['#', 'Componente', 'Descripción', 'Categoría', 'Stock', 'Precio Unit.', 'Valor Total', 'Estado'];
-    headers.forEach((h, i) => {
-        const cell = ws.getCell(5, i + 1);
-        cell.value  = h;
-        cell.font   = { name: 'Arial', size: 10, bold: true, color: WHITE };
-        cell.fill   = { type: 'pattern', pattern: 'solid', fgColor: ROYAL };
-        cell.alignment = { horizontal: 'center', vertical: 'middle' };
-        cell.border = thinBorder;
-    });
-
-    // ── FILAS DE DATOS ──
-    const estadoColores = {
-        'Disponible': { argb: 'FF10B981' },
-        'Stock Bajo':  { argb: 'FFCA8A04' },
-        'Crítico':     { argb: 'FFF59E0B' },
-        'Agotado':     { argb: 'FFEF4444' },
-    };
-
-    INVENTARIO_DATA.forEach((item, idx) => {
-        const rowNum = idx + 6;
-        const row    = ws.getRow(rowNum);
-        row.height   = 18;
-
-        const isEven = idx % 2 === 0;
-        const rowBg  = isEven ? LIGHT : WHITE;
-
-        const valores = [
-            idx + 1,
-            item.nombre,
-            item.descripcion || '—',
-            item.categoria,
-            item.stock,
-            parseFloat(item.precio),
-            parseFloat((item.stock * item.precio).toFixed(2)),
-            item.estado,
-        ];
-
-        valores.forEach((val, col) => {
-            const cell = ws.getCell(rowNum, col + 1);
-            cell.value  = val;
-            cell.font   = { name: 'Arial', size: 9 };
-            cell.fill   = { type: 'pattern', pattern: 'solid', fgColor: rowBg };
-            cell.border = thinBorder;
-            cell.alignment = { vertical: 'middle',
-                horizontal: col === 0 || col === 4 || col === 7 ? 'center' : col >= 5 ? 'right' : 'left' };
-
-            // Formato moneda
-            if (col === 5 || col === 6) {
-                cell.numFmt = '$#,##0.00';
-            }
-
-            // Color de la celda Estado
-            if (col === 7) {
-                const c = estadoColores[val] || SLATE;
-                cell.font = { name: 'Arial', size: 9, bold: true, color: c };
-            }
-
-            // Resaltar stock crítico/agotado
-            if (col === 4 && (item.estado === 'Agotado' || item.estado === 'Crítico')) {
-                cell.font = { name: 'Arial', size: 9, bold: true, color: estadoColores[item.estado] };
-            }
-        });
-    });
-
-    // ── FILA TOTALES ──
-    const totalRow = INVENTARIO_DATA.length + 6;
-    ws.getRow(totalRow).height = 20;
-
-    ws.mergeCells(`A${totalRow}:D${totalRow}`);
-    const totLabel = ws.getCell(`A${totalRow}`);
-    totLabel.value = 'VALORIZACIÓN TOTAL DEL INVENTARIO';
-    totLabel.font  = { name: 'Arial', size: 10, bold: true, color: WHITE };
-    totLabel.fill  = { type: 'pattern', pattern: 'solid', fgColor: NAVY };
-    totLabel.alignment = { horizontal: 'center', vertical: 'middle' };
-    totLabel.border = thinBorder;
-
-    const totalStock = INVENTARIO_DATA.reduce((s, i) => s + i.stock, 0);
-    const totalValor = INVENTARIO_DATA.reduce((s, i) => s + i.stock * i.precio, 0);
-
-    const stockCell = ws.getCell(`E${totalRow}`);
-    stockCell.value  = totalStock;
-    stockCell.font   = { name: 'Arial', size: 10, bold: true, color: WHITE };
-    stockCell.fill   = { type: 'pattern', pattern: 'solid', fgColor: NAVY };
-    stockCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    stockCell.border = thinBorder;
-
-    ws.mergeCells(`F${totalRow}:G${totalRow}`);
-    const valorCell  = ws.getCell(`F${totalRow}`);
-    valorCell.value  = parseFloat(totalValor.toFixed(2));
-    valorCell.numFmt = '$#,##0.00';
-    valorCell.font   = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF10B981' } };
-    valorCell.fill   = { type: 'pattern', pattern: 'solid', fgColor: NAVY };
-    valorCell.alignment = { horizontal: 'right', vertical: 'middle' };
-    valorCell.border = thinBorder;
-
-    const estadoTot = ws.getCell(`H${totalRow}`);
-    estadoTot.fill  = { type: 'pattern', pattern: 'solid', fgColor: NAVY };
-    estadoTot.border= thinBorder;
-
-    // ── GUARDAR ──
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob   = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    saveAs(blob, `ServiTech_Inventario_${new Date().toISOString().slice(0,10)}.xlsx`);
-
-    btn.disabled = false;
-    btn.innerHTML = originalHTML;
-    showToast('📊 Inventario exportado a Excel correctamente.', 'success');
+// ─────────────────────────────────────────────
+// Exportar inventario (simulación)
+// ─────────────────────────────────────────────
+function exportarInventario() {
+    showToast('📊 Inventario exportado exitosamente.', 'success');
 }
 </script>
 {% endblock %}

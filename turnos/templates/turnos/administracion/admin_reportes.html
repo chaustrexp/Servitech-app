@@ -1,451 +1,281 @@
 {% extends 'turnos/administracion/admin_base.html' %}
 {% load static %}
 
-{% block title %}Reportes y Analíticas | ServiTech{% endblock %}
-
-{% block page_header %}
-<div class="flex items-center justify-end gap-3 mb-6">
-    <!-- Conmutador Mensual / Anual -->
-    <div class="flex items-center bg-slate-100 rounded-xl p-1 gap-1">
-        <button id="btn-periodo-mensual" onclick="cambiarPeriodo('mensual')"
-                class="px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-navy shadow-sm transition-all">
-            Mensual
-        </button>
-        <button id="btn-periodo-anual" onclick="cambiarPeriodo('anual')"
-                class="px-4 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-navy transition-all">
-            Anual
-        </button>
-    </div>
-    <!-- Exportar PDF -->
-    <button onclick="exportarReportePDF()"
-            class="flex items-center gap-2 bg-gradient-to-r from-royal to-sky hover:opacity-95 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm transition-all shadow-md shadow-royal/20">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-        </svg>
-        Exportar Reporte
-    </button>
-</div>
-{% endblock %}
+{% block title %}Reportes Analíticos | ServiTech{% endblock %}
 
 {% block content %}
 
 <!-- ════════════════════════════════════════════
-     1. KPIs SUPERIORES
+     CABECERA DE PÁGINA
 ════════════════════════════════════════════ -->
-<div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-
-    <!-- Total Citas -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all group">
-        <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-2xl bg-sky-light/80 text-sky flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-            </div>
-            <span class="text-[11px] font-bold text-emerald bg-emerald-light px-2 py-0.5 rounded-full kpi-badge" data-mensual="+12.5%" data-anual="+31.2%">+12.5%</span>
-        </div>
-        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Citas</p>
-        <p class="text-2xl font-extrabold text-navy mt-1 kpi-valor" data-mensual="{{ reporte.total }}" data-anual="{{ reporte.total|add:'1050' }}">{{ reporte.total }}</p>
-        <p class="text-[11px] text-slate-400 mt-0.5 kpi-label" data-mensual="este mes" data-anual="este año">este mes</p>
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6 mt-2">
+    <div>
+        <h1 class="text-[26px] font-bold text-slate-800 tracking-tight leading-none mb-1.5">Reportes Analíticos</h1>
+        <p class="text-[13px] text-slate-500 font-medium">Monitoreo de rendimiento operativo y satisfacción.</p>
     </div>
-
-    <!-- Finalizadas -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all group">
-        <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-2xl bg-emerald-light text-emerald flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <span class="text-[11px] font-bold text-emerald bg-emerald-light px-2 py-0.5 rounded-full kpi-badge" data-mensual="{{ reporte.tasa_exito }}%" data-anual="87.3%">{{ reporte.tasa_exito }}%</span>
+    <div class="flex items-center gap-2 flex-shrink-0">
+        <!-- Toggle Mensual / Anual -->
+        <div class="flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+            <button id="btn-mensual" onclick="cambiarPeriodo('mensual')"
+                    class="px-4 py-1.5 rounded-lg text-[12px] font-bold bg-[#003399] text-white transition">
+                Mensual
+            </button>
+            <button id="btn-anual" onclick="cambiarPeriodo('anual')"
+                    class="px-4 py-1.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition">
+                Anual
+            </button>
         </div>
-        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Finalizadas</p>
-        <p class="text-2xl font-extrabold text-navy mt-1 kpi-valor" data-mensual="{{ reporte.finalizadas }}" data-anual="{{ reporte.finalizadas|add:'912' }}">{{ reporte.finalizadas }}</p>
-        <p class="text-[11px] text-slate-400 mt-0.5 kpi-label" data-mensual="tasa de éxito" data-anual="tasa de éxito">tasa de éxito</p>
-    </div>
-
-    <!-- Canceladas -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all group">
-        <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <span class="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full kpi-badge" data-mensual="-2.1%" data-anual="-5.4%">-2.1%</span>
-        </div>
-        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Canceladas</p>
-        <p class="text-2xl font-extrabold text-navy mt-1 kpi-valor" data-mensual="{{ reporte.canceladas }}" data-anual="{{ reporte.canceladas|add:'87' }}">{{ reporte.canceladas }}</p>
-        <p class="text-[11px] text-slate-400 mt-0.5 kpi-label" data-mensual="este mes" data-anual="este año">este mes</p>
-    </div>
-
-    <!-- Tasa de Éxito -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all group">
-        <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-2xl bg-royal/10 text-royal flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                </svg>
-            </div>
-            <span class="text-[11px] font-bold text-emerald bg-emerald-light px-2 py-0.5 rounded-full">↑ Óptimo</span>
-        </div>
-        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Eficiencia Global</p>
-        <p class="text-2xl font-extrabold text-navy mt-1 kpi-valor" data-mensual="{{ reporte.tasa_exito }}%" data-anual="87.3%">{{ reporte.tasa_exito }}%</p>
-        <p class="text-[11px] text-slate-400 mt-0.5">índice operativo</p>
+        <!-- Botón Exportar -->
+        <button onclick="exportarReporte()"
+                class="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl text-[12px] transition shadow-sm">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            Exportar Reporte
+        </button>
     </div>
 </div>
 
 <!-- ════════════════════════════════════════════
-     2. GRÁFICOS PRINCIPALES (Barras + Donut)
+     1. FILA SUPERIOR: GRÁFICO DE BARRAS + DONUT
 ════════════════════════════════════════════ -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
     <!-- Gráfico de Barras: Rendimiento Operativo -->
-    <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
-        <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
-            <div>
-                <h3 class="font-extrabold text-navy text-base">Rendimiento Operativo</h3>
-                <p class="text-xs text-slate-400 mt-0.5" id="label-periodo-grafico">Citas completadas vs canceladas — últimos 6 meses</p>
-            </div>
-            <div class="flex items-center gap-4 text-xs font-semibold text-slate-500">
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-royal inline-block"></span>Completadas</span>
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-sky inline-block"></span>Canceladas</span>
-            </div>
+    <div class="lg:col-span-2 bg-white rounded-[20px] border border-slate-100 shadow-sm p-6">
+        <div class="flex items-start justify-between mb-6">
+            <h3 class="font-bold text-slate-800 text-[15px]">Rendimiento Operativo Mensual</h3>
+            <span class="flex items-center gap-1 text-[12px] font-bold text-emerald-600">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+                +12.4% vs Mes Anterior
+            </span>
         </div>
-        <div class="relative h-64 sm:h-72">
+        <div class="relative w-full h-[240px] mb-4">
             <canvas id="graficoRendimiento"></canvas>
+        </div>
+        <!-- Leyenda -->
+        <div class="flex items-center gap-6 justify-center text-[12px] font-medium">
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-[#003399]"></span>
+                <span class="text-slate-600">Servicios Completados</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full border-2 border-slate-300 bg-white"></span>
+                <span class="text-slate-600">Meta de Operación</span>
+            </div>
         </div>
     </div>
 
     <!-- Gráfico Donut: Tipos de Servicio -->
-    <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col">
-        <div class="mb-4">
-            <h3 class="font-extrabold text-navy text-base">Tipos de Servicio</h3>
-            <p class="text-xs text-slate-400 mt-0.5">Distribución por categoría</p>
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-6 flex flex-col">
+        <h3 class="font-bold text-slate-800 text-[15px] mb-6">Tipos de Servicio</h3>
+        <div class="flex-1 flex items-center justify-center">
+            <div class="relative w-44 h-44">
+                <canvas id="graficoDonut"></canvas>
+            </div>
         </div>
-        <div class="relative flex-1 flex items-center justify-center">
-            <canvas id="graficoDonut" class="max-h-52"></canvas>
-        </div>
-        <!-- Leyenda del donut -->
-        <div id="leyenda-donut" class="mt-4 space-y-2">
-            <!-- generada por JS -->
+        <!-- Leyenda del Donut -->
+        <div class="mt-6 space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-[#001E6E]"></span>
+                    <span class="text-[13px] text-slate-600 font-medium">Reparación</span>
+                </div>
+                <span class="text-[13px] font-bold text-slate-800">45%</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-[#003399]"></span>
+                    <span class="text-[13px] text-slate-600 font-medium">Mantenimiento</span>
+                </div>
+                <span class="text-[13px] font-bold text-slate-800">30%</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-[#34D399]"></span>
+                    <span class="text-[13px] text-slate-600 font-medium">Instalación</span>
+                </div>
+                <span class="text-[13px] font-bold text-slate-800">25%</span>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- ════════════════════════════════════════════
-     3. SATISFACCIÓN + REPORTES RECIENTES
+     2. FILA MEDIA: SATISFACCIÓN + REPORTES RECIENTES
 ════════════════════════════════════════════ -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
-    <!-- Satisfacción del Cliente -->
-    <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
-        <div class="flex items-center justify-between mb-5">
+    <!-- Panel de Satisfacción del Cliente -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-6">
+        <h3 class="font-bold text-slate-800 text-[15px] mb-4">Satisfacción del Cliente</h3>
+        <!-- Promedio grande -->
+        <div class="flex items-center gap-3 mb-6">
+            <span class="text-[52px] font-bold text-[#003399] leading-none">4.8</span>
             <div>
-                <h3 class="font-extrabold text-navy text-base">Satisfacción del Cliente</h3>
-                <p class="text-xs text-slate-400 mt-0.5">Basado en evaluaciones post-servicio</p>
-            </div>
-            <div class="text-right">
-                <p class="text-3xl font-extrabold text-navy leading-none">4.7</p>
-                <div class="flex items-center gap-0.5 mt-1 justify-end">
-                    {% for i in "12345" %}
-                    <svg class="w-4 h-4 {% if forloop.counter <= 4 %}text-amber-400{% else %}text-amber-300{% endif %}" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                    </svg>
-                    {% endfor %}
+                <div class="flex items-center gap-0.5 mb-1">
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="w-5 h-5 text-amber-200" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                 </div>
-                <p class="text-[11px] text-slate-400 mt-1">de 5 estrellas · 312 reseñas</p>
+                <p class="text-[12px] text-slate-500">Promedio basado en 1,240 reseñas</p>
             </div>
         </div>
-
-        <!-- Barras de distribución por estrella -->
-        <div class="space-y-2.5">
-            {% with estrellas="54321" %}
-            {% for e in estrellas %}
+        <!-- Barras de distribución -->
+        <div class="space-y-3">
             <div class="flex items-center gap-3">
-                <div class="flex items-center gap-0.5 w-16 flex-shrink-0">
-                    <span class="text-xs font-bold text-slate-600">{{ e }}</span>
-                    <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                    </svg>
+                <span class="text-[12px] font-bold text-slate-600 w-4">5</span>
+                <div class="flex-1 bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2" style="width: 75%"></div>
                 </div>
-                <div class="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
-                    <div class="h-2 rounded-full bg-amber-400 transition-all duration-700"
-                         style="width: {% if forloop.counter == 1 %}68{% elif forloop.counter == 2 %}20{% elif forloop.counter == 3 %}8{% elif forloop.counter == 4 %}3{% else %}1{% endif %}%">
-                    </div>
+                <span class="text-[12px] font-semibold text-slate-500 w-7 text-right">75%</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-[12px] font-bold text-slate-600 w-4">4</span>
+                <div class="flex-1 bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2" style="width: 15%"></div>
                 </div>
-                <span class="text-xs font-semibold text-slate-400 w-8 text-right flex-shrink-0">
-                    {% if forloop.counter == 1 %}68%{% elif forloop.counter == 2 %}20%{% elif forloop.counter == 3 %}8%{% elif forloop.counter == 4 %}3%{% else %}1%{% endif %}
-                </span>
+                <span class="text-[12px] font-semibold text-slate-500 w-7 text-right">15%</span>
             </div>
-            {% endfor %}
-            {% endwith %}
-        </div>
-
-        <!-- NPS -->
-        <div class="mt-5 pt-4 border-t border-slate-100 grid grid-cols-3 gap-3 text-center">
-            <div>
-                <p class="text-lg font-extrabold text-emerald">88%</p>
-                <p class="text-[11px] text-slate-400 font-semibold mt-0.5">Promotores</p>
+            <div class="flex items-center gap-3">
+                <span class="text-[12px] font-bold text-slate-600 w-4">3</span>
+                <div class="flex-1 bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2" style="width: 5%"></div>
+                </div>
+                <span class="text-[12px] font-semibold text-slate-500 w-7 text-right">5%</span>
             </div>
-            <div>
-                <p class="text-lg font-extrabold text-amber-500">9%</p>
-                <p class="text-[11px] text-slate-400 font-semibold mt-0.5">Pasivos</p>
+            <div class="flex items-center gap-3">
+                <span class="text-[12px] font-bold text-slate-600 w-4">2</span>
+                <div class="flex-1 bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2" style="width: 3%"></div>
+                </div>
+                <span class="text-[12px] font-semibold text-slate-500 w-7 text-right">3%</span>
             </div>
-            <div>
-                <p class="text-lg font-extrabold text-rose-500">3%</p>
-                <p class="text-[11px] text-slate-400 font-semibold mt-0.5">Detractores</p>
+            <div class="flex items-center gap-3">
+                <span class="text-[12px] font-bold text-slate-600 w-4">1</span>
+                <div class="flex-1 bg-slate-100 rounded-full h-2">
+                    <div class="bg-rose-400 rounded-full h-2" style="width: 2%"></div>
+                </div>
+                <span class="text-[12px] font-semibold text-slate-500 w-7 text-right">2%</span>
             </div>
         </div>
     </div>
 
-    <!-- Reportes Recientes -->
-    <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col">
+    <!-- Panel de Reportes Recientes -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-6">
         <div class="flex items-center justify-between mb-5">
-            <h3 class="font-extrabold text-navy text-base">Reportes Recientes</h3>
-            <button class="text-xs font-bold text-royal hover:underline">Ver todos</button>
+            <h3 class="font-bold text-slate-800 text-[15px]">Reportes Recientes</h3>
+            <a href="#" class="text-[12px] font-bold text-[#003399] hover:underline">Ver Historial</a>
         </div>
-
-        <div class="space-y-3 flex-1">
+        <div class="grid grid-cols-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">
+            <span>Nombre del Reporte</span>
+            <span class="text-center">Generado Por</span>
+            <span class="text-right">Estado</span>
+        </div>
+        <div class="space-y-1">
 
             <!-- Reporte 1 -->
-            <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:border-royal/20 hover:bg-royal/5 transition-all cursor-pointer">
-                <div class="w-9 h-9 rounded-xl bg-royal/10 text-royal flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
+            <div class="flex items-center gap-3 px-1 py-3 border-b border-slate-100 hover:bg-slate-50/50 rounded-xl transition-colors">
+                <div class="w-8 h-8 rounded-lg bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs font-bold text-navy truncate">Reporte Mensual — Julio 2026</p>
-                    <p class="text-[11px] text-slate-400">Generado el 01 Ago 2026 · 148 citas</p>
+                    <p class="text-[12px] font-bold text-slate-700 truncate leading-tight">Resumen_Operativo_Mayo_2024.pdf</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Sema_Admin</p>
                 </div>
-                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-light text-emerald flex-shrink-0">Completo</span>
+                <div class="text-[11px] text-slate-500 text-center flex-shrink-0 leading-tight">
+                    <p>15 Mayo,</p><p>2024</p>
+                </div>
+                <span class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#D1FAE5] text-[#047857]">LISTO</span>
             </div>
 
             <!-- Reporte 2 -->
-            <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:border-royal/20 hover:bg-royal/5 transition-all cursor-pointer">
-                <div class="w-9 h-9 rounded-xl bg-sky-light text-sky flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
+            <div class="flex items-center gap-3 px-1 py-3 border-b border-slate-100 hover:bg-slate-50/50 rounded-xl transition-colors">
+                <div class="w-8 h-8 rounded-lg bg-[#D1FAE5] text-[#059669] flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs font-bold text-navy truncate">Reporte Mensual — Junio 2026</p>
-                    <p class="text-[11px] text-slate-400">Generado el 01 Jul 2026 · 134 citas</p>
+                    <p class="text-[12px] font-bold text-slate-700 truncate leading-tight">Inventario_Q2_Final.xlsx</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Auto_System</p>
                 </div>
-                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-light text-emerald flex-shrink-0">Completo</span>
+                <div class="text-[11px] text-slate-500 text-center flex-shrink-0 leading-tight">
+                    <p>12 Mayo,</p><p>2024</p>
+                </div>
+                <span class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#D1FAE5] text-[#047857]">LISTO</span>
             </div>
 
             <!-- Reporte 3 -->
-            <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:border-royal/20 hover:bg-royal/5 transition-all cursor-pointer">
-                <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
+            <div class="flex items-center gap-3 px-1 py-3 hover:bg-slate-50/50 rounded-xl transition-colors">
+                <div class="w-8 h-8 rounded-lg bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs font-bold text-navy truncate">Reporte Trimestral — Q2 2026</p>
-                    <p class="text-[11px] text-slate-400">Generado el 30 Jun 2026 · 389 citas</p>
+                    <p class="text-[12px] font-bold text-slate-700 truncate leading-tight">Satisfaccion_Global_A23.pdf</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Admin_Principal</p>
                 </div>
-                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-600 flex-shrink-0">Revisión</span>
+                <div class="text-[11px] text-slate-500 text-center flex-shrink-0 leading-tight">
+                    <p>05 Mayo,</p><p>2024</p>
+                </div>
+                <span class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">PENDIENTE</span>
             </div>
-
-            <!-- Reporte 4 -->
-            <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:border-royal/20 hover:bg-royal/5 transition-all cursor-pointer">
-                <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs font-bold text-navy truncate">Reporte Anual — 2025</p>
-                    <p class="text-[11px] text-slate-400">Generado el 15 Ene 2026 · 1,482 citas</p>
-                </div>
-                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-royal/10 text-royal flex-shrink-0">Archivado</span>
-            </div>
-
         </div>
     </div>
 </div>
 
 <!-- ════════════════════════════════════════════
-     4. KPIs INFERIORES: Tiempo · Efectividad · Retorno
+     3. FILA INFERIOR: 3 MÉTRICAS CLAVE
 ════════════════════════════════════════════ -->
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
 
-    <!-- Tiempo de Respuesta -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all">
-        <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-2xl bg-sky-light/80 text-sky flex items-center justify-center">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <div>
-                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tiempo de Respuesta</p>
-                <p class="text-xl font-extrabold text-navy leading-tight kpi-valor" data-mensual="38.5 min" data-anual="41.2 min">38.5 min</p>
-            </div>
+    <!-- KPI: Tiempo de Respuesta -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
         </div>
-        <!-- Mini barra de progreso -->
-        <div class="space-y-1.5">
-            <div class="flex justify-between text-[11px] font-semibold text-slate-400">
-                <span>Promedio actual</span><span class="text-emerald">↓ Mejoró 4.2 min</span>
-            </div>
-            <div class="w-full bg-slate-100 rounded-full h-2">
-                <div class="bg-gradient-to-r from-sky to-royal h-2 rounded-full transition-all duration-700" style="width: 62%"></div>
-            </div>
-            <div class="flex justify-between text-[10px] text-slate-300">
-                <span>0 min</span><span>Meta: 35 min</span><span>60 min</span>
+        <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tiempo de Respuesta</p>
+            <h3 class="text-[26px] font-bold text-slate-800 leading-none mb-1">1.4 hrs</h3>
+            <div class="flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+                <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+                -15m mejor que el mes pasado
             </div>
         </div>
     </div>
 
-    <!-- Efectividad Técnica -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all">
-        <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-2xl bg-emerald-light text-emerald flex items-center justify-center">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-                </svg>
-            </div>
-            <div>
-                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Efectividad Técnica</p>
-                <p class="text-xl font-extrabold text-navy leading-tight kpi-valor" data-mensual="{{ reporte.tasa_exito }}%" data-anual="87.3%">{{ reporte.tasa_exito }}%</p>
-            </div>
+    <!-- KPI: Efectividad Técnica -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-[#D1FAE5] text-[#059669] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
         </div>
-        <div class="space-y-1.5">
-            <div class="flex justify-between text-[11px] font-semibold text-slate-400">
-                <span>Citas resueltas</span><span class="text-emerald">↑ Sobre meta</span>
-            </div>
-            <div class="w-full bg-slate-100 rounded-full h-2">
-                <div class="bg-gradient-to-r from-emerald to-emerald/70 h-2 rounded-full transition-all duration-700"
-                     style="width: {{ reporte.tasa_exito }}%"></div>
-            </div>
-            <div class="flex justify-between text-[10px] text-slate-300">
-                <span>0%</span><span>Meta: 85%</span><span>100%</span>
+        <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Efectividad Técnica</p>
+            <h3 class="text-[26px] font-bold text-slate-800 leading-none mb-1">94.2%</h3>
+            <div class="flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+                <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                +2.1% en resolución a la primera
             </div>
         </div>
     </div>
 
-    <!-- Retorno / Ingresos -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all">
-        <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-2xl bg-royal/10 text-royal flex items-center justify-center">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <div>
-                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Retorno Estimado</p>
-                <p class="text-xl font-extrabold text-navy leading-tight kpi-valor" data-mensual="$45,280" data-anual="$498,400">$45,280</p>
-            </div>
+    <!-- KPI: Retorno de Clientes -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
         </div>
-        <div class="space-y-1.5">
-            <div class="flex justify-between text-[11px] font-semibold text-slate-400">
-                <span>Ingresos estimados</span><span class="text-emerald">↑ +8.4%</span>
-            </div>
-            <div class="w-full bg-slate-100 rounded-full h-2">
-                <div class="bg-gradient-to-r from-royal to-sky h-2 rounded-full transition-all duration-700" style="width: 75%"></div>
-            </div>
-            <div class="flex justify-between text-[10px] text-slate-300">
-                <span>$0</span><span>Meta: $50k</span><span>$60k</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ════════════════════════════════════════════
-     5. TÉCNICOS TOP + SERVICIOS POPULARES
-════════════════════════════════════════════ -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-
-    <!-- Técnicos Top -->
-    <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
-        <h3 class="font-extrabold text-navy text-base mb-4">Técnicos con Mayor Rendimiento</h3>
-        <div class="space-y-3">
-            {% for tec in tecnicos_top %}
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-navy text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
-                    {{ tec.tecnico__nombre_completo|slice:":1"|upper|default:"T" }}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between mb-1">
-                        <p class="text-xs font-bold text-navy truncate">{{ tec.tecnico__nombre_completo|default:"Técnico" }}</p>
-                        <span class="text-xs font-bold text-slate-600 ml-2 flex-shrink-0">{{ tec.total }} citas</span>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-1.5">
-                        <div class="bg-gradient-to-r from-royal to-sky h-1.5 rounded-full"
-                             style="width: {% widthratio tec.total tecnicos_top.0.total 100 %}%"></div>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            {% for mock in "12345" %}
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-navy text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
-                    {% if forloop.counter == 1 %}C{% elif forloop.counter == 2 %}A{% elif forloop.counter == 3 %}R{% elif forloop.counter == 4 %}M{% else %}L{% endif %}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between mb-1">
-                        <p class="text-xs font-bold text-navy truncate">
-                            {% if forloop.counter == 1 %}Carlos Mendoza{% elif forloop.counter == 2 %}Ana Torres{% elif forloop.counter == 3 %}Roberto Silva{% elif forloop.counter == 4 %}María Castillo{% else %}Luis Pérez{% endif %}
-                        </p>
-                        <span class="text-xs font-bold text-slate-600 ml-2 flex-shrink-0">
-                            {% if forloop.counter == 1 %}42{% elif forloop.counter == 2 %}38{% elif forloop.counter == 3 %}31{% elif forloop.counter == 4 %}27{% else %}20{% endif %} citas
-                        </span>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-1.5">
-                        <div class="bg-gradient-to-r from-royal to-sky h-1.5 rounded-full"
-                             style="width: {% if forloop.counter == 1 %}100{% elif forloop.counter == 2 %}90{% elif forloop.counter == 3 %}74{% elif forloop.counter == 4 %}64{% else %}48{% endif %}%"></div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- Servicios Más Solicitados -->
-    <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
-        <h3 class="font-extrabold text-navy text-base mb-4">Servicios Más Solicitados</h3>
-        <div class="space-y-3">
-            {% for svc in servicios_populares %}
-            <div class="flex items-center gap-3">
-                <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center text-[11px] font-extrabold flex-shrink-0">
-                    {{ forloop.counter }}
-                </span>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between mb-1">
-                        <p class="text-xs font-bold text-navy truncate">{{ svc.servicio__nombre|default:"Servicio" }}</p>
-                        <span class="text-xs font-bold text-slate-600 ml-2 flex-shrink-0">{{ svc.total }}</span>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-1.5">
-                        <div class="bg-gradient-to-r from-sky to-sky/60 h-1.5 rounded-full"
-                             style="width: {% widthratio svc.total servicios_populares.0.total 100 %}%"></div>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            {% for mock in "12345" %}
-            <div class="flex items-center gap-3">
-                <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center text-[11px] font-extrabold flex-shrink-0">{{ forloop.counter }}</span>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between mb-1">
-                        <p class="text-xs font-bold text-navy truncate">
-                            {% if forloop.counter == 1 %}Mantenimiento Preventivo{% elif forloop.counter == 2 %}Cambio de Pantalla{% elif forloop.counter == 3 %}Diagnóstico General{% elif forloop.counter == 4 %}Reparación de Placa{% else %}Cambio de Batería{% endif %}
-                        </p>
-                        <span class="text-xs font-bold text-slate-600 ml-2">
-                            {% if forloop.counter == 1 %}52{% elif forloop.counter == 2 %}38{% elif forloop.counter == 3 %}29{% elif forloop.counter == 4 %}18{% else %}11{% endif %}
-                        </span>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-1.5">
-                        <div class="bg-gradient-to-r from-sky to-sky/60 h-1.5 rounded-full"
-                             style="width: {% if forloop.counter == 1 %}100{% elif forloop.counter == 2 %}73{% elif forloop.counter == 3 %}56{% elif forloop.counter == 4 %}35{% else %}21{% endif %}%"></div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-            {% endfor %}
+        <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Retorno de Clientes</p>
+            <h3 class="text-[26px] font-bold text-slate-800 leading-none mb-1">68%</h3>
+            <p class="text-[11px] text-slate-500 font-medium">Manteniendo tendencia estable</p>
         </div>
     </div>
 </div>
@@ -454,67 +284,48 @@
 
 {% block scripts %}
 <script>
-// ═══════════════════════════════════════════════
-// DATOS PARA LOS GRÁFICOS (Mensual / Anual)
-// ═══════════════════════════════════════════════
-const DATOS_GRAFICOS = {
-    mensual: {
-        rendimiento: {
-            labels: ['Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul'],
-            completadas: [88, 95, 102, 118, 134, {{ reporte.finalizadas|default:0 }}],
-            canceladas:  [12, 8,  14,  9,   11,  {{ reporte.canceladas|default:0 }}],
-        },
-        donut: {
-            labels: ['Mantenimiento', 'Reparación', 'Diagnóstico', 'Instalación', 'Otros'],
-            data:   [38, 27, 18, 11, 6],
-        },
-        periodo_label: 'Citas completadas vs canceladas — últimos 6 meses',
-    },
-    anual: {
-        rendimiento: {
-            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-            completadas: [98, 112, 125, 108, 134, 142, 148, 0, 0, 0, 0, 0],
-            canceladas:  [14, 10,  12,  9,   11,  13,  8,  0, 0, 0, 0, 0],
-        },
-        donut: {
-            labels: ['Mantenimiento', 'Reparación', 'Diagnóstico', 'Instalación', 'Otros'],
-            data:   [41, 24, 20, 9, 6],
-        },
-        periodo_label: 'Citas completadas vs canceladas — año 2026',
-    },
+// ─────────────────────────────────────────────
+// 1. Gráfico de Barras: Rendimiento Operativo
+// ─────────────────────────────────────────────
+let chartRendimiento = null;
+
+const datosMensual = {
+    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+    completados: [400, 580, 490, 670, 710, 840],
+    meta: [500, 500, 500, 620, 700, 750]
 };
 
-const DONUT_COLORES = ['#0040A8', '#0284C7', '#10B981', '#F59E0B', '#8B5CF6'];
+const datosAnual = {
+    labels: ['2019', '2020', '2021', '2022', '2023', '2024'],
+    completados: [3200, 2900, 3800, 5100, 6400, 7800],
+    meta: [4000, 4000, 4500, 5000, 6000, 7500]
+};
 
-let periodoActivo  = 'mensual';
-let chartRendimiento = null;
-let chartDonut       = null;
-
-// ═══════════════════════════════════════════════
-// INICIALIZAR GRÁFICO DE BARRAS (Rendimiento)
-// ═══════════════════════════════════════════════
-function inicializarGraficoRendimiento() {
+function inicializarGraficoRendimiento(datos) {
+    if (chartRendimiento) chartRendimiento.destroy();
     const ctx = document.getElementById('graficoRendimiento').getContext('2d');
-    const d   = DATOS_GRAFICOS.mensual.rendimiento;
-
     chartRendimiento = new Chart(ctx, {
-        type: 'bar',
         data: {
-            labels: d.labels,
+            labels: datos.labels,
             datasets: [
                 {
-                    label: 'Completadas',
-                    data: d.completadas,
-                    backgroundColor: '#0040A8',
-                    borderRadius: 8,
-                    barThickness: 18,
+                    type: 'bar',
+                    label: 'Servicios Completados',
+                    data: datos.completados,
+                    backgroundColor: '#003399',
+                    borderRadius: { topLeft: 5, topRight: 5 },
+                    barThickness: 28,
                 },
                 {
-                    label: 'Canceladas',
-                    data: d.canceladas,
-                    backgroundColor: '#0284C7',
-                    borderRadius: 8,
-                    barThickness: 18,
+                    type: 'line',
+                    label: 'Meta de Operación',
+                    data: datos.meta,
+                    borderColor: '#94A3B8',
+                    borderWidth: 2,
+                    borderDash: [6, 4],
+                    pointRadius: 0,
+                    tension: 0.4,
+                    fill: false,
                 }
             ]
         },
@@ -524,372 +335,99 @@ function inicializarGraficoRendimiento() {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: '#001E50',
+                    backgroundColor: '#1E293B',
                     titleFont: { family: 'Inter', size: 12, weight: 'bold' },
-                    bodyFont:  { family: 'Inter', size: 11 },
+                    bodyFont: { family: 'Inter', size: 11 },
                     padding: 10,
-                    cornerRadius: 10,
+                    cornerRadius: 8
                 }
             },
             scales: {
-                x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } },
+                x: {
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: { font: { family: 'Inter', size: 11 }, color: '#94A3B8' }
+                },
                 y: {
-                    border: { dash: [4, 4] },
-                    grid:   { color: '#f1f5f9' },
-                    ticks:  { font: { family: 'Inter', size: 11 }, beginAtZero: true }
+                    grid: { color: '#F1F5F9', drawBorder: false },
+                    border: { display: false },
+                    ticks: { font: { family: 'Inter', size: 11 }, color: '#94A3B8', maxTicksLimit: 7 }
                 }
             }
         }
     });
 }
 
-// ═══════════════════════════════════════════════
-// INICIALIZAR GRÁFICO DONUT (Tipos de Servicio)
-// ═══════════════════════════════════════════════
+// ─────────────────────────────────────────────
+// 2. Gráfico Donut: Tipos de Servicio
+// ─────────────────────────────────────────────
 function inicializarGraficoDonut() {
     const ctx = document.getElementById('graficoDonut').getContext('2d');
-    const d   = DATOS_GRAFICOS.mensual.donut;
-
-    chartDonut = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: d.labels,
+            labels: ['Reparación', 'Mantenimiento', 'Instalación'],
             datasets: [{
-                data: d.data,
-                backgroundColor: DONUT_COLORES,
-                borderWidth: 2,
+                data: [45, 30, 25],
+                backgroundColor: ['#001E6E', '#003399', '#34D399'],
+                borderWidth: 3,
                 borderColor: '#ffffff',
-                hoverOffset: 6,
+                hoverOffset: 6
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
-            cutout: '70%',
+            maintainAspectRatio: false,
+            cutout: '68%',
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: '#001E50',
+                    backgroundColor: '#1E293B',
                     titleFont: { family: 'Inter', size: 12, weight: 'bold' },
-                    bodyFont:  { family: 'Inter', size: 11 },
+                    bodyFont: { family: 'Inter', size: 11 },
                     padding: 10,
-                    cornerRadius: 10,
+                    cornerRadius: 8,
                     callbacks: {
-                        label: ctx => ` ${ctx.label}: ${ctx.parsed}%`
+                        label: (c) => ` ${c.label}: ${c.parsed}%`
                     }
                 }
             }
         }
     });
-
-    actualizarLeyendaDonut(d.labels, d.data);
 }
 
-function actualizarLeyendaDonut(labels, data) {
-    const contenedor = document.getElementById('leyenda-donut');
-    contenedor.innerHTML = '';
-    labels.forEach((label, i) => {
-        const item = document.createElement('div');
-        item.className = 'flex items-center justify-between gap-2';
-        item.innerHTML = `
-            <div class="flex items-center gap-2 min-w-0">
-                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${DONUT_COLORES[i]}"></span>
-                <span class="text-xs text-slate-600 truncate">${label}</span>
-            </div>
-            <span class="text-xs font-bold text-navy flex-shrink-0">${data[i]}%</span>
-        `;
-        contenedor.appendChild(item);
-    });
-}
-
-// ═══════════════════════════════════════════════
-// CONMUTADOR DE PERÍODO (Mensual / Anual)
-// ═══════════════════════════════════════════════
+// ─────────────────────────────────────────────
+// 3. Toggle Mensual / Anual
+// ─────────────────────────────────────────────
 function cambiarPeriodo(periodo) {
-    if (periodo === periodoActivo) return;
-    periodoActivo = periodo;
-
-    const btnMensual = document.getElementById('btn-periodo-mensual');
-    const btnAnual   = document.getElementById('btn-periodo-anual');
-    const activeClass   = 'px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-navy shadow-sm transition-all';
-    const inactiveClass = 'px-4 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-navy transition-all';
+    const btnMensual = document.getElementById('btn-mensual');
+    const btnAnual = document.getElementById('btn-anual');
+    const BASE_ACTIVE = 'px-4 py-1.5 rounded-lg text-[12px] font-bold bg-[#003399] text-white transition';
+    const BASE_INACTIVE = 'px-4 py-1.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition';
 
     if (periodo === 'mensual') {
-        btnMensual.className = activeClass;
-        btnAnual.className   = inactiveClass;
+        btnMensual.className = BASE_ACTIVE;
+        btnAnual.className = BASE_INACTIVE;
+        inicializarGraficoRendimiento(datosMensual);
     } else {
-        btnAnual.className   = activeClass;
-        btnMensual.className = inactiveClass;
+        btnAnual.className = BASE_ACTIVE;
+        btnMensual.className = BASE_INACTIVE;
+        inicializarGraficoRendimiento(datosAnual);
     }
-
-    const d = DATOS_GRAFICOS[periodo];
-
-    // Actualizar gráfico barras
-    chartRendimiento.data.labels              = d.rendimiento.labels;
-    chartRendimiento.data.datasets[0].data    = d.rendimiento.completadas;
-    chartRendimiento.data.datasets[1].data    = d.rendimiento.canceladas;
-    chartRendimiento.update('active');
-
-    // Actualizar donut
-    chartDonut.data.labels                    = d.donut.labels;
-    chartDonut.data.datasets[0].data          = d.donut.data;
-    chartDonut.update('active');
-    actualizarLeyendaDonut(d.donut.labels, d.donut.data);
-
-    // Actualizar label del gráfico
-    document.getElementById('label-periodo-grafico').textContent = d.periodo_label;
-
-    // Actualizar KPIs con animación
-    document.querySelectorAll('.kpi-valor').forEach(el => {
-        const valor = el.dataset[periodo];
-        if (valor) {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(4px)';
-            setTimeout(() => {
-                el.textContent = valor;
-                el.style.transition = 'all 0.25s ease';
-                el.style.opacity = '1';
-                el.style.transform = 'translateY(0)';
-            }, 120);
-        }
-    });
-    document.querySelectorAll('.kpi-badge').forEach(el => {
-        const valor = el.dataset[periodo];
-        if (valor) el.textContent = valor;
-    });
-    document.querySelectorAll('.kpi-label').forEach(el => {
-        const valor = el.dataset[periodo];
-        if (valor) el.textContent = valor;
-    });
 }
 
-// ═══════════════════════════════════════════════
-// EXPORTAR REPORTE PDF (jsPDF + AutoTable)
-// ═══════════════════════════════════════════════
-async function exportarReportePDF() {
-    const btn = document.querySelector('[onclick="exportarReportePDF()"]');
-    const originalHTML = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Generando...`;
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const W = doc.internal.pageSize.getWidth();
-    const H = doc.internal.pageSize.getHeight();
-    const periodoLabel = periodoActivo === 'mensual' ? 'Mensual — Agosto 2026' : 'Anual — 2026';
-    const fechaGen = new Date().toLocaleDateString('es-ES', { day:'2-digit', month:'long', year:'numeric' });
-
-    // ── MEMBRETE HEADER ──
-    // Fondo azul marino
-    doc.setFillColor(0, 30, 80);
-    doc.roundedRect(0, 0, W, 42, 0, 0, 'F');
-
-    // Línea decorativa azul cielo
-    doc.setFillColor(2, 132, 199);
-    doc.rect(0, 38, W, 4, 'F');
-
-    // Nombre empresa
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(22);
-    doc.setTextColor(255, 255, 255);
-    doc.text('ServiTech', 14, 18);
-
-    // Subtítulo
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(160, 200, 255);
-    doc.text('Sistema de Gestión de Servicios Técnicos', 14, 25);
-
-    // Título del reporte (derecha)
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(255, 255, 255);
-    doc.text('REPORTE EJECUTIVO', W - 14, 16, { align: 'right' });
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(160, 200, 255);
-    doc.text(`Período: ${periodoLabel}`, W - 14, 22, { align: 'right' });
-    doc.text(`Generado: ${fechaGen}`, W - 14, 28, { align: 'right' });
-
-    // Badge "Admin Console"
-    doc.setFillColor(16, 185, 129);
-    doc.roundedRect(14, 29, 30, 6, 2, 2, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7);
-    doc.setTextColor(255, 255, 255);
-    doc.text('Admin Console', 29, 33.5, { align: 'center' });
-
-    // ── SECCIÓN 1: KPIs ──
-    let y = 52;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(0, 30, 80);
-    doc.text('Indicadores Clave de Rendimiento', 14, y);
-
-    // Línea separadora
-    doc.setDrawColor(226, 232, 240);
-    doc.setLineWidth(0.3);
-    doc.line(14, y + 2, W - 14, y + 2);
-    y += 8;
-
-    // 4 cajas KPI en fila
-    const kpiData = [
-        { label: 'Total Citas',      valor: periodoActivo === 'mensual' ? '{{ reporte.total }}' : '{{ reporte.total|add:"1050" }}', color: [2, 132, 199] },
-        { label: 'Finalizadas',      valor: periodoActivo === 'mensual' ? '{{ reporte.finalizadas }}' : '{{ reporte.finalizadas|add:"912" }}', color: [16, 185, 129] },
-        { label: 'Canceladas',       valor: periodoActivo === 'mensual' ? '{{ reporte.canceladas }}' : '{{ reporte.canceladas|add:"87" }}', color: [239, 68, 68] },
-        { label: 'Tasa de Éxito',    valor: '{{ reporte.tasa_exito }}%', color: [0, 64, 168] },
-    ];
-
-    const boxW = (W - 28 - 9) / 4;
-    kpiData.forEach((kpi, i) => {
-        const x = 14 + i * (boxW + 3);
-        doc.setFillColor(248, 250, 252);
-        doc.roundedRect(x, y, boxW, 22, 2, 2, 'F');
-        doc.setDrawColor(...kpi.color);
-        doc.setLineWidth(0.6);
-        doc.line(x, y, x, y + 22);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(16);
-        doc.setTextColor(...kpi.color);
-        doc.text(String(kpi.valor), x + boxW / 2, y + 13, { align: 'center' });
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7);
-        doc.setTextColor(100, 116, 139);
-        doc.text(kpi.label.toUpperCase(), x + boxW / 2, y + 19, { align: 'center' });
-    });
-    y += 30;
-
-    // ── SECCIÓN 2: MÉTRICAS OPERATIVAS ──
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(0, 30, 80);
-    doc.text('Métricas Operativas', 14, y);
-    doc.setDrawColor(226, 232, 240);
-    doc.line(14, y + 2, W - 14, y + 2);
-    y += 7;
-
-    doc.autoTable({
-        startY: y,
-        head: [['Métrica', 'Valor', 'Meta', 'Estado']],
-        body: [
-            ['Tiempo de Respuesta Promedio', '38.5 min',  '35 min',   'En Proceso'],
-            ['Efectividad Técnica',           '{{ reporte.tasa_exito }}%', '85%', '{% if reporte.tasa_exito >= 85 %}Óptimo{% else %}Mejorable{% endif %}'],
-            ['Retorno Estimado (USD)',         '$45,280',  '$50,000',  'En Proceso'],
-            ['Satisfacción del Cliente',       '4.7 / 5',  '4.5 / 5', 'Óptimo'],
-            ['NPS Score',                      '85',       '80',       'Óptimo'],
-        ],
-        styles:      { font: 'helvetica', fontSize: 9, cellPadding: 3 },
-        headStyles:  { fillColor: [0, 30, 80], textColor: 255, fontStyle: 'bold', fontSize: 9 },
-        alternateRowStyles: { fillColor: [248, 250, 252] },
-        columnStyles: {
-            0: { cellWidth: 70 },
-            1: { halign: 'center', fontStyle: 'bold' },
-            2: { halign: 'center' },
-            3: {
-                halign: 'center', fontStyle: 'bold',
-                textColor: [16, 185, 129],
-            },
-        },
-        margin: { left: 14, right: 14 },
-        didParseCell: (data) => {
-            if (data.column.index === 3 && data.section === 'body') {
-                const v = data.cell.raw;
-                if (v === 'Óptimo')     data.cell.styles.textColor = [16, 185, 129];
-                else if (v === 'En Proceso') data.cell.styles.textColor = [245, 158, 11];
-                else                    data.cell.styles.textColor = [239, 68, 68];
-            }
-        },
-    });
-    y = doc.lastAutoTable.finalY + 10;
-
-    // ── SECCIÓN 3: TÉCNICOS TOP ──
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(0, 30, 80);
-    doc.text('Técnicos con Mayor Rendimiento', 14, y);
-    doc.setDrawColor(226, 232, 240);
-    doc.line(14, y + 2, W - 14, y + 2);
-    y += 7;
-
-    const tecnicosRows = [
-        ['Carlos Mendoza',   '42', '95%', 'Platinum'],
-        ['Ana Torres',       '38', '92%', 'Gold'],
-        ['Roberto Silva',    '31', '88%', 'Gold'],
-        ['María Castillo',   '27', '85%', 'Silver'],
-        ['Luis Pérez',       '20', '80%', 'Silver'],
-    ];
-
-    doc.autoTable({
-        startY: y,
-        head: [['Técnico', 'Citas Atendidas', 'Efectividad', 'Nivel']],
-        body: tecnicosRows,
-        styles:     { font: 'helvetica', fontSize: 9, cellPadding: 3 },
-        headStyles: { fillColor: [0, 64, 168], textColor: 255, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [248, 250, 252] },
-        columnStyles: {
-            1: { halign: 'center' },
-            2: { halign: 'center', fontStyle: 'bold', textColor: [16, 185, 129] },
-            3: { halign: 'center' },
-        },
-        margin: { left: 14, right: 14 },
-    });
-    y = doc.lastAutoTable.finalY + 10;
-
-    // ── SECCIÓN 4: DISTRIBUCIÓN POR SERVICIO ──
-    if (y + 60 > H - 20) { doc.addPage(); y = 20; }
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(0, 30, 80);
-    doc.text('Distribución por Tipo de Servicio', 14, y);
-    doc.setDrawColor(226, 232, 240);
-    doc.line(14, y + 2, W - 14, y + 2);
-    y += 7;
-
-    const d = DATOS_GRAFICOS[periodoActivo].donut;
-    const serviciosRows = d.labels.map((l, i) => [l, `${d.data[i]}%`, Math.round(d.data[i] * 1.48) + ' citas']);
-    doc.autoTable({
-        startY: y,
-        head: [['Tipo de Servicio', 'Porcentaje', 'Citas Aprox.']],
-        body: serviciosRows,
-        styles:     { font: 'helvetica', fontSize: 9, cellPadding: 3 },
-        headStyles: { fillColor: [2, 132, 199], textColor: 255, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [248, 250, 252] },
-        columnStyles: { 1: { halign: 'center', fontStyle: 'bold' }, 2: { halign: 'center' } },
-        margin: { left: 14, right: 14 },
-    });
-    y = doc.lastAutoTable.finalY + 10;
-
-    // ── FOOTER EN TODAS LAS PÁGINAS ──
-    const totalPages = doc.internal.getNumberOfPages();
-    for (let p = 1; p <= totalPages; p++) {
-        doc.setPage(p);
-        // Línea footer
-        doc.setDrawColor(226, 232, 240);
-        doc.setLineWidth(0.3);
-        doc.line(14, H - 14, W - 14, H - 14);
-        // Texto izquierda
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7);
-        doc.setTextColor(148, 163, 184);
-        doc.text('© 2026 ServiTech System Inc. — Documento de uso interno y confidencial.', 14, H - 8);
-        // Paginación derecha
-        doc.text(`Página ${p} de ${totalPages}`, W - 14, H - 8, { align: 'right' });
-    }
-
-    // ── GUARDAR ──
-    doc.save(`ServiTech_Reporte_${periodoActivo === 'mensual' ? 'Agosto_2026' : 'Anual_2026'}.pdf`);
-
-    btn.disabled = false;
-    btn.innerHTML = originalHTML;
-    showToast('📄 Reporte PDF exportado correctamente.', 'success');
+// ─────────────────────────────────────────────
+// 4. Exportar Reporte (simulación)
+// ─────────────────────────────────────────────
+function exportarReporte() {
+    showToast('📊 Reporte exportado exitosamente.', 'success');
 }
 
-// ═══════════════════════════════════════════════
-// INICIALIZACIÓN
-// ═══════════════════════════════════════════════
+// ─────────────────────────────────────────────
+// Inicialización
+// ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    inicializarGraficoRendimiento();
+    inicializarGraficoRendimiento(datosMensual);
     inicializarGraficoDonut();
 });
 </script>
