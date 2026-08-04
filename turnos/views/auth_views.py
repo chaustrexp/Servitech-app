@@ -47,7 +47,7 @@ class CustomLoginView(LoginView):
         print(f"[LOGIN] Usuario: {user.correo} | Rol: {user.rol} | Activo: {user.is_active}")
 
         rol = user.rol
-        if rol == Usuario.Rol.ADMINISTRADOR:
+        if user.es_admin:
             print("[LOGIN] Redirigiendo a admin_dashboard")
             return redirect('admin_dashboard')
         elif rol == Usuario.Rol.TECNICO:
@@ -69,12 +69,11 @@ def home(request):
     if not request.user.is_authenticated:
         return redirect('login')
 
-    rol = request.user.rol
-    if rol == Usuario.Rol.ADMINISTRADOR:
+    if request.user.es_admin:
         return redirect('admin_dashboard')
-    elif rol == Usuario.Rol.TECNICO:
+    elif request.user.rol == Usuario.Rol.TECNICO:
         return redirect('dashboard_tecnico')
-    elif rol == Usuario.Rol.CLIENTE:
+    elif request.user.rol == Usuario.Rol.CLIENTE:
         return redirect('cliente_inicio')
     else:
         # Rol no reconocido — evita el bucle, va al login con mensaje

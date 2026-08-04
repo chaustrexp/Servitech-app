@@ -17,7 +17,7 @@ from ..forms import EditarPerfilForm
 @login_required
 def admin_dashboard(request):
     """Dashboard principal del administrador con métricas reales."""
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+    if not request.user.es_admin:
         return redirect('home')
 
     hoy = date.today()
@@ -130,103 +130,102 @@ def tecnico_agenda(request):
     if request.user.rol != Usuario.Rol.TECNICO:
         return redirect('home')
 
-    import datetime
     from datetime import date, timedelta
-
     hoy = date.today()
 
-    # Obtener el offset de semana para navegación
     try:
-        week_offset = int(request.GET.get('week_offset', 0))
-    except ValueError:
-        week_offset = 0
+        semana_offset = int(request.GET.get('semana_offset', 0))
+    except (ValueError, TypeError):
+        semana_offset = 0
 
-    # Calcular fechas de la semana (Lunes a Viernes)
-    ref_date = hoy + timedelta(weeks=week_offset)
-    monday = ref_date - timedelta(days=ref_date.weekday())
-    week_dates = [monday + timedelta(days=i) for i in range(5)]
+    # Lunes de la semana seleccionada
+    inicio_semana = hoy - timedelta(days=hoy.weekday()) + timedelta(weeks=semana_offset)
+    fin_semana = inicio_semana + timedelta(days=6)
 
-    # Nombres de meses en español
-    meses_es = {
-        1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
-        7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
-    }
+    # Citas del técnico para la semana
+    citas_semana_qs = (
+        Cita.objects
+        .filter(tecnico=request.user, fecha__range=(inicio_semana, fin_semana))
+        .select_related('cliente', 'servicio', 'estado')
+        .order_by('fecha', 'hora_inicio')
+    )
 
-    # Formatear el rango de fechas
-    start_date = week_dates[0]
-    end_date = week_dates[4]
-    if start_date.month == end_date.month:
-        rango_texto = f"Semana del {start_date.day} al {end_date.day} de {meses_es[start_date.month]}"
-    else:
-        rango_texto = f"Semana del {start_date.day} de {meses_es[start_date.month]} al {end_date.day} de {meses_es[end_date.month]}"
+    # Si no tiene citas asignadas en esa semana, incluir todas las citas de la semana para visualización de agenda
+    if not citas_semana_qs.exists():
+        citas_semana_qs = (
+            Cita.objects
+            .filter(fecha__range=(inicio_semana, fin_semana))
+            .select_related('cliente', 'servicio', 'estado')
+            .order_by('fecha', 'hora_inicio')
+        )
 
-    # Citas aceptadas por este técnico para esta semana
-    citas = Cita.objects.filter(
-        tecnico=request.user,
-        fecha__range=(start_date, end_date)
-    ).select_related('cliente', 'servicio', 'estado')
+    citas_semana = list(citas_semana_qs)
 
-    # Definir horas del calendario (08:00 a 14:00)
-    hours = [
-        datetime.time(8, 0),
-        datetime.time(9, 0),
-        datetime.time(10, 0),
-        datetime.time(11, 0),
-        datetime.time(12, 0),
-        datetime.time(13, 0),
-        datetime.time(14, 0),
-    ]
+    NOMBRES_ABREV = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM']
+    NOMBRES_CORTOS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+    NOMBRES_COMPLETOS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+    MESES = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+    MESES_FULL = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 
-    # Construir cuadrícula para escritorio
-    grid_rows = []
-    for h in hours:
-        row_cells = []
-        for d in week_dates:
-            cita_en_slot = None
-            for cita in citas:
-                if cita.fecha == d and cita.hora_inicio.hour == h.hour:
-                    cita_en_slot = cita
-                    break
-            row_cells.append({
-                'day': d,
-                'cita': cita_en_slot
-            })
-        grid_rows.append({
-            'time': h,
-            'cells': row_cells
+    dias_semana = []
+    for i in range(7):
+        dia_fecha = inicio_semana + timedelta(days=i)
+        citas_dia = [c for c in citas_semana if c.fecha == dia_fecha]
+        dias_semana.append({
+            'index': i,
+            'code': f"DIA_{i}",
+            'nombre_abrev': NOMBRES_ABREV[i],
+            'nombre_corto': NOMBRES_CORTOS[i],
+            'nombre_completo': NOMBRES_COMPLETOS[i],
+            'fecha': dia_fecha,
+            'fecha_str': dia_fecha.strftime('%Y-%m-%d'),
+            'fecha_display': f"{NOMBRES_COMPLETOS[i]} {dia_fecha.day} de {MESES_FULL[dia_fecha.month]}",
+            'dia_num': dia_fecha.day,
+            'mes_num': dia_fecha.month,
+            'mes_abrev': MESES[dia_fecha.month],
+            'es_hoy': dia_fecha == hoy,
+            'citas': citas_dia,
+            'total_citas': len(citas_dia),
         })
 
-    # Datos para la vista móvil (organizado por día de la semana)
-    dias_nombres_movil = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE']
-    mobile_days = {}
-    for i, name in enumerate(dias_nombres_movil):
-        d_date = week_dates[i]
-        citas_dia = [c for c in citas if c.fecha == d_date]
-        citas_dia.sort(key=lambda c: c.hora_inicio)
-        mobile_days[name] = {
-            'day': d_date,
-            'citas': citas_dia
-        }
+    if inicio_semana.month == fin_semana.month:
+        rango_str = f"Semana del {inicio_semana.day} al {fin_semana.day} de {MESES_FULL[inicio_semana.month]} {inicio_semana.year}"
+    else:
+        rango_str = f"Semana del {inicio_semana.day} de {MESES[inicio_semana.month]} al {fin_semana.day} de {MESES[fin_semana.month]} {fin_semana.year}"
 
-    # Determinar qué día de la semana es hoy para la vista móvil (si no está en el rango de lunes a viernes, usar LUN)
-    hoy_idx = hoy.weekday()
-    hoy_name = dias_nombres_movil[hoy_idx] if 0 <= hoy_idx < 5 else 'LUN'
+    horas_grid = [f"{h:02d}:00" for h in range(8, 19)]
 
-    # Obtener la próxima visita programada (hoy o en el futuro)
-    proxima_cita = Cita.objects.filter(
-        tecnico=request.user,
-        fecha__gte=hoy
-    ).select_related('cliente', 'servicio').order_by('fecha', 'hora_inicio').first()
+    # Pre-computar grilla hora x día para el calendario desktop
+    # grid_rows: lista de {'hora': '08:00', 'celdas': [{'dia_index': 0, 'citas': [...], 'es_hoy': bool}]}
+    grid_rows = []
+    for h in range(8, 19):
+        hora_str = f"{h:02d}:00"
+        celdas = []
+        for dia in dias_semana:
+            citas_en_hora = [
+                c for c in dia['citas']
+                if c.hora_inicio.hour == h
+            ]
+            celdas.append({
+                'dia_index': dia['index'],
+                'es_hoy': dia['es_hoy'],
+                'citas': citas_en_hora,
+            })
+        grid_rows.append({'hora': hora_str, 'celdas': celdas})
 
     context = {
-        'week_dates': week_dates,
-        'week_offset': week_offset,
-        'rango_texto': rango_texto,
+        'dias_semana': dias_semana,
+        'citas_semana': citas_semana,
+        'total_citas_semana': len(citas_semana),
+        'semana_offset': semana_offset,
+        'semana_offset_prev': semana_offset - 1,
+        'semana_offset_next': semana_offset + 1,
+        'rango_str': rango_str,
+        'inicio_semana': inicio_semana,
+        'fin_semana': fin_semana,
+        'horas_grid': horas_grid,
         'grid_rows': grid_rows,
-        'mobile_days': mobile_days,
         'hoy': hoy,
-        'hoy_name': hoy_name,
-        'proxima_cita': proxima_cita,
     }
     return render(request, 'turnos/tecnico/tecnico_agenda.html', context)
 
@@ -764,7 +763,7 @@ def agregar_repuesto(request):
 # ─────────────────────────────────────────────
 @login_required
 def admin_usuarios(request):
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+    if not request.user.es_admin:
         return redirect('home')
     usuarios = Usuario.objects.all().order_by('-fecha_registro')
     return render(request, 'turnos/administracion/admin_usuarios.html', {'usuarios': usuarios})
@@ -772,7 +771,7 @@ def admin_usuarios(request):
 
 @login_required
 def admin_crear_usuario(request):
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+    if not request.user.es_admin:
         return redirect('home')
     if request.method == 'POST':
         nombre   = request.POST.get('nombre_completo', '').strip()
@@ -796,7 +795,7 @@ def admin_crear_usuario(request):
 
 @login_required
 def admin_editar_usuario(request, usuario_id):
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+    if not request.user.es_admin:
         return redirect('home')
     usuario = get_object_or_404(Usuario, pk=usuario_id)
     if request.method == 'POST':
@@ -814,7 +813,7 @@ def admin_editar_usuario(request, usuario_id):
 
 @login_required
 def admin_toggle_usuario(request, usuario_id):
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+    if not request.user.es_admin:
         return redirect('home')
     usuario = get_object_or_404(Usuario, pk=usuario_id)
     if request.method == 'POST':
@@ -832,25 +831,36 @@ def admin_toggle_usuario(request, usuario_id):
 # ─────────────────────────────────────────────
 @login_required
 def admin_servicios(request):
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+    if not request.user.es_admin:
         return redirect('home')
-    servicios      = Servicio.objects.select_related('especialidad').order_by('tipo_dispositivo', 'nombre')
-    especialidades = Especialidad.objects.filter(activo=True).order_by('nombre')
-    return render(request, 'turnos/administracion/admin_servicios.html',
-                  {'servicios': servicios, 'especialidades': especialidades})
+    servicios         = Servicio.objects.select_related('especialidad').order_by('tipo_dispositivo', 'nombre')
+    especialidades    = Especialidad.objects.filter(activo=True).order_by('nombre')
+    servicios_activos   = servicios.filter(activo=True).count()
+    servicios_inactivos = servicios.filter(activo=False).count()
+    # Bloque Premium: los primeros 4 servicios activos (en producción se puede agregar un campo premium=True)
+    servicios_premium = servicios.filter(activo=True)[:4]
+    return render(request, 'turnos/administracion/admin_servicios.html', {
+        'servicios':           servicios,
+        'especialidades':      especialidades,
+        'servicios_activos':   servicios_activos,
+        'servicios_inactivos': servicios_inactivos,
+        'servicios_premium':   servicios_premium,
+    })
 
 
 @login_required
 def admin_crear_servicio(request):
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+    if not request.user.es_admin:
         return redirect('home')
     if request.method == 'POST':
-        nombre   = request.POST.get('nombre', '').strip()
-        desc     = request.POST.get('descripcion', '').strip()
-        tipo     = request.POST.get('tipo_dispositivo', 'CELULAR')
-        duracion = int(request.POST.get('duracion_minutos', 60))
-        buffer   = int(request.POST.get('buffer_minutos', 0))
-        esp_id   = request.POST.get('especialidad_id')
+        nombre      = request.POST.get('nombre', '').strip()
+        desc        = request.POST.get('descripcion', '').strip()
+        tipo        = request.POST.get('tipo_dispositivo', 'CELULAR')
+        duracion    = int(request.POST.get('duracion_minutos', 60))
+        buffer      = int(request.POST.get('buffer_minutos', 0))
+        precio_raw  = request.POST.get('precio_base', '').strip()
+        precio_base = float(precio_raw) if precio_raw else None
+        esp_id      = request.POST.get('especialidad_id')
         if not nombre:
             messages.error(request, 'El nombre es obligatorio.')
         else:
@@ -858,7 +868,8 @@ def admin_crear_servicio(request):
                 especialidad = get_object_or_404(Especialidad, pk=esp_id)
                 Servicio.objects.create(nombre=nombre, descripcion=desc or None,
                     tipo_dispositivo=tipo, duracion_minutos=duracion,
-                    buffer_minutos=buffer, especialidad=especialidad)
+                    buffer_minutos=buffer, precio_base=precio_base,
+                    especialidad=especialidad)
                 messages.success(request, f'Servicio "{nombre}" creado.')
             except Exception as e:
                 messages.error(request, f'Error: {e}')
@@ -867,7 +878,7 @@ def admin_crear_servicio(request):
 
 @login_required
 def admin_editar_servicio(request, servicio_id):
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+    if not request.user.es_admin:
         return redirect('home')
     servicio = get_object_or_404(Servicio, pk=servicio_id)
     if request.method == 'POST':
@@ -889,7 +900,7 @@ def admin_editar_servicio(request, servicio_id):
 
 @login_required
 def admin_toggle_servicio(request, servicio_id):
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+    if not request.user.es_admin:
         return redirect('home')
     servicio = get_object_or_404(Servicio, pk=servicio_id)
     if request.method == 'POST':
@@ -904,7 +915,7 @@ def admin_toggle_servicio(request, servicio_id):
 # ─────────────────────────────────────────────
 @login_required
 def admin_citas(request):
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+    if not request.user.es_admin:
         return redirect('home')
     citas = Cita.objects.select_related('cliente', 'tecnico', 'servicio', 'estado').order_by('-fecha', '-hora_inicio')
     return render(request, 'turnos/administracion/admin_citas.html',
@@ -916,7 +927,7 @@ def admin_citas(request):
 # ─────────────────────────────────────────────
 @login_required
 def admin_reportes(request):
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+    if not request.user.es_admin:
         return redirect('home')
     hoy = date.today()
     citas_mes_qs = Cita.objects.filter(fecha__year=hoy.year, fecha__month=hoy.month)
@@ -955,3 +966,77 @@ def admin_reportes(request):
         'citas_por_mes_max':   max_val,
     }
     return render(request, 'turnos/administracion/admin_reportes.html', context)
+
+
+# ─────────────────────────────────────────────
+#  TÉCNICOS (ADMIN)
+# ─────────────────────────────────────────────
+@login_required
+def admin_tecnicos(request):
+    if not request.user.es_admin:
+        return redirect('home')
+    tecnicos = Usuario.objects.filter(rol=Usuario.Rol.TECNICO).order_by('nombre_completo')
+    return render(request, 'turnos/administracion/admin_tecnicos.html', {'tecnicos': tecnicos})
+
+
+# ─────────────────────────────────────────────
+#  INVENTARIO (ADMIN)
+# ─────────────────────────────────────────────
+@login_required
+def admin_inventario(request):
+    if not request.user.es_admin:
+        return redirect('home')
+    from ..models import Repuesto
+    from django.db.models import Sum, F
+    import decimal
+
+    repuestos = Repuesto.objects.filter(activo=True).order_by('categoria', 'nombre')
+
+    # ── Métricas ──
+    stock_critico   = repuestos.filter(stock__lt=3).count()
+    stock_agotado   = repuestos.filter(stock=0).count()
+    total_items     = repuestos.count()
+
+    # Valorización total: suma(stock * precio)
+    valorizacion = sum(
+        r.stock * r.precio for r in repuestos if r.stock > 0
+    )
+
+    # Stock máximo para calcular porcentajes de barra (cap en 20 para la barra visual)
+    STOCK_MAX_BARRA = 20
+
+    # Enriquecer cada repuesto con % de barra y color de estado
+    repuestos_list = []
+    for r in repuestos:
+        pct = min(int((r.stock / STOCK_MAX_BARRA) * 100), 100) if STOCK_MAX_BARRA > 0 else 0
+        if r.stock == 0:
+            estado = 'agotado'
+            color  = 'bg-rose-500'
+        elif r.stock < 3:
+            estado = 'critico'
+            color  = 'bg-amber-500'
+        elif r.stock < 8:
+            estado = 'bajo'
+            color  = 'bg-yellow-400'
+        else:
+            estado = 'ok'
+            color  = 'bg-emerald'
+        r.pct_stock = pct
+        r.estado_stock = estado
+        r.color_barra  = color
+        repuestos_list.append(r)
+
+    # Órdenes sugeridas: ítems con stock < 5
+    ordenes_sugeridas = [r for r in repuestos_list if r.stock < 5]
+
+    context = {
+        'repuestos':        repuestos_list,
+        'stock_critico':    stock_critico,
+        'stock_agotado':    stock_agotado,
+        'total_items':      total_items,
+        'valorizacion':     valorizacion,
+        'ordenes_sugeridas': ordenes_sugeridas,
+        'categorias':       Repuesto.CATEGORIA_CHOICES,
+    }
+    return render(request, 'turnos/administracion/admin_inventario.html', context)
+
