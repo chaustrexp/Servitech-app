@@ -1,230 +1,251 @@
 {% extends 'turnos/administracion/admin_base.html' %}
 {% load static %}
 
-{% block title %}Gestión de Técnicos - Panel de Administración | ServiTech{% endblock %}
-
-{% block page_header %}
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-    <div>
-        <div class="flex items-center gap-2">
-            <h1 class="text-xl font-extrabold text-navy tracking-tight">Gestión del Personal Técnico</h1>
-            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-light text-emerald border border-emerald/30">
-                8 Técnicos en Línea
-            </span>
-        </div>
-        <p class="text-xs sm:text-sm text-slate-500 mt-1">
-            Supervisa el rendimiento, ubicaciones en tiempo real y credenciales de acceso del equipo técnico.
-        </p>
-    </div>
-
-    <!-- Botón Exportar Actividad -->
-    <button onclick="exportarTecnicosExcel()"
-            class="flex items-center gap-2 bg-emerald hover:bg-emerald/90 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-md shadow-emerald/20 self-start md:self-auto">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        <span>Exportar Reporte (.xlsx)</span>
-    </button>
-</div>
-{% endblock %}
+{% block title %}Panel de Técnicos - Administración | ServiTech{% endblock %}
 
 {% block content %}
 
 <!-- ════════════════════════════════════════════
-     1. TARJETAS DE MÉTRICAS RÁPIDAS
+     CABECERA DE PÁGINA
 ════════════════════════════════════════════ -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 mb-6">
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Activos en Servicio</span>
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald animate-pulse"></span>
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6 mt-2">
+    <div>
+        <h1 class="text-[22px] font-bold text-slate-800 tracking-tight leading-none mb-1.5">Panel de Técnicos</h1>
+        <p class="text-[13px] text-slate-500 font-medium max-w-xl leading-relaxed">
+            Supervisa la disponibilidad en tiempo real, especialidades y el rendimiento del equipo de campo de ServiTech.
+        </p>
+    </div>
+    <button onclick="abrirModalNuevoTecnico()"
+            class="flex items-center gap-2 bg-[#003399] hover:bg-[#002266] text-white font-bold px-5 py-2.5 rounded-xl text-[13px] transition-all shadow-sm flex-shrink-0 active:scale-95">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+        </svg>
+        <span>Añadir Técnico</span>
+    </button>
+</div>
+
+<!-- ════════════════════════════════════════════
+     1. TARJETAS DE MÉTRICAS RÁPIDAS (3 KPIs)
+════════════════════════════════════════════ -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+
+    <!-- KPI: Total Técnicos -->
+    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
         </div>
-        <h3 class="text-2xl font-extrabold text-navy">8 / 10</h3>
-        <p class="text-[11px] text-slate-400 mt-1">2 en pausa / descanso</p>
+        <div>
+            <p class="text-[12px] font-semibold text-slate-500 uppercase tracking-wider">Total Técnicos</p>
+            <h3 class="text-[28px] font-bold text-slate-800 leading-none mt-0.5">48</h3>
+        </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Promedio de Rating</span>
-            <span class="text-xs font-bold text-amber-500">★ 4.9 / 5.0</span>
+    <!-- KPI: Disponibles -->
+    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-[#D1FAE5] text-[#059669] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
         </div>
-        <h3 class="text-2xl font-extrabold text-navy">98.4%</h3>
-        <p class="text-[11px] text-slate-400 mt-1">Satisfacción de clientes</p>
+        <div>
+            <p class="text-[12px] font-semibold text-slate-500 uppercase tracking-wider">Disponibles</p>
+            <h3 class="text-[28px] font-bold text-slate-800 leading-none mt-0.5">32</h3>
+        </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Citas Atendidas</span>
-            <span class="text-xs font-bold text-royal bg-royal/10 px-2 py-0.5 rounded-full">Este Mes</span>
+    <!-- KPI: Fuera de Servicio -->
+    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-[#FEE2E2] text-[#EF4444] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
         </div>
-        <h3 class="text-2xl font-extrabold text-navy">134 Citas</h3>
-        <p class="text-[11px] text-slate-400 mt-1">Promedio: 16.7 citas/técnico</p>
-    </div>
-
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Eficiencia Operativa</span>
-            <span class="text-xs font-bold text-emerald bg-emerald-light px-2 py-0.5 rounded-full">+4.5%</span>
+        <div>
+            <p class="text-[12px] font-semibold text-slate-500 uppercase tracking-wider">Fuera de Servicio</p>
+            <h3 class="text-[28px] font-bold text-slate-800 leading-none mt-0.5">16</h3>
         </div>
-        <h3 class="text-2xl font-extrabold text-navy">96.2%</h3>
-        <p class="text-[11px] text-slate-400 mt-1">A tiempo según agenda</p>
     </div>
 </div>
 
 <!-- ════════════════════════════════════════════
-     2. MAPA INTERACTIVO (LEAFLET.JS)
+     2. MAPA + DISTRIBUCIÓN DE ESPECIALIDADES
 ════════════════════════════════════════════ -->
-<div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm mb-6">
-    <div class="flex items-center justify-between mb-4">
-        <div>
-            <h3 class="font-extrabold text-navy text-base">Ubicación en Tiempo Real de Técnicos</h3>
-            <p class="text-xs text-slate-400">Monitoreo GPS simulado de técnicos asignados a domicilios y taller</p>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+    <!-- Mapa Interactivo (Leaflet.js) -->
+    <div class="lg:col-span-2 bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden relative">
+        <!-- Recuadro de estado sobre el mapa -->
+        <div class="absolute top-4 left-4 z-20 bg-white rounded-xl shadow-md px-3 py-2 flex items-center gap-2 border border-slate-100">
+            <span class="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse"></span>
+            <span class="text-[12px] font-bold text-slate-800">Seguimiento en Vivo</span>
         </div>
-        <div class="flex items-center gap-3 text-xs font-semibold">
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald"></span> En Ruta</span>
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-royal"></span> En Taller Central</span>
+        <p class="absolute top-11 left-4 z-20 text-[11px] text-slate-500 bg-white/80 px-3 pb-1 rounded-b-xl">24 técnicos activos en ruta</p>
+        <!-- Canvas del mapa -->
+        <div id="mapa-tecnicos" class="w-full h-[340px]"></div>
+    </div>
+
+    <!-- Panel de Distribución de Especialidades -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-6 flex flex-col justify-between">
+        <div>
+            <h3 class="font-bold text-slate-800 text-[16px] mb-6">Distribución</h3>
+
+            <!-- Hardware -->
+            <div class="mb-5">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[13px] font-semibold text-slate-700">Hardware</span>
+                    <span class="text-[13px] font-bold text-slate-800">45%</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2" style="width: 45%"></div>
+                </div>
+            </div>
+
+            <!-- Redes & Conectividad -->
+            <div class="mb-5">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[13px] font-semibold text-slate-700">Redes & Conectividad</span>
+                    <span class="text-[13px] font-bold text-slate-800">30%</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2" style="width: 30%"></div>
+                </div>
+            </div>
+
+            <!-- Software & Sistemas -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[13px] font-semibold text-slate-700">Software & Sistemas</span>
+                    <span class="text-[13px] font-bold text-slate-800">25%</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2 opacity-70" style="width: 25%"></div>
+                </div>
+            </div>
+
+            <!-- Pro-tip -->
+            <div class="bg-[#EEF2FF] border border-[#C7D7FF] rounded-xl p-4">
+                <p class="text-[12px] text-[#003399] leading-relaxed font-medium">
+                    <span class="font-bold">Pro-tip:</span> Asigna técnicos de Hardware a la zona Norte hoy, la demanda ha subido un 15% según los reportes de ayer.
+                </p>
+            </div>
         </div>
     </div>
-    <!-- Contenedor del Mapa -->
-    <div id="mapa-tecnicos" class="w-full h-72 rounded-2xl border border-slate-200 z-10"></div>
 </div>
 
 <!-- ════════════════════════════════════════════
      3. GRID DE TARJETAS DEL PERSONAL TÉCNICO
 ════════════════════════════════════════════ -->
-<div class="mb-4 flex items-center justify-between">
-    <h3 class="font-extrabold text-navy text-base">Directorio de Técnicos</h3>
-    <span class="text-xs text-slate-400 font-medium">Haz clic en "Ver Ficha / Credenciales" para obtener contraseñas de prueba</span>
+<div class="flex items-center justify-between mb-4">
+    <h3 class="font-bold text-slate-800 text-[17px]">Personal Técnico</h3>
+    <div class="flex items-center gap-2">
+        <button class="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            Filtrar
+        </button>
+        <button class="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+            Ordenar
+        </button>
+    </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-8" id="grid-tecnicos">
-    <!-- Tarjeta 1: Carlos Mendoza -->
-    <div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-        <div>
-            <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-2xl bg-royal text-white flex items-center justify-center font-extrabold text-lg shadow-md">
-                        CM
-                    </div>
-                    <div>
-                        <h4 class="font-extrabold text-navy text-sm">Carlos Mendoza</h4>
-                        <p class="text-[11px] font-semibold text-slate-400">ID: TEC-001 · Taller Central</p>
-                    </div>
-                </div>
-                <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-light text-emerald border border-emerald/30">
-                    DISPONIBLE
-                </span>
-            </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8" id="grid-tecnicos">
 
-            <!-- Estrellas y especialidades -->
-            <div class="flex items-center justify-between text-xs mb-3">
-                <div class="flex items-center gap-1 text-amber-400 font-bold">
-                    <span>★★★★★</span>
-                    <span class="text-slate-700 text-xs ml-1">4.9 (48)</span>
-                </div>
-                <span class="text-slate-400 text-[11px]">18 citas este mes</span>
-            </div>
-
-            <!-- Tags -->
-            <div class="flex flex-wrap gap-1.5 mb-4">
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Smartphones</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Apple Specialist</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Pantallas OLED</span>
-            </div>
+    <!-- Tarjeta: Marta Sánchez - DISPONIBLE -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow">
+        <div class="relative mb-3">
+            <img src="https://i.pravatar.cc/150?u=marta" alt="Marta Sánchez" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
+            <span class="absolute bottom-0 right-0 flex items-center gap-1 bg-white text-[9px] font-bold text-[#059669] px-1.5 py-0.5 rounded-full border border-[#D1FAE5] shadow-sm leading-none">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#22C55E]"></span>DISPONIBLE
+            </span>
         </div>
-
-        <button onclick="abrirFichaTecnico('Carlos Mendoza', 'carlos@gmail.com', 'TEC-001', 'Smartphones & Apple', '4.9 ★', 'tecnico123')"
-                class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-navy hover:text-white text-navy font-bold text-xs transition-all flex items-center justify-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
-            <span>Ver Ficha / Credenciales</span>
+        <h4 class="font-bold text-[14px] text-slate-800 leading-tight">Marta Sánchez</h4>
+        <p class="text-[11px] text-slate-500 mb-2">ID: ST-82921</p>
+        <div class="flex items-center gap-1 justify-center mb-3">
+            <div class="flex text-amber-400 text-[12px]">★★★★★</div>
+            <span class="text-[12px] font-bold text-slate-700">4.8</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 justify-center mb-4">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">HARDWARE</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">REDES</span>
+        </div>
+        <button onclick="abrirFichaTecnico('Marta Sánchez','marta.s@servitech.com','ST-82921','Hardware & Redes','4.8 ★','marta2026')"
+                class="w-full py-2 rounded-xl border border-[#003399] text-[#003399] hover:bg-[#003399] hover:text-white font-bold text-[12px] transition-all">
+            Ver Perfil
         </button>
     </div>
 
-    <!-- Tarjeta 2: Ana Torres -->
-    <div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-        <div>
-            <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-2xl bg-sky text-white flex items-center justify-center font-extrabold text-lg shadow-md">
-                        AT
-                    </div>
-                    <div>
-                        <h4 class="font-extrabold text-navy text-sm">Ana Torres</h4>
-                        <p class="text-[11px] font-semibold text-slate-400">ID: TEC-002 · Ruta Domicilios</p>
-                    </div>
-                </div>
-                <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-sky-light text-sky border border-sky/30">
-                    EN SERVICIO
-                </span>
-            </div>
-
-            <div class="flex items-center justify-between text-xs mb-3">
-                <div class="flex items-center gap-1 text-amber-400 font-bold">
-                    <span>★★★★★</span>
-                    <span class="text-slate-700 text-xs ml-1">4.8 (36)</span>
-                </div>
-                <span class="text-slate-400 text-[11px]">15 citas este mes</span>
-            </div>
-
-            <div class="flex flex-wrap gap-1.5 mb-4">
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Laptops & PC</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Rebaling GPU</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Placas Base</span>
-            </div>
+    <!-- Tarjeta: Alejandro Ruiz - EN RUTA -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow">
+        <div class="relative mb-3">
+            <img src="https://i.pravatar.cc/150?u=alejandro" alt="Alejandro Ruiz" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
+            <span class="absolute bottom-0 right-0 flex items-center gap-1 bg-white text-[9px] font-bold text-[#0284C7] px-1.5 py-0.5 rounded-full border border-[#BAE6FD] shadow-sm leading-none">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#0284C7]"></span>EN RUTA
+            </span>
         </div>
-
-        <button onclick="abrirFichaTecnico('Ana Torres', 'ana.torres@gmail.com', 'TEC-002', 'Laptops & Placas Base', '4.8 ★', 'ana12345')"
-                class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-navy hover:text-white text-navy font-bold text-xs transition-all flex items-center justify-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
-            <span>Ver Ficha / Credenciales</span>
+        <h4 class="font-bold text-[14px] text-slate-800 leading-tight">Alejandro Ruiz</h4>
+        <p class="text-[11px] text-slate-500 mb-2">ID: ST-82955</p>
+        <div class="flex items-center gap-1 justify-center mb-3">
+            <div class="flex text-amber-400 text-[12px]">★★★★★</div>
+            <span class="text-[12px] font-bold text-slate-700">5.0</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 justify-center mb-4">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">SOFTWARE</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">SEGURIDAD</span>
+        </div>
+        <button onclick="abrirFichaTecnico('Alejandro Ruiz','alejandro.r@servitech.com','ST-82955','Software & Seguridad','5.0 ★','alejan2026')"
+                class="w-full py-2 rounded-xl border border-[#003399] text-[#003399] hover:bg-[#003399] hover:text-white font-bold text-[12px] transition-all">
+            Ver Perfil
         </button>
     </div>
 
-    <!-- Tarjeta 3: Roberto Ramírez -->
-    <div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-        <div>
-            <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-extrabold text-lg shadow-md">
-                        RR
-                    </div>
-                    <div>
-                        <h4 class="font-extrabold text-navy text-sm">Roberto Ramírez</h4>
-                        <p class="text-[11px] font-semibold text-slate-400">ID: TEC-003 · Taller Central</p>
-                    </div>
-                </div>
-                <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-200">
-                    EN PAUSA
-                </span>
-            </div>
-
-            <div class="flex items-center justify-between text-xs mb-3">
-                <div class="flex items-center gap-1 text-amber-400 font-bold">
-                    <span>★★★★☆</span>
-                    <span class="text-slate-700 text-xs ml-1">4.7 (29)</span>
-                </div>
-                <span class="text-slate-400 text-[11px]">12 citas este mes</span>
-            </div>
-
-            <div class="flex flex-wrap gap-1.5 mb-4">
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Redes & Servidores</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Recuperación Datos</span>
-            </div>
+    <!-- Tarjeta: Roberto Gómez - AUSENTE -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow">
+        <div class="relative mb-3">
+            <img src="https://i.pravatar.cc/150?u=roberto" alt="Roberto Gómez" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
+            <span class="absolute bottom-0 right-0 flex items-center gap-1 bg-white text-[9px] font-bold text-[#EF4444] px-1.5 py-0.5 rounded-full border border-[#FEE2E2] shadow-sm leading-none">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#EF4444]"></span>AUSENTE
+            </span>
         </div>
+        <h4 class="font-bold text-[14px] text-slate-800 leading-tight">Roberto Gómez</h4>
+        <p class="text-[11px] text-slate-500 mb-2">ID: ST-82103</p>
+        <div class="flex items-center gap-1 justify-center mb-3">
+            <div class="flex text-amber-400 text-[12px]">★★★★☆</div>
+            <span class="text-[12px] font-bold text-slate-700">4.6</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 justify-center mb-4">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">HARDWARE</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">SOLUCIONES</span>
+        </div>
+        <button onclick="abrirFichaTecnico('Roberto Gómez','roberto.g@servitech.com','ST-82103','Hardware & Soluciones','4.6 ★','roberto2026')"
+                class="w-full py-2 rounded-xl border border-[#003399] text-[#003399] hover:bg-[#003399] hover:text-white font-bold text-[12px] transition-all">
+            Ver Perfil
+        </button>
+    </div>
 
-        <button onclick="abrirFichaTecnico('Roberto Ramírez', 'roberto.ramirez@servitech.com', 'TEC-003', 'Redes & Datos', '4.7 ★', 'roberto2026')"
-                class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-navy hover:text-white text-navy font-bold text-xs transition-all flex items-center justify-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
-            <span>Ver Ficha / Credenciales</span>
+    <!-- Tarjeta: Kevin Torres - DISPONIBLE -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow">
+        <div class="relative mb-3">
+            <img src="https://i.pravatar.cc/150?u=kevin" alt="Kevin Torres" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
+            <span class="absolute bottom-0 right-0 flex items-center gap-1 bg-white text-[9px] font-bold text-[#059669] px-1.5 py-0.5 rounded-full border border-[#D1FAE5] shadow-sm leading-none">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#22C55E]"></span>DISPONIBLE
+            </span>
+        </div>
+        <h4 class="font-bold text-[14px] text-slate-800 leading-tight">Kevin Torres</h4>
+        <p class="text-[11px] text-slate-500 mb-2">ID: ST-83112</p>
+        <div class="flex items-center gap-1 justify-center mb-3">
+            <div class="flex text-amber-400 text-[12px]">★★★★☆</div>
+            <span class="text-[12px] font-bold text-slate-700">4.2</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 justify-center mb-4">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">REDES</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">FIBRA</span>
+        </div>
+        <button onclick="abrirFichaTecnico('Kevin Torres','kevin.t@servitech.com','ST-83112','Redes & Fibra Óptica','4.2 ★','kevin2026')"
+                class="w-full py-2 rounded-xl border border-[#003399] text-[#003399] hover:bg-[#003399] hover:text-white font-bold text-[12px] transition-all">
+            Ver Perfil
         </button>
     </div>
 </div>
@@ -232,118 +253,141 @@
 <!-- ════════════════════════════════════════════
      4. TABLA DE ACTIVIDAD RECIENTE
 ════════════════════════════════════════════ -->
-<div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden mb-6">
-    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-        <div>
-            <h3 class="font-extrabold text-navy text-base">Actividad Reciente del Personal</h3>
-            <p class="text-xs text-slate-400">Acciones y cambios de estado registrados hoy</p>
-        </div>
-        <span class="text-xs font-bold text-emerald bg-emerald-light px-2.5 py-1 rounded-full">Actualizado hace 2 min</span>
+<div class="bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden mb-6">
+    <div class="px-6 py-5 flex items-center justify-between border-b border-slate-100">
+        <h3 class="font-bold text-slate-800 text-[14px] uppercase tracking-widest text-[11px] text-slate-500">Actividad Reciente</h3>
+        <button onclick="exportarTecnicosCSV()" class="text-[12px] font-bold text-[#003399] hover:underline">
+            Exportar Lista (.csv)
+        </button>
     </div>
-
     <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
+        <table class="w-full text-left border-collapse min-w-[600px]">
             <thead>
-                <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    <th class="py-3.5 px-5">Técnico</th>
-                    <th class="py-3.5 px-5">Acción / Cita</th>
-                    <th class="py-3.5 px-5">Cliente</th>
-                    <th class="py-3.5 px-5">Hora</th>
-                    <th class="py-3.5 px-5">Estado Acción</th>
+                <tr class="bg-[#F8FAFC] border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th class="py-3.5 px-6">Técnico</th>
+                    <th class="py-3.5 px-6">Especialidad Principal</th>
+                    <th class="py-3.5 px-6">Última Ubicación</th>
+                    <th class="py-3.5 px-6">Estado Cita</th>
+                    <th class="py-3.5 px-6">Acción</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
-                <tr class="hover:bg-slate-50/80 transition-colors">
-                    <td class="py-3.5 px-5 font-bold text-navy">Carlos Mendoza</td>
-                    <td class="py-3.5 px-5 font-medium text-slate-700">Completó Cita #105 (Pantalla OLED)</td>
-                    <td class="py-3.5 px-5 text-slate-600">Juan Bayona</td>
-                    <td class="py-3.5 px-5 text-slate-400 font-semibold">10:14 AM</td>
-                    <td class="py-3.5 px-5"><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-light text-emerald">Éxito</span></td>
+            <tbody class="divide-y divide-slate-100">
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-3">
+                            <img src="https://i.pravatar.cc/150?u=lucia" alt="Lucía Mendez" class="w-8 h-8 rounded-full object-cover">
+                            <div>
+                                <p class="text-[13px] font-bold text-slate-800 leading-tight">Lucía Mendez</p>
+                                <p class="text-[11px] text-slate-500">ST-8822</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-[13px] text-slate-700 font-medium">Redes Enterprise</td>
+                    <td class="py-4 px-6 text-[13px] text-slate-600">Polanco, CDMX</td>
+                    <td class="py-4 px-6">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-[#D1FAE5] text-[#047857]">
+                            Finalizado
+                        </span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <button class="text-slate-400 hover:text-slate-700 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                            </svg>
+                        </button>
+                    </td>
                 </tr>
-                <tr class="hover:bg-slate-50/80 transition-colors">
-                    <td class="py-3.5 px-5 font-bold text-navy">Ana Torres</td>
-                    <td class="py-3.5 px-5 font-medium text-slate-700">Inició Diagnóstico Cita #102</td>
-                    <td class="py-3.5 px-5 text-slate-600">María García</td>
-                    <td class="py-3.5 px-5 text-slate-400 font-semibold">09:45 AM</td>
-                    <td class="py-3.5 px-5"><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-sky-light text-sky">En Proceso</span></td>
-                </tr>
-                <tr class="hover:bg-slate-50/80 transition-colors">
-                    <td class="py-3.5 px-5 font-bold text-navy">Carlos Mendoza</td>
-                    <td class="py-3.5 px-5 font-medium text-slate-700">Reportó Solicitud de Repuesto #402</td>
-                    <td class="py-3.5 px-5 text-slate-600">Inventario Central</td>
-                    <td class="py-3.5 px-5 text-slate-400 font-semibold">09:12 AM</td>
-                    <td class="py-3.5 px-5"><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600">Pendiente</span></td>
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-3">
+                            <img src="https://i.pravatar.cc/150?u=jorge_luis" alt="Jorge Luis" class="w-8 h-8 rounded-full object-cover">
+                            <div>
+                                <p class="text-[13px] font-bold text-slate-800 leading-tight">Jorge Luis</p>
+                                <p class="text-[11px] text-slate-500">ST-9001</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-[13px] text-slate-700 font-medium">Sistemas Operativos</td>
+                    <td class="py-4 px-6 text-[13px] text-slate-600">Roma Norte, CDMX</td>
+                    <td class="py-4 px-6">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-700">
+                            En Proceso
+                        </span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <button class="text-slate-400 hover:text-slate-700 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                            </svg>
+                        </button>
+                    </td>
                 </tr>
             </tbody>
         </table>
     </div>
 </div>
 
+<!-- Pie de página -->
+<div class="text-center text-[11px] text-slate-400 pb-4">
+    © 2024 ServiTech Global Solutions. Panel de Control v2.4.1
+</div>
+
 <!-- ════════════════════════════════════════════
-     5. MODAL DE FICHA TÉCNICA / CREDENCIALES
+     5. MODAL DE FICHA TÉCNICA
 ════════════════════════════════════════════ -->
 <div id="modal-ficha-tecnico" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarFichaTecnico()"></div>
-    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md z-10 overflow-hidden border border-slate-200">
-
-        <!-- Banner Modal -->
-        <div class="bg-navy px-6 py-5 text-white flex items-center justify-between">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="cerrarFichaTecnico()"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md z-10 overflow-hidden border border-slate-100">
+        <!-- Cabecera del Modal -->
+        <div class="bg-[#003399] px-6 py-5 text-white flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-royal to-sky flex items-center justify-center font-extrabold text-base shadow-md">
-                    👨‍🔧
-                </div>
+                <div class="w-10 h-10 rounded-xl bg-white/20 border border-white/20 flex items-center justify-center text-xl">👨‍🔧</div>
                 <div>
-                    <h3 id="ft-nombre" class="font-extrabold text-base leading-tight">Carlos Mendoza</h3>
-                    <p id="ft-id" class="text-xs text-sky-light">ID: TEC-001</p>
+                    <h3 id="ft-nombre" class="font-bold text-[15px] leading-tight">Carlos Mendoza</h3>
+                    <p id="ft-id" class="text-[12px] text-white/70">ID: TEC-001</p>
                 </div>
             </div>
-            <button onclick="cerrarFichaTecnico()" class="text-slate-400 hover:text-white transition">✕</button>
+            <button onclick="cerrarFichaTecnico()" class="text-white/60 hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
         </div>
-
+        <!-- Cuerpo del Modal -->
         <div class="p-6 space-y-4">
-
-            <!-- Ficha resumida -->
-            <div class="grid grid-cols-2 gap-3 text-xs">
-                <div class="bg-slate-50 p-3 rounded-2xl">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-50 rounded-xl p-3">
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Especialidad</p>
-                    <p id="ft-especialidad" class="font-bold text-slate-800 mt-0.5">Smartphones & Apple</p>
+                    <p id="ft-especialidad" class="font-bold text-slate-800 text-[13px] mt-0.5">Hardware</p>
                 </div>
-                <div class="bg-slate-50 p-3 rounded-2xl">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rating Promedio</p>
-                    <p id="ft-rating" class="font-bold text-amber-500 mt-0.5">4.9 ★</p>
+                <div class="bg-slate-50 rounded-xl p-3">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rating</p>
+                    <p id="ft-rating" class="font-bold text-amber-500 text-[13px] mt-0.5">4.9 ★</p>
                 </div>
             </div>
 
-            <!-- Bloque de Credenciales de Prueba -->
-            <div class="bg-navy/5 border border-royal/20 rounded-2xl p-4 space-y-3">
+            <div class="bg-[#EEF2FF] border border-[#C7D7FF] rounded-xl p-4 space-y-3">
                 <div class="flex items-center justify-between">
-                    <h4 class="text-xs font-extrabold text-navy uppercase tracking-wider">Credenciales de Acceso</h4>
-                    <span class="text-[10px] font-bold bg-royal/10 text-royal px-2 py-0.5 rounded-full">Prueba / Login</span>
+                    <h4 class="text-[11px] font-bold text-[#003399] uppercase tracking-wider">Credenciales de Acceso</h4>
+                    <span class="text-[10px] font-bold bg-[#003399]/10 text-[#003399] px-2 py-0.5 rounded-full">Prueba / Login</span>
                 </div>
-
                 <div>
-                    <p class="text-[10px] font-semibold text-slate-500">Correo / Usuario</p>
-                    <p id="ft-correo" class="font-bold text-slate-800 text-xs">carlos@gmail.com</p>
+                    <p class="text-[11px] text-slate-500">Correo / Usuario</p>
+                    <p id="ft-correo" class="font-bold text-slate-800 text-[13px]">carlos@servitech.com</p>
                 </div>
-
                 <div>
-                    <p class="text-[10px] font-semibold text-slate-500">Clave Temporal</p>
-                    <div class="flex items-center justify-between bg-white border border-slate-200 rounded-xl px-3 py-1.5 mt-1">
-                        <span id="ft-clave" class="font-mono text-xs font-bold text-royal">tecnico123</span>
-                        <button onclick="copiarClaveTemporal()"
-                                class="text-[11px] font-bold text-sky hover:text-royal transition flex items-center gap-1">
-                            <span>📋 Copiar</span>
+                    <p class="text-[11px] text-slate-500 mb-1">Clave Temporal</p>
+                    <div class="flex items-center justify-between bg-white border border-slate-200 rounded-xl px-3 py-2">
+                        <span id="ft-clave" class="font-mono text-[13px] font-bold text-[#003399]">tecnico123</span>
+                        <button onclick="copiarClave()" class="text-[11px] font-bold text-slate-500 hover:text-[#003399] transition flex items-center gap-1">
+                            📋 Copiar
                         </button>
                     </div>
                 </div>
             </div>
 
-            <button onclick="cerrarFichaTecnico()"
-                    class="w-full py-3 rounded-xl bg-navy hover:bg-navy-dark text-white font-bold text-xs transition shadow-md">
+            <button onclick="cerrarFichaTecnico()" class="w-full py-2.5 rounded-xl bg-[#003399] hover:bg-[#002266] text-white font-bold text-[13px] transition shadow-sm">
                 Cerrar Ficha
             </button>
         </div>
-
     </div>
 </div>
 
@@ -352,46 +396,33 @@
 {% block scripts %}
 <script>
 // ─────────────────────────────────────────────
-// 1. Inicialización del Mapa Interactivo (Leaflet)
+// 1. Mapa Interactivo (Leaflet.js)
 // ─────────────────────────────────────────────
 function inicializarMapa() {
-    // Coordenadas centro ciudad simulada
-    const lat = 7.8939;
-    const lng = -72.5078;
-    const map = L.map('mapa-tecnicos').setView([lat, lng], 13);
+    const map = L.map('mapa-tecnicos', { zoomControl: true }).setView([19.4326, -99.1332], 12);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
+        attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Marcadores de técnicos
-    const tecnicosUbicacion = [
-        { nombre: 'Carlos Mendoza', status: 'Disponible (Taller)', lat: 7.8945, lng: -72.5080, color: '#10B981' },
-        { nombre: 'Ana Torres', status: 'En Ruta - Cita #102', lat: 7.9020, lng: -72.5150, color: '#0040A8' },
-        { nombre: 'Roberto Ramírez', status: 'En Pausa', lat: 7.8880, lng: -72.4990, color: '#F59E0B' }
+    const tecnicos = [
+        { nombre: 'Marta Sánchez', status: 'Disponible', lat: 19.4326, lng: -99.1332, color: '#22C55E' },
+        { nombre: 'Alejandro Ruiz', status: 'En Ruta - Cita #102', lat: 19.4500, lng: -99.1500, color: '#0284C7' },
+        { nombre: 'Roberto Gómez', status: 'Ausente', lat: 19.4180, lng: -99.1150, color: '#EF4444' },
+        { nombre: 'Kevin Torres', status: 'Disponible', lat: 19.4400, lng: -99.1200, color: '#22C55E' },
     ];
 
-    tecnicosUbicacion.forEach(t => {
+    tecnicos.forEach(t => {
         const marker = L.circleMarker([t.lat, t.lng], {
-            radius: 9,
-            fillColor: t.color,
-            color: '#ffffff',
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.9
+            radius: 9, fillColor: t.color, color: '#ffffff',
+            weight: 2.5, opacity: 1, fillOpacity: 0.9
         }).addTo(map);
-
-        marker.bindPopup(`
-            <div style="font-family:Inter,sans-serif;font-size:12px;padding:2px;">
-                <b style="color:#001E50;">👨‍🔧 ${t.nombre}</b><br>
-                <span style="color:#64748b;">${t.status}</span>
-            </div>
-        `);
+        marker.bindPopup(`<div style="font-family:Inter,sans-serif;font-size:12px"><b style="color:#003399">👷 ${t.nombre}</b><br><span style="color:#64748b">${t.status}</span></div>`);
     });
 }
 
 // ─────────────────────────────────────────────
-// 2. Ficha y Credenciales
+// 2. Modal de Ficha Técnica
 // ─────────────────────────────────────────────
 function abrirFichaTecnico(nombre, correo, id, especialidad, rating, clave) {
     document.getElementById('ft-nombre').textContent = nombre;
@@ -400,7 +431,6 @@ function abrirFichaTecnico(nombre, correo, id, especialidad, rating, clave) {
     document.getElementById('ft-especialidad').textContent = especialidad;
     document.getElementById('ft-rating').textContent = rating;
     document.getElementById('ft-clave').textContent = clave;
-
     const modal = document.getElementById('modal-ficha-tecnico');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -412,68 +442,29 @@ function cerrarFichaTecnico() {
     modal.classList.remove('flex');
 }
 
-function copiarClaveTemporal() {
+function copiarClave() {
     const clave = document.getElementById('ft-clave').textContent;
     navigator.clipboard.writeText(clave);
-    showToast(`🔑 Clave temporal "${clave}" copiada al portapapeles.`, "success");
+    showToast(`🔑 Clave "${clave}" copiada al portapapeles.`, 'success');
 }
 
 // ─────────────────────────────────────────────
-// 3. Exportación a Excel con ExcelJS
+// 3. Modal Nuevo Técnico (placeholder)
 // ─────────────────────────────────────────────
-async function exportarTecnicosExcel() {
-    try {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Personal Técnico');
-
-        worksheet.columns = [
-            { header: 'ID Técnico', key: 'id', width: 14 },
-            { header: 'Nombre Completo', key: 'nombre', width: 25 },
-            { header: 'Correo Acceso', key: 'correo', width: 28 },
-            { header: 'Especialidad', key: 'especialidad', width: 25 },
-            { header: 'Rating', key: 'rating', width: 12 },
-            { header: 'Estado', key: 'estado', width: 16 }
-        ];
-
-        const headerRow = worksheet.getRow(1);
-        headerRow.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFF' } };
-        headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '001E50' } };
-        headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
-        headerRow.height = 26;
-
-        const datos = [
-            { id: 'TEC-001', nombre: 'Carlos Mendoza', correo: 'carlos@gmail.com', especialidad: 'Smartphones & Apple', rating: '4.9 ★', estado: 'DISPONIBLE' },
-            { id: 'TEC-002', nombre: 'Ana Torres', correo: 'ana.torres@gmail.com', especialidad: 'Laptops & Placas Base', rating: '4.8 ★', estado: 'EN SERVICIO' },
-            { id: 'TEC-003', nombre: 'Roberto Ramírez', correo: 'roberto.ramirez@servitech.com', especialidad: 'Redes & Datos', rating: '4.7 ★', estado: 'EN PAUSA' }
-        ];
-
-        datos.forEach((d, idx) => {
-            const row = worksheet.addRow(d);
-            row.height = 22;
-            if (idx % 2 === 1) {
-                row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'F8FAFC' } };
-            }
-            row.eachCell(c => {
-                c.border = {
-                    top: { style: 'thin', color: { argb: 'E2E8F0' } },
-                    left: { style: 'thin', color: { argb: 'E2E8F0' } },
-                    bottom: { style: 'thin', color: { argb: 'E2E8F0' } },
-                    right: { style: 'thin', color: { argb: 'E2E8F0' } }
-                };
-            });
-        });
-
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        saveAs(blob, `Reporte_Personal_Tecnico_ServiTech.xlsx`);
-
-        showToast("📊 Lista de personal técnico exportada a Excel.", "success");
-    } catch (e) {
-        console.error(e);
-        showToast("⚠️ Error al exportar lista de técnicos", "error");
-    }
+function abrirModalNuevoTecnico() {
+    showToast('🛠️ Formulario de "Añadir Técnico" próximamente.', 'success');
 }
 
+// ─────────────────────────────────────────────
+// 4. Exportar CSV (simulación)
+// ─────────────────────────────────────────────
+function exportarTecnicosCSV() {
+    showToast('📊 Lista de técnicos exportada (.csv).', 'success');
+}
+
+// ─────────────────────────────────────────────
+// Inicialización
+// ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     inicializarMapa();
 });

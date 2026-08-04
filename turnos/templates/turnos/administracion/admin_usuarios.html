@@ -3,270 +3,299 @@
 
 {% block title %}Directorio de Usuarios - Panel de Administración | ServiTech{% endblock %}
 
-{% block page_header %}
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-    <div>
-        <div class="flex items-center gap-2">
-            <h1 class="text-xl font-extrabold text-navy tracking-tight">Directorio de Usuarios</h1>
-            <span id="badge-total-usuarios" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-royal/10 text-royal border border-royal/20">
-                1,248 Usuarios Registrados
-            </span>
-        </div>
-        <p class="text-xs sm:text-sm text-slate-500 mt-1">
-            Administración centralizada de accesos, roles y comunicaciones globales del sistema.
-        </p>
-    </div>
-
-    <!-- Botones de Acciones Masivas -->
-    <div class="flex flex-wrap items-center gap-2.5">
-        <button onclick="abrirModalBroadcast()"
-                class="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-3.5 py-2 rounded-xl text-xs transition-all shadow-sm">
-            <svg class="w-4 h-4 text-royal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-            <span>Broadcast Email</span>
-        </button>
-
-        <button onclick="abrirModalResetGeneral()"
-                class="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-3.5 py-2 rounded-xl text-xs transition-all shadow-sm">
-            <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-            </svg>
-            <span>Reset Passwords</span>
-        </button>
-
-        <button onclick="abrirModalCrearUsuario()"
-                class="flex items-center gap-2 bg-gradient-to-r from-royal to-sky hover:opacity-95 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-md shadow-royal/20">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-            </svg>
-            <span>+ Nuevo Usuario</span>
-        </button>
-    </div>
-</div>
-{% endblock %}
-
 {% block content %}
 
 <!-- ════════════════════════════════════════════
-     1. TARJETAS DE MÉTRICAS DE USUARIOS
+     1. TARJETAS DE MÉTRICAS SUPERIORES (3 KPIs)
 ════════════════════════════════════════════ -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 mb-6">
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Registrados</span>
-            <span class="text-xs font-bold text-royal bg-royal/10 px-2 py-0.5 rounded-full">1,248</span>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6 mt-2">
+
+    <!-- KPI: Total Usuarios -->
+    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-start justify-between hover:shadow-md transition-shadow">
+        <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Total Usuarios</p>
+            <h3 class="text-[32px] font-bold text-slate-800 leading-none mb-2">1,248</h3>
+            <div class="flex items-center gap-1 text-[12px] text-emerald-600 font-semibold">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+                +12% desde el mes pasado
+            </div>
         </div>
-        <h3 class="text-2xl font-extrabold text-navy">1,248</h3>
-        <p class="text-[11px] text-slate-400 mt-1">+34 nuevos esta semana</p>
+        <div class="w-12 h-12 rounded-xl bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Clientes Activos</span>
-            <span class="text-xs font-bold text-sky bg-sky-light px-2 py-0.5 rounded-full">94.5%</span>
+    <!-- KPI: Usuarios Activos -->
+    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-start justify-between hover:shadow-md transition-shadow">
+        <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Usuarios Activos</p>
+            <h3 class="text-[32px] font-bold text-slate-800 leading-none mb-2">1,102</h3>
+            <div class="flex items-center gap-1 text-[12px] text-slate-500 font-semibold">
+                <svg class="w-3.5 h-3.5 text-[#059669]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                88% Tasa de actividad
+            </div>
         </div>
-        <h3 class="text-2xl font-extrabold text-navy">1,180</h3>
-        <p class="text-[11px] text-slate-400 mt-1">Con citas agendadas</p>
+        <div class="w-12 h-12 rounded-xl bg-[#D1FAE5] text-[#059669] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Personal Técnico</span>
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald animate-pulse"></span>
+    <!-- KPI: Nuevos Este Mes -->
+    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-start justify-between hover:shadow-md transition-shadow">
+        <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Nuevos Este Mes</p>
+            <h3 class="text-[32px] font-bold text-slate-800 leading-none mb-2">84</h3>
+            <div class="flex items-center gap-1 text-[12px] text-slate-500 font-semibold">
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Objetivo mensual: 100
+            </div>
         </div>
-        <h3 class="text-2xl font-extrabold text-navy">10</h3>
-        <p class="text-[11px] text-slate-400 mt-1">8 en servicio activo hoy</p>
-    </div>
-
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Administradores</span>
-            <span class="text-xs font-bold text-navy bg-navy/10 px-2 py-0.5 rounded-full">Root Privileges</span>
+        <div class="w-12 h-12 rounded-xl bg-[#FEF9C3] text-[#CA8A04] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+            </svg>
         </div>
-        <h3 class="text-2xl font-extrabold text-navy">4</h3>
-        <p class="text-[11px] text-slate-400 mt-1">Acceso a consola general</p>
     </div>
 </div>
 
 <!-- ════════════════════════════════════════════
-     2. PESTAÑAS Y BUSCADOR
+     2. DIRECTORIO DE USUARIOS (TABLA)
 ════════════════════════════════════════════ -->
-<div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden mb-6">
 
-    <!-- Pestañas de Roles -->
-    <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl overflow-x-auto">
-        <button onclick="filtrarPorRol('TODOS')" id="tab-rol-todos"
-                class="px-4 py-2 rounded-xl text-xs font-bold bg-white text-navy shadow-sm transition">
-            Todos (1,248)
-        </button>
-        <button onclick="filtrarPorRol('ADMINISTRADOR')" id="tab-rol-admin"
-                class="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-navy transition">
-            Administradores (4)
-        </button>
-        <button onclick="filtrarPorRol('TECNICO')" id="tab-rol-tec"
-                class="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-navy transition">
-            Técnicos (10)
-        </button>
-        <button onclick="filtrarPorRol('CLIENTE')" id="tab-rol-cli"
-                class="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-navy transition">
-            Clientes (1,180)
+    <!-- Cabecera del panel -->
+    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-4">
+            <h2 class="text-[18px] font-bold text-slate-800">Directorio de Usuarios</h2>
+            <!-- Pestañas de filtro por rol -->
+            <div class="flex items-center gap-1">
+                <button onclick="filtrarPorRol('TODOS')" id="tab-todos"
+                        class="px-3.5 py-1.5 rounded-full text-[12px] font-bold bg-[#003399] text-white transition">Todos</button>
+                <button onclick="filtrarPorRol('ADMINISTRADOR')" id="tab-admin"
+                        class="px-3.5 py-1.5 rounded-full text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition">Administradores</button>
+                <button onclick="filtrarPorRol('TECNICO')" id="tab-tecnico"
+                        class="px-3.5 py-1.5 rounded-full text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition">Técnicos</button>
+                <button onclick="filtrarPorRol('CLIENTE')" id="tab-cliente"
+                        class="px-3.5 py-1.5 rounded-full text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition">Clientes</button>
+            </div>
+        </div>
+        <!-- Botón filtros avanzados -->
+        <button class="flex items-center gap-1.5 text-[12px] font-semibold text-slate-600 hover:text-slate-800 transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+            </svg>
+            Filtros Avanzados
         </button>
     </div>
 
-    <!-- Buscador por Nombre/Correo -->
-    <div class="relative w-full md:w-72">
-        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-        <input type="text" id="filtro-busqueda-usuario" onkeyup="aplicarBusquedaUsuario()" placeholder="Buscar usuario por nombre o correo..."
-               class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-royal focus:bg-white transition">
-    </div>
-</div>
-
-<!-- ════════════════════════════════════════════
-     3. TABLA DIRECTORIO DE USUARIOS
-════════════════════════════════════════════ -->
-<div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden mb-6">
+    <!-- Tabla -->
     <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
+        <table class="w-full text-left border-collapse min-w-[720px]">
             <thead>
-                <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    <th class="py-3.5 px-5">Usuario</th>
-                    <th class="py-3.5 px-5">Correo Electrónico</th>
-                    <th class="py-3.5 px-5">Rol</th>
-                    <th class="py-3.5 px-5">Estado</th>
-                    <th class="py-3.5 px-5">Fecha Registro</th>
-                    <th class="py-3.5 px-5 text-right">Acciones Rápidas</th>
+                <tr class="text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                    <th class="py-4 px-6">Usuario</th>
+                    <th class="py-4 px-6">Email</th>
+                    <th class="py-4 px-6">Rol</th>
+                    <th class="py-4 px-6">Estado</th>
+                    <th class="py-4 px-6">Última Conexión</th>
+                    <th class="py-4 px-6">Acciones</th>
                 </tr>
             </thead>
-            <tbody id="tabla-usuarios-body" class="divide-y divide-slate-100 text-xs sm:text-sm">
-                <!-- Renderizado por JavaScript -->
+            <tbody id="tabla-usuarios-body" class="divide-y divide-slate-100">
+                <!-- Renderizado dinámico por JS -->
             </tbody>
         </table>
     </div>
 
     <!-- Paginación -->
-    <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p id="info-paginacion-usuarios" class="text-xs font-semibold text-slate-500">
-            Mostrando 1 a 5 de 1,248 usuarios
-        </p>
-        <div class="flex items-center gap-1.5" id="controles-paginacion-usuarios">
-            <!-- Botones dinámicos JS -->
+    <div class="px-6 py-4 flex items-center justify-between">
+        <p class="text-[13px] text-slate-600 font-medium">Mostrando 1-10 de 1,248 usuarios</p>
+        <div class="flex items-center gap-1.5">
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#003399] text-white font-bold text-[13px] shadow-sm">1</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-medium text-[13px] transition">2</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-medium text-[13px] transition">3</button>
+            <span class="text-slate-400 text-[13px] px-1">...</span>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-medium text-[13px] transition">125</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
         </div>
     </div>
 </div>
 
 <!-- ════════════════════════════════════════════
-     4. MODAL: BROADCAST EMAIL
+     3. FILA INFERIOR: SEGURIDAD + ACCIONES RÁPIDAS
 ════════════════════════════════════════════ -->
-<div id="modal-broadcast" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarModalBroadcast()"></div>
-    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg z-10 overflow-hidden border border-slate-200">
-        <div class="bg-navy px-6 py-5 text-white flex items-center justify-between">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+    <!-- Resumen de Seguridad -->
+    <div class="lg:col-span-2 bg-[#003399] rounded-[20px] p-6 shadow-md text-white flex flex-col justify-between relative overflow-hidden">
+        <div class="absolute -right-8 -top-8 w-36 h-36 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="relative z-10">
+            <h3 class="font-bold text-[16px] mb-2">Resumen de Seguridad</h3>
+            <p class="text-[13px] text-slate-200/90 leading-relaxed">
+                No se han detectado intentos de acceso no autorizados en las últimas 48 horas. Todos los servicios funcionan correctamente.
+            </p>
+        </div>
+        <div class="relative z-10 flex items-center gap-2 mt-5">
+            <!-- Avatares apilados de técnicos de guardia -->
+            <div class="flex -space-x-2">
+                <img src="https://i.pravatar.cc/150?u=guardia1" class="w-7 h-7 rounded-full border-2 border-[#003399] object-cover" alt="">
+                <img src="https://i.pravatar.cc/150?u=guardia2" class="w-7 h-7 rounded-full border-2 border-[#003399] object-cover" alt="">
+                <div class="w-7 h-7 rounded-full border-2 border-[#003399] bg-white/20 flex items-center justify-center text-[9px] font-bold text-white">+12</div>
+            </div>
+            <span class="text-[11px] font-bold text-white/80 uppercase tracking-wider">Técnicos de Guardia Hoy</span>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-6 flex flex-col gap-3">
+        <h3 class="font-bold text-slate-800 text-[14px] mb-1 uppercase tracking-wider text-slate-500 text-[11px]">Acciones Rápidas</h3>
+
+        <!-- Reset Passwords -->
+        <button onclick="abrirModalResetGeneral()"
+                class="group w-full flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 hover:border-[#003399] hover:bg-[#EEF2FF] transition">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-royal flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-[#003399]/10 flex items-center justify-center transition">
+                    <svg class="w-4 h-4 text-slate-500 group-hover:text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    </svg>
+                </div>
+                <span class="text-[13px] font-semibold text-slate-700 group-hover:text-[#003399]">Reset Passwords</span>
+            </div>
+            <svg class="w-4 h-4 text-slate-400 group-hover:text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+
+        <!-- Broadcast Email -->
+        <button onclick="abrirModalBroadcast()"
+                class="group w-full flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 hover:border-[#003399] hover:bg-[#EEF2FF] transition">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-[#003399]/10 flex items-center justify-center transition">
+                    <svg class="w-4 h-4 text-slate-500 group-hover:text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                     </svg>
                 </div>
+                <span class="text-[13px] font-semibold text-slate-700 group-hover:text-[#003399]">Broadcast Email</span>
+            </div>
+            <svg class="w-4 h-4 text-slate-400 group-hover:text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+
+        <!-- Suspend Users -->
+        <button onclick="abrirModalSuspenderUsuarios()"
+                class="group w-full flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50 transition">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-rose-100 flex items-center justify-center transition">
+                    <svg class="w-4 h-4 text-slate-500 group-hover:text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                    </svg>
+                </div>
+                <span class="text-[13px] font-semibold text-slate-700 group-hover:text-rose-600">Suspend Users</span>
+            </div>
+            <svg class="w-4 h-4 text-slate-400 group-hover:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     4. MODAL: REGISTRAR NUEVO USUARIO
+════════════════════════════════════════════ -->
+<div id="modal-nuevo-usuario" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="cerrarModalCrearUsuario()"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md z-10 overflow-hidden border border-slate-100">
+        <div class="px-6 py-4 flex items-center justify-between border-b border-slate-100">
+            <h3 class="font-bold text-[15px] text-slate-800">Registrar Nuevo Usuario</h3>
+            <button onclick="cerrarModalCrearUsuario()" class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form class="p-6 space-y-4" onsubmit="guardarNuevoUsuario(event)">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <h3 class="font-extrabold text-base leading-tight">Broadcast Email Masivo</h3>
-                    <p class="text-xs text-sky-light">Envío masivo de avisos o promociones</p>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Nombre</label>
+                    <input type="text" required placeholder="Nombre" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Apellido</label>
+                    <input type="text" required placeholder="Apellido" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
                 </div>
             </div>
-            <button onclick="cerrarModalBroadcast()" class="text-slate-400 hover:text-white transition">✕</button>
-        </div>
-
-        <form onsubmit="enviarBroadcast(event)" class="p-6 space-y-4">
             <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Destinatarios</label>
-                <select id="bc-destinatarios" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-royal">
-                    <option value="TODOS">Todos los usuarios registrados (1,248)</option>
-                    <option value="CLIENTES">Solo Clientes (1,180)</option>
-                    <option value="TECNICOS">Solo Personal Técnico (10)</option>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Correo Electrónico</label>
+                <input type="email" required placeholder="usuario@servitech.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Rol del Usuario</label>
+                <select class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                    <option>Administrador</option>
+                    <option>Técnico Nivel 1</option>
+                    <option>Técnico Nivel 2</option>
+                    <option>Técnico Nivel 3</option>
+                    <option>Cliente VIP</option>
+                    <option>Cliente Corporativo</option>
                 </select>
             </div>
-
-            <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Asunto del Correo</label>
-                <input type="text" required id="bc-asunto" placeholder="Ej. Notificación de Mantenimiento Programado ServiTech"
-                       class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-royal">
-            </div>
-
-            <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Mensaje</label>
-                <textarea required id="bc-mensaje" rows="4" placeholder="Escribe el comunicado masivo..."
-                          class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-royal"></textarea>
-            </div>
-
-            <div class="flex gap-3 pt-2">
-                <button type="button" onclick="cerrarModalBroadcast()" class="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50">Cancelar</button>
-                <button type="submit" class="flex-1 py-3 rounded-xl bg-royal hover:bg-royal-hover text-white font-extrabold text-xs shadow-md">Enviar Broadcast</button>
+            <div class="pt-2 flex gap-3">
+                <button type="button" onclick="cerrarModalCrearUsuario()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition">Cancelar</button>
+                <button type="submit" class="flex-1 py-2.5 rounded-xl bg-[#003399] hover:bg-[#002266] text-white font-bold text-[13px] transition shadow-sm">Registrar</button>
             </div>
         </form>
     </div>
 </div>
 
 <!-- ════════════════════════════════════════════
-     5. MODAL: RESET PASSWORDS & SUSPEND
+     5. MODAL: BROADCAST EMAIL
 ════════════════════════════════════════════ -->
-<div id="modal-reset-user" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarModalReset()"></div>
-    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm z-10 p-6 border border-slate-200">
-        <h3 class="font-extrabold text-navy text-base mb-1">Restablecer Contraseña</h3>
-        <p id="reset-user-email" class="text-xs text-slate-400 mb-4">Usuario: carlos@gmail.com</p>
-
-        <div class="space-y-3 mb-5">
+<div id="modal-broadcast" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="cerrarModalBroadcast()"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md z-10 overflow-hidden border border-slate-100">
+        <div class="px-6 py-4 flex items-center justify-between border-b border-slate-100">
+            <h3 class="font-bold text-[15px] text-slate-800">Broadcast Email</h3>
+            <button onclick="cerrarModalBroadcast()" class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="p-6 space-y-4">
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Nueva Contraseña Temporal</label>
-                <input type="text" id="reset-nueva-pass" value="ServiTech2026!"
-                       class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-royal font-bold focus:outline-none">
+                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Destinatarios</label>
+                <select class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                    <option>Todos los usuarios (1,248)</option>
+                    <option>Solo Clientes</option>
+                    <option>Solo Técnicos</option>
+                    <option>Solo Administradores</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Asunto</label>
+                <input type="text" placeholder="Asunto del mensaje" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Mensaje</label>
+                <textarea rows="4" placeholder="Escribe tu mensaje aquí..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition resize-none"></textarea>
+            </div>
+            <div class="pt-1 flex gap-3">
+                <button onclick="cerrarModalBroadcast()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition">Cancelar</button>
+                <button onclick="enviarBroadcast()" class="flex-1 py-2.5 rounded-xl bg-[#003399] hover:bg-[#002266] text-white font-bold text-[13px] transition shadow-sm">Enviar Email</button>
             </div>
         </div>
-
-        <div class="flex gap-3">
-            <button onclick="cerrarModalReset()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50">Cancelar</button>
-            <button onclick="confirmarResetPass()" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-md">Actualizar Clave</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Nuevo Usuario -->
-<div id="modal-crear-usuario" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarModalCrearUsuario()"></div>
-    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md z-10 p-6 border border-slate-200">
-        <h3 class="font-extrabold text-navy text-base mb-1">Registrar Nuevo Usuario</h3>
-        <p class="text-xs text-slate-400 mb-4">Ingresa la información para dar de alta la cuenta</p>
-
-        <form onsubmit="guardarNuevoUsuario(event)" class="space-y-3">
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Completo</label>
-                <input type="text" required id="nu-nombre" placeholder="Ej. Fernando Gómez" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico</label>
-                <input type="email" required id="nu-correo" placeholder="correo@ejemplo.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800">
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Rol de Acceso</label>
-                    <select id="nu-rol" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800">
-                        <option value="CLIENTE">Cliente</option>
-                        <option value="TECNICO">Técnico</option>
-                        <option value="ADMINISTRADOR">Administrador</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Contraseña</label>
-                    <input type="password" required id="nu-pass" value="User2026!" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800">
-                </div>
-            </div>
-            <div class="flex gap-3 pt-3">
-                <button type="button" onclick="cerrarModalCrearUsuario()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">Cancelar</button>
-                <button type="submit" class="flex-1 py-2.5 rounded-xl bg-royal text-white font-bold text-xs shadow-md">Crear Cuenta</button>
-            </div>
-        </form>
     </div>
 </div>
 
@@ -275,268 +304,162 @@
 {% block scripts %}
 <script>
 // ─────────────────────────────────────────────
-// DATASET DE USUARIOS (BD + Mock data completo)
+// DATASET DE USUARIOS (Simulado)
 // ─────────────────────────────────────────────
-let USUARIOS_BD = [
-    {% if usuarios %}
-        {% for u in usuarios %}
-        {
-            id: "{{ u.pk }}",
-            nombre: "{{ u.nombre_completo|escapejs }}",
-            correo: "{{ u.correo|escapejs }}",
-            rol: "{{ u.rol|upper|escapejs }}",
-            activo: {% if u.activo %}true{% else %}false{% endif %},
-            fecha: "{{ u.fecha_registro|date:'d/m/Y' }}"
-        }{% if not forloop.last %},{% endif %}
-        {% endfor %}
-    {% else %}
-        { id: "1", nombre: "Manuel Rojas", correo: "admin@servitech.com", rol: "ADMINISTRADOR", activo: true, fecha: "01/01/2026" },
-        { id: "2", nombre: "Carlos Mendoza", correo: "carlos@gmail.com", rol: "TECNICO", activo: true, fecha: "05/01/2026" },
-        { id: "3", nombre: "Ana Torres", correo: "ana.torres@gmail.com", rol: "TECNICO", activo: true, fecha: "10/01/2026" },
-        { id: "4", nombre: "Carlos Mendoza C.", correo: "carlos.mendoza@gmail.com", rol: "CLIENTE", activo: true, fecha: "12/02/2026" },
-        { id: "5", nombre: "María García", correo: "maria.garcia@gmail.com", rol: "CLIENTE", activo: true, fecha: "15/02/2026" },
-        { id: "6", nombre: "Roberto López", correo: "roberto.lopez@gmail.com", rol: "CLIENTE", activo: true, fecha: "20/03/2026" },
-        { id: "7", nombre: "Sofía Ramírez", correo: "sofia.ramirez@gmail.com", rol: "CLIENTE", activo: true, fecha: "02/04/2026" },
-        { id: "8", nombre: "Cristian Chaustre", correo: "cristianchaustre90@gmail.com", rol: "CLIENTE", activo: true, fecha: "10/05/2026" }
-    {% endif %}
+const USUARIOS = [
+    {
+        id: 'ST-8821', nombre: 'Carlos Mendoza', email: 'c.mendoza@servitech.com',
+        avatar: 'CM', color: 'bg-[#003399]',
+        rol: 'ADMINISTRADOR', rol_label: 'ADMINISTRADOR', rol_color: 'bg-[#EEF2FF] text-[#003399] border border-[#C7D7FF]',
+        estado: 'Activo', ultima_conexion: 'Hace 15 min'
+    },
+    {
+        id: 'ST-9012', nombre: 'Ana López', email: 'a.lopez@servitech.tech',
+        avatar: 'AL', color: 'bg-[#0284C7]',
+        rol: 'TECNICO', rol_label: 'TÉCNICO NIVEL 2', rol_color: 'bg-[#EFF6FF] text-[#0284C7] border border-[#BAE6FD]',
+        estado: 'Activo', ultima_conexion: 'Hoy, 09:42 AM'
+    },
+    {
+        id: 'CL-1102', nombre: 'Ricardo Gómez', email: 'ricardo.g@corporacion.mx',
+        avatar: 'RG', color: 'bg-slate-500',
+        rol: 'CLIENTE', rol_label: 'CLIENTE CORPORATIVO', rol_color: 'bg-slate-100 text-slate-600 border border-slate-200',
+        estado: 'Inactivo', ultima_conexion: 'Hace 3 días'
+    },
+    {
+        id: 'ST-4439', nombre: 'Marina Vega', email: 'm.vega@servitech.tech',
+        avatar: 'MV', color: 'bg-[#059669]',
+        rol: 'TECNICO', rol_label: 'TÉCNICO NIVEL 3', rol_color: 'bg-[#D1FAE5] text-[#047857] border border-[#6EE7B7]',
+        estado: 'Activo', ultima_conexion: 'Ayer, 18:20 PM'
+    },
+    {
+        id: 'CL-2022', nombre: 'Elena Pineda', email: 'e.pineda@industrial.com',
+        avatar: 'EP', color: 'bg-[#7C3AED]',
+        rol: 'CLIENTE', rol_label: 'CLIENTE VIP', rol_color: 'bg-[#F3E8FF] text-[#7C3AED] border border-[#DDD6FE]',
+        estado: 'Activo', ultima_conexion: 'Hoy, 10:15 AM'
+    }
 ];
 
-let usuariosFiltrados = [...USUARIOS_BD];
-let rolFiltroActual = 'TODOS';
-let paginaActualUsuarios = 1;
-const porPaginaUsuarios = 5;
-let usuarioSeleccionadoCorreo = '';
+let usuariosFiltrados = [...USUARIOS];
 
 // ─────────────────────────────────────────────
-// RENDERIZADO DE TABLA Y PAGINACIÓN
+// RENDERIZADO DE TABLA
 // ─────────────────────────────────────────────
-function renderizarTablaUsuarios() {
+function renderizarTabla() {
     const tbody = document.getElementById('tabla-usuarios-body');
     tbody.innerHTML = '';
 
-    const inicio = (paginaActualUsuarios - 1) * porPaginaUsuarios;
-    const fin = inicio + porPaginaUsuarios;
-    const paginados = usuariosFiltrados.slice(inicio, fin);
-
-    if (paginados.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="6" class="py-12 text-center text-slate-400 font-medium">
-                    🔍 No se encontraron usuarios con el filtro seleccionado.
-                </td>
-            </tr>`;
-        actualizarPaginacionUsuarios(0);
+    if (usuariosFiltrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-slate-400">No se encontraron usuarios.</td></tr>`;
         return;
     }
 
-    paginados.forEach(u => {
+    usuariosFiltrados.forEach(u => {
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-50/80 transition-colors border-b border-slate-100';
+        tr.className = 'hover:bg-slate-50/50 transition-colors group';
 
-        let rolBadge = '';
-        const r = u.rol.toUpperCase();
-        if (r.includes('ADMIN')) rolBadge = 'bg-navy text-white';
-        else if (r.includes('TECNIC')) rolBadge = 'bg-royal text-white';
-        else rolBadge = 'bg-sky-light text-sky border border-sky/30';
-
-        const iniciales = u.nombre.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+        const dotColor = u.estado === 'Activo' ? 'bg-[#22C55E]' : 'bg-rose-400';
+        const textoColor = u.estado === 'Activo' ? 'text-[#059669]' : 'text-rose-600';
 
         tr.innerHTML = `
-            <td class="py-4 px-5">
+            <td class="py-4 px-6">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs">
-                        ${iniciales}
-                    </div>
+                    <div class="w-9 h-9 rounded-full ${u.color} text-white flex items-center justify-center text-[11px] font-bold flex-shrink-0">${u.avatar}</div>
                     <div>
-                        <p class="font-bold text-navy leading-tight">${u.nombre}</p>
-                        <p class="text-[10px] text-slate-400">ID: USR-00${u.id}</p>
+                        <p class="text-[13px] font-bold text-slate-800 leading-tight">${u.nombre}</p>
+                        <p class="text-[11px] text-slate-500">ID: #${u.id}</p>
                     </div>
                 </div>
             </td>
-            <td class="py-4 px-5 font-medium text-slate-700">${u.correo}</td>
-            <td class="py-4 px-5">
-                <span class="inline-block text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${rolBadge}">
-                    ${u.rol}
-                </span>
+            <td class="py-4 px-6 text-[13px] text-slate-600">${u.email}</td>
+            <td class="py-4 px-6">
+                <span class="inline-block text-[10px] font-bold px-2.5 py-1 rounded-lg ${u.rol_color}">${u.rol_label}</span>
             </td>
-            <td class="py-4 px-5">
-                <button onclick="toggleEstadoUsuario('${u.id}')"
-                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold transition ${u.activo ? 'bg-emerald-light text-emerald' : 'bg-rose-50 text-rose-600'}">
-                    <span class="w-1.5 h-1.5 rounded-full ${u.activo ? 'bg-emerald' : 'bg-rose-500'}"></span>
-                    ${u.activo ? 'ACTIVO' : 'SUSPENDIDO'}
-                </button>
+            <td class="py-4 px-6">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full ${dotColor}"></span>
+                    <span class="text-[13px] font-semibold ${textoColor}">${u.estado}</span>
+                </div>
             </td>
-            <td class="py-4 px-5 text-slate-400 text-xs">${u.fecha}</td>
-            <td class="py-4 px-5 text-right space-x-1">
-                <button onclick="abrirResetUsuario('${u.correo}')" title="Reset Password"
-                        class="p-1.5 rounded-xl hover:bg-amber-50 text-amber-600 transition">
-                    🔑
-                </button>
-                <button onclick="toggleEstadoUsuario('${u.id}')" title="Suspender / Activar"
-                        class="p-1.5 rounded-xl hover:bg-rose-50 text-rose-600 transition">
-                    🚫
+            <td class="py-4 px-6 text-[13px] text-slate-600">${u.ultima_conexion}</td>
+            <td class="py-4 px-6">
+                <button class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                    </svg>
                 </button>
             </td>
         `;
         tbody.appendChild(tr);
     });
-
-    actualizarPaginacionUsuarios(usuariosFiltrados.length);
-}
-
-function actualizarPaginacionUsuarios(total) {
-    const info = document.getElementById('info-paginacion-usuarios');
-    const contenedor = document.getElementById('controles-paginacion-usuarios');
-    contenedor.innerHTML = '';
-
-    if (total === 0) {
-        info.textContent = 'Mostrando 0 de 0 usuarios';
-        return;
-    }
-
-    const totalPaginas = Math.ceil(total / porPaginaUsuarios);
-    const inicio = (paginaActualUsuarios - 1) * porPaginaUsuarios + 1;
-    const fin = Math.min(paginaActualUsuarios * porPaginaUsuarios, total);
-    info.textContent = `Mostrando ${inicio} a ${fin} de ${total} usuarios`;
-
-    const btnAnt = document.createElement('button');
-    btnAnt.className = `px-3 py-1 rounded-xl border border-slate-200 text-xs font-bold ${paginaActualUsuarios === 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-600'}`;
-    btnAnt.textContent = '« Ant';
-    btnAnt.onclick = () => { if (paginaActualUsuarios > 1) { paginaActualUsuarios--; renderizarTablaUsuarios(); } };
-    contenedor.appendChild(btnAnt);
-
-    for (let i = 1; i <= totalPaginas; i++) {
-        const btnNum = document.createElement('button');
-        btnNum.className = `px-3 py-1 rounded-xl text-xs font-bold ${i === paginaActualUsuarios ? 'bg-navy text-white shadow-sm' : 'border border-slate-200 text-slate-600 hover:bg-slate-100'}`;
-        btnNum.textContent = i;
-        btnNum.onclick = () => { paginaActualUsuarios = i; renderizarTablaUsuarios(); };
-        contenedor.appendChild(btnNum);
-    }
-
-    const btnSig = document.createElement('button');
-    btnSig.className = `px-3 py-1 rounded-xl border border-slate-200 text-xs font-bold ${paginaActualUsuarios === totalPaginas ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-600'}`;
-    btnSig.textContent = 'Sig »';
-    btnSig.onclick = () => { if (paginaActualUsuarios < totalPaginas) { paginaActualUsuarios++; renderizarTablaUsuarios(); } };
-    contenedor.appendChild(btnSig);
 }
 
 // ─────────────────────────────────────────────
-// FILTRADO POR ROLES Y BÚSQUEDA
+// FILTRO POR ROL (PESTAÑAS)
 // ─────────────────────────────────────────────
+const TABS = { TODOS: 'tab-todos', ADMINISTRADOR: 'tab-admin', TECNICO: 'tab-tecnico', CLIENTE: 'tab-cliente' };
+
 function filtrarPorRol(rol) {
-    rolFiltroActual = rol;
-    ['todos','admin','tec','cli'].forEach(t => {
-        const btn = document.getElementById(`tab-rol-${t}`);
-        if (!btn) return;
-        btn.className = 'px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-navy transition';
+    // Resetear estilos de tabs
+    Object.values(TABS).forEach(id => {
+        const el = document.getElementById(id);
+        el.className = 'px-3.5 py-1.5 rounded-full text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition';
     });
+    // Activar tab seleccionado
+    const activeTab = document.getElementById(TABS[rol]);
+    if (activeTab) activeTab.className = 'px-3.5 py-1.5 rounded-full text-[12px] font-bold bg-[#003399] text-white transition';
 
-    if (rol === 'TODOS') document.getElementById('tab-rol-todos').className = 'px-4 py-2 rounded-xl text-xs font-bold bg-white text-navy shadow-sm transition';
-    else if (rol === 'ADMINISTRADOR') document.getElementById('tab-rol-admin').className = 'px-4 py-2 rounded-xl text-xs font-bold bg-white text-navy shadow-sm transition';
-    else if (rol === 'TECNICO') document.getElementById('tab-rol-tec').className = 'px-4 py-2 rounded-xl text-xs font-bold bg-white text-navy shadow-sm transition';
-    else if (rol === 'CLIENTE') document.getElementById('tab-rol-cli').className = 'px-4 py-2 rounded-xl text-xs font-bold bg-white text-navy shadow-sm transition';
-
-    aplicarBusquedaUsuario();
-}
-
-function aplicarBusquedaUsuario() {
-    const q = document.getElementById('filtro-busqueda-usuario').value.toLowerCase();
-    usuariosFiltrados = USUARIOS_BD.filter(u => {
-        const matchRol = rolFiltroActual === 'TODOS' || u.rol.toUpperCase().includes(rolFiltroActual);
-        const matchTxt = u.nombre.toLowerCase().includes(q) || u.correo.toLowerCase().includes(q);
-        return matchRol && matchTxt;
-    });
-
-    paginaActualUsuarios = 1;
-    renderizarTablaUsuarios();
+    usuariosFiltrados = rol === 'TODOS' ? [...USUARIOS] : USUARIOS.filter(u => u.rol === rol);
+    renderizarTabla();
 }
 
 // ─────────────────────────────────────────────
-// MODALES E INTERACCIONES
+// MODALES: NUEVO USUARIO
+// ─────────────────────────────────────────────
+function abrirModalCrearUsuario() {
+    const m = document.getElementById('modal-nuevo-usuario');
+    m.classList.remove('hidden'); m.classList.add('flex');
+}
+function cerrarModalCrearUsuario() {
+    const m = document.getElementById('modal-nuevo-usuario');
+    m.classList.add('hidden'); m.classList.remove('flex');
+}
+function guardarNuevoUsuario(e) {
+    e.preventDefault();
+    cerrarModalCrearUsuario();
+    showToast('✅ Usuario registrado exitosamente.', 'success');
+}
+
+// ─────────────────────────────────────────────
+// MODALES: BROADCAST EMAIL
 // ─────────────────────────────────────────────
 function abrirModalBroadcast() {
     const m = document.getElementById('modal-broadcast');
-    m.classList.remove('hidden');
-    m.classList.add('flex');
+    m.classList.remove('hidden'); m.classList.add('flex');
 }
-
 function cerrarModalBroadcast() {
     const m = document.getElementById('modal-broadcast');
-    m.classList.add('hidden');
-    m.classList.remove('flex');
+    m.classList.add('hidden'); m.classList.remove('flex');
 }
-
-function enviarBroadcast(e) {
-    e.preventDefault();
-    const dest = document.getElementById('bc-destinatarios').value;
-    const asunto = document.getElementById('bc-asunto').value;
+function enviarBroadcast() {
     cerrarModalBroadcast();
-    showToast(`📧 Broadcast "${asunto}" enviado a ${dest}.`, "success");
+    showToast('📧 Email enviado a todos los usuarios.', 'success');
 }
 
-function abrirResetUsuario(correo) {
-    usuarioSeleccionadoCorreo = correo;
-    document.getElementById('reset-user-email').textContent = 'Usuario: ' + correo;
-    const m = document.getElementById('modal-reset-user');
-    m.classList.remove('hidden');
-    m.classList.add('flex');
+// ─────────────────────────────────────────────
+// ACCIONES RÁPIDAS (placeholders)
+// ─────────────────────────────────────────────
+function abrirModalResetGeneral() {
+    showToast('🔑 Reset de contraseñas iniciado.', 'success');
+}
+function abrirModalSuspenderUsuarios() {
+    showToast('⚠️ Función de suspensión próximamente.', 'success');
 }
 
-function cerrarModalReset() {
-    const m = document.getElementById('modal-reset-user');
-    m.classList.add('hidden');
-    m.classList.remove('flex');
-}
-
-function confirmarResetPass() {
-    const pass = document.getElementById('reset-nueva-pass').value;
-    cerrarModalReset();
-    showToast(`🔑 Contraseña actualizada a "${pass}" para ${usuarioSeleccionadoCorreo}`, "success");
-}
-
-function toggleEstadoUsuario(id) {
-    const u = USUARIOS_BD.find(usr => usr.id.toString() === id.toString());
-    if (u) {
-        u.activo = !u.activo;
-        renderizarTablaUsuarios();
-        showToast(`👤 Usuario ${u.nombre} ${u.activo ? 'activado' : 'suspendido'}.`, u.activo ? "success" : "error");
-    }
-}
-
-function abrirModalCrearUsuario() {
-    const m = document.getElementById('modal-crear-usuario');
-    m.classList.remove('hidden');
-    m.classList.add('flex');
-}
-
-function cerrarModalCrearUsuario() {
-    const m = document.getElementById('modal-crear-usuario');
-    m.classList.add('hidden');
-    m.classList.remove('flex');
-}
-
-function guardarNuevoUsuario(e) {
-    e.preventDefault();
-    const nom = document.getElementById('nu-nombre').value;
-    const correo = document.getElementById('nu-correo').value;
-    const rol = document.getElementById('nu-rol').value;
-
-    USUARIOS_BD.unshift({
-        id: (USUARIOS_BD.length + 1).toString(),
-        nombre: nom,
-        correo: correo,
-        rol: rol,
-        activo: true,
-        fecha: new Date().toLocaleDateString('es-ES')
-    });
-
-    cerrarModalCrearUsuario();
-    aplicarBusquedaUsuario();
-    showToast(`✅ Cuenta creada para ${nom} (${rol}).`, "success");
-}
-
+// ─────────────────────────────────────────────
+// Inicialización
+// ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    renderizarTablaUsuarios();
+    renderizarTabla();
 });
 </script>
 {% endblock %}
