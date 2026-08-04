@@ -4,8 +4,10 @@ from django.contrib import messages
 from django.db.models import Count
 from datetime import date, timedelta
 import calendar
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
-from ..models import Cita, Usuario, Repuesto, Servicio, Especialidad
+from ..models import Cita, Usuario, Repuesto, Servicio, Especialidad, EstadoCita
 from ..forms import EditarPerfilForm
 
 
@@ -79,21 +81,24 @@ def dashboard_tecnico(request):
     from datetime import date
     hoy = date.today()
 
-    # Citas programadas para hoy
-    citas_hoy_count = Cita.objects.filter(fecha=hoy).count()
+    # Citas programadas para hoy asignadas al técnico
+    citas_hoy_count = Cita.objects.filter(fecha=hoy, tecnico=request.user).count()
 
-    # Citas en proceso (En diagnóstico o En reparación)
+    # Citas en proceso asignadas al técnico (En diagnóstico o En reparación)
     en_proceso_count = Cita.objects.filter(
+        tecnico=request.user,
         estado__nombre__in=['EN_DIAGNOSTICO', 'EN_REPARACION', 'En Diagnóstico', 'En Reparación']
     ).count()
 
-    # Citas finalizadas
+    # Citas finalizadas asignadas al técnico
     finalizadas_count = Cita.objects.filter(
+        tecnico=request.user,
         estado__nombre__iexact='finalizada'
     ).count()
 
-    # Citas con retraso
+    # Citas con retraso asignadas al técnico
     retrasos_count = Cita.objects.filter(
+        tecnico=request.user,
         estado__nombre__iexact='retrasada'
     ).count()
 
@@ -124,7 +129,146 @@ def tecnico_agenda(request):
     """Agenda del técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
         return redirect('home')
-    return render(request, 'turnos/tecnico/tecnico_agenda.html')
+
+    import datetime
+    from datetime import date, timedelta
+
+    hoy = date.today()
+
+    # Obtener el offset de semana para navegación
+    try:
+        week_offset = int(request.GET.get('week_offset', 0))
+    except ValueError:
+        week_offset = 0
+
+    # Calcular fechas de la semana (Lunes a Viernes)
+    ref_date = hoy + timedelta(weeks=week_offset)
+    monday = ref_date - timedelta(days=ref_date.weekday())
+    week_dates = [monday + timedelta(days=i) for i in range(5)]
+
+    # Nombres de meses en español
+    meses_es = {
+        1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
+        7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
+    }
+
+    # Formatear el rango de fechas
+    start_date = week_dates[0]
+    end_date = week_dates[4]
+    if start_date.month == end_date.month:
+        rango_texto = f"Semana del {start_date.day} al {end_date.day} de {meses_es[start_date.month]}"
+    else:
+        rango_texto = f"Semana del {start_date.day} de {meses_es[start_date.month]} al {end_date.day} de {meses_es[end_date.month]}"
+
+    # Citas aceptadas por este técnico para esta semana
+    citas = Cita.objects.filter(
+        tecnico=request.user,
+        fecha__range=(start_date, end_date)
+    ).select_related('cliente', 'servicio', 'estado')
+
+    # Definir horas del calendario (08:00 a 14:00)
+    hours = [
+        datetime.time(8, 0),
+        datetime.time(9, 0),
+        datetime.time(10, 0),
+        datetime.time(11, 0),
+        datetime.time(12, 0),
+        datetime.time(13, 0),
+        datetime.time(14, 0),
+    ]
+
+    # Construir cuadrícula para escritorio
+    grid_rows = []
+    for h in hours:
+        row_cells = []
+        for d in week_dates:
+            cita_en_slot = None
+            for cita in citas:
+                if cita.fecha == d and cita.hora_inicio.hour == h.hour:
+                    cita_en_slot = cita
+                    break
+            row_cells.append({
+                'day': d,
+                'cita': cita_en_slot
+            })
+        grid_rows.append({
+            'time': h,
+            'cells': row_cells
+        })
+
+    # Datos para la vista móvil (organizado por día de la semana)
+    dias_nombres_movil = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE']
+    mobile_days = {}
+    for i, name in enumerate(dias_nombres_movil):
+        d_date = week_dates[i]
+        citas_dia = [c for c in citas if c.fecha == d_date]
+        citas_dia.sort(key=lambda c: c.hora_inicio)
+        mobile_days[name] = {
+            'day': d_date,
+            'citas': citas_dia
+        }
+
+    # Determinar qué día de la semana es hoy para la vista móvil (si no está en el rango de lunes a viernes, usar LUN)
+    hoy_idx = hoy.weekday()
+    hoy_name = dias_nombres_movil[hoy_idx] if 0 <= hoy_idx < 5 else 'LUN'
+
+    # Obtener la próxima visita programada (hoy o en el futuro)
+    proxima_cita = Cita.objects.filter(
+        tecnico=request.user,
+        fecha__gte=hoy
+    ).select_related('cliente', 'servicio').order_by('fecha', 'hora_inicio').first()
+
+    context = {
+        'week_dates': week_dates,
+        'week_offset': week_offset,
+        'rango_texto': rango_texto,
+        'grid_rows': grid_rows,
+        'mobile_days': mobile_days,
+        'hoy': hoy,
+        'hoy_name': hoy_name,
+        'proxima_cita': proxima_cita,
+    }
+    return render(request, 'turnos/tecnico/tecnico_agenda.html', context)
+
+@login_required
+@require_POST
+def aceptar_cita(request, cita_id):
+    """Permite al técnico aceptar una cita disponible."""
+    if request.user.rol != Usuario.Rol.TECNICO:
+        return JsonResponse({'success': False, 'error': 'No autorizado.'}, status=403)
+
+    cita = get_object_or_404(Cita, id=cita_id)
+    if cita.tecnico is not None:
+        return JsonResponse({'success': False, 'error': 'Esta cita ya tiene un técnico asignado.'}, status=400)
+
+    # Asignar técnico
+    cita.tecnico = request.user
+    cita.save()
+
+    return JsonResponse({
+        'success': True,
+        'message': f'Cita de {cita.cliente.nombre_completo} aceptada con éxito.'
+    })
+
+@login_required
+@require_POST
+def finalizar_cita(request, cita_id):
+    """Permite al técnico marcar una cita como finalizada."""
+    if request.user.rol != Usuario.Rol.TECNICO:
+        return JsonResponse({'success': False, 'error': 'No autorizado.'}, status=403)
+
+    cita = get_object_or_404(Cita, id=cita_id, tecnico=request.user)
+    
+    # Obtener o crear el estado FINALIZADA
+    estado_finalizada, _ = EstadoCita.objects.get_or_create(nombre='FINALIZADA')
+    
+    cita.estado = estado_finalizada
+    cita.save()
+
+    return JsonResponse({
+        'success': True,
+        'message': f'Cita de {cita.cliente.nombre_completo} finalizada con éxito.'
+    })
 
 @login_required
 def tecnico_dispositivos(request):

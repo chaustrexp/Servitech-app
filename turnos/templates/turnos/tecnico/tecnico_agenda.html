@@ -8,11 +8,12 @@
 <div class="flex items-center gap-0 mb-6 md:mb-8">
     <h1 class="text-base sm:text-lg font-bold text-[#002b75] leading-tight whitespace-nowrap">Mi Agenda</h1>
     <span class="mx-3 text-slate-300 font-light text-lg select-none">|</span>
-    <p id="rango-fecha" class="text-slate-400 text-xs sm:text-sm font-normal leading-tight">Semana del 14 al 18 de Octubre</p>
+    <p id="rango-fecha" class="text-slate-400 text-xs sm:text-sm font-normal leading-tight">{{ rango_texto }}</p>
 </div>
 {% endblock page_header %}
 
 {% block content %}
+{% csrf_token %}
 
 <!-- ══════════════════════════════════════════════
      BARRA SUPERIOR DE CONTROLES
@@ -88,144 +89,63 @@
                 <div class="p-3 text-xs font-bold text-slate-400 uppercase tracking-wider text-center flex items-center justify-center">
                     Hora
                 </div>
-                <div class="p-3 text-center border-l border-slate-100">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">LUN</p>
-                    <p class="text-base font-extrabold text-slate-700">14</p>
-                </div>
-                <div class="p-3 text-center border-l border-slate-100">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">MAR</p>
-                    <p class="text-base font-extrabold text-slate-700">15</p>
-                </div>
-                <div class="p-3 text-center border-l border-slate-100 bg-[#eef2ff]">
-                    <p class="text-xs font-bold text-[#002b75] uppercase tracking-wider">MIÉ</p>
+                {% for d in week_dates %}
+                <div class="p-3 text-center border-l border-slate-100 {% if d == hoy %}bg-[#eef2ff]{% endif %}">
+                    <p class="text-xs font-bold {% if d == hoy %}text-[#002b75]{% else %}text-slate-400{% endif %} uppercase tracking-wider">
+                        {% if forloop.counter == 1 %}LUN
+                        {% elif forloop.counter == 2 %}MAR
+                        {% elif forloop.counter == 3 %}MIÉ
+                        {% elif forloop.counter == 4 %}JUE
+                        {% elif forloop.counter == 5 %}VIE
+                        {% endif %}
+                    </p>
                     <div class="flex items-center justify-center gap-1">
-                        <p class="text-base font-extrabold text-[#002b75]">16</p>
+                        <p class="text-base font-extrabold {% if d == hoy %}text-[#002b75]{% else %}text-slate-700{% endif %}">{{ d.day }}</p>
+                        {% if d == hoy %}
                         <span class="w-1.5 h-1.5 rounded-full bg-[#002b75]"></span>
+                        {% endif %}
                     </div>
                 </div>
-                <div class="p-3 text-center border-l border-slate-100">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">JUE</p>
-                    <p class="text-base font-extrabold text-slate-700">17</p>
-                </div>
-                <div class="p-3 text-center border-l border-slate-100">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">VIE</p>
-                    <p class="text-base font-extrabold text-slate-700">18</p>
-                </div>
+                {% endfor %}
             </div>
 
             <!-- Filas de horas (08:00 a 15:00) -->
             <div class="relative divide-y divide-slate-100 text-sm">
-
-                <!-- 08:00 -->
-                <div class="grid grid-cols-6 h-16">
-                    <div class="p-2 text-xs font-medium text-slate-400 text-center flex items-center justify-center">08:00</div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1 bg-[#f8fafc]/50"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                </div>
-
-                <!-- 09:00 -->
-                <div class="grid grid-cols-6 h-20">
-                    <div class="p-2 text-xs font-medium text-slate-400 text-center flex items-center justify-center">09:00</div>
-                    <!-- Card LUN 09:00 -->
-                    <div class="border-l border-slate-100 p-1.5">
-                        <div onclick="verDetalleEvento('Reparación HVAC', 'Residencial Torres', '09:00 - 10:30', 'Lunes 14 Oct', 'DIAGNOSTICO')"
-                             class="evento-card h-full bg-[#eef2ff] border-l-4 border-[#002b75] rounded-xl p-2.5 cursor-pointer hover:shadow-md transition">
-                            <p class="font-bold text-[#002b75] text-xs leading-tight">Reparación HVAC</p>
-                            <p class="text-[11px] text-slate-500 mt-0.5 truncate">Residencial Torres</p>
-                        </div>
+                {% for row in grid_rows %}
+                <div class="grid grid-cols-6 {% if row.time.hour == 9 or row.time.hour == 10 or row.time.hour == 14 %}h-20{% else %}h-16{% endif %} relative">
+                    <div class="p-2 text-xs font-medium text-slate-400 text-center flex items-center justify-center">
+                        {{ row.time|time:"H:i" }}
                     </div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1 bg-[#f8fafc]/50"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                </div>
-
-                <!-- 10:00 -->
-                <div class="grid grid-cols-6 h-20">
-                    <div class="p-2 text-xs font-medium text-slate-400 text-center flex items-center justify-center">10:00</div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <!-- Card MAR 10:00 -->
-                    <div class="border-l border-slate-100 p-1.5">
-                        <div onclick="verDetalleEvento('Instalación Rack', 'DataCenter Global', '10:00 - 11:30', 'Martes 15 Oct', 'FINALIZADO')"
-                             class="evento-card h-full bg-[#f0fdf4] border-l-4 border-emerald-500 rounded-xl p-2.5 cursor-pointer hover:shadow-md transition">
-                            <p class="font-bold text-emerald-800 text-xs leading-tight">Instalación Rack</p>
-                            <p class="text-[11px] text-emerald-600 mt-0.5 truncate">DataCenter Global</p>
-                        </div>
-                    </div>
-                    <div class="border-l border-slate-100 p-1 bg-[#f8fafc]/50"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                </div>
-
-                <!-- 11:00 -->
-                <div class="grid grid-cols-6 h-16">
-                    <div class="p-2 text-xs font-medium text-slate-400 text-center flex items-center justify-center">11:00</div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1 bg-[#f8fafc]/50"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                </div>
-
-                <!-- 12:00 (Línea de tiempo actual) -->
-                <div class="grid grid-cols-6 h-16 relative">
-                    <div class="p-2 text-xs font-medium text-slate-400 text-center flex items-center justify-center">12:00</div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <!-- Columna MIÉ con línea de tiempo actual roja -->
-                    <div class="border-l border-slate-100 p-1 bg-[#f8fafc]/50 relative">
+                    
+                    {% for cell in row.cells %}
+                    <div class="border-l border-slate-100 p-1.5 {% if cell.day == hoy %}bg-[#f8fafc]/50{% endif %} relative">
+                        {% if cell.cita %}
+                            {% with cita=cell.cita %}
+                            <div onclick="verDetalleEvento('{{ cita.id }}', '{{ cita.servicio.nombre|escapejs }}', '{{ cita.cliente.nombre_completo|escapejs }}', '{{ cita.hora_inicio|time:'H:i' }} - {{ cita.hora_fin|time:'H:i' }}', '{{ cell.day|date:'l d \d\e F'|escapejs }}', '{{ cita.estado.nombre|escapejs }}')"
+                                 class="evento-card h-full rounded-xl p-2.5 cursor-pointer hover:shadow-md transition
+                                        {% if cita.estado.nombre|lower == 'finalizada' or cita.estado.nombre|lower == 'finalizado' %}
+                                            bg-[#f0fdf4] border-l-4 border-emerald-500 text-emerald-800
+                                        {% else %}
+                                            bg-[#eef2ff] border-l-4 border-[#002b75] text-[#002b75]
+                                        {% endif %}">
+                                <p class="font-bold text-xs leading-tight">{{ cita.servicio.nombre }}</p>
+                                <p class="text-[11px] mt-0.5 truncate {% if cita.estado.nombre|lower == 'finalizada' or cita.estado.nombre|lower == 'finalizado' %}text-emerald-600{% else %}text-slate-500{% endif %}">
+                                    {{ cita.cliente.nombre_completo }}
+                                </p>
+                            </div>
+                            {% endwith %}
+                        {% endif %}
+                        
+                        {# Red line for current time indicator #}
+                        {% if cell.day == hoy and row.time.hour == 12 %}
                         <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-red-500 flex items-center z-10">
                             <div class="w-2.5 h-2.5 bg-red-500 rounded-full -ml-1"></div>
                         </div>
+                        {% endif %}
                     </div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
+                    {% endfor %}
                 </div>
-
-                <!-- 13:00 -->
-                <div class="grid grid-cols-6 h-16">
-                    <div class="p-2 text-xs font-medium text-slate-400 text-center flex items-center justify-center">13:00</div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1 bg-[#f8fafc]/50"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                </div>
-
-                <!-- 14:00 -->
-                <div class="grid grid-cols-6 h-20">
-                    <div class="p-2 text-xs font-medium text-slate-400 text-center flex items-center justify-center">14:00</div>
-                    <!-- Card LUN 14:00 -->
-                    <div class="border-l border-slate-100 p-1.5">
-                        <div onclick="verDetalleEvento('Revisión UPS', 'Banco Regional', '14:00 - 15:00', 'Lunes 14 Oct', 'PENDIENTE')"
-                             class="evento-card h-full bg-[#eef2ff] border-l-4 border-[#002b75] rounded-xl p-2.5 cursor-pointer hover:shadow-md transition">
-                            <p class="font-bold text-[#002b75] text-xs leading-tight">Revisión UPS</p>
-                            <p class="text-[11px] text-slate-500 mt-0.5 truncate">Banco Regional</p>
-                        </div>
-                    </div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <!-- Card MIÉ 14:00 -->
-                    <div class="border-l border-slate-100 p-1.5 bg-[#f8fafc]/50">
-                        <div onclick="verDetalleEvento('Cableado Estruct.', 'Oficina Central', '14:00 - 15:30', 'Miércoles 16 Oct', 'DIAGNOSTICO')"
-                             class="evento-card h-full bg-[#eef2ff] border-l-4 border-[#002b75] rounded-xl p-2.5 cursor-pointer hover:shadow-md transition">
-                            <p class="font-bold text-[#002b75] text-xs leading-tight">Cableado Estruct.</p>
-                            <p class="text-[11px] text-slate-500 mt-0.5 truncate">Oficina Central</p>
-                        </div>
-                    </div>
-                    <div class="border-l border-slate-100 p-1"></div>
-                    <!-- Card VIE 14:00 -->
-                    <div class="border-l border-slate-100 p-1.5">
-                        <div onclick="verDetalleEvento('Soporte Remoto', 'Sucursal Sur', '14:00 - 15:00', 'Viernes 18 Oct', 'FINALIZADO')"
-                             class="evento-card h-full bg-[#f0fdf4] border-l-4 border-emerald-500 rounded-xl p-2.5 cursor-pointer hover:shadow-md transition">
-                            <p class="font-bold text-emerald-800 text-xs leading-tight">Soporte Remoto</p>
-                            <p class="text-[11px] text-emerald-600 mt-0.5 truncate">Sucursal Sur</p>
-                        </div>
-                    </div>
-                </div>
-
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -244,131 +164,68 @@
 <div class="sm:hidden space-y-4 mb-6">
     <!-- Selector de Día (Pestañas horizontales deslizables) -->
     <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-none" style="-webkit-overflow-scrolling:touch">
-        <button onclick="seleccionarDiaMovil('LUN')" id="btn-dia-LUN" class="flex-1 min-w-[70px] flex flex-col items-center p-3 rounded-2xl border transition-all text-center bg-white border-slate-200 text-slate-600 font-medium">
-            <span class="text-[10px] uppercase font-bold text-slate-400">Lun</span>
-            <span class="text-lg font-extrabold mt-0.5">14</span>
+        {% for name, day_data in mobile_days.items %}
+        <button onclick="seleccionarDiaMovil('{{ name }}')" id="btn-dia-{{ name }}" 
+                class="flex-1 min-w-[70px] flex flex-col items-center p-3 rounded-2xl border transition-all text-center 
+                       {% if day_data.day == hoy %}bg-[#eef2ff] border-[#002b75] text-[#002b75] font-semibold{% else %}bg-white border-slate-200 text-slate-600 font-medium{% endif %}">
+            <span class="text-[10px] uppercase font-bold {% if day_data.day == hoy %}text-[#002b75]/70{% else %}text-slate-400{% endif %}">
+                {% if name == 'LUN' %}Lun
+                {% elif name == 'MAR' %}Mar
+                {% elif name == 'MIE' %}Mié
+                {% elif name == 'JUE' %}Jue
+                {% elif name == 'VIE' %}Vie
+                {% endif %}
+            </span>
+            <span class="text-lg font-extrabold mt-0.5">{{ day_data.day.day }}</span>
         </button>
-        <button onclick="seleccionarDiaMovil('MAR')" id="btn-dia-MAR" class="flex-1 min-w-[70px] flex flex-col items-center p-3 rounded-2xl border transition-all text-center bg-white border-slate-200 text-slate-600 font-medium">
-            <span class="text-[10px] uppercase font-bold text-slate-400">Mar</span>
-            <span class="text-lg font-extrabold mt-0.5">15</span>
-        </button>
-        <button onclick="seleccionarDiaMovil('MIE')" id="btn-dia-MIE" class="flex-1 min-w-[70px] flex flex-col items-center p-3 rounded-2xl border transition-all text-center bg-[#eef2ff] border-[#002b75] text-[#002b75] font-semibold">
-            <span class="text-[10px] uppercase font-bold text-[#002b75]/70">Mié</span>
-            <span class="text-lg font-extrabold mt-0.5">16</span>
-        </button>
-        <button onclick="seleccionarDiaMovil('JUE')" id="btn-dia-JUE" class="flex-1 min-w-[70px] flex flex-col items-center p-3 rounded-2xl border transition-all text-center bg-white border-slate-200 text-slate-600 font-medium">
-            <span class="text-[10px] uppercase font-bold text-slate-400">Jue</span>
-            <span class="text-lg font-extrabold mt-0.5">17</span>
-        </button>
-        <button onclick="seleccionarDiaMovil('VIE')" id="btn-dia-VIE" class="flex-1 min-w-[70px] flex flex-col items-center p-3 rounded-2xl border transition-all text-center bg-white border-slate-200 text-slate-600 font-medium">
-            <span class="text-[10px] uppercase font-bold text-slate-400">Vie</span>
-            <span class="text-lg font-extrabold mt-0.5">18</span>
-        </button>
+        {% endfor %}
     </div>
 
     <!-- Contenedor de la línea de tiempo del día seleccionado -->
     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
         
-        <!-- Timeline LUNES -->
-        <div id="timeline-LUN" class="timeline-dia hidden space-y-4">
-            <!-- 09:00 -->
-            <div class="flex gap-3">
-                <div class="w-12 text-right py-1">
-                    <span class="text-xs font-semibold text-slate-400">09:00</span>
-                </div>
-                <div class="flex-1 border-l-2 border-slate-100 pl-4 pb-2 relative">
-                    <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-slate-300 rounded-full"></div>
-                    <div onclick="verDetalleEvento('Reparación HVAC', 'Residencial Torres', '09:00 - 10:30', 'Lunes 14 Oct', 'DIAGNOSTICO')"
-                         class="evento-card bg-[#eef2ff] border-l-4 border-[#002b75] rounded-xl p-3 cursor-pointer hover:shadow-md transition">
-                        <p class="font-bold text-[#002b75] text-sm">Reparación HVAC</p>
-                        <p class="text-xs text-slate-500 mt-1">Residencial Torres</p>
-                        <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#002b75]/10 text-[#002b75]">En Diagnóstico</span>
+        {% for name, day_data in mobile_days.items %}
+        <!-- Timeline {{ name }} -->
+        <div id="timeline-{{ name }}" class="timeline-dia {% if day_data.day != hoy %}hidden{% endif %} space-y-4">
+            {% if day_data.citas %}
+                {% for cita in day_data.citas %}
+                <div class="flex gap-3">
+                    <div class="w-12 text-right py-1">
+                        <span class="text-xs font-semibold text-slate-400">{{ cita.hora_inicio|time:"H:i" }}</span>
+                    </div>
+                    <div class="flex-1 border-l-2 border-slate-100 pl-4 pb-2 relative">
+                        <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-slate-300 rounded-full"></div>
+                        <div onclick="verDetalleEvento('{{ cita.id }}', '{{ cita.servicio.nombre|escapejs }}', '{{ cita.cliente.nombre_completo|escapejs }}', '{{ cita.hora_inicio|time:'H:i' }} - {{ cita.hora_fin|time:'H:i' }}', '{{ day_data.day|date:'l d \d\e F'|escapejs }}', '{{ cita.estado.nombre|escapejs }}')"
+                             class="evento-card rounded-xl p-3 cursor-pointer hover:shadow-md transition
+                                    {% if cita.estado.nombre|lower == 'finalizada' or cita.estado.nombre|lower == 'finalizado' %}
+                                        bg-[#f0fdf4] border-l-4 border-emerald-500 text-emerald-800
+                                    {% else %}
+                                        bg-[#eef2ff] border-l-4 border-[#002b75] text-[#002b75]
+                                    {% endif %}">
+                            <p class="font-bold text-sm">{{ cita.servicio.nombre }}</p>
+                            <p class="text-xs {% if cita.estado.nombre|lower == 'finalizada' or cita.estado.nombre|lower == 'finalizado' %}text-emerald-600{% else %}text-slate-500{% endif %} mt-1">{{ cita.cliente.nombre_completo }}</p>
+                            <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold 
+                                         {% if cita.estado.nombre|lower == 'finalizada' or cita.estado.nombre|lower == 'finalizado' %}
+                                             bg-emerald-100 text-emerald-800
+                                         {% else %}
+                                             bg-[#002b75]/10 text-[#002b75]
+                                         {% endif %}">
+                                {{ cita.estado.nombre }}
+                            </span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <!-- 14:00 -->
-            <div class="flex gap-3">
-                <div class="w-12 text-right py-1">
-                    <span class="text-xs font-semibold text-slate-400">14:00</span>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-8 text-slate-400">
+                    <svg class="w-12 h-12 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <p class="text-sm font-medium">No hay servicios agendados para este día</p>
                 </div>
-                <div class="flex-1 border-l-2 border-slate-100 pl-4 pb-2 relative">
-                    <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-slate-300 rounded-full"></div>
-                    <div onclick="verDetalleEvento('Revisión UPS', 'Banco Regional', '14:00 - 15:00', 'Lunes 14 Oct', 'PENDIENTE')"
-                         class="evento-card bg-[#eef2ff] border-l-4 border-[#002b75] rounded-xl p-3 cursor-pointer hover:shadow-md transition">
-                        <p class="font-bold text-[#002b75] text-sm">Revisión UPS</p>
-                        <p class="text-xs text-slate-500 mt-1">Banco Regional</p>
-                        <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#002b75]/10 text-[#002b75]">Pendiente</span>
-                    </div>
-                </div>
-            </div>
+            {% endif %}
         </div>
-
-        <!-- Timeline MARTES -->
-        <div id="timeline-MAR" class="timeline-dia hidden space-y-4">
-            <!-- 10:00 -->
-            <div class="flex gap-3">
-                <div class="w-12 text-right py-1">
-                    <span class="text-xs font-semibold text-slate-400">10:00</span>
-                </div>
-                <div class="flex-1 border-l-2 border-slate-100 pl-4 pb-2 relative">
-                    <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-slate-300 rounded-full"></div>
-                    <div onclick="verDetalleEvento('Instalación Rack', 'DataCenter Global', '10:00 - 11:30', 'Martes 15 Oct', 'FINALIZADO')"
-                         class="evento-card bg-[#f0fdf4] border-l-4 border-emerald-500 rounded-xl p-3 cursor-pointer hover:shadow-md transition">
-                        <p class="font-bold text-emerald-800 text-sm">Instalación Rack</p>
-                        <p class="text-xs text-emerald-600 mt-1">DataCenter Global</p>
-                        <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Finalizado</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Timeline MIÉRCOLES -->
-        <div id="timeline-MIE" class="timeline-dia space-y-4">
-            <!-- 14:00 -->
-            <div class="flex gap-3">
-                <div class="w-12 text-right py-1">
-                    <span class="text-xs font-semibold text-slate-400">14:00</span>
-                </div>
-                <div class="flex-1 border-l-2 border-slate-100 pl-4 pb-2 relative">
-                    <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-slate-300 rounded-full"></div>
-                    <div onclick="verDetalleEvento('Cableado Estruct.', 'Oficina Central', '14:00 - 15:30', 'Miércoles 16 Oct', 'DIAGNOSTICO')"
-                         class="evento-card bg-[#eef2ff] border-l-4 border-[#002b75] rounded-xl p-3 cursor-pointer hover:shadow-md transition">
-                        <p class="font-bold text-[#002b75] text-sm">Cableado Estruct.</p>
-                        <p class="text-xs text-slate-500 mt-1">Oficina Central</p>
-                        <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#002b75]/10 text-[#002b75]">En Diagnóstico</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Timeline JUEVES -->
-        <div id="timeline-JUE" class="timeline-dia hidden space-y-4">
-            <div class="text-center py-8 text-slate-400">
-                <svg class="w-12 h-12 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <p class="text-sm font-medium">No hay servicios agendados para este día</p>
-            </div>
-        </div>
-
-        <!-- Timeline VIERNES -->
-        <div id="timeline-VIE" class="timeline-dia hidden space-y-4">
-            <!-- 14:00 -->
-            <div class="flex gap-3">
-                <div class="w-12 text-right py-1">
-                    <span class="text-xs font-semibold text-slate-400">14:00</span>
-                </div>
-                <div class="flex-1 border-l-2 border-slate-100 pl-4 pb-2 relative">
-                    <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-slate-300 rounded-full"></div>
-                    <div onclick="verDetalleEvento('Soporte Remoto', 'Sucursal Sur', '14:00 - 15:00', 'Viernes 18 Oct', 'FINALIZADO')"
-                         class="evento-card bg-[#f0fdf4] border-l-4 border-emerald-500 rounded-xl p-3 cursor-pointer hover:shadow-md transition">
-                        <p class="font-bold text-emerald-800 text-sm">Soporte Remoto</p>
-                        <p class="text-xs text-emerald-600 mt-1">Sucursal Sur</p>
-                        <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Finalizado</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
 
     </div>
 </div>
@@ -389,14 +246,15 @@
 
     <!-- Card: Próxima Visita (Tarjeta Azul) -->
     <div class="bg-[#002b75] rounded-2xl p-5 shadow-sm text-white flex flex-col justify-between relative overflow-hidden">
+        {% if proxima_cita %}
         <div>
             <p class="text-xs text-blue-200 uppercase font-semibold tracking-wider mb-1">Próxima Visita</p>
-            <p class="text-lg font-extrabold mb-1 leading-snug">14:00 - Banco Regional</p>
-            <p class="text-xs text-blue-200">Revisión general de sistema UPS</p>
+            <p class="text-lg font-extrabold mb-1 leading-snug">{{ proxima_cita.hora_inicio|time:"H:i" }} - {{ proxima_cita.cliente.nombre_completo }}</p>
+            <p class="text-xs text-blue-200">{{ proxima_cita.servicio.nombre }}</p>
         </div>
 
         <div class="flex items-end justify-between mt-5">
-            <button onclick="abrirMapa('Banco Regional', 'Av. Principal #102, Centro Financiero')"
+            <button onclick="abrirMapa('{{ proxima_cita.cliente.nombre_completo|escapejs }}', '{{ proxima_cita.observaciones|default:'Sin observaciones'|escapejs }}')"
                     class="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold px-3 py-2 rounded-xl transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -404,13 +262,25 @@
                 </svg>
                 Ver Mapa 🗺️
             </button>
-            <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-blue-200">
+            <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-blue-200" title="{{ proxima_cita.fecha|date:'d/m/Y' }}">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
         </div>
+        {% else %}
+        <div>
+            <p class="text-xs text-blue-200 uppercase font-semibold tracking-wider mb-1">Próxima Visita</p>
+            <p class="text-lg font-extrabold mb-1 leading-snug">Sin visitas programadas</p>
+            <p class="text-xs text-blue-200">Disfruta tu tiempo libre.</p>
+        </div>
+        <div class="flex justify-end mt-5">
+            <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-blue-200">
+                ☕
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Card: Notas Rápidas -->
@@ -549,7 +419,7 @@
         </div>
 
         <div class="flex gap-2">
-            <button onclick="cambiarEstadoEvento('Finalizado')"
+            <button id="btn-finalizar-cita" onclick="cambiarEstadoEvento('Finalizado')"
                     class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition shadow">
                 ✅ Marcar Finalizado
             </button>
@@ -611,16 +481,16 @@
         if (vista === 'semana') {
             btnSemana.className = 'px-4 py-1.5 rounded-lg text-sm font-semibold bg-white text-[#002b75] shadow-sm transition-all';
             btnDia.className = 'px-4 py-1.5 rounded-lg text-sm font-semibold text-slate-500 hover:text-slate-700 transition-all';
-            document.getElementById('rango-fecha').textContent = 'Semana del 14 al 18 de Octubre';
+            document.getElementById('rango-fecha').textContent = '{{ rango_texto }}';
             mostrarToast('📅 Vista semanal activa');
         } else {
             btnDia.className = 'px-4 py-1.5 rounded-lg text-sm font-semibold bg-white text-[#002b75] shadow-sm transition-all';
             btnSemana.className = 'px-4 py-1.5 rounded-lg text-sm font-semibold text-slate-500 hover:text-slate-700 transition-all';
-            document.getElementById('rango-fecha').textContent = 'Miércoles 16 de Octubre';
+            document.getElementById('rango-fecha').textContent = '{{ hoy|date:"l d \d\e F"|capfirst }}';
             mostrarToast('📆 Vista diaria activa');
             
-            // Si cambian a vista diaria, seleccionamos Miércoles por defecto en móvil
-            seleccionarDiaMovil('MIE');
+            // Si cambian a vista diaria, seleccionamos el día de hoy o Lunes por defecto en móvil
+            seleccionarDiaMovil('{{ hoy_name }}');
         }
     }
 
@@ -652,8 +522,15 @@
         // Sincronizar el título de rango de fecha para la vista móvil
         const rangoFecha = document.getElementById('rango-fecha');
         if (rangoFecha) {
-            const nombresCompletos = { LUN: 'Lunes 14', MAR: 'Martes 15', MIE: 'Miércoles 16', JUE: 'Jueves 17', VIE: 'Viernes 18' };
-            rangoFecha.textContent = `${nombresCompletos[dia]} de Octubre`;
+            const nombresCompletos = {
+                LUN: 'Lunes {{ week_dates.0.day }}',
+                MAR: 'Martes {{ week_dates.1.day }}',
+                MIE: 'Miércoles {{ week_dates.2.day }}',
+                JUE: 'Jueves {{ week_dates.3.day }}',
+                VIE: 'Viernes {{ week_dates.4.day }}'
+            };
+            const mesNombre = '{{ week_dates.2|date:"F"|capfirst }}';
+            rangoFecha.textContent = `${nombresCompletos[dia]} de ${mesNombre}`;
         }
         
         // Sincronizar el estado del filtro de estado sobre el nuevo timeline visible
@@ -664,14 +541,10 @@
     }
 
     /* ── Navegación semanas ── */
-    let _offsetSemana = 0;
     function navegarSemana(direccion) {
-        _offsetSemana += direccion;
-        const texto = _offsetSemana === 0 ? 'Semana del 14 al 18 de Octubre' :
-                      _offsetSemana > 0 ? `Semana del ${14 + _offsetSemana*7} al ${18 + _offsetSemana*7} de Octubre` :
-                      `Semana del ${14 + _offsetSemana*7} al ${18 + _offsetSemana*7} de Septiembre`;
-        document.getElementById('rango-fecha').textContent = texto;
-        mostrarToast(`🗓️ Navegando agenda (${_offsetSemana > 0 ? '+' : ''}${_offsetSemana} sem)`);
+        const currentOffset = parseInt("{{ week_offset }}") || 0;
+        const newOffset = currentOffset + direccion;
+        window.location.href = `{% url 'tecnico_agenda' %}?week_offset=${newOffset}`;
     }
 
     /* ── Filtrar por estado ── */
@@ -705,21 +578,75 @@
     // están definidas globalmente en tecnico_base.html
 
     /* ── Modal Detalle Evento ── */
-    function verDetalleEvento(titulo, cliente, horario, fecha, estado) {
+    /* ── Modal Detalle Evento ── */
+    let _activeCitaId = null;
+
+    function verDetalleEvento(id, titulo, cliente, horario, fecha, estado) {
+        _activeCitaId = id;
         document.getElementById('ev-titulo').textContent = titulo;
         document.getElementById('ev-cliente').textContent = cliente;
         document.getElementById('ev-horario').textContent = horario;
         document.getElementById('ev-fecha').textContent = fecha;
+        
+        const btnFinalizar = document.getElementById('btn-finalizar-cita');
+        const isFinalizado = (estado.toUpperCase() === 'FINALIZADA' || estado.toUpperCase() === 'FINALIZADO');
+        
+        if (isFinalizado) {
+            btnFinalizar.innerHTML = '✅ Finalizado';
+            btnFinalizar.disabled = true;
+            btnFinalizar.className = 'flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-400 font-semibold text-xs cursor-not-allowed';
+        } else {
+            btnFinalizar.innerHTML = '✅ Marcar Finalizado';
+            btnFinalizar.disabled = false;
+            btnFinalizar.className = 'flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition shadow';
+        }
+        
         document.getElementById('modal-detalle-evento').classList.remove('hidden');
         document.getElementById('modal-detalle-evento').classList.add('flex');
     }
+
     function cerrarDetalleEvento() {
         document.getElementById('modal-detalle-evento').classList.add('hidden');
         document.getElementById('modal-detalle-evento').classList.remove('flex');
     }
+
     function cambiarEstadoEvento(nuevoEstado) {
-        cerrarDetalleEvento();
-        mostrarToast(`✅ Estado cambiado a: ${nuevoEstado}`);
+        if (!_activeCitaId) return;
+        const btnFinalizar = document.getElementById('btn-finalizar-cita');
+        btnFinalizar.innerHTML = `<svg class="w-4 h-4 animate-spin inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Procesando...`;
+        btnFinalizar.disabled = true;
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch(`/tecnico/citas/${_activeCitaId}/finalizar/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                btnFinalizar.innerHTML = '✅ Finalizado';
+                btnFinalizar.className = 'flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-400 font-semibold text-xs cursor-not-allowed';
+                mostrarToast('✅ Cita finalizada con éxito.', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                btnFinalizar.innerHTML = '✅ Marcar Finalizado';
+                btnFinalizar.disabled = false;
+                btnFinalizar.className = 'flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition shadow';
+                mostrarToast(`❌ Error: ${data.error}`, 'danger');
+            }
+        })
+        .catch(error => {
+            btnFinalizar.innerHTML = '✅ Marcar Finalizado';
+            btnFinalizar.disabled = false;
+            btnFinalizar.className = 'flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition shadow';
+            mostrarToast('❌ Error de conexión al servidor.', 'danger');
+        });
     }
 
     /* ── Modal Mapa ── */
