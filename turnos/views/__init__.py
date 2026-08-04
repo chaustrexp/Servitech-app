@@ -25,6 +25,8 @@ from .dashboard_views import (
     # Técnico
     dashboard_tecnico,
     tecnico_agenda,
+    aceptar_cita,
+    finalizar_cita,
     tecnico_dispositivos,
     tecnico_clientes,
     tecnico_soporte,
