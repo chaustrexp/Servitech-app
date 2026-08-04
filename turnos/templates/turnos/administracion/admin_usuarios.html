@@ -112,7 +112,63 @@
                 </tr>
             </thead>
             <tbody id="tabla-usuarios-body" class="divide-y divide-slate-100">
-                <!-- Renderizado dinámico por JS -->
+                {% for u in usuarios %}
+                <tr class="hover:bg-slate-50/50 transition-colors group user-row" data-rol="{{ u.rol }}">
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[11px] font-bold flex-shrink-0 uppercase">
+                                {{ u.nombre_completo|slice:":2" }}
+                            </div>
+                            <div>
+                                <p class="text-[13px] font-bold text-slate-800 leading-tight">{{ u.nombre_completo }}</p>
+                                <p class="text-[11px] text-slate-500">ID: #{{ u.pk }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-[13px] text-slate-600">{{ u.correo }}</td>
+                    <td class="py-4 px-6">
+                        <form action="{% url 'admin_editar_usuario' u.pk %}" method="POST" class="m-0 p-0" id="form-rol-{{ u.pk }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="nombre_completo" value="{{ u.nombre_completo }}">
+                            <input type="hidden" name="correo" value="{{ u.correo }}">
+                            <select name="rol" onchange="document.getElementById('form-rol-{{ u.pk }}').submit()"
+                                    class="text-[10px] font-bold px-2.5 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003399] cursor-pointer 
+                                           {% if u.rol == 'ADMINISTRADOR' %}bg-rose-100 text-rose-700
+                                           {% elif u.rol == 'TECNICO' %}bg-[#E0E7FF] text-[#003399]
+                                           {% else %}bg-slate-100 text-slate-600{% endif %}">
+                                <option value="CLIENTE" {% if u.rol == 'CLIENTE' %}selected{% endif %}>Cliente</option>
+                                <option value="TECNICO" {% if u.rol == 'TECNICO' %}selected{% endif %}>Técnico</option>
+                                <option value="ADMINISTRADOR" {% if u.rol == 'ADMINISTRADOR' %}selected{% endif %}>Administrador</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full {% if u.activo %}bg-[#22C55E]{% else %}bg-rose-400{% endif %}"></span>
+                            <span class="text-[13px] font-semibold {% if u.activo %}text-[#059669]{% else %}text-rose-600{% endif %}">
+                                {% if u.activo %}Activo{% else %}Inactivo{% endif %}
+                            </span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-[13px] text-slate-600">
+                        {% if u.last_login %}{{ u.last_login|date:"d M Y, H:i" }}{% else %}Nunca{% endif %}
+                    </td>
+                    <td class="py-4 px-6">
+                        <form action="{% url 'admin_toggle_usuario' u.pk %}" method="POST" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition" title="{% if u.activo %}Desactivar{% else %}Activar{% endif %}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="py-12 text-center text-slate-400">No hay usuarios registrados.</td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
@@ -141,23 +197,39 @@
 ════════════════════════════════════════════ -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
-    <!-- Resumen de Seguridad -->
+    <!-- Resumen de Plataforma -->
     <div class="lg:col-span-2 bg-[#003399] rounded-[20px] p-6 shadow-md text-white flex flex-col justify-between relative overflow-hidden">
         <div class="absolute -right-8 -top-8 w-36 h-36 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -left-12 -bottom-12 w-48 h-48 bg-[#002266] rounded-full blur-3xl pointer-events-none"></div>
         <div class="relative z-10">
-            <h3 class="font-bold text-[16px] mb-2">Resumen de Seguridad</h3>
-            <p class="text-[13px] text-slate-200/90 leading-relaxed">
-                No se han detectado intentos de acceso no autorizados en las últimas 48 horas. Todos los servicios funcionan correctamente.
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="font-bold text-[16px]">Resumen de Plataforma</h3>
+                <span class="px-2.5 py-1 bg-white/20 rounded-lg text-[10px] font-bold text-white uppercase tracking-wider backdrop-blur-sm border border-white/10">Estadísticas</span>
+            </div>
+            <p class="text-[13px] text-slate-200/90 leading-relaxed max-w-lg">
+                Mantén el control de todos los roles dentro de la plataforma. El directorio centralizado permite una gestión rápida de accesos y permisos.
             </p>
         </div>
-        <div class="relative z-10 flex items-center gap-2 mt-5">
-            <!-- Avatares apilados de técnicos de guardia -->
-            <div class="flex -space-x-2">
-                <img src="https://i.pravatar.cc/150?u=guardia1" class="w-7 h-7 rounded-full border-2 border-[#003399] object-cover" alt="">
-                <img src="https://i.pravatar.cc/150?u=guardia2" class="w-7 h-7 rounded-full border-2 border-[#003399] object-cover" alt="">
-                <div class="w-7 h-7 rounded-full border-2 border-[#003399] bg-white/20 flex items-center justify-center text-[9px] font-bold text-white">+12</div>
+        
+        <div class="relative z-10 grid grid-cols-3 gap-4 mt-6">
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3.5 border border-white/10">
+                <p class="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Clientes
+                </p>
+                <p class="text-2xl font-black" id="stat-clientes">0</p>
             </div>
-            <span class="text-[11px] font-bold text-white/80 uppercase tracking-wider">Técnicos de Guardia Hoy</span>
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3.5 border border-white/10">
+                <p class="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#60A5FA]"></span> Técnicos
+                </p>
+                <p class="text-2xl font-black" id="stat-tecnicos">0</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3.5 border border-white/10">
+                <p class="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Administradores
+                </p>
+                <p class="text-2xl font-black" id="stat-admins">0</p>
+            </div>
         </div>
     </div>
 
@@ -165,53 +237,37 @@
     <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-6 flex flex-col gap-3">
         <h3 class="font-bold text-slate-800 text-[14px] mb-1 uppercase tracking-wider text-slate-500 text-[11px]">Acciones Rápidas</h3>
 
-        <!-- Reset Passwords -->
-        <button onclick="abrirModalResetGeneral()"
+        <!-- Registrar Usuario -->
+        <button onclick="abrirModalCrearUsuario()"
                 class="group w-full flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 hover:border-[#003399] hover:bg-[#EEF2FF] transition">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-[#003399]/10 flex items-center justify-center transition">
                     <svg class="w-4 h-4 text-slate-500 group-hover:text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                     </svg>
                 </div>
-                <span class="text-[13px] font-semibold text-slate-700 group-hover:text-[#003399]">Reset Passwords</span>
+                <span class="text-[13px] font-semibold text-slate-700 group-hover:text-[#003399]">Registrar Nuevo Usuario</span>
             </div>
             <svg class="w-4 h-4 text-slate-400 group-hover:text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
         </button>
 
-        <!-- Broadcast Email -->
-        <button onclick="abrirModalBroadcast()"
+        <!-- Exportar Directorio -->
+        <a href="{% url 'admin_exportar_usuarios_excel' %}"
                 class="group w-full flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 hover:border-[#003399] hover:bg-[#EEF2FF] transition">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-[#003399]/10 flex items-center justify-center transition">
                     <svg class="w-4 h-4 text-slate-500 group-hover:text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                     </svg>
                 </div>
-                <span class="text-[13px] font-semibold text-slate-700 group-hover:text-[#003399]">Broadcast Email</span>
+                <span class="text-[13px] font-semibold text-slate-700 group-hover:text-[#003399]">Exportar a Excel</span>
             </div>
             <svg class="w-4 h-4 text-slate-400 group-hover:text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
-        </button>
-
-        <!-- Suspend Users -->
-        <button onclick="abrirModalSuspenderUsuarios()"
-                class="group w-full flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50 transition">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-rose-100 flex items-center justify-center transition">
-                    <svg class="w-4 h-4 text-slate-500 group-hover:text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
-                    </svg>
-                </div>
-                <span class="text-[13px] font-semibold text-slate-700 group-hover:text-rose-600">Suspend Users</span>
-            </div>
-            <svg class="w-4 h-4 text-slate-400 group-hover:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-        </button>
+        </a>
     </div>
 </div>
 
@@ -261,138 +317,12 @@
     </div>
 </div>
 
-<!-- ════════════════════════════════════════════
-     5. MODAL: BROADCAST EMAIL
-════════════════════════════════════════════ -->
-<div id="modal-broadcast" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
-    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="cerrarModalBroadcast()"></div>
-    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md z-10 overflow-hidden border border-slate-100">
-        <div class="px-6 py-4 flex items-center justify-between border-b border-slate-100">
-            <h3 class="font-bold text-[15px] text-slate-800">Broadcast Email</h3>
-            <button onclick="cerrarModalBroadcast()" class="text-slate-400 hover:text-slate-600 transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-        <div class="p-6 space-y-4">
-            <div>
-                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Destinatarios</label>
-                <select class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
-                    <option>Todos los usuarios (1,248)</option>
-                    <option>Solo Clientes</option>
-                    <option>Solo Técnicos</option>
-                    <option>Solo Administradores</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Asunto</label>
-                <input type="text" placeholder="Asunto del mensaje" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Mensaje</label>
-                <textarea rows="4" placeholder="Escribe tu mensaje aquí..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition resize-none"></textarea>
-            </div>
-            <div class="pt-1 flex gap-3">
-                <button onclick="cerrarModalBroadcast()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition">Cancelar</button>
-                <button onclick="enviarBroadcast()" class="flex-1 py-2.5 rounded-xl bg-[#003399] hover:bg-[#002266] text-white font-bold text-[13px] transition shadow-sm">Enviar Email</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-// ─────────────────────────────────────────────
-// DATASET DE USUARIOS (Simulado)
-// ─────────────────────────────────────────────
-const USUARIOS = [
-    {
-        id: 'ST-8821', nombre: 'Carlos Mendoza', email: 'c.mendoza@servitech.com',
-        avatar: 'CM', color: 'bg-[#003399]',
-        rol: 'ADMINISTRADOR', rol_label: 'ADMINISTRADOR', rol_color: 'bg-[#EEF2FF] text-[#003399] border border-[#C7D7FF]',
-        estado: 'Activo', ultima_conexion: 'Hace 15 min'
-    },
-    {
-        id: 'ST-9012', nombre: 'Ana López', email: 'a.lopez@servitech.tech',
-        avatar: 'AL', color: 'bg-[#0284C7]',
-        rol: 'TECNICO', rol_label: 'TÉCNICO NIVEL 2', rol_color: 'bg-[#EFF6FF] text-[#0284C7] border border-[#BAE6FD]',
-        estado: 'Activo', ultima_conexion: 'Hoy, 09:42 AM'
-    },
-    {
-        id: 'CL-1102', nombre: 'Ricardo Gómez', email: 'ricardo.g@corporacion.mx',
-        avatar: 'RG', color: 'bg-slate-500',
-        rol: 'CLIENTE', rol_label: 'CLIENTE CORPORATIVO', rol_color: 'bg-slate-100 text-slate-600 border border-slate-200',
-        estado: 'Inactivo', ultima_conexion: 'Hace 3 días'
-    },
-    {
-        id: 'ST-4439', nombre: 'Marina Vega', email: 'm.vega@servitech.tech',
-        avatar: 'MV', color: 'bg-[#059669]',
-        rol: 'TECNICO', rol_label: 'TÉCNICO NIVEL 3', rol_color: 'bg-[#D1FAE5] text-[#047857] border border-[#6EE7B7]',
-        estado: 'Activo', ultima_conexion: 'Ayer, 18:20 PM'
-    },
-    {
-        id: 'CL-2022', nombre: 'Elena Pineda', email: 'e.pineda@industrial.com',
-        avatar: 'EP', color: 'bg-[#7C3AED]',
-        rol: 'CLIENTE', rol_label: 'CLIENTE VIP', rol_color: 'bg-[#F3E8FF] text-[#7C3AED] border border-[#DDD6FE]',
-        estado: 'Activo', ultima_conexion: 'Hoy, 10:15 AM'
-    }
-];
-
-let usuariosFiltrados = [...USUARIOS];
-
-// ─────────────────────────────────────────────
-// RENDERIZADO DE TABLA
-// ─────────────────────────────────────────────
-function renderizarTabla() {
-    const tbody = document.getElementById('tabla-usuarios-body');
-    tbody.innerHTML = '';
-
-    if (usuariosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-slate-400">No se encontraron usuarios.</td></tr>`;
-        return;
-    }
-
-    usuariosFiltrados.forEach(u => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-50/50 transition-colors group';
-
-        const dotColor = u.estado === 'Activo' ? 'bg-[#22C55E]' : 'bg-rose-400';
-        const textoColor = u.estado === 'Activo' ? 'text-[#059669]' : 'text-rose-600';
-
-        tr.innerHTML = `
-            <td class="py-4 px-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full ${u.color} text-white flex items-center justify-center text-[11px] font-bold flex-shrink-0">${u.avatar}</div>
-                    <div>
-                        <p class="text-[13px] font-bold text-slate-800 leading-tight">${u.nombre}</p>
-                        <p class="text-[11px] text-slate-500">ID: #${u.id}</p>
-                    </div>
-                </div>
-            </td>
-            <td class="py-4 px-6 text-[13px] text-slate-600">${u.email}</td>
-            <td class="py-4 px-6">
-                <span class="inline-block text-[10px] font-bold px-2.5 py-1 rounded-lg ${u.rol_color}">${u.rol_label}</span>
-            </td>
-            <td class="py-4 px-6">
-                <div class="flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full ${dotColor}"></span>
-                    <span class="text-[13px] font-semibold ${textoColor}">${u.estado}</span>
-                </div>
-            </td>
-            <td class="py-4 px-6 text-[13px] text-slate-600">${u.ultima_conexion}</td>
-            <td class="py-4 px-6">
-                <button class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-                    </svg>
-                </button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
 // ─────────────────────────────────────────────
 // FILTRO POR ROL (PESTAÑAS)
 // ─────────────────────────────────────────────
@@ -402,14 +332,21 @@ function filtrarPorRol(rol) {
     // Resetear estilos de tabs
     Object.values(TABS).forEach(id => {
         const el = document.getElementById(id);
-        el.className = 'px-3.5 py-1.5 rounded-full text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition';
+        if(el) el.className = 'px-3.5 py-1.5 rounded-full text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition';
     });
     // Activar tab seleccionado
     const activeTab = document.getElementById(TABS[rol]);
     if (activeTab) activeTab.className = 'px-3.5 py-1.5 rounded-full text-[12px] font-bold bg-[#003399] text-white transition';
 
-    usuariosFiltrados = rol === 'TODOS' ? [...USUARIOS] : USUARIOS.filter(u => u.rol === rol);
-    renderizarTabla();
+    // Filtrar las filas de la tabla
+    const rows = document.querySelectorAll('.user-row');
+    rows.forEach(row => {
+        if (rol === 'TODOS' || row.dataset.rol === rol) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
 }
 
 // ─────────────────────────────────────────────
@@ -430,36 +367,23 @@ function guardarNuevoUsuario(e) {
 }
 
 // ─────────────────────────────────────────────
-// MODALES: BROADCAST EMAIL
-// ─────────────────────────────────────────────
-function abrirModalBroadcast() {
-    const m = document.getElementById('modal-broadcast');
-    m.classList.remove('hidden'); m.classList.add('flex');
-}
-function cerrarModalBroadcast() {
-    const m = document.getElementById('modal-broadcast');
-    m.classList.add('hidden'); m.classList.remove('flex');
-}
-function enviarBroadcast() {
-    cerrarModalBroadcast();
-    showToast('📧 Email enviado a todos los usuarios.', 'success');
-}
-
-// ─────────────────────────────────────────────
-// ACCIONES RÁPIDAS (placeholders)
-// ─────────────────────────────────────────────
-function abrirModalResetGeneral() {
-    showToast('🔑 Reset de contraseñas iniciado.', 'success');
-}
-function abrirModalSuspenderUsuarios() {
-    showToast('⚠️ Función de suspensión próximamente.', 'success');
-}
-
-// ─────────────────────────────────────────────
 // Inicialización
 // ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    renderizarTabla();
+    // Contar usuarios reales renderizados por backend
+    let clientes = 0, tecnicos = 0, admins = 0;
+    const rows = document.querySelectorAll('.user-row');
+    rows.forEach(row => {
+        const rol = row.dataset.rol;
+        if (rol === 'CLIENTE') clientes++;
+        else if (rol === 'TECNICO') tecnicos++;
+        else if (rol === 'ADMINISTRADOR') admins++;
+    });
+
+    // Actualizar los contadores en la UI
+    document.getElementById('stat-clientes').innerText = clientes;
+    document.getElementById('stat-tecnicos').innerText = tecnicos;
+    document.getElementById('stat-admins').innerText = admins;
 });
 </script>
 {% endblock %}

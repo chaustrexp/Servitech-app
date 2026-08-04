@@ -21,6 +21,8 @@ from .dashboard_views import (
     admin_editar_servicio,
     admin_toggle_servicio,
     admin_citas,
+    admin_exportar_citas_excel,
+    admin_exportar_usuarios_excel,
     admin_reportes,
     admin_tecnicos,
     admin_inventario,
