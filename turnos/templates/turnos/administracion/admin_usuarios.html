@@ -1,0 +1,389 @@
+{% extends 'turnos/administracion/admin_base.html' %}
+{% load static %}
+
+{% block title %}Directorio de Usuarios - Panel de Administración | ServiTech{% endblock %}
+
+{% block content %}
+
+<!-- ════════════════════════════════════════════
+     1. TARJETAS DE MÉTRICAS SUPERIORES (3 KPIs)
+════════════════════════════════════════════ -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6 mt-2">
+
+    <!-- KPI: Total Usuarios -->
+    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-start justify-between hover:shadow-md transition-shadow">
+        <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Total Usuarios</p>
+            <h3 class="text-[32px] font-bold text-slate-800 leading-none mb-2">1,248</h3>
+            <div class="flex items-center gap-1 text-[12px] text-emerald-600 font-semibold">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+                +12% desde el mes pasado
+            </div>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- KPI: Usuarios Activos -->
+    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-start justify-between hover:shadow-md transition-shadow">
+        <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Usuarios Activos</p>
+            <h3 class="text-[32px] font-bold text-slate-800 leading-none mb-2">1,102</h3>
+            <div class="flex items-center gap-1 text-[12px] text-slate-500 font-semibold">
+                <svg class="w-3.5 h-3.5 text-[#059669]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                88% Tasa de actividad
+            </div>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-[#D1FAE5] text-[#059669] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- KPI: Nuevos Este Mes -->
+    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-start justify-between hover:shadow-md transition-shadow">
+        <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Nuevos Este Mes</p>
+            <h3 class="text-[32px] font-bold text-slate-800 leading-none mb-2">84</h3>
+            <div class="flex items-center gap-1 text-[12px] text-slate-500 font-semibold">
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Objetivo mensual: 100
+            </div>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-[#FEF9C3] text-[#CA8A04] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     2. DIRECTORIO DE USUARIOS (TABLA)
+════════════════════════════════════════════ -->
+<div class="bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden mb-6">
+
+    <!-- Cabecera del panel -->
+    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-4">
+            <h2 class="text-[18px] font-bold text-slate-800">Directorio de Usuarios</h2>
+            <!-- Pestañas de filtro por rol -->
+            <div class="flex items-center gap-1">
+                <button onclick="filtrarPorRol('TODOS')" id="tab-todos"
+                        class="px-3.5 py-1.5 rounded-full text-[12px] font-bold bg-[#003399] text-white transition">Todos</button>
+                <button onclick="filtrarPorRol('ADMINISTRADOR')" id="tab-admin"
+                        class="px-3.5 py-1.5 rounded-full text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition">Administradores</button>
+                <button onclick="filtrarPorRol('TECNICO')" id="tab-tecnico"
+                        class="px-3.5 py-1.5 rounded-full text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition">Técnicos</button>
+                <button onclick="filtrarPorRol('CLIENTE')" id="tab-cliente"
+                        class="px-3.5 py-1.5 rounded-full text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition">Clientes</button>
+            </div>
+        </div>
+        <!-- Botón filtros avanzados -->
+        <button class="flex items-center gap-1.5 text-[12px] font-semibold text-slate-600 hover:text-slate-800 transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+            </svg>
+            Filtros Avanzados
+        </button>
+    </div>
+
+    <!-- Tabla -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[720px]">
+            <thead>
+                <tr class="text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                    <th class="py-4 px-6">Usuario</th>
+                    <th class="py-4 px-6">Email</th>
+                    <th class="py-4 px-6">Rol</th>
+                    <th class="py-4 px-6">Estado</th>
+                    <th class="py-4 px-6">Última Conexión</th>
+                    <th class="py-4 px-6">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-usuarios-body" class="divide-y divide-slate-100">
+                {% for u in usuarios %}
+                <tr class="hover:bg-slate-50/50 transition-colors group user-row" data-rol="{{ u.rol }}">
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[11px] font-bold flex-shrink-0 uppercase">
+                                {{ u.nombre_completo|slice:":2" }}
+                            </div>
+                            <div>
+                                <p class="text-[13px] font-bold text-slate-800 leading-tight">{{ u.nombre_completo }}</p>
+                                <p class="text-[11px] text-slate-500">ID: #{{ u.pk }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-[13px] text-slate-600">{{ u.correo }}</td>
+                    <td class="py-4 px-6">
+                        <form action="{% url 'admin_editar_usuario' u.pk %}" method="POST" class="m-0 p-0" id="form-rol-{{ u.pk }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="nombre_completo" value="{{ u.nombre_completo }}">
+                            <input type="hidden" name="correo" value="{{ u.correo }}">
+                            <select name="rol" onchange="document.getElementById('form-rol-{{ u.pk }}').submit()"
+                                    class="text-[10px] font-bold px-2.5 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003399] cursor-pointer 
+                                           {% if u.rol == 'ADMINISTRADOR' %}bg-rose-100 text-rose-700
+                                           {% elif u.rol == 'TECNICO' %}bg-[#E0E7FF] text-[#003399]
+                                           {% else %}bg-slate-100 text-slate-600{% endif %}">
+                                <option value="CLIENTE" {% if u.rol == 'CLIENTE' %}selected{% endif %}>Cliente</option>
+                                <option value="TECNICO" {% if u.rol == 'TECNICO' %}selected{% endif %}>Técnico</option>
+                                <option value="ADMINISTRADOR" {% if u.rol == 'ADMINISTRADOR' %}selected{% endif %}>Administrador</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full {% if u.activo %}bg-[#22C55E]{% else %}bg-rose-400{% endif %}"></span>
+                            <span class="text-[13px] font-semibold {% if u.activo %}text-[#059669]{% else %}text-rose-600{% endif %}">
+                                {% if u.activo %}Activo{% else %}Inactivo{% endif %}
+                            </span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-[13px] text-slate-600">
+                        {% if u.last_login %}{{ u.last_login|date:"d M Y, H:i" }}{% else %}Nunca{% endif %}
+                    </td>
+                    <td class="py-4 px-6">
+                        <form action="{% url 'admin_toggle_usuario' u.pk %}" method="POST" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition" title="{% if u.activo %}Desactivar{% else %}Activar{% endif %}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="py-12 text-center text-slate-400">No hay usuarios registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="px-6 py-4 flex items-center justify-between">
+        <p class="text-[13px] text-slate-600 font-medium">Mostrando 1-10 de 1,248 usuarios</p>
+        <div class="flex items-center gap-1.5">
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#003399] text-white font-bold text-[13px] shadow-sm">1</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-medium text-[13px] transition">2</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-medium text-[13px] transition">3</button>
+            <span class="text-slate-400 text-[13px] px-1">...</span>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-medium text-[13px] transition">125</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     3. FILA INFERIOR: SEGURIDAD + ACCIONES RÁPIDAS
+════════════════════════════════════════════ -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+    <!-- Resumen de Plataforma -->
+    <div class="lg:col-span-2 bg-[#003399] rounded-[20px] p-6 shadow-md text-white flex flex-col justify-between relative overflow-hidden">
+        <div class="absolute -right-8 -top-8 w-36 h-36 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -left-12 -bottom-12 w-48 h-48 bg-[#002266] rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative z-10">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="font-bold text-[16px]">Resumen de Plataforma</h3>
+                <span class="px-2.5 py-1 bg-white/20 rounded-lg text-[10px] font-bold text-white uppercase tracking-wider backdrop-blur-sm border border-white/10">Estadísticas</span>
+            </div>
+            <p class="text-[13px] text-slate-200/90 leading-relaxed max-w-lg">
+                Mantén el control de todos los roles dentro de la plataforma. El directorio centralizado permite una gestión rápida de accesos y permisos.
+            </p>
+        </div>
+        
+        <div class="relative z-10 grid grid-cols-3 gap-4 mt-6">
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3.5 border border-white/10">
+                <p class="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Clientes
+                </p>
+                <p class="text-2xl font-black" id="stat-clientes">0</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3.5 border border-white/10">
+                <p class="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#60A5FA]"></span> Técnicos
+                </p>
+                <p class="text-2xl font-black" id="stat-tecnicos">0</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3.5 border border-white/10">
+                <p class="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Administradores
+                </p>
+                <p class="text-2xl font-black" id="stat-admins">0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-6 flex flex-col gap-3">
+        <h3 class="font-bold text-slate-800 text-[14px] mb-1 uppercase tracking-wider text-slate-500 text-[11px]">Acciones Rápidas</h3>
+
+        <!-- Registrar Usuario -->
+        <button onclick="abrirModalCrearUsuario()"
+                class="group w-full flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 hover:border-[#003399] hover:bg-[#EEF2FF] transition">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-[#003399]/10 flex items-center justify-center transition">
+                    <svg class="w-4 h-4 text-slate-500 group-hover:text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                </div>
+                <span class="text-[13px] font-semibold text-slate-700 group-hover:text-[#003399]">Registrar Nuevo Usuario</span>
+            </div>
+            <svg class="w-4 h-4 text-slate-400 group-hover:text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+
+        <!-- Exportar Directorio -->
+        <a href="{% url 'admin_exportar_usuarios_excel' %}"
+                class="group w-full flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 hover:border-[#003399] hover:bg-[#EEF2FF] transition">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-[#003399]/10 flex items-center justify-center transition">
+                    <svg class="w-4 h-4 text-slate-500 group-hover:text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                </div>
+                <span class="text-[13px] font-semibold text-slate-700 group-hover:text-[#003399]">Exportar a Excel</span>
+            </div>
+            <svg class="w-4 h-4 text-slate-400 group-hover:text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </a>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     4. MODAL: REGISTRAR NUEVO USUARIO
+════════════════════════════════════════════ -->
+<div id="modal-nuevo-usuario" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="cerrarModalCrearUsuario()"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md z-10 overflow-hidden border border-slate-100">
+        <div class="px-6 py-4 flex items-center justify-between border-b border-slate-100">
+            <h3 class="font-bold text-[15px] text-slate-800">Registrar Nuevo Usuario</h3>
+            <button onclick="cerrarModalCrearUsuario()" class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form class="p-6 space-y-4" onsubmit="guardarNuevoUsuario(event)">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Nombre</label>
+                    <input type="text" required placeholder="Nombre" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Apellido</label>
+                    <input type="text" required placeholder="Apellido" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                </div>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Correo Electrónico</label>
+                <input type="email" required placeholder="usuario@servitech.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Rol del Usuario</label>
+                <select class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                    <option>Administrador</option>
+                    <option>Técnico Nivel 1</option>
+                    <option>Técnico Nivel 2</option>
+                    <option>Técnico Nivel 3</option>
+                    <option>Cliente VIP</option>
+                    <option>Cliente Corporativo</option>
+                </select>
+            </div>
+            <div class="pt-2 flex gap-3">
+                <button type="button" onclick="cerrarModalCrearUsuario()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition">Cancelar</button>
+                <button type="submit" class="flex-1 py-2.5 rounded-xl bg-[#003399] hover:bg-[#002266] text-white font-bold text-[13px] transition shadow-sm">Registrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ─────────────────────────────────────────────
+// FILTRO POR ROL (PESTAÑAS)
+// ─────────────────────────────────────────────
+const TABS = { TODOS: 'tab-todos', ADMINISTRADOR: 'tab-admin', TECNICO: 'tab-tecnico', CLIENTE: 'tab-cliente' };
+
+function filtrarPorRol(rol) {
+    // Resetear estilos de tabs
+    Object.values(TABS).forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.className = 'px-3.5 py-1.5 rounded-full text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition';
+    });
+    // Activar tab seleccionado
+    const activeTab = document.getElementById(TABS[rol]);
+    if (activeTab) activeTab.className = 'px-3.5 py-1.5 rounded-full text-[12px] font-bold bg-[#003399] text-white transition';
+
+    // Filtrar las filas de la tabla
+    const rows = document.querySelectorAll('.user-row');
+    rows.forEach(row => {
+        if (rol === 'TODOS' || row.dataset.rol === rol) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// ─────────────────────────────────────────────
+// MODALES: NUEVO USUARIO
+// ─────────────────────────────────────────────
+function abrirModalCrearUsuario() {
+    const m = document.getElementById('modal-nuevo-usuario');
+    m.classList.remove('hidden'); m.classList.add('flex');
+}
+function cerrarModalCrearUsuario() {
+    const m = document.getElementById('modal-nuevo-usuario');
+    m.classList.add('hidden'); m.classList.remove('flex');
+}
+function guardarNuevoUsuario(e) {
+    e.preventDefault();
+    cerrarModalCrearUsuario();
+    showToast('✅ Usuario registrado exitosamente.', 'success');
+}
+
+// ─────────────────────────────────────────────
+// Inicialización
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    // Contar usuarios reales renderizados por backend
+    let clientes = 0, tecnicos = 0, admins = 0;
+    const rows = document.querySelectorAll('.user-row');
+    rows.forEach(row => {
+        const rol = row.dataset.rol;
+        if (rol === 'CLIENTE') clientes++;
+        else if (rol === 'TECNICO') tecnicos++;
+        else if (rol === 'ADMINISTRADOR') admins++;
+    });
+
+    // Actualizar los contadores en la UI
+    document.getElementById('stat-clientes').innerText = clientes;
+    document.getElementById('stat-tecnicos').innerText = tecnicos;
+    document.getElementById('stat-admins').innerText = admins;
+});
+</script>
+{% endblock %}

@@ -1,0 +1,434 @@
+{% extends 'turnos/administracion/admin_base.html' %}
+{% load static %}
+
+{% block title %}Reportes Analíticos | ServiTech{% endblock %}
+
+{% block content %}
+
+<!-- ════════════════════════════════════════════
+     CABECERA DE PÁGINA
+════════════════════════════════════════════ -->
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6 mt-2">
+    <div>
+        <h1 class="text-[26px] font-bold text-slate-800 tracking-tight leading-none mb-1.5">Reportes Analíticos</h1>
+        <p class="text-[13px] text-slate-500 font-medium">Monitoreo de rendimiento operativo y satisfacción.</p>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0">
+        <!-- Toggle Mensual / Anual -->
+        <div class="flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+            <button id="btn-mensual" onclick="cambiarPeriodo('mensual')"
+                    class="px-4 py-1.5 rounded-lg text-[12px] font-bold bg-[#003399] text-white transition">
+                Mensual
+            </button>
+            <button id="btn-anual" onclick="cambiarPeriodo('anual')"
+                    class="px-4 py-1.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition">
+                Anual
+            </button>
+        </div>
+        <!-- Botón Exportar -->
+        <button onclick="exportarReporte()"
+                class="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl text-[12px] transition shadow-sm">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            Exportar Reporte
+        </button>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     1. FILA SUPERIOR: GRÁFICO DE BARRAS + DONUT
+════════════════════════════════════════════ -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+    <!-- Gráfico de Barras: Rendimiento Operativo -->
+    <div class="lg:col-span-2 bg-white rounded-[20px] border border-slate-100 shadow-sm p-6">
+        <div class="flex items-start justify-between mb-6">
+            <h3 class="font-bold text-slate-800 text-[15px]">Rendimiento Operativo Mensual</h3>
+            <span class="flex items-center gap-1 text-[12px] font-bold text-emerald-600">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+                +12.4% vs Mes Anterior
+            </span>
+        </div>
+        <div class="relative w-full h-[240px] mb-4">
+            <canvas id="graficoRendimiento"></canvas>
+        </div>
+        <!-- Leyenda -->
+        <div class="flex items-center gap-6 justify-center text-[12px] font-medium">
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-[#003399]"></span>
+                <span class="text-slate-600">Servicios Completados</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full border-2 border-slate-300 bg-white"></span>
+                <span class="text-slate-600">Meta de Operación</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico Donut: Tipos de Servicio -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-6 flex flex-col">
+        <h3 class="font-bold text-slate-800 text-[15px] mb-6">Tipos de Servicio</h3>
+        <div class="flex-1 flex items-center justify-center">
+            <div class="relative w-44 h-44">
+                <canvas id="graficoDonut"></canvas>
+            </div>
+        </div>
+        <!-- Leyenda del Donut -->
+        <div class="mt-6 space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-[#001E6E]"></span>
+                    <span class="text-[13px] text-slate-600 font-medium">Reparación</span>
+                </div>
+                <span class="text-[13px] font-bold text-slate-800">45%</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-[#003399]"></span>
+                    <span class="text-[13px] text-slate-600 font-medium">Mantenimiento</span>
+                </div>
+                <span class="text-[13px] font-bold text-slate-800">30%</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-[#34D399]"></span>
+                    <span class="text-[13px] text-slate-600 font-medium">Instalación</span>
+                </div>
+                <span class="text-[13px] font-bold text-slate-800">25%</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     2. FILA MEDIA: SATISFACCIÓN + REPORTES RECIENTES
+════════════════════════════════════════════ -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+    <!-- Panel de Satisfacción del Cliente -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-6">
+        <h3 class="font-bold text-slate-800 text-[15px] mb-4">Satisfacción del Cliente</h3>
+        <!-- Promedio grande -->
+        <div class="flex items-center gap-3 mb-6">
+            <span class="text-[52px] font-bold text-[#003399] leading-none">4.8</span>
+            <div>
+                <div class="flex items-center gap-0.5 mb-1">
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="w-5 h-5 text-amber-200" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+                <p class="text-[12px] text-slate-500">Promedio basado en 1,240 reseñas</p>
+            </div>
+        </div>
+        <!-- Barras de distribución -->
+        <div class="space-y-3">
+            <div class="flex items-center gap-3">
+                <span class="text-[12px] font-bold text-slate-600 w-4">5</span>
+                <div class="flex-1 bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2" style="width: 75%"></div>
+                </div>
+                <span class="text-[12px] font-semibold text-slate-500 w-7 text-right">75%</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-[12px] font-bold text-slate-600 w-4">4</span>
+                <div class="flex-1 bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2" style="width: 15%"></div>
+                </div>
+                <span class="text-[12px] font-semibold text-slate-500 w-7 text-right">15%</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-[12px] font-bold text-slate-600 w-4">3</span>
+                <div class="flex-1 bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2" style="width: 5%"></div>
+                </div>
+                <span class="text-[12px] font-semibold text-slate-500 w-7 text-right">5%</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-[12px] font-bold text-slate-600 w-4">2</span>
+                <div class="flex-1 bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2" style="width: 3%"></div>
+                </div>
+                <span class="text-[12px] font-semibold text-slate-500 w-7 text-right">3%</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-[12px] font-bold text-slate-600 w-4">1</span>
+                <div class="flex-1 bg-slate-100 rounded-full h-2">
+                    <div class="bg-rose-400 rounded-full h-2" style="width: 2%"></div>
+                </div>
+                <span class="text-[12px] font-semibold text-slate-500 w-7 text-right">2%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de Reportes Recientes -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-6">
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="font-bold text-slate-800 text-[15px]">Reportes Recientes</h3>
+            <a href="#" class="text-[12px] font-bold text-[#003399] hover:underline">Ver Historial</a>
+        </div>
+        <div class="grid grid-cols-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">
+            <span>Nombre del Reporte</span>
+            <span class="text-center">Generado Por</span>
+            <span class="text-right">Estado</span>
+        </div>
+        <div class="space-y-1">
+
+            <!-- Reporte 1 -->
+            <div class="flex items-center gap-3 px-1 py-3 border-b border-slate-100 hover:bg-slate-50/50 rounded-xl transition-colors">
+                <div class="w-8 h-8 rounded-lg bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-[12px] font-bold text-slate-700 truncate leading-tight">Resumen_Operativo_Mayo_2024.pdf</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Sema_Admin</p>
+                </div>
+                <div class="text-[11px] text-slate-500 text-center flex-shrink-0 leading-tight">
+                    <p>15 Mayo,</p><p>2024</p>
+                </div>
+                <span class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#D1FAE5] text-[#047857]">LISTO</span>
+            </div>
+
+            <!-- Reporte 2 -->
+            <div class="flex items-center gap-3 px-1 py-3 border-b border-slate-100 hover:bg-slate-50/50 rounded-xl transition-colors">
+                <div class="w-8 h-8 rounded-lg bg-[#D1FAE5] text-[#059669] flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-[12px] font-bold text-slate-700 truncate leading-tight">Inventario_Q2_Final.xlsx</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Auto_System</p>
+                </div>
+                <div class="text-[11px] text-slate-500 text-center flex-shrink-0 leading-tight">
+                    <p>12 Mayo,</p><p>2024</p>
+                </div>
+                <span class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#D1FAE5] text-[#047857]">LISTO</span>
+            </div>
+
+            <!-- Reporte 3 -->
+            <div class="flex items-center gap-3 px-1 py-3 hover:bg-slate-50/50 rounded-xl transition-colors">
+                <div class="w-8 h-8 rounded-lg bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-[12px] font-bold text-slate-700 truncate leading-tight">Satisfaccion_Global_A23.pdf</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Admin_Principal</p>
+                </div>
+                <div class="text-[11px] text-slate-500 text-center flex-shrink-0 leading-tight">
+                    <p>05 Mayo,</p><p>2024</p>
+                </div>
+                <span class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">PENDIENTE</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     3. FILA INFERIOR: 3 MÉTRICAS CLAVE
+════════════════════════════════════════════ -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+
+    <!-- KPI: Tiempo de Respuesta -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tiempo de Respuesta</p>
+            <h3 class="text-[26px] font-bold text-slate-800 leading-none mb-1">1.4 hrs</h3>
+            <div class="flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+                <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+                -15m mejor que el mes pasado
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI: Efectividad Técnica -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-[#D1FAE5] text-[#059669] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Efectividad Técnica</p>
+            <h3 class="text-[26px] font-bold text-slate-800 leading-none mb-1">94.2%</h3>
+            <div class="flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+                <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                +2.1% en resolución a la primera
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI: Retorno de Clientes -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
+        </div>
+        <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Retorno de Clientes</p>
+            <h3 class="text-[26px] font-bold text-slate-800 leading-none mb-1">68%</h3>
+            <p class="text-[11px] text-slate-500 font-medium">Manteniendo tendencia estable</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ─────────────────────────────────────────────
+// 1. Gráfico de Barras: Rendimiento Operativo
+// ─────────────────────────────────────────────
+let chartRendimiento = null;
+
+const datosMensual = {
+    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+    completados: [400, 580, 490, 670, 710, 840],
+    meta: [500, 500, 500, 620, 700, 750]
+};
+
+const datosAnual = {
+    labels: ['2019', '2020', '2021', '2022', '2023', '2024'],
+    completados: [3200, 2900, 3800, 5100, 6400, 7800],
+    meta: [4000, 4000, 4500, 5000, 6000, 7500]
+};
+
+function inicializarGraficoRendimiento(datos) {
+    if (chartRendimiento) chartRendimiento.destroy();
+    const ctx = document.getElementById('graficoRendimiento').getContext('2d');
+    chartRendimiento = new Chart(ctx, {
+        data: {
+            labels: datos.labels,
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'Servicios Completados',
+                    data: datos.completados,
+                    backgroundColor: '#003399',
+                    borderRadius: { topLeft: 5, topRight: 5 },
+                    barThickness: 28,
+                },
+                {
+                    type: 'line',
+                    label: 'Meta de Operación',
+                    data: datos.meta,
+                    borderColor: '#94A3B8',
+                    borderWidth: 2,
+                    borderDash: [6, 4],
+                    pointRadius: 0,
+                    tension: 0.4,
+                    fill: false,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1E293B',
+                    titleFont: { family: 'Inter', size: 12, weight: 'bold' },
+                    bodyFont: { family: 'Inter', size: 11 },
+                    padding: 10,
+                    cornerRadius: 8
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: { font: { family: 'Inter', size: 11 }, color: '#94A3B8' }
+                },
+                y: {
+                    grid: { color: '#F1F5F9', drawBorder: false },
+                    border: { display: false },
+                    ticks: { font: { family: 'Inter', size: 11 }, color: '#94A3B8', maxTicksLimit: 7 }
+                }
+            }
+        }
+    });
+}
+
+// ─────────────────────────────────────────────
+// 2. Gráfico Donut: Tipos de Servicio
+// ─────────────────────────────────────────────
+function inicializarGraficoDonut() {
+    const ctx = document.getElementById('graficoDonut').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Reparación', 'Mantenimiento', 'Instalación'],
+            datasets: [{
+                data: [45, 30, 25],
+                backgroundColor: ['#001E6E', '#003399', '#34D399'],
+                borderWidth: 3,
+                borderColor: '#ffffff',
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1E293B',
+                    titleFont: { family: 'Inter', size: 12, weight: 'bold' },
+                    bodyFont: { family: 'Inter', size: 11 },
+                    padding: 10,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: (c) => ` ${c.label}: ${c.parsed}%`
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ─────────────────────────────────────────────
+// 3. Toggle Mensual / Anual
+// ─────────────────────────────────────────────
+function cambiarPeriodo(periodo) {
+    const btnMensual = document.getElementById('btn-mensual');
+    const btnAnual = document.getElementById('btn-anual');
+    const BASE_ACTIVE = 'px-4 py-1.5 rounded-lg text-[12px] font-bold bg-[#003399] text-white transition';
+    const BASE_INACTIVE = 'px-4 py-1.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition';
+
+    if (periodo === 'mensual') {
+        btnMensual.className = BASE_ACTIVE;
+        btnAnual.className = BASE_INACTIVE;
+        inicializarGraficoRendimiento(datosMensual);
+    } else {
+        btnAnual.className = BASE_ACTIVE;
+        btnMensual.className = BASE_INACTIVE;
+        inicializarGraficoRendimiento(datosAnual);
+    }
+}
+
+// ─────────────────────────────────────────────
+// 4. Exportar Reporte (simulación)
+// ─────────────────────────────────────────────
+function exportarReporte() {
+    showToast('📊 Reporte exportado exitosamente.', 'success');
+}
+
+// ─────────────────────────────────────────────
+// Inicialización
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarGraficoRendimiento(datosMensual);
+    inicializarGraficoDonut();
+});
+</script>
+{% endblock %}

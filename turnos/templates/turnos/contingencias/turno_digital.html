@@ -1,0 +1,76 @@
+{% extends 'turnos/layouts/base.html' %}
+
+{% block title %}Tu Turno Digital - ServiTech{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 border-blue-900">
+
+        <p class="text-slate-500 uppercase text-xs font-bold tracking-widest mb-2">Turno Digital</p>
+
+        <!-- ID del Turno -->
+        <h2 class="text-6xl font-extrabold text-blue-900 my-4">#{{ turno.pk }}</h2>
+
+        <!-- Badge de Estado -->
+        {% if turno.estado %}
+            <span class="bg-blue-100 text-blue-800 font-semibold px-4 py-1.5 rounded-full text-sm">
+                {{ turno.estado.nombre }}
+            </span>
+        {% else %}
+            <span class="bg-slate-100 text-slate-600 font-semibold px-4 py-1.5 rounded-full text-sm">
+                Sin estado asignado
+            </span>
+        {% endif %}
+
+        {% if turno.minutos_retraso > 0 %}
+            <div class="mt-3">
+                <span class="bg-amber-100 text-amber-800 font-semibold px-4 py-1.5 rounded-full text-sm">
+                    ⚠️ Retraso notificado: +{{ turno.minutos_retraso }} min
+                </span>
+            </div>
+        {% endif %}
+
+        <!-- Detalle del Turno -->
+        <div class="mt-8 text-left border-t border-slate-100 pt-6 space-y-3 text-sm">
+            <div class="flex justify-between">
+                <span class="text-slate-500 font-medium">Servicio</span>
+                <span class="text-slate-800 font-semibold">{{ turno.servicio.nombre }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500 font-medium">Fecha</span>
+                <span class="text-slate-800 font-semibold">{{ turno.fecha }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500 font-medium">Hora</span>
+                <span class="text-slate-800 font-semibold">{{ turno.hora_inicio|time:"h:i A" }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500 font-medium">Técnico</span>
+                <span class="text-slate-800 font-semibold">
+                    {% if turno.tecnico %}
+                        {{ turno.tecnico.nombre_completo }}
+                    {% else %}
+                        Por asignar
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Botón de Contingencia (RF-04) -->
+        {% if user.is_authenticated and turno.minutos_retraso == 0 %}
+        <form method="POST" action="{% url 'notificar_retraso' turno.pk %}" class="mt-8">
+            {% csrf_token %}
+            <button type="submit"
+                class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
+                ⚠️ Voy 10 min tarde
+            </button>
+        </form>
+        {% elif user.is_authenticated and turno.minutos_retraso > 0 %}
+        <div class="mt-6 bg-amber-50 text-amber-700 border border-amber-200 text-sm px-4 py-3 rounded-xl">
+            Ya notificaste tu retraso. El técnico ha sido informado.
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

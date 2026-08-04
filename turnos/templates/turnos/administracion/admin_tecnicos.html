@@ -1,0 +1,472 @@
+{% extends 'turnos/administracion/admin_base.html' %}
+{% load static %}
+
+{% block title %}Panel de Técnicos - Administración | ServiTech{% endblock %}
+
+{% block content %}
+
+<!-- ════════════════════════════════════════════
+     CABECERA DE PÁGINA
+════════════════════════════════════════════ -->
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6 mt-2">
+    <div>
+        <h1 class="text-[22px] font-bold text-slate-800 tracking-tight leading-none mb-1.5">Panel de Técnicos</h1>
+        <p class="text-[13px] text-slate-500 font-medium max-w-xl leading-relaxed">
+            Supervisa la disponibilidad en tiempo real, especialidades y el rendimiento del equipo de campo de ServiTech.
+        </p>
+    </div>
+    <button onclick="abrirModalNuevoTecnico()"
+            class="flex items-center gap-2 bg-[#003399] hover:bg-[#002266] text-white font-bold px-5 py-2.5 rounded-xl text-[13px] transition-all shadow-sm flex-shrink-0 active:scale-95">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+        </svg>
+        <span>Añadir Técnico</span>
+    </button>
+</div>
+
+<!-- ════════════════════════════════════════════
+     1. TARJETAS DE MÉTRICAS RÁPIDAS (3 KPIs)
+════════════════════════════════════════════ -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+
+    <!-- KPI: Total Técnicos -->
+    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </div>
+        <div>
+            <p class="text-[12px] font-semibold text-slate-500 uppercase tracking-wider">Total Técnicos</p>
+            <h3 class="text-[28px] font-bold text-slate-800 leading-none mt-0.5">48</h3>
+        </div>
+    </div>
+
+    <!-- KPI: Disponibles -->
+    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-[#D1FAE5] text-[#059669] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <div>
+            <p class="text-[12px] font-semibold text-slate-500 uppercase tracking-wider">Disponibles</p>
+            <h3 class="text-[28px] font-bold text-slate-800 leading-none mt-0.5">32</h3>
+        </div>
+    </div>
+
+    <!-- KPI: Fuera de Servicio -->
+    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-[#FEE2E2] text-[#EF4444] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <div>
+            <p class="text-[12px] font-semibold text-slate-500 uppercase tracking-wider">Fuera de Servicio</p>
+            <h3 class="text-[28px] font-bold text-slate-800 leading-none mt-0.5">16</h3>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     2. MAPA + DISTRIBUCIÓN DE ESPECIALIDADES
+════════════════════════════════════════════ -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+    <!-- Mapa Interactivo (Leaflet.js) -->
+    <div class="lg:col-span-2 bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden relative">
+        <!-- Recuadro de estado sobre el mapa -->
+        <div class="absolute top-4 left-4 z-20 bg-white rounded-xl shadow-md px-3 py-2 flex items-center gap-2 border border-slate-100">
+            <span class="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse"></span>
+            <span class="text-[12px] font-bold text-slate-800">Seguimiento en Vivo</span>
+        </div>
+        <p class="absolute top-11 left-4 z-20 text-[11px] text-slate-500 bg-white/80 px-3 pb-1 rounded-b-xl">24 técnicos activos en ruta</p>
+        <!-- Canvas del mapa -->
+        <div id="mapa-tecnicos" class="w-full h-[340px]"></div>
+    </div>
+
+    <!-- Panel de Distribución de Especialidades -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-6 flex flex-col justify-between">
+        <div>
+            <h3 class="font-bold text-slate-800 text-[16px] mb-6">Distribución</h3>
+
+            <!-- Hardware -->
+            <div class="mb-5">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[13px] font-semibold text-slate-700">Hardware</span>
+                    <span class="text-[13px] font-bold text-slate-800">45%</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2" style="width: 45%"></div>
+                </div>
+            </div>
+
+            <!-- Redes & Conectividad -->
+            <div class="mb-5">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[13px] font-semibold text-slate-700">Redes & Conectividad</span>
+                    <span class="text-[13px] font-bold text-slate-800">30%</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2" style="width: 30%"></div>
+                </div>
+            </div>
+
+            <!-- Software & Sistemas -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[13px] font-semibold text-slate-700">Software & Sistemas</span>
+                    <span class="text-[13px] font-bold text-slate-800">25%</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div class="bg-[#003399] rounded-full h-2 opacity-70" style="width: 25%"></div>
+                </div>
+            </div>
+
+            <!-- Pro-tip -->
+            <div class="bg-[#EEF2FF] border border-[#C7D7FF] rounded-xl p-4">
+                <p class="text-[12px] text-[#003399] leading-relaxed font-medium">
+                    <span class="font-bold">Pro-tip:</span> Asigna técnicos de Hardware a la zona Norte hoy, la demanda ha subido un 15% según los reportes de ayer.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     3. GRID DE TARJETAS DEL PERSONAL TÉCNICO
+════════════════════════════════════════════ -->
+<div class="flex items-center justify-between mb-4">
+    <h3 class="font-bold text-slate-800 text-[17px]">Personal Técnico</h3>
+    <div class="flex items-center gap-2">
+        <button class="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            Filtrar
+        </button>
+        <button class="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+            Ordenar
+        </button>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8" id="grid-tecnicos">
+
+    <!-- Tarjeta: Marta Sánchez - DISPONIBLE -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow">
+        <div class="relative mb-3">
+            <img src="https://i.pravatar.cc/150?u=marta" alt="Marta Sánchez" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
+            <span class="absolute bottom-0 right-0 flex items-center gap-1 bg-white text-[9px] font-bold text-[#059669] px-1.5 py-0.5 rounded-full border border-[#D1FAE5] shadow-sm leading-none">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#22C55E]"></span>DISPONIBLE
+            </span>
+        </div>
+        <h4 class="font-bold text-[14px] text-slate-800 leading-tight">Marta Sánchez</h4>
+        <p class="text-[11px] text-slate-500 mb-2">ID: ST-82921</p>
+        <div class="flex items-center gap-1 justify-center mb-3">
+            <div class="flex text-amber-400 text-[12px]">★★★★★</div>
+            <span class="text-[12px] font-bold text-slate-700">4.8</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 justify-center mb-4">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">HARDWARE</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">REDES</span>
+        </div>
+        <button onclick="abrirFichaTecnico('Marta Sánchez','marta.s@servitech.com','ST-82921','Hardware & Redes','4.8 ★','marta2026')"
+                class="w-full py-2 rounded-xl border border-[#003399] text-[#003399] hover:bg-[#003399] hover:text-white font-bold text-[12px] transition-all">
+            Ver Perfil
+        </button>
+    </div>
+
+    <!-- Tarjeta: Alejandro Ruiz - EN RUTA -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow">
+        <div class="relative mb-3">
+            <img src="https://i.pravatar.cc/150?u=alejandro" alt="Alejandro Ruiz" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
+            <span class="absolute bottom-0 right-0 flex items-center gap-1 bg-white text-[9px] font-bold text-[#0284C7] px-1.5 py-0.5 rounded-full border border-[#BAE6FD] shadow-sm leading-none">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#0284C7]"></span>EN RUTA
+            </span>
+        </div>
+        <h4 class="font-bold text-[14px] text-slate-800 leading-tight">Alejandro Ruiz</h4>
+        <p class="text-[11px] text-slate-500 mb-2">ID: ST-82955</p>
+        <div class="flex items-center gap-1 justify-center mb-3">
+            <div class="flex text-amber-400 text-[12px]">★★★★★</div>
+            <span class="text-[12px] font-bold text-slate-700">5.0</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 justify-center mb-4">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">SOFTWARE</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">SEGURIDAD</span>
+        </div>
+        <button onclick="abrirFichaTecnico('Alejandro Ruiz','alejandro.r@servitech.com','ST-82955','Software & Seguridad','5.0 ★','alejan2026')"
+                class="w-full py-2 rounded-xl border border-[#003399] text-[#003399] hover:bg-[#003399] hover:text-white font-bold text-[12px] transition-all">
+            Ver Perfil
+        </button>
+    </div>
+
+    <!-- Tarjeta: Roberto Gómez - AUSENTE -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow">
+        <div class="relative mb-3">
+            <img src="https://i.pravatar.cc/150?u=roberto" alt="Roberto Gómez" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
+            <span class="absolute bottom-0 right-0 flex items-center gap-1 bg-white text-[9px] font-bold text-[#EF4444] px-1.5 py-0.5 rounded-full border border-[#FEE2E2] shadow-sm leading-none">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#EF4444]"></span>AUSENTE
+            </span>
+        </div>
+        <h4 class="font-bold text-[14px] text-slate-800 leading-tight">Roberto Gómez</h4>
+        <p class="text-[11px] text-slate-500 mb-2">ID: ST-82103</p>
+        <div class="flex items-center gap-1 justify-center mb-3">
+            <div class="flex text-amber-400 text-[12px]">★★★★☆</div>
+            <span class="text-[12px] font-bold text-slate-700">4.6</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 justify-center mb-4">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">HARDWARE</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">SOLUCIONES</span>
+        </div>
+        <button onclick="abrirFichaTecnico('Roberto Gómez','roberto.g@servitech.com','ST-82103','Hardware & Soluciones','4.6 ★','roberto2026')"
+                class="w-full py-2 rounded-xl border border-[#003399] text-[#003399] hover:bg-[#003399] hover:text-white font-bold text-[12px] transition-all">
+            Ver Perfil
+        </button>
+    </div>
+
+    <!-- Tarjeta: Kevin Torres - DISPONIBLE -->
+    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow">
+        <div class="relative mb-3">
+            <img src="https://i.pravatar.cc/150?u=kevin" alt="Kevin Torres" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
+            <span class="absolute bottom-0 right-0 flex items-center gap-1 bg-white text-[9px] font-bold text-[#059669] px-1.5 py-0.5 rounded-full border border-[#D1FAE5] shadow-sm leading-none">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#22C55E]"></span>DISPONIBLE
+            </span>
+        </div>
+        <h4 class="font-bold text-[14px] text-slate-800 leading-tight">Kevin Torres</h4>
+        <p class="text-[11px] text-slate-500 mb-2">ID: ST-83112</p>
+        <div class="flex items-center gap-1 justify-center mb-3">
+            <div class="flex text-amber-400 text-[12px]">★★★★☆</div>
+            <span class="text-[12px] font-bold text-slate-700">4.2</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 justify-center mb-4">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">REDES</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">FIBRA</span>
+        </div>
+        <button onclick="abrirFichaTecnico('Kevin Torres','kevin.t@servitech.com','ST-83112','Redes & Fibra Óptica','4.2 ★','kevin2026')"
+                class="w-full py-2 rounded-xl border border-[#003399] text-[#003399] hover:bg-[#003399] hover:text-white font-bold text-[12px] transition-all">
+            Ver Perfil
+        </button>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     4. TABLA DE ACTIVIDAD RECIENTE
+════════════════════════════════════════════ -->
+<div class="bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden mb-6">
+    <div class="px-6 py-5 flex items-center justify-between border-b border-slate-100">
+        <h3 class="font-bold text-slate-800 text-[14px] uppercase tracking-widest text-[11px] text-slate-500">Actividad Reciente</h3>
+        <button onclick="exportarTecnicosCSV()" class="text-[12px] font-bold text-[#003399] hover:underline">
+            Exportar Lista (.csv)
+        </button>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[600px]">
+            <thead>
+                <tr class="bg-[#F8FAFC] border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th class="py-3.5 px-6">Técnico</th>
+                    <th class="py-3.5 px-6">Especialidad Principal</th>
+                    <th class="py-3.5 px-6">Última Ubicación</th>
+                    <th class="py-3.5 px-6">Estado Cita</th>
+                    <th class="py-3.5 px-6">Acción</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-3">
+                            <img src="https://i.pravatar.cc/150?u=lucia" alt="Lucía Mendez" class="w-8 h-8 rounded-full object-cover">
+                            <div>
+                                <p class="text-[13px] font-bold text-slate-800 leading-tight">Lucía Mendez</p>
+                                <p class="text-[11px] text-slate-500">ST-8822</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-[13px] text-slate-700 font-medium">Redes Enterprise</td>
+                    <td class="py-4 px-6 text-[13px] text-slate-600">Polanco, CDMX</td>
+                    <td class="py-4 px-6">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-[#D1FAE5] text-[#047857]">
+                            Finalizado
+                        </span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <button class="text-slate-400 hover:text-slate-700 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-3">
+                            <img src="https://i.pravatar.cc/150?u=jorge_luis" alt="Jorge Luis" class="w-8 h-8 rounded-full object-cover">
+                            <div>
+                                <p class="text-[13px] font-bold text-slate-800 leading-tight">Jorge Luis</p>
+                                <p class="text-[11px] text-slate-500">ST-9001</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-[13px] text-slate-700 font-medium">Sistemas Operativos</td>
+                    <td class="py-4 px-6 text-[13px] text-slate-600">Roma Norte, CDMX</td>
+                    <td class="py-4 px-6">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-700">
+                            En Proceso
+                        </span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <button class="text-slate-400 hover:text-slate-700 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pie de página -->
+<div class="text-center text-[11px] text-slate-400 pb-4">
+    © 2024 ServiTech Global Solutions. Panel de Control v2.4.1
+</div>
+
+<!-- ════════════════════════════════════════════
+     5. MODAL DE FICHA TÉCNICA
+════════════════════════════════════════════ -->
+<div id="modal-ficha-tecnico" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="cerrarFichaTecnico()"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md z-10 overflow-hidden border border-slate-100">
+        <!-- Cabecera del Modal -->
+        <div class="bg-[#003399] px-6 py-5 text-white flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/20 border border-white/20 flex items-center justify-center text-xl">👨‍🔧</div>
+                <div>
+                    <h3 id="ft-nombre" class="font-bold text-[15px] leading-tight">Carlos Mendoza</h3>
+                    <p id="ft-id" class="text-[12px] text-white/70">ID: TEC-001</p>
+                </div>
+            </div>
+            <button onclick="cerrarFichaTecnico()" class="text-white/60 hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <!-- Cuerpo del Modal -->
+        <div class="p-6 space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-50 rounded-xl p-3">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Especialidad</p>
+                    <p id="ft-especialidad" class="font-bold text-slate-800 text-[13px] mt-0.5">Hardware</p>
+                </div>
+                <div class="bg-slate-50 rounded-xl p-3">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rating</p>
+                    <p id="ft-rating" class="font-bold text-amber-500 text-[13px] mt-0.5">4.9 ★</p>
+                </div>
+            </div>
+
+            <div class="bg-[#EEF2FF] border border-[#C7D7FF] rounded-xl p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-[11px] font-bold text-[#003399] uppercase tracking-wider">Credenciales de Acceso</h4>
+                    <span class="text-[10px] font-bold bg-[#003399]/10 text-[#003399] px-2 py-0.5 rounded-full">Prueba / Login</span>
+                </div>
+                <div>
+                    <p class="text-[11px] text-slate-500">Correo / Usuario</p>
+                    <p id="ft-correo" class="font-bold text-slate-800 text-[13px]">carlos@servitech.com</p>
+                </div>
+                <div>
+                    <p class="text-[11px] text-slate-500 mb-1">Clave Temporal</p>
+                    <div class="flex items-center justify-between bg-white border border-slate-200 rounded-xl px-3 py-2">
+                        <span id="ft-clave" class="font-mono text-[13px] font-bold text-[#003399]">tecnico123</span>
+                        <button onclick="copiarClave()" class="text-[11px] font-bold text-slate-500 hover:text-[#003399] transition flex items-center gap-1">
+                            📋 Copiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="cerrarFichaTecnico()" class="w-full py-2.5 rounded-xl bg-[#003399] hover:bg-[#002266] text-white font-bold text-[13px] transition shadow-sm">
+                Cerrar Ficha
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ─────────────────────────────────────────────
+// 1. Mapa Interactivo (Leaflet.js)
+// ─────────────────────────────────────────────
+function inicializarMapa() {
+    const map = L.map('mapa-tecnicos', { zoomControl: true }).setView([19.4326, -99.1332], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const tecnicos = [
+        { nombre: 'Marta Sánchez', status: 'Disponible', lat: 19.4326, lng: -99.1332, color: '#22C55E' },
+        { nombre: 'Alejandro Ruiz', status: 'En Ruta - Cita #102', lat: 19.4500, lng: -99.1500, color: '#0284C7' },
+        { nombre: 'Roberto Gómez', status: 'Ausente', lat: 19.4180, lng: -99.1150, color: '#EF4444' },
+        { nombre: 'Kevin Torres', status: 'Disponible', lat: 19.4400, lng: -99.1200, color: '#22C55E' },
+    ];
+
+    tecnicos.forEach(t => {
+        const marker = L.circleMarker([t.lat, t.lng], {
+            radius: 9, fillColor: t.color, color: '#ffffff',
+            weight: 2.5, opacity: 1, fillOpacity: 0.9
+        }).addTo(map);
+        marker.bindPopup(`<div style="font-family:Inter,sans-serif;font-size:12px"><b style="color:#003399">👷 ${t.nombre}</b><br><span style="color:#64748b">${t.status}</span></div>`);
+    });
+}
+
+// ─────────────────────────────────────────────
+// 2. Modal de Ficha Técnica
+// ─────────────────────────────────────────────
+function abrirFichaTecnico(nombre, correo, id, especialidad, rating, clave) {
+    document.getElementById('ft-nombre').textContent = nombre;
+    document.getElementById('ft-correo').textContent = correo;
+    document.getElementById('ft-id').textContent = 'ID: ' + id;
+    document.getElementById('ft-especialidad').textContent = especialidad;
+    document.getElementById('ft-rating').textContent = rating;
+    document.getElementById('ft-clave').textContent = clave;
+    const modal = document.getElementById('modal-ficha-tecnico');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function cerrarFichaTecnico() {
+    const modal = document.getElementById('modal-ficha-tecnico');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function copiarClave() {
+    const clave = document.getElementById('ft-clave').textContent;
+    navigator.clipboard.writeText(clave);
+    showToast(`🔑 Clave "${clave}" copiada al portapapeles.`, 'success');
+}
+
+// ─────────────────────────────────────────────
+// 3. Modal Nuevo Técnico (placeholder)
+// ─────────────────────────────────────────────
+function abrirModalNuevoTecnico() {
+    showToast('🛠️ Formulario de "Añadir Técnico" próximamente.', 'success');
+}
+
+// ─────────────────────────────────────────────
+// 4. Exportar CSV (simulación)
+// ─────────────────────────────────────────────
+function exportarTecnicosCSV() {
+    showToast('📊 Lista de técnicos exportada (.csv).', 'success');
+}
+
+// ─────────────────────────────────────────────
+// Inicialización
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarMapa();
+});
+</script>
+{% endblock %}
