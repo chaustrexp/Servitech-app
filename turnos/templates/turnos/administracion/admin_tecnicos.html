@@ -1,0 +1,481 @@
+{% extends 'turnos/administracion/admin_base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Técnicos - Panel de Administración | ServiTech{% endblock %}
+
+{% block page_header %}
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div>
+        <div class="flex items-center gap-2">
+            <h1 class="text-xl font-extrabold text-navy tracking-tight">Gestión del Personal Técnico</h1>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-light text-emerald border border-emerald/30">
+                8 Técnicos en Línea
+            </span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">
+            Supervisa el rendimiento, ubicaciones en tiempo real y credenciales de acceso del equipo técnico.
+        </p>
+    </div>
+
+    <!-- Botón Exportar Actividad -->
+    <button onclick="exportarTecnicosExcel()"
+            class="flex items-center gap-2 bg-emerald hover:bg-emerald/90 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-md shadow-emerald/20 self-start md:self-auto">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <span>Exportar Reporte (.xlsx)</span>
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<!-- ════════════════════════════════════════════
+     1. TARJETAS DE MÉTRICAS RÁPIDAS
+════════════════════════════════════════════ -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 mb-6">
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Activos en Servicio</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald animate-pulse"></span>
+        </div>
+        <h3 class="text-2xl font-extrabold text-navy">8 / 10</h3>
+        <p class="text-[11px] text-slate-400 mt-1">2 en pausa / descanso</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Promedio de Rating</span>
+            <span class="text-xs font-bold text-amber-500">★ 4.9 / 5.0</span>
+        </div>
+        <h3 class="text-2xl font-extrabold text-navy">98.4%</h3>
+        <p class="text-[11px] text-slate-400 mt-1">Satisfacción de clientes</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Citas Atendidas</span>
+            <span class="text-xs font-bold text-royal bg-royal/10 px-2 py-0.5 rounded-full">Este Mes</span>
+        </div>
+        <h3 class="text-2xl font-extrabold text-navy">134 Citas</h3>
+        <p class="text-[11px] text-slate-400 mt-1">Promedio: 16.7 citas/técnico</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Eficiencia Operativa</span>
+            <span class="text-xs font-bold text-emerald bg-emerald-light px-2 py-0.5 rounded-full">+4.5%</span>
+        </div>
+        <h3 class="text-2xl font-extrabold text-navy">96.2%</h3>
+        <p class="text-[11px] text-slate-400 mt-1">A tiempo según agenda</p>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     2. MAPA INTERACTIVO (LEAFLET.JS)
+════════════════════════════════════════════ -->
+<div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <h3 class="font-extrabold text-navy text-base">Ubicación en Tiempo Real de Técnicos</h3>
+            <p class="text-xs text-slate-400">Monitoreo GPS simulado de técnicos asignados a domicilios y taller</p>
+        </div>
+        <div class="flex items-center gap-3 text-xs font-semibold">
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald"></span> En Ruta</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-royal"></span> En Taller Central</span>
+        </div>
+    </div>
+    <!-- Contenedor del Mapa -->
+    <div id="mapa-tecnicos" class="w-full h-72 rounded-2xl border border-slate-200 z-10"></div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     3. GRID DE TARJETAS DEL PERSONAL TÉCNICO
+════════════════════════════════════════════ -->
+<div class="mb-4 flex items-center justify-between">
+    <h3 class="font-extrabold text-navy text-base">Directorio de Técnicos</h3>
+    <span class="text-xs text-slate-400 font-medium">Haz clic en "Ver Ficha / Credenciales" para obtener contraseñas de prueba</span>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-8" id="grid-tecnicos">
+    <!-- Tarjeta 1: Carlos Mendoza -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+        <div>
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-royal text-white flex items-center justify-center font-extrabold text-lg shadow-md">
+                        CM
+                    </div>
+                    <div>
+                        <h4 class="font-extrabold text-navy text-sm">Carlos Mendoza</h4>
+                        <p class="text-[11px] font-semibold text-slate-400">ID: TEC-001 · Taller Central</p>
+                    </div>
+                </div>
+                <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-light text-emerald border border-emerald/30">
+                    DISPONIBLE
+                </span>
+            </div>
+
+            <!-- Estrellas y especialidades -->
+            <div class="flex items-center justify-between text-xs mb-3">
+                <div class="flex items-center gap-1 text-amber-400 font-bold">
+                    <span>★★★★★</span>
+                    <span class="text-slate-700 text-xs ml-1">4.9 (48)</span>
+                </div>
+                <span class="text-slate-400 text-[11px]">18 citas este mes</span>
+            </div>
+
+            <!-- Tags -->
+            <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Smartphones</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Apple Specialist</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Pantallas OLED</span>
+            </div>
+        </div>
+
+        <button onclick="abrirFichaTecnico('Carlos Mendoza', 'carlos@gmail.com', 'TEC-001', 'Smartphones & Apple', '4.9 ★', 'tecnico123')"
+                class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-navy hover:text-white text-navy font-bold text-xs transition-all flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            <span>Ver Ficha / Credenciales</span>
+        </button>
+    </div>
+
+    <!-- Tarjeta 2: Ana Torres -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+        <div>
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-sky text-white flex items-center justify-center font-extrabold text-lg shadow-md">
+                        AT
+                    </div>
+                    <div>
+                        <h4 class="font-extrabold text-navy text-sm">Ana Torres</h4>
+                        <p class="text-[11px] font-semibold text-slate-400">ID: TEC-002 · Ruta Domicilios</p>
+                    </div>
+                </div>
+                <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-sky-light text-sky border border-sky/30">
+                    EN SERVICIO
+                </span>
+            </div>
+
+            <div class="flex items-center justify-between text-xs mb-3">
+                <div class="flex items-center gap-1 text-amber-400 font-bold">
+                    <span>★★★★★</span>
+                    <span class="text-slate-700 text-xs ml-1">4.8 (36)</span>
+                </div>
+                <span class="text-slate-400 text-[11px]">15 citas este mes</span>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Laptops & PC</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Rebaling GPU</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Placas Base</span>
+            </div>
+        </div>
+
+        <button onclick="abrirFichaTecnico('Ana Torres', 'ana.torres@gmail.com', 'TEC-002', 'Laptops & Placas Base', '4.8 ★', 'ana12345')"
+                class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-navy hover:text-white text-navy font-bold text-xs transition-all flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            <span>Ver Ficha / Credenciales</span>
+        </button>
+    </div>
+
+    <!-- Tarjeta 3: Roberto Ramírez -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+        <div>
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-extrabold text-lg shadow-md">
+                        RR
+                    </div>
+                    <div>
+                        <h4 class="font-extrabold text-navy text-sm">Roberto Ramírez</h4>
+                        <p class="text-[11px] font-semibold text-slate-400">ID: TEC-003 · Taller Central</p>
+                    </div>
+                </div>
+                <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-200">
+                    EN PAUSA
+                </span>
+            </div>
+
+            <div class="flex items-center justify-between text-xs mb-3">
+                <div class="flex items-center gap-1 text-amber-400 font-bold">
+                    <span>★★★★☆</span>
+                    <span class="text-slate-700 text-xs ml-1">4.7 (29)</span>
+                </div>
+                <span class="text-slate-400 text-[11px]">12 citas este mes</span>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Redes & Servidores</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Recuperación Datos</span>
+            </div>
+        </div>
+
+        <button onclick="abrirFichaTecnico('Roberto Ramírez', 'roberto.ramirez@servitech.com', 'TEC-003', 'Redes & Datos', '4.7 ★', 'roberto2026')"
+                class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-navy hover:text-white text-navy font-bold text-xs transition-all flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            <span>Ver Ficha / Credenciales</span>
+        </button>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     4. TABLA DE ACTIVIDAD RECIENTE
+════════════════════════════════════════════ -->
+<div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden mb-6">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div>
+            <h3 class="font-extrabold text-navy text-base">Actividad Reciente del Personal</h3>
+            <p class="text-xs text-slate-400">Acciones y cambios de estado registrados hoy</p>
+        </div>
+        <span class="text-xs font-bold text-emerald bg-emerald-light px-2.5 py-1 rounded-full">Actualizado hace 2 min</span>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <th class="py-3.5 px-5">Técnico</th>
+                    <th class="py-3.5 px-5">Acción / Cita</th>
+                    <th class="py-3.5 px-5">Cliente</th>
+                    <th class="py-3.5 px-5">Hora</th>
+                    <th class="py-3.5 px-5">Estado Acción</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 px-5 font-bold text-navy">Carlos Mendoza</td>
+                    <td class="py-3.5 px-5 font-medium text-slate-700">Completó Cita #105 (Pantalla OLED)</td>
+                    <td class="py-3.5 px-5 text-slate-600">Juan Bayona</td>
+                    <td class="py-3.5 px-5 text-slate-400 font-semibold">10:14 AM</td>
+                    <td class="py-3.5 px-5"><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-light text-emerald">Éxito</span></td>
+                </tr>
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 px-5 font-bold text-navy">Ana Torres</td>
+                    <td class="py-3.5 px-5 font-medium text-slate-700">Inició Diagnóstico Cita #102</td>
+                    <td class="py-3.5 px-5 text-slate-600">María García</td>
+                    <td class="py-3.5 px-5 text-slate-400 font-semibold">09:45 AM</td>
+                    <td class="py-3.5 px-5"><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-sky-light text-sky">En Proceso</span></td>
+                </tr>
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 px-5 font-bold text-navy">Carlos Mendoza</td>
+                    <td class="py-3.5 px-5 font-medium text-slate-700">Reportó Solicitud de Repuesto #402</td>
+                    <td class="py-3.5 px-5 text-slate-600">Inventario Central</td>
+                    <td class="py-3.5 px-5 text-slate-400 font-semibold">09:12 AM</td>
+                    <td class="py-3.5 px-5"><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600">Pendiente</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     5. MODAL DE FICHA TÉCNICA / CREDENCIALES
+════════════════════════════════════════════ -->
+<div id="modal-ficha-tecnico" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarFichaTecnico()"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md z-10 overflow-hidden border border-slate-200">
+
+        <!-- Banner Modal -->
+        <div class="bg-navy px-6 py-5 text-white flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-royal to-sky flex items-center justify-center font-extrabold text-base shadow-md">
+                    👨‍🔧
+                </div>
+                <div>
+                    <h3 id="ft-nombre" class="font-extrabold text-base leading-tight">Carlos Mendoza</h3>
+                    <p id="ft-id" class="text-xs text-sky-light">ID: TEC-001</p>
+                </div>
+            </div>
+            <button onclick="cerrarFichaTecnico()" class="text-slate-400 hover:text-white transition">✕</button>
+        </div>
+
+        <div class="p-6 space-y-4">
+
+            <!-- Ficha resumida -->
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="bg-slate-50 p-3 rounded-2xl">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Especialidad</p>
+                    <p id="ft-especialidad" class="font-bold text-slate-800 mt-0.5">Smartphones & Apple</p>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-2xl">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rating Promedio</p>
+                    <p id="ft-rating" class="font-bold text-amber-500 mt-0.5">4.9 ★</p>
+                </div>
+            </div>
+
+            <!-- Bloque de Credenciales de Prueba -->
+            <div class="bg-navy/5 border border-royal/20 rounded-2xl p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-extrabold text-navy uppercase tracking-wider">Credenciales de Acceso</h4>
+                    <span class="text-[10px] font-bold bg-royal/10 text-royal px-2 py-0.5 rounded-full">Prueba / Login</span>
+                </div>
+
+                <div>
+                    <p class="text-[10px] font-semibold text-slate-500">Correo / Usuario</p>
+                    <p id="ft-correo" class="font-bold text-slate-800 text-xs">carlos@gmail.com</p>
+                </div>
+
+                <div>
+                    <p class="text-[10px] font-semibold text-slate-500">Clave Temporal</p>
+                    <div class="flex items-center justify-between bg-white border border-slate-200 rounded-xl px-3 py-1.5 mt-1">
+                        <span id="ft-clave" class="font-mono text-xs font-bold text-royal">tecnico123</span>
+                        <button onclick="copiarClaveTemporal()"
+                                class="text-[11px] font-bold text-sky hover:text-royal transition flex items-center gap-1">
+                            <span>📋 Copiar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="cerrarFichaTecnico()"
+                    class="w-full py-3 rounded-xl bg-navy hover:bg-navy-dark text-white font-bold text-xs transition shadow-md">
+                Cerrar Ficha
+            </button>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ─────────────────────────────────────────────
+// 1. Inicialización del Mapa Interactivo (Leaflet)
+// ─────────────────────────────────────────────
+function inicializarMapa() {
+    // Coordenadas centro ciudad simulada
+    const lat = 7.8939;
+    const lng = -72.5078;
+    const map = L.map('mapa-tecnicos').setView([lat, lng], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Marcadores de técnicos
+    const tecnicosUbicacion = [
+        { nombre: 'Carlos Mendoza', status: 'Disponible (Taller)', lat: 7.8945, lng: -72.5080, color: '#10B981' },
+        { nombre: 'Ana Torres', status: 'En Ruta - Cita #102', lat: 7.9020, lng: -72.5150, color: '#0040A8' },
+        { nombre: 'Roberto Ramírez', status: 'En Pausa', lat: 7.8880, lng: -72.4990, color: '#F59E0B' }
+    ];
+
+    tecnicosUbicacion.forEach(t => {
+        const marker = L.circleMarker([t.lat, t.lng], {
+            radius: 9,
+            fillColor: t.color,
+            color: '#ffffff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.9
+        }).addTo(map);
+
+        marker.bindPopup(`
+            <div style="font-family:Inter,sans-serif;font-size:12px;padding:2px;">
+                <b style="color:#001E50;">👨‍🔧 ${t.nombre}</b><br>
+                <span style="color:#64748b;">${t.status}</span>
+            </div>
+        `);
+    });
+}
+
+// ─────────────────────────────────────────────
+// 2. Ficha y Credenciales
+// ─────────────────────────────────────────────
+function abrirFichaTecnico(nombre, correo, id, especialidad, rating, clave) {
+    document.getElementById('ft-nombre').textContent = nombre;
+    document.getElementById('ft-correo').textContent = correo;
+    document.getElementById('ft-id').textContent = 'ID: ' + id;
+    document.getElementById('ft-especialidad').textContent = especialidad;
+    document.getElementById('ft-rating').textContent = rating;
+    document.getElementById('ft-clave').textContent = clave;
+
+    const modal = document.getElementById('modal-ficha-tecnico');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function cerrarFichaTecnico() {
+    const modal = document.getElementById('modal-ficha-tecnico');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function copiarClaveTemporal() {
+    const clave = document.getElementById('ft-clave').textContent;
+    navigator.clipboard.writeText(clave);
+    showToast(`🔑 Clave temporal "${clave}" copiada al portapapeles.`, "success");
+}
+
+// ─────────────────────────────────────────────
+// 3. Exportación a Excel con ExcelJS
+// ─────────────────────────────────────────────
+async function exportarTecnicosExcel() {
+    try {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Personal Técnico');
+
+        worksheet.columns = [
+            { header: 'ID Técnico', key: 'id', width: 14 },
+            { header: 'Nombre Completo', key: 'nombre', width: 25 },
+            { header: 'Correo Acceso', key: 'correo', width: 28 },
+            { header: 'Especialidad', key: 'especialidad', width: 25 },
+            { header: 'Rating', key: 'rating', width: 12 },
+            { header: 'Estado', key: 'estado', width: 16 }
+        ];
+
+        const headerRow = worksheet.getRow(1);
+        headerRow.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFF' } };
+        headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '001E50' } };
+        headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+        headerRow.height = 26;
+
+        const datos = [
+            { id: 'TEC-001', nombre: 'Carlos Mendoza', correo: 'carlos@gmail.com', especialidad: 'Smartphones & Apple', rating: '4.9 ★', estado: 'DISPONIBLE' },
+            { id: 'TEC-002', nombre: 'Ana Torres', correo: 'ana.torres@gmail.com', especialidad: 'Laptops & Placas Base', rating: '4.8 ★', estado: 'EN SERVICIO' },
+            { id: 'TEC-003', nombre: 'Roberto Ramírez', correo: 'roberto.ramirez@servitech.com', especialidad: 'Redes & Datos', rating: '4.7 ★', estado: 'EN PAUSA' }
+        ];
+
+        datos.forEach((d, idx) => {
+            const row = worksheet.addRow(d);
+            row.height = 22;
+            if (idx % 2 === 1) {
+                row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'F8FAFC' } };
+            }
+            row.eachCell(c => {
+                c.border = {
+                    top: { style: 'thin', color: { argb: 'E2E8F0' } },
+                    left: { style: 'thin', color: { argb: 'E2E8F0' } },
+                    bottom: { style: 'thin', color: { argb: 'E2E8F0' } },
+                    right: { style: 'thin', color: { argb: 'E2E8F0' } }
+                };
+            });
+        });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(blob, `Reporte_Personal_Tecnico_ServiTech.xlsx`);
+
+        showToast("📊 Lista de personal técnico exportada a Excel.", "success");
+    } catch (e) {
+        console.error(e);
+        showToast("⚠️ Error al exportar lista de técnicos", "error");
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarMapa();
+});
+</script>
+{% endblock %}
