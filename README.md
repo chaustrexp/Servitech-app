@@ -35,15 +35,25 @@ cd Servitech-app
 
 ### 2. Crear y activar el entorno virtual
 Es una buena práctica usar un entorno virtual para aislar las dependencias del proyecto.
-```bash
-# En Windows:
-python -m venv venv
-venv\Scripts\activate
 
-# En macOS/Linux:
-python3 -m venv venv
-source venv/bin/activate
-```
+* **En Windows (PowerShell - Recomendado en VS Code):**
+  ```powershell
+  python -m venv venv
+  venv\Scripts\Activate.ps1
+  ```
+  *(Si te da un error de políticas de ejecución en PowerShell, puedes ejecutar `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process` en tu consola o usar directamente `venv\Scripts\python manage.py <comando>` sin activar).*
+
+* **En Windows (CMD - Símbolo del sistema):**
+  ```cmd
+  python -m venv venv
+  venv\Scripts\activate
+  ```
+
+* **En macOS/Linux:**
+  ```bash
+  python3 -m venv venv
+  source venv/bin/activate
+  ```
 
 ### 3. Instalar dependencias
 Con el entorno virtual activado, instala todas las librerías requeridas:
@@ -95,3 +105,19 @@ Finalmente, inicia el servidor de desarrollo de Django:
 python manage.py runserver
 ```
 ¡Listo! Ya puedes acceder a la aplicación abriendo tu navegador en `http://127.0.0.1:8000/`.
+
+---
+
+## 💡 Solución a Errores Comunes
+
+### ❌ `ModuleNotFoundError: No module named 'dotenv'` en Windows
+Este error ocurre cuando ejecutas `python manage.py` sin que el entorno virtual esté activo (o porque no se activó correctamente).
+1. Asegúrate de haber instalado las dependencias con `pip install -r requirements.txt` dentro del entorno virtual.
+2. Si usas **PowerShell** (la terminal por defecto en VS Code), recuerda que ejecutar `venv\Scripts\activate` no funciona. Debes usar:
+   ```powershell
+   venv\Scripts\Activate.ps1
+   ```
+3. Alternativamente, puedes forzar el uso del Python del entorno virtual sin activarlo ejecutando:
+   ```powershell
+   venv\Scripts\python manage.py runserver
+   ```
