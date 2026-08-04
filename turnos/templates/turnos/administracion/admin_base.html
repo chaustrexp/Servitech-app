@@ -1,385 +1,225 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es" class="h-full bg-[#F8FAFC]">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Panel de Administración - ServiTech{% endblock %}</title>
-
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        navy: {
-                            DEFAULT: '#003399',
-                            dark: '#002266',
-                            light: '#E6F0FF',
-                        },
-                        royal: {
-                            DEFAULT: '#0040A8',
-                            hover: '#003388',
-                        },
-                        sky: {
-                            DEFAULT: '#0284C7',
-                            light: '#E0F2FE',
-                        },
-                        emerald: {
-                            DEFAULT: '#10B981',
-                            light: '#D1FAE5',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- Leaflet CSS & JS (Mapas) -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- Chart.js (Gráficos) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- ExcelJS + FileSaver.js (Exportaciones Excel con estilo) -->
-    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-
-    <!-- jsPDF + jsPDF-AutoTable (Exportaciones PDF con membrete) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .sidebar-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #475569;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            margin-bottom: 4px;
-        }
-        .sidebar-item:hover {
-            background-color: #F1F5F9;
-            color: #003399;
-        }
-        .sidebar-item:hover svg {
-            color: #003399;
-        }
-        .sidebar-item.active {
-            background-color: #E6F0FF;
-            color: #003399;
-            font-weight: 600;
-        }
-        .sidebar-item.active svg {
-            color: #003399;
-        }
-        #toast-container {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: none;
-        }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .nav-item { display:flex; align-items:center; gap:12px; padding:9px 12px; border-radius:10px; font-size:13.5px; font-weight:500; color:#64748b; transition:all .15s; text-decoration:none; }
+        .nav-item:hover { background:#f1f5f9; color:#1e293b; }
+        .nav-item.active { background:#eff6ff; color:#1d4ed8; font-weight:600; }
+        .sidebar-t { transition: transform 0.3s ease; }
+        #toast-container { position:fixed; bottom:24px; right:24px; z-index:200; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
     </style>
-
     {% block extra_head %}{% endblock %}
 </head>
-<body class="h-full bg-[#F8FAFC] text-slate-800 antialiased flex flex-col md:flex-row overflow-x-hidden">
+<body class="bg-[#f8fafc] min-h-screen flex overflow-x-hidden">
 
-    <!-- Overlay móvil -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
 
-    <!-- ════════════════════════════════════════════
-         SIDEBAR — Diseño claro (fondo blanco)
-    ════════════════════════════════════════════ -->
-    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-200 z-50 flex flex-col transition-transform duration-300 -translate-x-full md:translate-x-0">
-
-        <!-- ── Sección 1: Logo ── -->
-        <div class="p-6">
-            <!-- Logo -->
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-navy flex items-center justify-center flex-shrink-0">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar-t fixed top-0 left-0 h-full w-[210px] bg-white border-r border-slate-100 z-40 flex flex-col -translate-x-full md:translate-x-0">
+        <div class="px-5 pt-5 pb-4 border-b border-slate-100">
+            <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-[#1d4ed8] flex items-center justify-center flex-shrink-0">
+                    <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="w-7 h-7 rounded-lg object-cover">
                 </div>
-                <div>
-                    <h1 class="font-bold text-lg text-navy tracking-tight leading-none">ServiTech</h1>
-                    <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase mt-1">Panel de<br>Administración</p>
+                <div class="leading-tight">
+                    <p class="text-sm font-extrabold text-slate-800">ServiTech</p>
+                    <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Panel de Administración</p>
                 </div>
-                <!-- Botón cerrar (solo móvil) -->
-                <button onclick="toggleSidebar()" class="md:hidden ml-auto p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
+            </a>
         </div>
-
-        <!-- ── Sección 2: Navegación ── -->
-        <nav class="flex-1 overflow-y-auto px-4 py-2 space-y-1">
-
-            <!-- Inicio -->
-            <a href="{% url 'admin_dashboard' %}"
-               class="sidebar-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                </svg>
-                <span>Inicio</span>
+        <nav class="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
+            <a href="{% url 'admin_dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10-3a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1v-7z"/></svg>
+                Inicio
             </a>
-
-            <!-- Citas -->
-            <a href="{% url 'admin_citas' %}"
-               class="sidebar-item {% if request.resolver_match.url_name == 'admin_citas' %}active{% endif %}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <span>Citas</span>
+            <a href="{% url 'admin_citas' %}" class="nav-item {% if request.resolver_match.url_name == 'admin_citas' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Citas
             </a>
-
-            <!-- Técnicos -->
-            <a href="{% url 'admin_tecnicos' %}"
-               class="sidebar-item {% if request.resolver_match.url_name == 'admin_tecnicos' %}active{% endif %}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                <span>Técnicos</span>
+            <a href="{% url 'admin_usuarios' %}" class="nav-item {% if request.resolver_match.url_name == 'admin_usuarios' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Usuarios
             </a>
-
-            <!-- Usuarios -->
-            <a href="{% url 'admin_usuarios' %}"
-               class="sidebar-item {% if request.resolver_match.url_name == 'admin_usuarios' %}active{% endif %}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                </svg>
-                <span>Usuarios</span>
+            <a href="{% url 'admin_servicios' %}" class="nav-item {% if request.resolver_match.url_name == 'admin_servicios' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h7"/></svg>
+                Catálogo
             </a>
-
-            <!-- Catálogo -->
-            <a href="{% url 'admin_servicios' %}"
-               class="sidebar-item {% if request.resolver_match.url_name == 'admin_servicios' %}active{% endif %}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                </svg>
-                <span>Catálogo</span>
+            <a href="{% url 'admin_reportes' %}" class="nav-item {% if request.resolver_match.url_name == 'admin_reportes' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Reportes
             </a>
-
-            <!-- Reportes -->
-            <a href="{% url 'admin_reportes' %}"
-               class="sidebar-item {% if request.resolver_match.url_name == 'admin_reportes' %}active{% endif %}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                </svg>
-                <span>Reportes</span>
-            </a>
-
-            <!-- Inventario -->
-            <a href="{% url 'admin_inventario' %}"
-               class="sidebar-item {% if request.resolver_match.url_name == 'admin_inventario' %}active{% endif %}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
-                <span>Inventario</span>
-            </a>
-
         </nav>
-
-        <!-- ── Sección 3: Acciones inferiores ── -->
-        <div class="p-4 mt-auto space-y-2">
-            <!-- Cerrar Sesión (oculto en sidebar normal, lo ponemos sutil) -->
+        <div class="px-3 pb-4 pt-3 border-t border-slate-100 space-y-2">
+            <a href="{% url 'seleccionar_dispositivo' %}" class="w-full flex items-center justify-center gap-2 bg-[#1d4ed8] hover:bg-[#1e40af] text-white font-bold py-2.5 px-4 rounded-xl transition text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                Nueva Cita
+            </a>
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
-                <button type="submit"
-                        class="w-full flex items-center justify-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors mb-2">
+                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:bg-red-50 hover:text-red-600 transition">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                     Cerrar Sesión
                 </button>
             </form>
-            
-            <!-- Botón Nueva Cita -->
-            <a href="#" onclick="abrirModalNuevaCita(event)"
-               class="w-full flex items-center justify-center gap-2 bg-navy hover:bg-[#002266] text-white font-semibold py-3 px-4 rounded-xl transition-all text-sm shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-                </svg>
-                Nueva Cita
-            </a>
         </div>
     </aside>
 
-    <!-- ════════════════════════════════════════════
-         CONTENIDO PRINCIPAL (ml-0 md:ml-64)
-    ════════════════════════════════════════════ -->
-    <div class="flex-1 flex flex-col min-h-screen md:ml-64 bg-white/50">
+    <!-- CONTENIDO -->
+    <div class="flex-1 flex flex-col min-h-screen md:ml-[210px]">
 
-        <!-- TOPBAR SUPERIOR (Buscador + Perfil + Notificaciones) -->
-        <header class="bg-white border-b border-slate-200/60 sticky top-0 z-30 px-6 h-[72px] flex items-center justify-between gap-4">
+        <!-- ═══ TOPBAR NUEVO ═══ -->
+        <header class="bg-white border-b border-slate-100 sticky top-0 z-20 h-[56px] px-5 flex items-center justify-between">
 
-            <!-- Botón toggle móvil + Buscador Global -->
-            <div class="flex items-center gap-3 flex-1 max-w-2xl">
-                <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
+            <!-- Izq: hamburguesa + breadcrumb -->
+            <div class="flex items-center gap-3">
+                <button onclick="openSidebar()" class="md:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
-
-                <div class="relative w-full max-w-[480px]">
-                    <svg class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <input type="text" id="global-search" placeholder="Buscar citas, técnicos o reportes..."
-                           class="w-full pl-11 pr-4 py-3 bg-[#EEF2FF] border-none rounded-full text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 transition-all font-medium">
+                <div class="hidden md:flex items-center gap-1.5 text-xs">
+                    <span class="text-slate-400">Panel</span>
+                    <span class="text-slate-300">/</span>
+                    <span class="font-semibold text-slate-700">
+                        {% if request.resolver_match.url_name == 'admin_dashboard' %}Inicio
+                        {% elif request.resolver_match.url_name == 'admin_citas' %}Citas
+                        {% elif request.resolver_match.url_name == 'admin_usuarios' %}Usuarios
+                        {% elif request.resolver_match.url_name == 'admin_servicios' %}Catálogo
+                        {% elif request.resolver_match.url_name == 'admin_reportes' %}Reportes
+                        {% else %}Panel{% endif %}
+                    </span>
                 </div>
             </div>
 
-            <!-- Notificaciones + Info de Perfil -->
-            <div class="flex items-center gap-5 flex-shrink-0">
+            <!-- Der: buscador + acciones + perfil -->
+            <div class="flex items-center gap-1.5">
 
-                <div class="flex items-center gap-2 text-slate-400">
-                    <!-- Botón de Notificaciones -->
-                    <div class="relative">
-                        <button onclick="toggleNotificaciones()" class="p-2 hover:text-navy transition relative">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                            </svg>
-                            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white"></span>
-                        </button>
-                        <!-- Panel Notificaciones Dropped -->
-                        <div id="panel-notificaciones" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-50">
-                            <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
-                                <h4 class="font-bold text-xs text-navy uppercase tracking-wider">Notificaciones</h4>
-                            </div>
-                            <div class="space-y-2 text-xs">
-                                <div class="p-2 bg-slate-50 rounded-xl flex items-start gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-rose-500 mt-1.5 flex-shrink-0"></span>
-                                    <div>
-                                        <p class="font-semibold text-slate-700">Stock bajo</p>
-                                        <p class="text-[10px] text-slate-400">Sensores de temperatura mod XJ-20...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Buscador compacto con expansión -->
+                <div class="relative hidden sm:block">
+                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="text" id="topbar-search" placeholder="Buscar..."
+                           class="w-40 focus:w-56 pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder-slate-400 focus:outline-none focus:border-[#1d4ed8] focus:bg-white transition-all duration-300"
+                           onkeydown="if(event.key==='Enter'){ buscarTopbar(this.value); }">
+                </div>
 
-                    <!-- Ajustes -->
-                    <button class="p-2 hover:text-navy transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
+                <div class="w-px h-4 bg-slate-200 mx-1 hidden sm:block"></div>
+
+                <!-- Notificaciones -->
+                <div class="relative">
+                    <button id="btn-notif" onclick="toggleNotifAdmin()"
+                            class="relative p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#1d4ed8] transition">
+                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        <span id="notif-dot" class="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
                     </button>
-                </div>
-
-                <div class="h-8 w-px bg-slate-200 mx-1"></div>
-
-                <!-- Perfil del Admin -->
-                <div class="flex items-center gap-3">
-                    <div class="hidden sm:block text-right leading-tight">
-                        <p class="text-[13px] font-bold text-slate-800">
-                            {{ request.user.nombre_completo|default:"Admin Principal" }}
-                        </p>
-                        <p class="text-[11px] font-medium text-slate-400">ServiTech HQ</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-full overflow-hidden border border-slate-200">
-                        <img src="{% static 'img/foto de perfil administrador.png' %}"
-                             alt="Admin"
-                             class="w-full h-full object-cover"
-                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <div class="w-full h-full bg-navy hidden items-center justify-center text-white font-bold text-sm">
-                            {{ request.user.nombre_completo|default:request.user.username|slice:":1"|upper|default:"A" }}
+                    <div id="dropdown-notif-admin" class="hidden absolute right-0 top-10 w-68 bg-white rounded-xl shadow-xl border border-slate-100 z-50" style="width:270px">
+                        <div class="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between">
+                            <p class="text-xs font-bold text-slate-800">Notificaciones</p>
+                            <button onclick="marcarLeidas()" class="text-[11px] font-semibold text-[#1d4ed8] hover:underline">Marcar leídas</button>
+                        </div>
+                        <div class="divide-y divide-slate-50">
+                            <a href="{% url 'admin_citas' %}" class="flex gap-3 px-4 py-2.5 hover:bg-slate-50 transition">
+                                <div class="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <svg class="w-3.5 h-3.5 text-[#1d4ed8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-800">Nuevas citas registradas</p>
+                                    <p class="text-[10px] text-slate-400 mt-0.5">Revisa las citas pendientes.</p>
+                                </div>
+                            </a>
+                            <a href="{% url 'admin_reportes' %}" class="flex gap-3 px-4 py-2.5 hover:bg-slate-50 transition">
+                                <div class="w-7 h-7 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-800">Sistema operativo</p>
+                                    <p class="text-[10px] text-slate-400 mt-0.5">Todos los servicios normales.</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="px-4 py-2 border-t border-slate-100">
+                            <a href="{% url 'admin_reportes' %}" class="text-[11px] font-semibold text-[#1d4ed8] hover:underline">Ver reportes →</a>
                         </div>
                     </div>
                 </div>
 
+                <!-- Settings -->
+                <a href="{% url 'admin_servicios' %}" title="Catálogo"
+                   class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#1d4ed8] transition">
+                    <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </a>
+
+                <div class="w-px h-4 bg-slate-200 mx-1"></div>
+
+                <!-- Perfil -->
+                <button onclick="window.location.href='{% url 'admin_usuarios' %}'"
+                        class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-slate-50 transition group">
+                    <div class="w-7 h-7 rounded-full overflow-hidden ring-2 ring-slate-200 group-hover:ring-[#1d4ed8] transition">
+                        <img src="{% static 'img/foto de perfil administrador.png' %}" alt="Admin" class="w-full h-full object-cover">
+                    </div>
+                    <div class="hidden sm:block text-left">
+                        <p class="text-xs font-bold text-slate-700 group-hover:text-[#1d4ed8] transition leading-none truncate max-w-[80px]">
+                            {{ request.user.nombre_completo|default:"Admin"|truncatewords:1 }}
+                        </p>
+                        <p class="text-[10px] text-slate-400 leading-none mt-0.5">Admin</p>
+                    </div>
+                </button>
             </div>
         </header>
 
-        <!-- ÁREA DE CONTENIDO DINÁMICO -->
-        <main class="flex-1 p-6 sm:p-8 bg-slate-50/50">
+        <!-- Página -->
+        <main class="flex-1 p-5 md:p-7">
             {% block page_header %}{% endblock %}
-
-            {% if messages %}
-            <div class="mb-6 space-y-2">
-                {% for message in messages %}
-                <div class="p-4 rounded-2xl text-xs font-semibold border flex items-center justify-between shadow-sm
-                    {% if message.tags == 'error' %}bg-rose-50 text-rose-700 border-rose-200
-                    {% else %}bg-emerald-light text-emerald-800 border-emerald-300{% endif %}">
-                    <span>{{ message }}</span>
-                    <button onclick="this.parentElement.remove()" class="opacity-60 hover:opacity-100">✕</button>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
             {% block content %}{% endblock %}
         </main>
     </div>
 
-    <!-- Contenedor Toast para Notificaciones flotantes -->
     <div id="toast-container"></div>
 
-    <!-- Script Global del Layout -->
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
+        function openSidebar() { document.getElementById('sidebar').classList.remove('-translate-x-full'); document.getElementById('sidebar-overlay').classList.remove('hidden'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.add('-translate-x-full'); document.getElementById('sidebar-overlay').classList.add('hidden'); }
+
+        function toggleNotifAdmin() { document.getElementById('dropdown-notif-admin').classList.toggle('hidden'); }
+        function marcarLeidas() {
+            document.getElementById('notif-dot').style.display = 'none';
+            document.getElementById('dropdown-notif-admin').classList.add('hidden');
+            mostrarToast('✅ Notificaciones marcadas como leídas', 'success');
+        }
+        document.addEventListener('click', e => {
+            const d = document.getElementById('dropdown-notif-admin');
+            const b = document.getElementById('btn-notif');
+            if (d && !d.contains(e.target) && !b.contains(e.target)) d.classList.add('hidden');
+        });
+
+        function buscarTopbar(q) {
+            if (!q.trim()) return;
+            const v = q.toLowerCase();
+            if (v.includes('cita')) window.location.href = "{% url 'admin_citas' %}";
+            else if (v.includes('usuario') || v.includes('tecnico') || v.includes('técnico')) window.location.href = "{% url 'admin_usuarios' %}";
+            else if (v.includes('servicio') || v.includes('catalogo') || v.includes('catálogo')) window.location.href = "{% url 'admin_servicios' %}";
+            else if (v.includes('reporte') || v.includes('metrica') || v.includes('métrica')) window.location.href = "{% url 'admin_reportes' %}";
+            else mostrarToast('Sin resultados para "' + q + '"', 'info');
         }
 
-        function toggleNotificaciones() {
-            const panel = document.getElementById('panel-notificaciones');
-            panel.classList.toggle('hidden');
-        }
-
-        function showToast(mensaje, tipo = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const colorClass = tipo === 'success' ? 'bg-navy text-white border-emerald/40' : 'bg-rose-600 text-white border-rose-400';
-            toast.className = `${colorClass} pointer-events-auto px-4 py-3 rounded-2xl border shadow-xl text-xs font-semibold flex items-center gap-2 transform transition-all duration-300 translate-y-4 opacity-0`;
-            toast.innerHTML = `
-                <span>${tipo === 'success' ? '✅' : '⚠️'}</span>
-                <span>${mensaje}</span>
-            `;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.remove('translate-y-4', 'opacity-0');
-            }, 10);
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-4');
-                setTimeout(() => toast.remove(), 300);
-            }, 3500);
+        function mostrarToast(msg, tipo='info') {
+            const c = {success:'bg-emerald-600', warning:'bg-amber-500', error:'bg-red-600', info:'bg-[#1d4ed8]'};
+            const t = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-lg text-white text-sm font-medium ${c[tipo]||c.info} transform translate-y-4 opacity-0 transition-all duration-300`;
+            el.textContent = msg; t.appendChild(el);
+            requestAnimationFrame(() => el.classList.remove('translate-y-4','opacity-0'));
+            setTimeout(() => { el.classList.add('opacity-0','translate-y-4'); setTimeout(() => el.remove(), 300); }, 3500);
         }
     </script>
-
     {% block scripts %}{% endblock %}
 </body>
 </html>

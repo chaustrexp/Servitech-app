@@ -17,7 +17,7 @@ from ..forms import EditarPerfilForm
 @login_required
 def admin_dashboard(request):
     """Dashboard principal del administrador con métricas reales."""
-    if not request.user.es_admin:
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
         return redirect('home')
 
     hoy = date.today()
@@ -915,11 +915,211 @@ def admin_toggle_servicio(request, servicio_id):
 # ─────────────────────────────────────────────
 @login_required
 def admin_citas(request):
-    if not request.user.es_admin:
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
         return redirect('home')
-    citas = Cita.objects.select_related('cliente', 'tecnico', 'servicio', 'estado').order_by('-fecha', '-hora_inicio')
-    return render(request, 'turnos/administracion/admin_citas.html',
-                  {'citas': citas, 'total_citas': citas.count()})
+
+    hoy = date.today()
+
+    # ── KPIs ──
+    citas_hoy      = Cita.objects.filter(fecha=hoy).count()
+    pendientes     = Cita.objects.filter(estado__nombre__iexact='Confirmada').count()
+    en_proceso     = Cita.objects.filter(estado__nombre__iexact='Diagnóstico').count()
+    completadas    = Cita.objects.filter(estado__nombre__iexact='Finalizada').count()
+
+    # ── Filtros desde GET ──
+    qs = Cita.objects.select_related('cliente', 'tecnico', 'servicio', 'estado').order_by('-fecha', '-hora_inicio')
+
+    filtro_cliente  = request.GET.get('cliente', '').strip()
+    filtro_tecnico  = request.GET.get('tecnico', '').strip()
+    filtro_estado   = request.GET.get('estado', '').strip()
+    filtro_fecha_ini = request.GET.get('fecha_ini', '').strip()
+    filtro_fecha_fin = request.GET.get('fecha_fin', '').strip()
+
+    if filtro_cliente:
+        qs = qs.filter(cliente__nombre_completo__icontains=filtro_cliente)
+    if filtro_tecnico:
+        qs = qs.filter(tecnico__id=filtro_tecnico)
+    if filtro_estado:
+        qs = qs.filter(estado__nombre__iexact=filtro_estado)
+    if filtro_fecha_ini:
+        try:
+            from datetime import datetime
+            qs = qs.filter(fecha__gte=datetime.strptime(filtro_fecha_ini, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+    if filtro_fecha_fin:
+        try:
+            from datetime import datetime
+            qs = qs.filter(fecha__lte=datetime.strptime(filtro_fecha_fin, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+
+    # Paginación simple (25 por página)
+    from django.core.paginator import Paginator
+    paginator   = Paginator(qs, 25)
+    page_number = request.GET.get('page', 1)
+    page_obj    = paginator.get_page(page_number)
+
+    tecnicos    = Usuario.objects.filter(rol=Usuario.Rol.TECNICO, activo=True).order_by('nombre_completo')
+    estados     = EstadoCita.objects.all().order_by('nombre')
+
+    context = {
+        'citas':           page_obj,
+        'page_obj':        page_obj,
+        'total_citas':     qs.count(),
+        'citas_hoy':       citas_hoy,
+        'pendientes':      pendientes,
+        'en_proceso':      en_proceso,
+        'completadas':     completadas,
+        'tecnicos':        tecnicos,
+        'estados':         estados,
+        'filtro_cliente':  filtro_cliente,
+        'filtro_tecnico':  filtro_tecnico,
+        'filtro_estado':   filtro_estado,
+        'filtro_fecha_ini': filtro_fecha_ini,
+        'filtro_fecha_fin': filtro_fecha_fin,
+    }
+    return render(request, 'turnos/administracion/admin_citas.html', context)
+
+
+@login_required
+def admin_exportar_citas_excel(request):
+    """Exporta la lista de citas a Excel con diseño profesional."""
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return redirect('home')
+
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    from django.http import HttpResponse
+
+    hoy = date.today()
+
+    qs = Cita.objects.select_related('cliente', 'tecnico', 'servicio', 'estado').order_by('-fecha', '-hora_inicio')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Gestión de Citas"
+    ws.sheet_view.showGridLines = False
+
+    # Estilos
+    navy_fill    = PatternFill("solid", fgColor="1D4ED8")
+    blue_fill    = PatternFill("solid", fgColor="EFF6FF")
+    gray_fill    = PatternFill("solid", fgColor="F8FAFC")
+    green_fill   = PatternFill("solid", fgColor="D1FAE5")
+    amber_fill   = PatternFill("solid", fgColor="FEF3C7")
+    red_fill     = PatternFill("solid", fgColor="FEE2E2")
+    purple_fill  = PatternFill("solid", fgColor="EDE9FE")
+
+    thin = Side(border_style="thin", color="E2E8F0")
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    font_title   = Font(name="Inter", size=16, bold=True, color="1D4ED8")
+    font_sub     = Font(name="Inter", size=10, color="64748B")
+    font_header  = Font(name="Inter", size=10, bold=True, color="FFFFFF")
+    font_body    = Font(name="Inter", size=9, color="1E293B")
+    font_bold    = Font(name="Inter", size=9, bold=True, color="1E293B")
+
+    center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    left   = Alignment(horizontal="left",   vertical="center", wrap_text=True)
+
+    # ── Título ──
+    ws.merge_cells("A1:H2")
+    ws["A1"] = "ServiTech — Reporte de Gestión de Citas"
+    ws["A1"].font = font_title
+    ws["A1"].alignment = center
+    ws["A1"].fill = blue_fill
+
+    ws.merge_cells("A3:H3")
+    ws["A3"] = f"Generado el {hoy.strftime('%d/%m/%Y')}  |  Total de registros: {qs.count()}"
+    ws["A3"].font = font_sub
+    ws["A3"].alignment = center
+
+    # ── KPIs ──
+    ws.merge_cells("A4:B4"); ws["A4"] = "Citas Hoy"
+    ws.merge_cells("C4:D4"); ws["C4"] = "Pendientes"
+    ws.merge_cells("E4:F4"); ws["E4"] = "Completadas"
+
+    ws.merge_cells("A5:B5"); ws["A5"] = Cita.objects.filter(fecha=hoy).count()
+    ws.merge_cells("C5:D5"); ws["C5"] = Cita.objects.filter(estado__nombre__iexact='Confirmada').count()
+    ws.merge_cells("E5:F5"); ws["E5"] = Cita.objects.filter(estado__nombre__iexact='Finalizada').count()
+
+    for cell in ["A4","C4","E4"]:
+        ws[cell].font = Font(name="Inter", size=9, bold=True, color="64748B")
+        ws[cell].alignment = center
+    for cell in ["A5","C5","E5"]:
+        ws[cell].font = Font(name="Inter", size=18, bold=True, color="1D4ED8")
+        ws[cell].alignment = center
+
+    ws.row_dimensions[4].height = 18
+    ws.row_dimensions[5].height = 30
+
+    # ── Espacio ──
+    ws.row_dimensions[6].height = 8
+
+    # ── Encabezados tabla ──
+    headers = ["#", "CLIENTE", "SERVICIO", "TÉCNICO", "FECHA", "HORA", "ESTADO", "OBSERVACIONES"]
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=7, column=col, value=h)
+        cell.font = font_header
+        cell.fill = navy_fill
+        cell.alignment = center
+        cell.border = border
+    ws.row_dimensions[7].height = 22
+
+    # ── Datos ──
+    row_num = 8
+    for idx, cita in enumerate(qs, 1):
+        estado_nombre = cita.estado.nombre if cita.estado else "Sin estado"
+
+        # Color de fila por estado
+        if estado_nombre.lower() in ['finalizada']:
+            row_fill = green_fill
+        elif estado_nombre.lower() in ['cancelada']:
+            row_fill = red_fill
+        elif estado_nombre.lower() in ['diagnóstico', 'diagnostico']:
+            row_fill = purple_fill
+        elif estado_nombre.lower() in ['confirmada']:
+            row_fill = amber_fill
+        else:
+            row_fill = gray_fill if idx % 2 == 0 else None
+
+        data = [
+            f"{idx:03d}",
+            cita.cliente.nombre_completo if cita.cliente else "—",
+            cita.servicio.nombre if cita.servicio else "—",
+            cita.tecnico.nombre_completo if cita.tecnico else "Sin asignar",
+            cita.fecha.strftime('%d/%m/%Y') if cita.fecha else "—",
+            f"{cita.hora_inicio.strftime('%H:%M')} — {cita.hora_fin.strftime('%H:%M')}",
+            estado_nombre,
+            cita.observaciones or "—",
+        ]
+
+        aligns = [center, left, left, left, center, center, center, left]
+
+        for col, (val, aln) in enumerate(zip(data, aligns), 1):
+            cell = ws.cell(row=row_num, column=col, value=val)
+            cell.font = font_bold if col == 1 else font_body
+            cell.alignment = aln
+            cell.border = border
+            if row_fill:
+                cell.fill = row_fill
+
+        ws.row_dimensions[row_num].height = 18
+        row_num += 1
+
+    # ── Anchos de columna ──
+    col_widths = [6, 28, 28, 24, 14, 18, 16, 35]
+    for col, w in enumerate(col_widths, 1):
+        ws.column_dimensions[get_column_letter(col)].width = w
+
+    # ── Respuesta ──
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename=ServiTech_Citas_{hoy.strftime("%Y%m%d")}.xlsx'
+    wb.save(response)
+    return response
 
 
 # ─────────────────────────────────────────────
