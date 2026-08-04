@@ -23,10 +23,10 @@
 </head>
 <body class="bg-[#f8fafc] min-h-screen flex overflow-x-hidden">
 
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden" onclick="closeSidebar()"></div>
 
     <!-- SIDEBAR -->
-    <aside id="sidebar" class="sidebar-t fixed top-0 left-0 h-full w-[210px] bg-white border-r border-slate-100 z-40 flex flex-col -translate-x-full md:translate-x-0">
+    <aside id="sidebar" class="sidebar-t fixed top-0 left-0 h-full w-[210px] bg-white border-r border-slate-100 z-40 flex flex-col -translate-x-full lg:translate-x-0">
         <div class="px-5 pt-5 pb-4 border-b border-slate-100">
             <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-[#1d4ed8] flex items-center justify-center flex-shrink-0">
@@ -61,10 +61,7 @@
             </a>
         </nav>
         <div class="px-3 pb-4 pt-3 border-t border-slate-100 space-y-2">
-            <a href="{% url 'seleccionar_dispositivo' %}" class="w-full flex items-center justify-center gap-2 bg-[#1d4ed8] hover:bg-[#1e40af] text-white font-bold py-2.5 px-4 rounded-xl transition text-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                Nueva Cita
-            </a>
+
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
                 <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:bg-red-50 hover:text-red-600 transition">
@@ -76,14 +73,14 @@
     </aside>
 
     <!-- CONTENIDO -->
-    <div class="flex-1 flex flex-col min-h-screen md:ml-[210px]">
+    <div class="flex-1 flex flex-col min-h-screen lg:ml-[210px]">
 
         <!-- ═══ TOPBAR NUEVO ═══ -->
         <header class="bg-white border-b border-slate-100 sticky top-0 z-20 h-[56px] px-5 flex items-center justify-between">
 
             <!-- Izq: hamburguesa + breadcrumb -->
             <div class="flex items-center gap-3">
-                <button onclick="openSidebar()" class="md:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 transition">
+                <button onclick="openSidebar()" class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
                 <div class="hidden md:flex items-center gap-1.5 text-xs">

@@ -1240,3 +1240,35 @@ def admin_inventario(request):
     }
     return render(request, 'turnos/administracion/admin_inventario.html', context)
 
+@login_required
+def admin_exportar_usuarios_excel(request):
+    if not request.user.es_admin:
+        return redirect('home')
+    
+    import openpyxl
+    from django.http import HttpResponse
+    from turnos.models import Usuario
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Usuarios"
+
+    headers = ['ID', 'Nombre Completo', 'Correo', 'Teléfono', 'Rol', 'Estado']
+    ws.append(headers)
+
+    usuarios = Usuario.objects.all().order_by('id_usuario')
+    for u in usuarios:
+        estado = 'Activo' if u.activo else 'Inactivo'
+        ws.append([
+            u.id_usuario,
+            u.nombre_completo,
+            u.correo,
+            u.telefono or '',
+            u.get_rol_display(),
+            estado
+        ])
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="directorio_usuarios.xlsx"'
+    wb.save(response)
+    return response
