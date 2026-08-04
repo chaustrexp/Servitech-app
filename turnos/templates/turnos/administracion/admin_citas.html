@@ -86,24 +86,16 @@
 <!-- ════════════════════════════════════════════
      2. FILTROS AVANZADOS
 ════════════════════════════════════════════ -->
-<div class="bg-white rounded-[20px] border border-slate-100 p-5 shadow-sm mb-6">
+<form method="GET" action="{% url 'admin_citas' %}" class="bg-white rounded-[20px] border border-slate-100 p-5 shadow-sm mb-6" id="form-filtros">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
 
         <!-- Filtro Cliente -->
         <div>
             <label class="block text-[12px] font-bold text-slate-700 mb-1.5">Cliente</label>
             <div class="relative">
-                <select id="filtro-cliente" onchange="aplicarFiltros()"
-                        class="w-full pl-4 pr-8 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-[#003399] focus:bg-white cursor-pointer appearance-none transition">
-                    <option value="TODOS">Todos los clientes</option>
-                    <option value="Mariana Torres">Mariana Torres</option>
-                    <option value="Jorge Herrera">Jorge Herrera</option>
-                    <option value="Arturo Vidal">Arturo Vidal</option>
-                    <option value="Samuel Eto'o">Samuel Eto'o</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </div>
+                <input type="text" name="cliente" value="{{ filtro_cliente }}" placeholder="Buscar por cliente..."
+                       onchange="document.getElementById('form-filtros').submit()"
+                       class="w-full pl-4 pr-4 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-[#003399] focus:bg-white transition">
             </div>
         </div>
 
@@ -111,12 +103,12 @@
         <div>
             <label class="block text-[12px] font-bold text-slate-700 mb-1.5">Técnico</label>
             <div class="relative">
-                <select id="filtro-tecnico" onchange="aplicarFiltros()"
+                <select name="tecnico" onchange="document.getElementById('form-filtros').submit()"
                         class="w-full pl-4 pr-8 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-[#003399] focus:bg-white cursor-pointer appearance-none transition">
-                    <option value="TODOS">Todos los técnicos</option>
-                    <option value="Carlos Ruiz">Carlos Ruiz</option>
-                    <option value="Lucía Méndez">Lucía Méndez</option>
-                    <option value="Roberto Gómez">Roberto Gómez</option>
+                    <option value="">Todos los técnicos</option>
+                    {% for t in tecnicos %}
+                    <option value="{{ t.id }}" {% if filtro_tecnico == t.id|stringformat:"s" %}selected{% endif %}>{{ t.nombre_completo }}</option>
+                    {% endfor %}
                 </select>
                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -128,13 +120,12 @@
         <div>
             <label class="block text-[12px] font-bold text-slate-700 mb-1.5">Estado</label>
             <div class="relative">
-                <select id="filtro-estado" onchange="aplicarFiltros()"
+                <select name="estado" onchange="document.getElementById('form-filtros').submit()"
                         class="w-full pl-4 pr-8 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-[#003399] focus:bg-white cursor-pointer appearance-none transition">
-                    <option value="TODOS">Cualquier estado</option>
-                    <option value="PENDIENTE">Pendiente</option>
-                    <option value="CONFIRMADA">Confirmada</option>
-                    <option value="EN_PROCESO">En Proceso</option>
-                    <option value="COMPLETADA">Completada</option>
+                    <option value="">Cualquier estado</option>
+                    {% for est in estados %}
+                    <option value="{{ est.nombre }}" {% if filtro_estado == est.nombre %}selected{% endif %}>{{ est.nombre }}</option>
+                    {% endfor %}
                 </select>
                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -147,30 +138,31 @@
             <label class="block text-[12px] font-bold text-slate-700 mb-1.5">Rango de Fechas</label>
             <div class="flex items-center gap-2">
                 <div class="relative flex-1">
-                    <input type="text" placeholder="mm/dd/yyyy"
-                           class="w-full pl-3 pr-8 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-[#003399] focus:bg-white transition">
-                    <svg class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <input type="date" name="fecha_ini" value="{{ filtro_fecha_ini }}"
+                           onchange="document.getElementById('form-filtros').submit()"
+                           class="w-full pl-3 pr-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-[#003399] focus:bg-white transition">
                 </div>
                 <span class="text-slate-400 text-sm">a</span>
                 <div class="relative flex-1">
-                    <input type="text" placeholder="mm/dd/yyyy"
-                           class="w-full pl-3 pr-8 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-[#003399] focus:bg-white transition">
+                    <input type="date" name="fecha_fin" value="{{ filtro_fecha_fin }}"
+                           onchange="document.getElementById('form-filtros').submit()"
+                           class="w-full pl-3 pr-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-[13px] text-slate-700 focus:outline-none focus:border-[#003399] focus:bg-white transition">
                 </div>
             </div>
         </div>
 
         <!-- Botón Limpiar -->
         <div class="flex items-end h-full">
-            <button onclick="limpiarFiltros()"
-                    class="w-auto px-5 py-2.5 rounded-xl bg-[#EEF2FF] text-[#003399] hover:bg-[#E0E7FF] text-[13px] font-semibold transition flex items-center justify-center gap-1.5">
+            <a href="{% url 'admin_citas' %}"
+               class="w-auto px-5 py-2.5 rounded-xl bg-[#EEF2FF] text-[#003399] hover:bg-[#E0E7FF] text-[13px] font-semibold transition flex items-center justify-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                 </svg>
                 <span>Limpiar</span>
-            </button>
+            </a>
         </div>
     </div>
-</div>
+</form>
 
 <!-- ════════════════════════════════════════════
      3. TABLA DE CITAS
@@ -207,26 +199,145 @@
                 </tr>
             </thead>
             <tbody id="tabla-citas-body" class="divide-y divide-slate-100">
-                <!-- Se renderiza dinámicamente desde JavaScript -->
+                {% for cita in citas %}
+                <tr class="hover:bg-slate-50/50 transition-colors group">
+                    <!-- Cliente -->
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-[#1d4ed8] font-bold text-[13px] border border-slate-300">
+                                {{ cita.cliente.nombre_completo|slice:":1" }}
+                            </div>
+                            <div>
+                                <p class="text-[13px] font-bold text-slate-800 leading-tight">{{ cita.cliente.nombre_completo }}</p>
+                                <p class="text-[11px] text-slate-500 mt-0.5">{{ cita.cliente.user.email|default:"Sin email" }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    
+                    <!-- Servicio -->
+                    <td class="py-4 px-6">
+                        <div class="flex items-start gap-2">
+                            <div class="mt-0.5">
+                                <svg class="w-4 h-4 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-[13px] font-medium text-slate-700 leading-tight">{{ cita.servicio.nombre }}</p>
+                                <span class="inline-block mt-1 text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                                    {{ cita.vehiculo|default:"General" }}
+                                </span>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Técnico -->
+                    <td class="py-4 px-6">
+                        {% if cita.tecnico %}
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px] font-bold">
+                                {{ cita.tecnico.nombre_completo|slice:":1" }}
+                            </div>
+                            <span class="text-[13px] text-slate-700 font-medium">
+                                {{ cita.tecnico.nombre_completo }}
+                            </span>
+                        </div>
+                        {% else %}
+                        <span class="text-[12px] text-slate-400 italic">Sin asignar</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Fecha / Hora -->
+                    <td class="py-4 px-6">
+                        <p class="text-[13px] font-bold text-slate-800">{{ cita.fecha|date:"d M, Y" }}</p>
+                        <p class="text-[11px] text-slate-500 mt-0.5">{{ cita.hora_inicio|time:"H:i" }} - {{ cita.hora_fin|time:"H:i" }}</p>
+                    </td>
+
+                    <!-- Estado -->
+                    <td class="py-4 px-6">
+                        {% if cita.estado.nombre == 'Pendiente' %}
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#FEE2E2] text-[#B91C1C]">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#EF4444]"></span> Pendiente
+                            </span>
+                        {% elif cita.estado.nombre == 'Confirmada' %}
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-800">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Confirmada
+                            </span>
+                        {% elif cita.estado.nombre == 'Diagnóstico' %}
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Diagnóstico
+                            </span>
+                        {% elif cita.estado.nombre == 'En Reparación' or cita.estado.nombre == 'En Proceso' %}
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#E0E7FF] text-[#003399]">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#003399]"></span> En Proceso
+                            </span>
+                        {% elif cita.estado.nombre == 'Finalizada' or cita.estado.nombre == 'Completada' %}
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#6EE7B7] text-[#047857]">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#059669]"></span> Completada
+                            </span>
+                        {% elif cita.estado.nombre == 'Cancelada' %}
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Cancelada
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> {{ cita.estado.nombre }}
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Acciones -->
+                    <td class="py-4 px-6 text-right">
+                        <button class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition" title="Ver detalles">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="py-12 text-center text-slate-400 font-medium">
+                        🔍 No se encontraron citas con los filtros aplicados.
+                    </td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
 
     <!-- Paginación -->
     <div class="px-6 py-4 bg-[#F8FAFC] flex items-center justify-between">
-        <p id="info-paginacion" class="text-[13px] text-slate-600 font-medium">
-            Mostrando 4 de 189 citas
+        <p class="text-[13px] text-slate-600 font-medium">
+            Mostrando {% if citas.start_index %}{{ citas.start_index }}{% else %}0{% endif %} - 
+            {% if citas.end_index %}{{ citas.end_index }}{% else %}0{% endif %} de {{ total_citas }} citas
         </p>
-        <div class="flex items-center gap-2" id="controles-paginacion">
-            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition">
+        <div class="flex items-center gap-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.tecnico %}&tecnico={{ request.GET.tecnico }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_ini %}&fecha_ini={{ request.GET.fecha_ini }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" 
+               class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </a>
+            {% else %}
+            <div class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </div>
+            {% endif %}
+            
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#003399] text-white font-bold text-[13px] shadow-sm">
+                {{ page_obj.number }}
             </button>
-            <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#003399] text-white font-bold text-[13px] shadow-sm">1</button>
-            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-medium text-[13px] transition">2</button>
-            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-medium text-[13px] transition">3</button>
-            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">
+            
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.tecnico %}&tecnico={{ request.GET.tecnico }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_ini %}&fecha_ini={{ request.GET.fecha_ini }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" 
+               class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </button>
+            </a>
+            {% else %}
+            <div class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -236,206 +347,22 @@
 {% block scripts %}
 <script>
 // ─────────────────────────────────────────────
-// DATASET DE CITAS SIMULADAS PARA COINCIDIR CON LA IMAGEN
-// ─────────────────────────────────────────────
-let CITAS_BD = [
-    { 
-        id: "101", 
-        cliente_nombre: "Mariana Torres", 
-        cliente_email: "m.torres@gmail.com",
-        cliente_avatar: "https://i.pravatar.cc/150?u=mariana",
-        servicio: "Reparación Celular", 
-        dispositivo: "iPhone 13 Pro", 
-        dispositivo_tipo: "celular",
-        tecnico_nombre: "Carlos Ruiz", 
-        tecnico_inicial: "CR",
-        tecnico_color: "bg-[#003399]",
-        fecha_relativa: "Hoy, 14:30", 
-        hora_relativa: "En 2 horas", 
-        estado: "EN_PROCESO" 
-    },
-    { 
-        id: "102", 
-        cliente_nombre: "Jorge Herrera", 
-        cliente_email: "jorge.h@outlook.com",
-        cliente_avatar: "https://i.pravatar.cc/150?u=jorge",
-        servicio: "Mantenimiento Laptop", 
-        dispositivo: "MacBook Pro M2", 
-        dispositivo_tipo: "laptop",
-        tecnico_nombre: "Lucía Méndez", 
-        tecnico_inicial: "LM",
-        tecnico_color: "bg-[#34D399]",
-        fecha_relativa: "Mañana, 09:00", 
-        hora_relativa: "Pendiente asignación", 
-        estado: "PENDIENTE" 
-    },
-    { 
-        id: "103", 
-        cliente_nombre: "Arturo Vidal", 
-        cliente_email: "artur.v@vidal.cl",
-        cliente_avatar: "https://i.pravatar.cc/150?u=arturo",
-        servicio: "Cambio Pantalla PC", 
-        dispositivo: "Dell XPS 27\"", 
-        dispositivo_tipo: "pc",
-        tecnico_nombre: "Roberto Gómez", 
-        tecnico_inicial: "RG",
-        tecnico_color: "bg-[#1E3A8A]",
-        fecha_relativa: "Ayer, 16:00", 
-        hora_relativa: "Finalizado", 
-        estado: "COMPLETADA" 
-    },
-    { 
-        id: "104", 
-        cliente_nombre: "Samuel Eto'o", 
-        cliente_email: "sam.e@gmail.com",
-        cliente_avatar: "https://i.pravatar.cc/150?u=samuel",
-        servicio: "Cambio de Batería", 
-        dispositivo: "Apple Watch S8", 
-        dispositivo_tipo: "watch",
-        tecnico_nombre: "Lucía Méndez", 
-        tecnico_inicial: "LM",
-        tecnico_color: "bg-[#34D399]",
-        fecha_relativa: "Hoy, 10:30", 
-        hora_relativa: "Confirmada", 
-        estado: "CONFIRMADA" 
-    }
-];
-
-let citasFiltradas = [...CITAS_BD];
-
-// ─────────────────────────────────────────────
-// RENDERIZADO
-// ─────────────────────────────────────────────
-function renderizarTabla() {
-    const tbody = document.getElementById('tabla-citas-body');
-    tbody.innerHTML = '';
-
-    if (citasFiltradas.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="6" class="py-12 text-center text-slate-400 font-medium">
-                    🔍 No se encontraron citas.
-                </td>
-            </tr>`;
-        return;
-    }
-
-    citasFiltradas.forEach(c => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-50/50 transition-colors group';
-
-        // Determinar icono del dispositivo
-        let iconoDispositivo = '';
-        if(c.dispositivo_tipo === 'celular'){
-            iconoDispositivo = `<svg class="w-4 h-4 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>`;
-        } else if(c.dispositivo_tipo === 'laptop'){
-            iconoDispositivo = `<svg class="w-4 h-4 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>`;
-        } else if(c.dispositivo_tipo === 'pc'){
-            iconoDispositivo = `<svg class="w-4 h-4 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>`;
-        } else {
-            iconoDispositivo = `<svg class="w-4 h-4 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
-        }
-
-        // Determinar estilo del estado
-        let estadoClases = '';
-        let dotColor = '';
-        let estadoTexto = c.estado.replace('_', ' ');
-
-        if (c.estado === 'EN_PROCESO') {
-            estadoClases = 'bg-[#E0E7FF] text-[#003399]';
-            dotColor = 'bg-[#003399]';
-        } else if (c.estado === 'PENDIENTE') {
-            estadoClases = 'bg-[#FEE2E2] text-[#B91C1C]';
-            dotColor = 'bg-[#EF4444]';
-        } else if (c.estado === 'COMPLETADA') {
-            estadoClases = 'bg-[#6EE7B7] text-[#047857]';
-            dotColor = 'bg-[#059669]';
-        } else if (c.estado === 'CONFIRMADA') {
-            estadoClases = 'bg-[#E0E7FF] text-[#003399]';
-            dotColor = 'bg-[#003399]';
-        }
-
-        tr.innerHTML = `
-            <td class="py-4 px-6">
-                <div class="flex items-center gap-3">
-                    <img src="${c.cliente_avatar}" alt="${c.cliente_nombre}" class="w-9 h-9 rounded-full object-cover bg-slate-200">
-                    <div>
-                        <p class="text-[13px] font-bold text-slate-800 leading-tight">${c.cliente_nombre}</p>
-                        <p class="text-[11px] text-slate-500 mt-0.5">${c.cliente_email}</p>
-                    </div>
-                </div>
-            </td>
-            <td class="py-4 px-6">
-                <div class="flex items-start gap-2">
-                    <div class="mt-0.5">${iconoDispositivo}</div>
-                    <div>
-                        <p class="text-[13px] font-medium text-slate-700 leading-tight">${c.servicio}</p>
-                        <span class="inline-block mt-1 text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">${c.dispositivo}</span>
-                    </div>
-                </div>
-            </td>
-            <td class="py-4 px-6">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-7 h-7 rounded-full ${c.tecnico_color} text-white flex items-center justify-center text-[10px] font-bold">
-                        ${c.tecnico_inicial}
-                    </div>
-                    <span class="text-[13px] text-slate-700 font-medium">
-                        ${c.tecnico_nombre}
-                    </span>
-                </div>
-            </td>
-            <td class="py-4 px-6">
-                <p class="text-[13px] font-bold text-slate-800">${c.fecha_relativa}</p>
-                <p class="text-[11px] text-slate-500 mt-0.5">${c.hora_relativa}</p>
-            </td>
-            <td class="py-4 px-6">
-                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full ${estadoClases}">
-                    <span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span>
-                    ${estadoTexto}
-                </span>
-            </td>
-            <td class="py-4 px-6 text-right">
-                <button class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-                    </svg>
-                </button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-function aplicarFiltros() {
-    renderizarTabla();
-}
-function limpiarFiltros() {
-    document.getElementById('filtro-cliente').value = 'TODOS';
-    document.getElementById('filtro-tecnico').value = 'TODOS';
-    document.getElementById('filtro-estado').value = 'TODOS';
-    renderizarTabla();
-}
-
-// ─────────────────────────────────────────────
 // EXPORTACIÓN A EXCEL
 // ─────────────────────────────────────────────
 function exportarCitasExcel() {
-    const cliente = document.getElementById('filtro-cliente').value;
-    const tecnico = document.getElementById('filtro-tecnico').value;
-    const estado = document.getElementById('filtro-estado').value;
+    // Obtenemos los valores de los filtros actuales en el formulario GET
+    const form = document.getElementById('form-filtros');
+    const formData = new FormData(form);
     
-    // Asumiendo que existen inputs de fecha si están implementados en el DOM real
     let qs = "?";
-    if(cliente !== 'TODOS') qs += `cliente=${encodeURIComponent(cliente)}&`;
-    if(tecnico !== 'TODOS') qs += `tecnico=${encodeURIComponent(tecnico)}&`;
-    if(estado !== 'TODOS') qs += `estado=${encodeURIComponent(estado)}&`;
+    for (let [key, value] of formData.entries()) {
+        if (value.trim() !== '') {
+            qs += `${key}=${encodeURIComponent(value)}&`;
+        }
+    }
     
+    // Redirigir a la vista de exportación con los query params
     window.location.href = "{% url 'admin_exportar_citas_excel' %}" + qs;
 }
-
-// Inicialización
-document.addEventListener('DOMContentLoaded', () => {
-    renderizarTabla();
-});
 </script>
 {% endblock %}
