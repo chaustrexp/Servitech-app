@@ -3,25 +3,124 @@
 
 {% block title %}Catálogo de Servicios | ServiTech{% endblock %}
 
+{% block extra_head %}
+<style>
+/* Por defecto, la tabla de impresión está oculta */
+.print-only-table, .print-header {
+    display: none;
+}
+
+@media print {
+    /* Ocultar interfaz no esencial, barras, botones e imágenes pesadas */
+    aside, header, #sidebar, #sidebar-overlay, #toast-container,
+    .no-print, button, .col-acciones, .btn-crear-head, .cabecera-pagina,
+    #grid-servicios, .seccion-premium {
+        display: none !important;
+    }
+
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-family: Arial, sans-serif !important;
+    }
+
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    div[class*="ml-"] {
+        margin-left: 0 !important;
+    }
+
+    /* Mostrar membrete e informe impreso esencial */
+    .print-header {
+        display: block !important;
+        margin-bottom: 16px !important;
+        border-bottom: 2px solid #003399 !important;
+        padding-bottom: 10px !important;
+    }
+
+    .print-only-table {
+        display: block !important;
+        width: 100% !important;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
+<!-- MEMBRETE DE IMPRESIÓN (PDF) -->
+<div class="print-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 style="font-size: 20px; font-weight: bold; color: #003399; margin: 0;">ServiTech — Catálogo de Servicios Técnicos</h1>
+            <p style="font-size: 12px; color: #64748b; margin: 4px 0 0 0;">Reporte oficial de servicios y tiempos de atención</p>
+        </div>
+        <div style="text-align: right; font-size: 11px; color: #64748b;">
+            <p style="margin:0;"><strong>Fecha de impresión:</strong> {% now "d/m/Y H:i" %}</p>
+            <p style="margin:2px 0 0 0;"><strong>Total servicios:</strong> {{ servicios|length }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- TABLA DE RESUMEN EXCLUSIVA PARA IMPRESIÓN (PDF) -->
+<div class="print-only-table">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <thead>
+            <tr style="background-color: #F8FAFC; border-bottom: 2px solid #003399; font-size: 11px; text-transform: uppercase;">
+                <th style="padding: 8px 10px; text-align: left;">Servicio Técnico</th>
+                <th style="padding: 8px 10px; text-align: left;">Dispositivo</th>
+                <th style="padding: 8px 10px; text-align: left;">Especialidad</th>
+                <th style="padding: 8px 10px; text-align: center;">Duración</th>
+                <th style="padding: 8px 10px; text-align: center;">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in servicios %}
+            <tr style="border-bottom: 1px solid #E2E8F0; font-size: 12px;">
+                <td style="padding: 8px 10px;">
+                    <strong style="color: #1e293b;">{{ s.nombre }}</strong>
+                    {% if s.descripcion %}
+                    <div style="font-size: 11px; color: #64748b; margin-top: 2px;">{{ s.descripcion }}</div>
+                    {% endif %}
+                </td>
+                <td style="padding: 8px 10px;">{{ s.get_tipo_dispositivo_display }}</td>
+                <td style="padding: 8px 10px;">{{ s.especialidad.nombre|default:"General" }}</td>
+                <td style="padding: 8px 10px; text-align: center; font-weight: bold;">{{ s.duracion_minutos }} min</td>
+                <td style="padding: 8px 10px; text-align: center;">
+                    {% if s.activo %}<span style="color: #059669; font-weight: bold;">Activo</span>{% else %}<span style="color: #e11d48;">Inactivo</span>{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 <!-- ════════════════════════════════════════════
      CABECERA DE PÁGINA
 ════════════════════════════════════════════ -->
-<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8 mt-2">
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8 mt-2 cabecera-pagina">
     <div>
         <h1 class="text-[26px] font-bold text-[#003399] tracking-tight leading-none mb-2">Catálogo de Servicios</h1>
         <p class="text-[13px] text-slate-500 font-medium max-w-lg leading-relaxed">
             Administra y actualiza la oferta técnica de ServiTech. Configura precios, tiempos de respuesta y visibilidad para tus clientes.
         </p>
     </div>
-    <button onclick="abrirModalAgregarServicio()"
-            class="flex items-center gap-2 bg-[#003399] hover:bg-[#002266] text-white font-bold px-5 py-2.5 rounded-xl text-[13px] transition-all shadow-sm flex-shrink-0 active:scale-95">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-        </svg>
-        Agregar Servicio
-    </button>
+    <div class="flex items-center gap-2 flex-shrink-0 btn-crear-head no-print">
+        <button onclick="window.print()" class="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition" title="Imprimir Catálogo">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"/></svg>
+        </button>
+        <button onclick="abrirModalAgregarServicio()"
+                class="flex items-center gap-2 bg-[#003399] hover:bg-[#002266] text-white font-bold px-5 py-2.5 rounded-xl text-[13px] transition-all shadow-sm active:scale-95">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            Agregar Servicio
+        </button>
+    </div>
 </div>
 
 <!-- ════════════════════════════════════════════
@@ -29,133 +128,91 @@
 ════════════════════════════════════════════ -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" id="grid-servicios">
 
-    <!-- ─── Tarjeta 1: Reparación de Celulares ─── -->
-    <div class="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow">
-        <!-- Imagen con badge de estado -->
-        <div class="relative h-[200px] overflow-hidden bg-slate-200">
-            <img src="https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=600&q=80"
-                 alt="Reparación de Celulares"
-                 class="w-full h-full object-cover">
-            <span class="absolute top-4 right-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-[11px] font-bold text-[#059669] px-2.5 py-1 rounded-full shadow">
-                <span class="w-2 h-2 rounded-full bg-[#22C55E]"></span>Disponible
+    {% for s in servicios %}
+    <div class="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all flex flex-col justify-between">
+        <!-- Banner con badge de estado e imagen representativa según tipo -->
+        <div class="relative h-[160px] overflow-hidden bg-slate-800">
+            {% if s.tipo_dispositivo == 'CELULAR' %}
+            <img src="https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=600&q=80" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
+            {% elif s.tipo_dispositivo == 'LAPTOP' %}
+            <img src="https://images.unsplash.com/photo-1517059224940-d4af9eec41b7?w=600&q=80" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
+            {% else %}
+            <img src="https://images.unsplash.com/photo-1588702547919-26089e690ecd?w=600&q=80" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
+            {% endif %}
+            
+            <div class="absolute top-4 left-4">
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/90 text-[#003399] backdrop-blur-sm shadow-sm border border-white/20">
+                    {{ s.get_tipo_dispositivo_display }}
+                </span>
+            </div>
+
+            <span class="absolute top-4 right-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-[11px] font-bold {% if s.activo %}text-[#059669]{% else %}text-rose-600{% endif %} px-2.5 py-1 rounded-full shadow border border-white/20">
+                <span class="w-2 h-2 rounded-full {% if s.activo %}bg-[#22C55E]{% else %}bg-rose-500{% endif %}"></span>
+                {% if s.activo %}Disponible{% else %}Inactivo{% endif %}
             </span>
         </div>
+
         <!-- Contenido -->
-        <div class="p-5">
-            <div class="flex items-center justify-between mb-2">
-                <h3 class="text-[15px] font-bold text-[#003399]">Reparación de Celulares</h3>
-                <button class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-                    </svg>
-                </button>
-            </div>
-            <p class="text-[13px] text-slate-500 leading-relaxed mb-5">
-                Cambio de pantallas, baterías, puertos de carga y reparación de placa lógica para todas las marcas líderes.
-            </p>
-            <div class="flex items-end justify-between">
-                <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Precio Base</p>
-                    <p class="text-[18px] font-bold text-slate-800">$45.00</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tiempo Est.</p>
-                    <div class="flex items-center gap-1 text-[13px] text-slate-600 font-semibold justify-end">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        2-4 hrs
+        <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-[16px] font-bold text-[#003399] leading-tight">{{ s.nombre }}</h3>
+                    
+                    <!-- Botón Lápiz (Editar) y Toggle -->
+                    <div class="flex items-center gap-1 no-print">
+                        <button onclick="abrirModalEditarServicio({{ s.pk }}, '{{ s.nombre|escapejs }}', '{{ s.descripcion|default:''|escapejs }}', '{{ s.tipo_dispositivo|escapejs }}', {{ s.duracion_minutos }}, {{ s.buffer_minutos }}, '{{ s.especialidad.pk|default:'' }}')"
+                                class="p-1.5 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-[#003399] transition" title="Editar Servicio">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                            </svg>
+                        </button>
+                        <form action="{% url 'admin_toggle_servicio' s.pk %}" method="POST" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition" title="{% if s.activo %}Desactivar{% else %}Activar{% endif %}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                </svg>
+                            </button>
+                        </form>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- ─── Tarjeta 2: Mantenimiento Laptops ─── -->
-    <div class="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow">
-        <div class="relative h-[200px] overflow-hidden bg-slate-200">
-            <img src="https://images.unsplash.com/photo-1517059224940-d4af9eec41b7?w=600&q=80"
-                 alt="Mantenimiento Laptops"
-                 class="w-full h-full object-cover">
-            <span class="absolute top-4 right-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-[11px] font-bold text-[#059669] px-2.5 py-1 rounded-full shadow">
-                <span class="w-2 h-2 rounded-full bg-[#22C55E]"></span>Disponible
-            </span>
-        </div>
-        <div class="p-5">
-            <div class="flex items-center justify-between mb-2">
-                <h3 class="text-[15px] font-bold text-[#003399]">Mantenimiento Laptops</h3>
-                <button class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-                    </svg>
-                </button>
+                <p class="text-[13px] text-slate-500 leading-relaxed mb-4">
+                    {{ s.descripcion|default:"Servicio técnico especializado garantizado con insumos de alta calidad." }}
+                </p>
             </div>
-            <p class="text-[13px] text-slate-500 leading-relaxed mb-5">
-                Limpieza profunda, cambio de pasta térmica, optimización de software y actualización de componentes (RAM/SSD).
-            </p>
-            <div class="flex items-end justify-between">
-                <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Precio Base</p>
-                    <p class="text-[18px] font-bold text-slate-800">$60.00</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tiempo Est.</p>
-                    <div class="flex items-center gap-1 text-[13px] text-slate-600 font-semibold justify-end">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        24 hrs
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- ─── Tarjeta 3: Instalación de Redes ─── -->
-    <div class="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow">
-        <div class="relative h-[200px] overflow-hidden bg-slate-800">
-            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80"
-                 alt="Instalación de Redes"
-                 class="w-full h-full object-cover opacity-80">
-            <span class="absolute top-4 right-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-[11px] font-bold text-[#059669] px-2.5 py-1 rounded-full shadow">
-                <span class="w-2 h-2 rounded-full bg-[#22C55E]"></span>Disponible
-            </span>
-        </div>
-        <div class="p-5">
-            <div class="flex items-center justify-between mb-2">
-                <h3 class="text-[15px] font-bold text-[#003399]">Instalación de Redes</h3>
-                <button class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-                    </svg>
-                </button>
-            </div>
-            <p class="text-[13px] text-slate-500 leading-relaxed mb-5">
-                Diseño y despliegue de infraestructura WiFi y cableado estructurado para hogares y pequeñas oficinas.
-            </p>
-            <div class="flex items-end justify-between">
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
                 <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Precio Base</p>
-                    <p class="text-[18px] font-bold text-slate-800">$120.00</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Especialidad</p>
+                    <span class="text-[12px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+                        {{ s.especialidad.nombre|default:"General" }}
+                    </span>
                 </div>
                 <div class="text-right">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tiempo Est.</p>
-                    <div class="flex items-center gap-1 text-[13px] text-slate-600 font-semibold justify-end">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Tiempo Est.</p>
+                    <div class="flex items-center gap-1 text-[13px] text-slate-700 font-bold justify-end">
                         <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        1-2 días
+                        {{ s.duracion_minutos }} min
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    {% empty %}
+    <div class="col-span-2 bg-white rounded-2xl p-12 text-center border border-slate-100">
+        <p class="text-slate-400 font-medium">No hay servicios registrados en el catálogo.</p>
+    </div>
+    {% endfor %}
+
 </div>
 
 <!-- ════════════════════════════════════════════
      2. SECCIÓN: SERVICIOS PREMIUM EMPRESA
 ════════════════════════════════════════════ -->
-<div class="bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden mb-6">
+<div class="bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden mb-6 seccion-premium">
     <!-- Cabecera de sección -->
     <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -164,86 +221,44 @@
             </svg>
             <h3 class="font-bold text-slate-800 text-[15px]">Servicios Premium Empresa</h3>
         </div>
-        <span class="text-[12px] text-slate-500 font-medium">3 servicios configurados</span>
+        <span class="text-[12px] text-slate-500 font-medium">{{ servicios_premium|length }} servicios configurados</span>
     </div>
 
     <!-- Lista de servicios premium -->
     <div class="divide-y divide-slate-100">
-
-        <!-- Item 1: Auditoría de Ciberseguridad -->
-        <div class="px-6 py-5 flex items-center gap-4 hover:bg-slate-50/50 transition-colors">
-            <div class="w-10 h-10 rounded-xl bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                </svg>
+        {% for sp in servicios_premium %}
+        <div class="px-6 py-5 flex flex-wrap items-center gap-4 hover:bg-slate-50/50 transition-colors">
+            <div class="w-10 h-10 rounded-xl bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0 font-bold">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
             </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-[14px] font-bold text-slate-800 leading-tight">Auditoría de Ciberseguridad</p>
-                <p class="text-[12px] text-slate-500 mt-0.5">Análisis de vulnerabilidades y hardening de sistemas.</p>
+            <div class="flex-1 min-w-[200px]">
+                <p class="text-[14px] font-bold text-slate-800 leading-tight">{{ sp.nombre }}</p>
+                <p class="text-[12px] text-slate-500 mt-0.5">{{ sp.descripcion|default:"Soporte técnico corporativo prioritario." }}</p>
             </div>
             <div class="text-right flex-shrink-0">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Precio</p>
-                <p class="text-[14px] font-bold text-slate-800">$450.00</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Duración</p>
+                <p class="text-[14px] font-bold text-slate-800">{{ sp.duracion_minutos }} min</p>
             </div>
-            <span class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#EEF2FF] text-[#003399] border border-[#C7D7FF]">SLA: 48H</span>
+            <span class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#EEF2FF] text-[#003399] border border-[#C7D7FF]">
+                {{ sp.get_tipo_dispositivo_display }}
+            </span>
             <div class="flex items-center gap-1.5 flex-shrink-0">
-                <span class="w-2 h-2 rounded-full bg-[#22C55E]"></span>
-                <span class="text-[13px] font-semibold text-[#059669]">Activo</span>
+                <span class="w-2 h-2 rounded-full {% if sp.activo %}bg-[#22C55E]{% else %}bg-slate-300{% endif %}"></span>
+                <span class="text-[13px] font-semibold {% if sp.activo %}text-[#059669]{% else %}text-slate-500{% endif %}">
+                    {% if sp.activo %}Activo{% else %}Inactivo{% endif %}
+                </span>
             </div>
-            <button class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition flex-shrink-0">
+            <!-- Botón Lápiz funcional -->
+            <button onclick="abrirModalEditarServicio({{ sp.pk }}, '{{ sp.nombre|escapejs }}', '{{ sp.descripcion|default:''|escapejs }}', '{{ sp.tipo_dispositivo|escapejs }}', {{ sp.duracion_minutos }}, {{ sp.buffer_minutos }}, '{{ sp.especialidad.pk|default:'' }}')"
+                    class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition flex-shrink-0 no-print" title="Editar Servicio">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
             </button>
         </div>
-
-        <!-- Item 2: Recuperación de Desastres Cloud -->
-        <div class="px-6 py-5 flex items-center gap-4 hover:bg-slate-50/50 transition-colors">
-            <div class="w-10 h-10 rounded-xl bg-[#F0F9FF] text-[#0284C7] flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-                </svg>
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-[14px] font-bold text-slate-800 leading-tight">Recuperación de Desastres Cloud</p>
-                <p class="text-[12px] text-slate-500 mt-0.5">Configuración de backups redundantes y failover automatizado.</p>
-            </div>
-            <div class="text-right flex-shrink-0">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Precio</p>
-                <p class="text-[14px] font-bold text-slate-800">$299.00</p>
-            </div>
-            <span class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#EEF2FF] text-[#003399] border border-[#C7D7FF]">SLA: 24H</span>
-            <div class="flex items-center gap-1.5 flex-shrink-0">
-                <span class="w-2 h-2 rounded-full bg-slate-300"></span>
-                <span class="text-[13px] font-semibold text-slate-500">Inactivo</span>
-            </div>
-            <button class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition flex-shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-            </button>
+        {% empty %}
+        <div class="px-6 py-6 text-center text-slate-400 text-sm">
+            No hay servicios corporativos premium registrados.
         </div>
-
-        <!-- Item 3: Soporte Hardware Industrial -->
-        <div class="px-6 py-5 flex items-center gap-4 hover:bg-slate-50/50 transition-colors">
-            <div class="w-10 h-10 rounded-xl bg-[#FFF7ED] text-[#EA580C] flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-[14px] font-bold text-slate-800 leading-tight">Soporte Hardware Industrial</p>
-                <p class="text-[12px] text-slate-500 mt-0.5">Mantenimiento preventivo de maquinaria controlada por PLC.</p>
-            </div>
-            <div class="text-right flex-shrink-0">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Precio</p>
-                <p class="text-[14px] font-bold text-slate-800">$850.00</p>
-            </div>
-            <span class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#EEF2FF] text-[#003399] border border-[#C7D7FF]">SLA: 12H</span>
-            <div class="flex items-center gap-1.5 flex-shrink-0">
-                <span class="w-2 h-2 rounded-full bg-[#22C55E]"></span>
-                <span class="text-[13px] font-semibold text-[#059669]">Activo</span>
-            </div>
-            <button class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition flex-shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-            </button>
-        </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -259,38 +274,105 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-        <form class="p-6 space-y-4" onsubmit="guardarServicio(event)">
+        <form action="{% url 'admin_crear_servicio' %}" method="POST" class="p-6 space-y-4">
+            {% csrf_token %}
             <div>
                 <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Nombre del Servicio</label>
-                <input type="text" required placeholder="Ej. Reparación de Tablet" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                <input type="text" name="nombre" required placeholder="Ej. Reparación de Placa Celular" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
             </div>
             <div>
                 <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Descripción</label>
-                <textarea rows="3" placeholder="Describe el servicio..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition resize-none"></textarea>
+                <textarea name="descripcion" rows="3" placeholder="Describe el alcance del servicio..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition resize-none"></textarea>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Precio Base ($)</label>
-                    <input type="number" step="0.01" placeholder="0.00" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Tipo de Dispositivo</label>
+                    <select name="tipo_dispositivo" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition font-semibold">
+                        <option value="CELULAR">Celular</option>
+                        <option value="LAPTOP">Laptop</option>
+                        <option value="PC">PC / Escritorio</option>
+                    </select>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Tiempo Estimado</label>
-                    <input type="text" placeholder="Ej. 2-4 hrs" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Especialidad</label>
+                    <select name="especialidad_id" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                        {% for esp in especialidades %}
+                        <option value="{{ esp.pk }}">{{ esp.nombre }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
-            <div>
-                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Categoría</label>
-                <select class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
-                    <option>Celulares</option>
-                    <option>Laptops</option>
-                    <option>PC & Escritorio</option>
-                    <option>Redes</option>
-                    <option>Premium Empresa</option>
-                </select>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Duración (Minutos)</label>
+                    <input type="number" name="duracion_minutos" value="60" required min="10" step="5" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Tiempo Buffer (Min)</label>
+                    <input type="number" name="buffer_minutos" value="15" min="0" step="5" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                </div>
             </div>
             <div class="pt-2 flex gap-3">
                 <button type="button" onclick="cerrarModalAgregarServicio()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition">Cancelar</button>
-                <button type="submit" class="flex-1 py-2.5 rounded-xl bg-[#003399] hover:bg-[#002266] text-white font-bold text-[13px] transition shadow-sm">Guardar Servicio</button>
+                <button type="submit" class="flex-1 py-2.5 rounded-xl bg-[#003399] hover:bg-[#002266] text-white font-bold text-[13px] transition shadow-sm">Registrar Servicio</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     4. MODAL: EDITAR SERVICIO (LÁPIZ)
+════════════════════════════════════════════ -->
+<div id="modal-editar-servicio" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="cerrarModalEditarServicio()"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md z-10 overflow-hidden border border-slate-100">
+        <div class="px-6 py-4 flex items-center justify-between border-b border-slate-100">
+            <h3 class="font-bold text-[15px] text-slate-800">Editar Servicio Técnico</h3>
+            <button onclick="cerrarModalEditarServicio()" class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form id="form-editar-servicio" method="POST" action="" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Nombre del Servicio</label>
+                <input type="text" id="edit-serv-nombre" name="nombre" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Descripción</label>
+                <textarea id="edit-serv-desc" name="descripcion" rows="3" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition resize-none"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Tipo de Dispositivo</label>
+                    <select id="edit-serv-tipo" name="tipo_dispositivo" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition font-semibold">
+                        <option value="CELULAR">Celular</option>
+                        <option value="LAPTOP">Laptop</option>
+                        <option value="PC">PC / Escritorio</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Especialidad</label>
+                    <select id="edit-serv-esp" name="especialidad_id" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                        {% for esp in especialidades %}
+                        <option value="{{ esp.pk }}">{{ esp.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Duración (Minutos)</label>
+                    <input type="number" id="edit-serv-duracion" name="duracion_minutos" required min="10" step="5" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Tiempo Buffer (Min)</label>
+                    <input type="number" id="edit-serv-buffer" name="buffer_minutos" min="0" step="5" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                </div>
+            </div>
+            <div class="pt-2 flex gap-3">
+                <button type="button" onclick="cerrarModalEditarServicio()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition">Cancelar</button>
+                <button type="submit" class="flex-1 py-2.5 rounded-xl bg-[#003399] hover:bg-[#002266] text-white font-bold text-[13px] transition shadow-sm">Guardar Cambios</button>
             </div>
         </form>
     </div>
@@ -301,22 +383,39 @@
 {% block scripts %}
 <script>
 // ─────────────────────────────────────────────
-// Modal: Agregar Servicio
+// MODAL AGREGAR SERVICIO
 // ─────────────────────────────────────────────
 function abrirModalAgregarServicio() {
     const m = document.getElementById('modal-agregar-servicio');
-    m.classList.remove('hidden');
-    m.classList.add('flex');
+    m.classList.remove('hidden'); m.classList.add('flex');
 }
 function cerrarModalAgregarServicio() {
     const m = document.getElementById('modal-agregar-servicio');
-    m.classList.add('hidden');
-    m.classList.remove('flex');
+    m.classList.add('hidden'); m.classList.remove('flex');
 }
-function guardarServicio(e) {
-    e.preventDefault();
-    cerrarModalAgregarServicio();
-    showToast('✅ Servicio agregado al catálogo exitosamente.', 'success');
+
+// ─────────────────────────────────────────────
+// MODAL EDITAR SERVICIO (LÁPIZ)
+// ─────────────────────────────────────────────
+function abrirModalEditarServicio(id, nombre, desc, tipo, duracion, buffer, espId) {
+    const form = document.getElementById('form-editar-servicio');
+    form.action = `/admin-panel/servicios/${id}/editar/`;
+    document.getElementById('edit-serv-nombre').value = nombre;
+    document.getElementById('edit-serv-desc').value = desc;
+    document.getElementById('edit-serv-tipo').value = tipo;
+    document.getElementById('edit-serv-duracion').value = duracion;
+    document.getElementById('edit-serv-buffer').value = buffer;
+    if (espId) {
+        document.getElementById('edit-serv-esp').value = espId;
+    }
+
+    const m = document.getElementById('modal-editar-servicio');
+    m.classList.remove('hidden'); m.classList.add('flex');
+}
+
+function cerrarModalEditarServicio() {
+    const m = document.getElementById('modal-editar-servicio');
+    m.classList.add('hidden'); m.classList.remove('flex');
 }
 </script>
 {% endblock %}

@@ -42,6 +42,12 @@ class Usuario(AbstractUser):
     )
     activo = models.BooleanField(default=True)
     fecha_registro = models.DateTimeField(auto_now_add=True)
+    foto_perfil = models.ImageField(
+        upload_to='perfiles/',
+        null=True,
+        blank=True,
+        verbose_name='Foto de Perfil'
+    )
 
     USERNAME_FIELD = 'correo'
     REQUIRED_FIELDS = ['nombre_completo']

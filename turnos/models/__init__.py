@@ -5,4 +5,4 @@ from .horarios import HorarioTecnico
 from .notificaciones import Notificacion
 from .repuestos import Repuesto
 from .inventario import Inventario
-
+from .tecnicos import PerfilTecnico
