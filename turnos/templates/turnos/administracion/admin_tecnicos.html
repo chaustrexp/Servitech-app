@@ -1,472 +1,666 @@
 {% extends 'turnos/administracion/admin_base.html' %}
 {% load static %}
 
-{% block title %}Panel de Técnicos - Administración | ServiTech{% endblock %}
+{% block title %}Administración de Técnicos | ServiTech{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── Nivel badges ─────────────────────────── */
+.nivel-1 { background:#d1fae5; color:#065f46; border-color:#a7f3d0; }
+.nivel-2 { background:#dbeafe; color:#1e3a8a; border-color:#bfdbfe; }
+.nivel-3 { background:#ede9fe; color:#5b21b6; border-color:#ddd6fe; }
+
+/* ── Dispositivo chips ────────────────────── */
+.chip-cel  { background:#fef9c3; color:#92400e; }
+.chip-pc   { background:#e0f2fe; color:#0c4a6e; }
+.chip-lap  { background:#fce7f3; color:#831843; }
+
+/* ── Card estado borde top ────────────────── */
+.card-en-proceso { border-top: 3px solid #10b981; }
+.card-disponible { border-top: 3px solid #003399; }
+.card-pausado    { border-top: 3px solid #f43f5e; }
+.card-inactivo   { border-top: 3px solid #94a3b8; }
+
+/* ── Pulse dot ────────────────────────────── */
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.4)} }
+.dot-pulse { animation: pulse-dot 1.6s ease-in-out infinite; }
+
+/* ── Card hover ───────────────────────────── */
+.monitor-card { transition: box-shadow .2s, transform .15s; }
+.monitor-card:hover { box-shadow: 0 8px 32px rgba(0,51,153,.10); transform: translateY(-2px); }
+
+/* ── Tabs ─────────────────────────────────── */
+.modal-tab.active { border-bottom: 2px solid #003399; color:#003399; font-weight:800; }
+.check-esp input[type=checkbox] { accent-color:#003399; width:15px; height:15px; }
+</style>
+{% endblock %}
 
 {% block content %}
-
-<!-- ════════════════════════════════════════════
-     CABECERA DE PÁGINA
-════════════════════════════════════════════ -->
-<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6 mt-2">
+<!-- ════ CABECERA ════════════════════════════════════════════════════════════ -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 mt-1">
     <div>
-        <h1 class="text-[22px] font-bold text-slate-800 tracking-tight leading-none mb-1.5">Panel de Técnicos</h1>
-        <p class="text-[13px] text-slate-500 font-medium max-w-xl leading-relaxed">
-            Supervisa la disponibilidad en tiempo real, especialidades y el rendimiento del equipo de campo de ServiTech.
+        <h1 class="text-[22px] sm:text-[28px] font-extrabold text-[#0f172a] tracking-tight leading-none mb-1">
+            Centro de Operaciones
+        </h1>
+        <p class="text-[12px] sm:text-[13px] text-slate-500 font-medium leading-none">
+            Monitoreo en tiempo real · {{ hoy|date:"l d \d\e F" }}
         </p>
     </div>
-    <button onclick="abrirModalNuevoTecnico()"
-            class="flex items-center gap-2 bg-[#003399] hover:bg-[#002266] text-white font-bold px-5 py-2.5 rounded-xl text-[13px] transition-all shadow-sm flex-shrink-0 active:scale-95">
+    <button onclick="abrirModal('modal-crear-tecnico')"
+            class="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#003399] hover:bg-[#002266]
+                   text-white font-bold px-5 py-2.5 rounded-xl text-xs sm:text-[13px] transition shadow-md active:scale-95">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
         </svg>
-        <span>Añadir Técnico</span>
+        Nuevo Técnico
     </button>
 </div>
 
-<!-- ════════════════════════════════════════════
-     1. TARJETAS DE MÉTRICAS RÁPIDAS (3 KPIs)
-════════════════════════════════════════════ -->
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
-
-    <!-- KPI: Total Técnicos -->
-    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-        <div class="w-12 h-12 rounded-xl bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-        </div>
-        <div>
-            <p class="text-[12px] font-semibold text-slate-500 uppercase tracking-wider">Total Técnicos</p>
-            <h3 class="text-[28px] font-bold text-slate-800 leading-none mt-0.5">48</h3>
-        </div>
+<!-- Django Messages -->
+{% if messages %}
+<div class="mb-5 space-y-2">
+    {% for message in messages %}
+    <div class="p-3.5 rounded-2xl text-xs font-bold flex items-start gap-3 shadow-sm
+        {% if message.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200
+        {% else %}bg-rose-50 text-rose-800 border border-rose-200{% endif %}">
+        <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {% if message.tags == 'success' %}
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            {% else %}
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            {% endif %}
+        </svg>
+        <span>{{ message }}</span>
     </div>
+    {% endfor %}
+</div>
+{% endif %}
 
-    <!-- KPI: Disponibles -->
-    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-        <div class="w-12 h-12 rounded-xl bg-[#D1FAE5] text-[#059669] flex items-center justify-center flex-shrink-0">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-        </div>
-        <div>
-            <p class="text-[12px] font-semibold text-slate-500 uppercase tracking-wider">Disponibles</p>
-            <h3 class="text-[28px] font-bold text-slate-800 leading-none mt-0.5">32</h3>
-        </div>
+<!-- ════ MÉTRICAS ════════════════════════════════════════════════════════════ -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+    <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total</p>
+        <p class="text-[28px] sm:text-[32px] font-black text-slate-800 leading-none">{{ total_tecnicos }}</p>
+        <p class="text-[10px] text-slate-400 mt-1">técnico{{ total_tecnicos|pluralize:"s" }}</p>
     </div>
-
-    <!-- KPI: Fuera de Servicio -->
-    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-        <div class="w-12 h-12 rounded-xl bg-[#FEE2E2] text-[#EF4444] flex items-center justify-center flex-shrink-0">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
+    <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100 shadow-sm">
+        <div class="flex items-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 dot-pulse"></span>
+            <p class="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">En proceso</p>
         </div>
-        <div>
-            <p class="text-[12px] font-semibold text-slate-500 uppercase tracking-wider">Fuera de Servicio</p>
-            <h3 class="text-[28px] font-bold text-slate-800 leading-none mt-0.5">16</h3>
-        </div>
+        <p class="text-[28px] sm:text-[32px] font-black text-emerald-700 leading-none">{{ en_proceso_hoy }}</p>
+        <p class="text-[10px] text-emerald-600 mt-1">atendiendo ahora</p>
+    </div>
+    <div class="bg-[#EEF2FF] rounded-2xl p-4 border border-blue-100 shadow-sm">
+        <p class="text-[11px] font-bold text-[#003399] uppercase tracking-wider mb-1">Disponibles</p>
+        <p class="text-[28px] sm:text-[32px] font-black text-[#003399] leading-none">{{ disponibles_hoy }}</p>
+        <p class="text-[10px] text-blue-500 mt-1">listos para asignar</p>
+    </div>
+    <div class="bg-rose-50 rounded-2xl p-4 border border-rose-100 shadow-sm">
+        <p class="text-[11px] font-bold text-rose-600 uppercase tracking-wider mb-1">Con novedad</p>
+        <p class="text-[28px] sm:text-[32px] font-black text-rose-600 leading-none">{{ pausados_hoy }}</p>
+        <p class="text-[10px] text-rose-400 mt-1">pausados / retraso</p>
     </div>
 </div>
 
-<!-- ════════════════════════════════════════════
-     2. MAPA + DISTRIBUCIÓN DE ESPECIALIDADES
-════════════════════════════════════════════ -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
-    <!-- Mapa Interactivo (Leaflet.js) -->
-    <div class="lg:col-span-2 bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden relative">
-        <!-- Recuadro de estado sobre el mapa -->
-        <div class="absolute top-4 left-4 z-20 bg-white rounded-xl shadow-md px-3 py-2 flex items-center gap-2 border border-slate-100">
-            <span class="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse"></span>
-            <span class="text-[12px] font-bold text-slate-800">Seguimiento en Vivo</span>
+<!-- ════ MONITOREO ACTIVO ════════════════════════════════════════════════════ -->
+<div class="mb-7">
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+            <div class="w-1.5 h-6 rounded-full bg-[#003399]"></div>
+            <h2 class="text-[15px] sm:text-[18px] font-extrabold text-slate-800">Monitoreo en Tiempo Real</h2>
         </div>
-        <p class="absolute top-11 left-4 z-20 text-[11px] text-slate-500 bg-white/80 px-3 pb-1 rounded-b-xl">24 técnicos activos en ruta</p>
-        <!-- Canvas del mapa -->
-        <div id="mapa-tecnicos" class="w-full h-[340px]"></div>
+        <span class="text-[10px] text-slate-400 font-semibold">Hoy · {{ hoy|date:"d/m/Y" }}</span>
     </div>
 
-    <!-- Panel de Distribución de Especialidades -->
-    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-6 flex flex-col justify-between">
-        <div>
-            <h3 class="font-bold text-slate-800 text-[16px] mb-6">Distribución</h3>
+    {% if tecnicos_monitoreo %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for item in tecnicos_monitoreo %}
+        {% with t=item.tecnico estado=item.estado_monitor cita=item.cita_activa perfil=item.perfil %}
 
-            <!-- Hardware -->
-            <div class="mb-5">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[13px] font-semibold text-slate-700">Hardware</span>
-                    <span class="text-[13px] font-bold text-slate-800">45%</span>
-                </div>
-                <div class="w-full bg-slate-100 rounded-full h-2">
-                    <div class="bg-[#003399] rounded-full h-2" style="width: 45%"></div>
-                </div>
-            </div>
+        <!-- ── CARD DE MONITOREO ─────────────────────────────── -->
+        <div class="monitor-card bg-white rounded-[20px] shadow-sm border border-slate-100
+            {% if estado == 'en_proceso' %}card-en-proceso
+            {% elif estado == 'disponible' %}card-disponible
+            {% elif estado == 'pausado' %}card-pausado
+            {% else %}card-inactivo{% endif %}">
 
-            <!-- Redes & Conectividad -->
-            <div class="mb-5">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[13px] font-semibold text-slate-700">Redes & Conectividad</span>
-                    <span class="text-[13px] font-bold text-slate-800">30%</span>
-                </div>
-                <div class="w-full bg-slate-100 rounded-full h-2">
-                    <div class="bg-[#003399] rounded-full h-2" style="width: 30%"></div>
-                </div>
-            </div>
-
-            <!-- Software & Sistemas -->
-            <div class="mb-6">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[13px] font-semibold text-slate-700">Software & Sistemas</span>
-                    <span class="text-[13px] font-bold text-slate-800">25%</span>
-                </div>
-                <div class="w-full bg-slate-100 rounded-full h-2">
-                    <div class="bg-[#003399] rounded-full h-2 opacity-70" style="width: 25%"></div>
-                </div>
-            </div>
-
-            <!-- Pro-tip -->
-            <div class="bg-[#EEF2FF] border border-[#C7D7FF] rounded-xl p-4">
-                <p class="text-[12px] text-[#003399] leading-relaxed font-medium">
-                    <span class="font-bold">Pro-tip:</span> Asigna técnicos de Hardware a la zona Norte hoy, la demanda ha subido un 15% según los reportes de ayer.
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ════════════════════════════════════════════
-     3. GRID DE TARJETAS DEL PERSONAL TÉCNICO
-════════════════════════════════════════════ -->
-<div class="flex items-center justify-between mb-4">
-    <h3 class="font-bold text-slate-800 text-[17px]">Personal Técnico</h3>
-    <div class="flex items-center gap-2">
-        <button class="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-            Filtrar
-        </button>
-        <button class="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
-            Ordenar
-        </button>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8" id="grid-tecnicos">
-
-    <!-- Tarjeta: Marta Sánchez - DISPONIBLE -->
-    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow">
-        <div class="relative mb-3">
-            <img src="https://i.pravatar.cc/150?u=marta" alt="Marta Sánchez" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
-            <span class="absolute bottom-0 right-0 flex items-center gap-1 bg-white text-[9px] font-bold text-[#059669] px-1.5 py-0.5 rounded-full border border-[#D1FAE5] shadow-sm leading-none">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#22C55E]"></span>DISPONIBLE
-            </span>
-        </div>
-        <h4 class="font-bold text-[14px] text-slate-800 leading-tight">Marta Sánchez</h4>
-        <p class="text-[11px] text-slate-500 mb-2">ID: ST-82921</p>
-        <div class="flex items-center gap-1 justify-center mb-3">
-            <div class="flex text-amber-400 text-[12px]">★★★★★</div>
-            <span class="text-[12px] font-bold text-slate-700">4.8</span>
-        </div>
-        <div class="flex flex-wrap gap-1.5 justify-center mb-4">
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">HARDWARE</span>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">REDES</span>
-        </div>
-        <button onclick="abrirFichaTecnico('Marta Sánchez','marta.s@servitech.com','ST-82921','Hardware & Redes','4.8 ★','marta2026')"
-                class="w-full py-2 rounded-xl border border-[#003399] text-[#003399] hover:bg-[#003399] hover:text-white font-bold text-[12px] transition-all">
-            Ver Perfil
-        </button>
-    </div>
-
-    <!-- Tarjeta: Alejandro Ruiz - EN RUTA -->
-    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow">
-        <div class="relative mb-3">
-            <img src="https://i.pravatar.cc/150?u=alejandro" alt="Alejandro Ruiz" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
-            <span class="absolute bottom-0 right-0 flex items-center gap-1 bg-white text-[9px] font-bold text-[#0284C7] px-1.5 py-0.5 rounded-full border border-[#BAE6FD] shadow-sm leading-none">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#0284C7]"></span>EN RUTA
-            </span>
-        </div>
-        <h4 class="font-bold text-[14px] text-slate-800 leading-tight">Alejandro Ruiz</h4>
-        <p class="text-[11px] text-slate-500 mb-2">ID: ST-82955</p>
-        <div class="flex items-center gap-1 justify-center mb-3">
-            <div class="flex text-amber-400 text-[12px]">★★★★★</div>
-            <span class="text-[12px] font-bold text-slate-700">5.0</span>
-        </div>
-        <div class="flex flex-wrap gap-1.5 justify-center mb-4">
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">SOFTWARE</span>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">SEGURIDAD</span>
-        </div>
-        <button onclick="abrirFichaTecnico('Alejandro Ruiz','alejandro.r@servitech.com','ST-82955','Software & Seguridad','5.0 ★','alejan2026')"
-                class="w-full py-2 rounded-xl border border-[#003399] text-[#003399] hover:bg-[#003399] hover:text-white font-bold text-[12px] transition-all">
-            Ver Perfil
-        </button>
-    </div>
-
-    <!-- Tarjeta: Roberto Gómez - AUSENTE -->
-    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow">
-        <div class="relative mb-3">
-            <img src="https://i.pravatar.cc/150?u=roberto" alt="Roberto Gómez" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
-            <span class="absolute bottom-0 right-0 flex items-center gap-1 bg-white text-[9px] font-bold text-[#EF4444] px-1.5 py-0.5 rounded-full border border-[#FEE2E2] shadow-sm leading-none">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#EF4444]"></span>AUSENTE
-            </span>
-        </div>
-        <h4 class="font-bold text-[14px] text-slate-800 leading-tight">Roberto Gómez</h4>
-        <p class="text-[11px] text-slate-500 mb-2">ID: ST-82103</p>
-        <div class="flex items-center gap-1 justify-center mb-3">
-            <div class="flex text-amber-400 text-[12px]">★★★★☆</div>
-            <span class="text-[12px] font-bold text-slate-700">4.6</span>
-        </div>
-        <div class="flex flex-wrap gap-1.5 justify-center mb-4">
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">HARDWARE</span>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">SOLUCIONES</span>
-        </div>
-        <button onclick="abrirFichaTecnico('Roberto Gómez','roberto.g@servitech.com','ST-82103','Hardware & Soluciones','4.6 ★','roberto2026')"
-                class="w-full py-2 rounded-xl border border-[#003399] text-[#003399] hover:bg-[#003399] hover:text-white font-bold text-[12px] transition-all">
-            Ver Perfil
-        </button>
-    </div>
-
-    <!-- Tarjeta: Kevin Torres - DISPONIBLE -->
-    <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow">
-        <div class="relative mb-3">
-            <img src="https://i.pravatar.cc/150?u=kevin" alt="Kevin Torres" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
-            <span class="absolute bottom-0 right-0 flex items-center gap-1 bg-white text-[9px] font-bold text-[#059669] px-1.5 py-0.5 rounded-full border border-[#D1FAE5] shadow-sm leading-none">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#22C55E]"></span>DISPONIBLE
-            </span>
-        </div>
-        <h4 class="font-bold text-[14px] text-slate-800 leading-tight">Kevin Torres</h4>
-        <p class="text-[11px] text-slate-500 mb-2">ID: ST-83112</p>
-        <div class="flex items-center gap-1 justify-center mb-3">
-            <div class="flex text-amber-400 text-[12px]">★★★★☆</div>
-            <span class="text-[12px] font-bold text-slate-700">4.2</span>
-        </div>
-        <div class="flex flex-wrap gap-1.5 justify-center mb-4">
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">REDES</span>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#003399]">FIBRA</span>
-        </div>
-        <button onclick="abrirFichaTecnico('Kevin Torres','kevin.t@servitech.com','ST-83112','Redes & Fibra Óptica','4.2 ★','kevin2026')"
-                class="w-full py-2 rounded-xl border border-[#003399] text-[#003399] hover:bg-[#003399] hover:text-white font-bold text-[12px] transition-all">
-            Ver Perfil
-        </button>
-    </div>
-</div>
-
-<!-- ════════════════════════════════════════════
-     4. TABLA DE ACTIVIDAD RECIENTE
-════════════════════════════════════════════ -->
-<div class="bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden mb-6">
-    <div class="px-6 py-5 flex items-center justify-between border-b border-slate-100">
-        <h3 class="font-bold text-slate-800 text-[14px] uppercase tracking-widest text-[11px] text-slate-500">Actividad Reciente</h3>
-        <button onclick="exportarTecnicosCSV()" class="text-[12px] font-bold text-[#003399] hover:underline">
-            Exportar Lista (.csv)
-        </button>
-    </div>
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[600px]">
-            <thead>
-                <tr class="bg-[#F8FAFC] border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    <th class="py-3.5 px-6">Técnico</th>
-                    <th class="py-3.5 px-6">Especialidad Principal</th>
-                    <th class="py-3.5 px-6">Última Ubicación</th>
-                    <th class="py-3.5 px-6">Estado Cita</th>
-                    <th class="py-3.5 px-6">Acción</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                <tr class="hover:bg-slate-50/50 transition-colors">
-                    <td class="py-4 px-6">
-                        <div class="flex items-center gap-3">
-                            <img src="https://i.pravatar.cc/150?u=lucia" alt="Lucía Mendez" class="w-8 h-8 rounded-full object-cover">
-                            <div>
-                                <p class="text-[13px] font-bold text-slate-800 leading-tight">Lucía Mendez</p>
-                                <p class="text-[11px] text-slate-500">ST-8822</p>
+            <!-- CABECERA DEL CARD -->
+            <div class="p-4 pb-3">
+                <div class="flex items-start justify-between gap-2">
+                    <!-- Avatar grande con gradiente -->
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="relative flex-shrink-0">
+                            <div class="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-base
+                                {% if estado == 'en_proceso' %}bg-gradient-to-br from-emerald-400 to-emerald-600 text-white
+                                {% elif estado == 'disponible' %}bg-gradient-to-br from-blue-500 to-[#003399] text-white
+                                {% elif estado == 'pausado' %}bg-gradient-to-br from-rose-400 to-rose-600 text-white
+                                {% else %}bg-gradient-to-br from-slate-300 to-slate-400 text-white{% endif %}">
+                                {{ t.nombre_completo|slice:":2"|upper }}
                             </div>
+                            <!-- Indicador de estado (dot) -->
+                            <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white
+                                {% if estado == 'en_proceso' %}bg-emerald-500 dot-pulse
+                                {% elif estado == 'disponible' %}bg-blue-500
+                                {% elif estado == 'pausado' %}bg-rose-500
+                                {% else %}bg-slate-400{% endif %}">
+                            </span>
                         </div>
-                    </td>
-                    <td class="py-4 px-6 text-[13px] text-slate-700 font-medium">Redes Enterprise</td>
-                    <td class="py-4 px-6 text-[13px] text-slate-600">Polanco, CDMX</td>
-                    <td class="py-4 px-6">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-[#D1FAE5] text-[#047857]">
-                            Finalizado
-                        </span>
-                    </td>
-                    <td class="py-4 px-6">
-                        <button class="text-slate-400 hover:text-slate-700 transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-                            </svg>
-                        </button>
-                    </td>
-                </tr>
-                <tr class="hover:bg-slate-50/50 transition-colors">
-                    <td class="py-4 px-6">
-                        <div class="flex items-center gap-3">
-                            <img src="https://i.pravatar.cc/150?u=jorge_luis" alt="Jorge Luis" class="w-8 h-8 rounded-full object-cover">
-                            <div>
-                                <p class="text-[13px] font-bold text-slate-800 leading-tight">Jorge Luis</p>
-                                <p class="text-[11px] text-slate-500">ST-9001</p>
-                            </div>
+                        <div class="min-w-0">
+                            <h3 class="font-extrabold text-slate-800 text-[13px] leading-tight truncate">{{ t.nombre_completo }}</h3>
+                            <p class="text-[10px] text-slate-400 font-medium truncate">{{ t.correo }}</p>
                         </div>
-                    </td>
-                    <td class="py-4 px-6 text-[13px] text-slate-700 font-medium">Sistemas Operativos</td>
-                    <td class="py-4 px-6 text-[13px] text-slate-600">Roma Norte, CDMX</td>
-                    <td class="py-4 px-6">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-700">
-                            En Proceso
-                        </span>
-                    </td>
-                    <td class="py-4 px-6">
-                        <button class="text-slate-400 hover:text-slate-700 transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-                            </svg>
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+                    </div>
 
-<!-- Pie de página -->
-<div class="text-center text-[11px] text-slate-400 pb-4">
-    © 2024 ServiTech Global Solutions. Panel de Control v2.4.1
-</div>
+                    <!-- Badge estado -->
+                    <span class="flex-shrink-0 text-[9px] font-black px-2.5 py-1.5 rounded-xl uppercase tracking-wide
+                        {% if estado == 'en_proceso' %}bg-emerald-100 text-emerald-800
+                        {% elif estado == 'disponible' %}bg-blue-100 text-[#003399]
+                        {% elif estado == 'pausado' %}bg-rose-100 text-rose-800
+                        {% else %}bg-slate-100 text-slate-500{% endif %}">
+                        {% if estado == 'en_proceso' %}En proceso
+                        {% elif estado == 'disponible' %}Disponible
+                        {% elif estado == 'pausado' %}Con novedad
+                        {% else %}Inactivo{% endif %}
+                    </span>
+                </div>
 
-<!-- ════════════════════════════════════════════
-     5. MODAL DE FICHA TÉCNICA
-════════════════════════════════════════════ -->
-<div id="modal-ficha-tecnico" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
-    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="cerrarFichaTecnico()"></div>
-    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md z-10 overflow-hidden border border-slate-100">
-        <!-- Cabecera del Modal -->
-        <div class="bg-[#003399] px-6 py-5 text-white flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-white/20 border border-white/20 flex items-center justify-center text-xl">👨‍🔧</div>
-                <div>
-                    <h3 id="ft-nombre" class="font-bold text-[15px] leading-tight">Carlos Mendoza</h3>
-                    <p id="ft-id" class="text-[12px] text-white/70">ID: TEC-001</p>
+                <!-- Nivel + Chips de especialidad -->
+                {% if perfil %}
+                <div class="flex flex-wrap items-center gap-1.5 mt-3">
+                    <span class="text-[9px] font-black px-2 py-0.5 rounded-lg border nivel-{{ perfil.nivel }} uppercase">
+                        Nivel {{ perfil.nivel }}
+                    </span>
+                    {% for esp in perfil.get_especialidades_list %}
+                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-lg
+                        {% if esp == 'CELULAR' %}chip-cel{% elif esp == 'PC_MESA' %}chip-pc{% else %}chip-lap{% endif %}">
+                        {% if esp == 'CELULAR' %}📱{% elif esp == 'PC_MESA' %}🖥{% else %}💻{% endif %}
+                        {% if esp == 'CELULAR' %}Celular{% elif esp == 'PC_MESA' %}PC{% else %}Portátil{% endif %}
+                    </span>
+                    {% endfor %}
                 </div>
-            </div>
-            <button onclick="cerrarFichaTecnico()" class="text-white/60 hover:text-white transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-        <!-- Cuerpo del Modal -->
-        <div class="p-6 space-y-4">
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-slate-50 rounded-xl p-3">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Especialidad</p>
-                    <p id="ft-especialidad" class="font-bold text-slate-800 text-[13px] mt-0.5">Hardware</p>
-                </div>
-                <div class="bg-slate-50 rounded-xl p-3">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rating</p>
-                    <p id="ft-rating" class="font-bold text-amber-500 text-[13px] mt-0.5">4.9 ★</p>
-                </div>
+                {% endif %}
             </div>
 
-            <div class="bg-[#EEF2FF] border border-[#C7D7FF] rounded-xl p-4 space-y-3">
-                <div class="flex items-center justify-between">
-                    <h4 class="text-[11px] font-bold text-[#003399] uppercase tracking-wider">Credenciales de Acceso</h4>
-                    <span class="text-[10px] font-bold bg-[#003399]/10 text-[#003399] px-2 py-0.5 rounded-full">Prueba / Login</span>
-                </div>
-                <div>
-                    <p class="text-[11px] text-slate-500">Correo / Usuario</p>
-                    <p id="ft-correo" class="font-bold text-slate-800 text-[13px]">carlos@servitech.com</p>
-                </div>
-                <div>
-                    <p class="text-[11px] text-slate-500 mb-1">Clave Temporal</p>
-                    <div class="flex items-center justify-between bg-white border border-slate-200 rounded-xl px-3 py-2">
-                        <span id="ft-clave" class="font-mono text-[13px] font-bold text-[#003399]">tecnico123</span>
-                        <button onclick="copiarClave()" class="text-[11px] font-bold text-slate-500 hover:text-[#003399] transition flex items-center gap-1">
-                            📋 Copiar
-                        </button>
+            <!-- SEPARADOR -->
+            <div class="mx-4 border-t border-slate-100"></div>
+
+            <!-- CUERPO: tarea activa o estado -->
+            <div class="p-4 pt-3">
+                {% if cita %}
+                <!-- Tarea activa -->
+                <div class="rounded-2xl p-3 mb-3
+                    {% if estado == 'en_proceso' %}bg-emerald-50 border border-emerald-100
+                    {% elif estado == 'pausado' %}bg-rose-50 border border-rose-100
+                    {% else %}bg-slate-50 border border-slate-100{% endif %}">
+                    <div class="flex items-center gap-2 mb-2">
+                        <svg class="w-3.5 h-3.5 flex-shrink-0
+                            {% if estado == 'en_proceso' %}text-emerald-600{% elif estado == 'pausado' %}text-rose-500{% else %}text-slate-400{% endif %}"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <p class="text-[11px] font-extrabold text-slate-700 truncate">{{ cita.servicio.nombre }}</p>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2 text-[10px] text-slate-500">
+                            <svg class="w-3 h-3 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            <span class="truncate">{{ cita.cliente.nombre_completo }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                            <svg class="w-3 h-3 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>{{ cita.hora_inicio|time:"H:i" }} – {{ cita.hora_fin|time:"H:i" }}</span>
+                            {% if cita.estado %}
+                            <span class="ml-auto bg-white border border-slate-200 text-slate-600 font-bold px-1.5 py-0.5 rounded-lg text-[9px]">
+                                {{ cita.estado.nombre }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% if estado == 'pausado' and cita.observaciones %}
+                        <p class="text-[10px] text-rose-600 font-semibold flex items-center gap-1 mt-1">
+                            <span>⚠</span> {{ cita.observaciones|truncatechars:45 }}
+                        </p>
+                        {% endif %}
                     </div>
                 </div>
-            </div>
 
-            <button onclick="cerrarFichaTecnico()" class="w-full py-2.5 rounded-xl bg-[#003399] hover:bg-[#002266] text-white font-bold text-[13px] transition shadow-sm">
-                Cerrar Ficha
+                {% else %}
+                <!-- Sin tarea activa -->
+                <div class="rounded-2xl p-3 mb-3 bg-slate-50 border border-slate-100 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl
+                        {% if estado == 'disponible' %}bg-blue-100{% else %}bg-slate-100{% endif %}
+                        flex items-center justify-center flex-shrink-0">
+                        {% if estado == 'disponible' %}
+                        <svg class="w-4 h-4 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        {% else %}
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                        </svg>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="text-[11px] font-bold text-slate-600">
+                            {% if estado == 'disponible' %}Listo para nueva tarea
+                            {% else %}Sin actividad registrada{% endif %}
+                        </p>
+                        {% if item.total_citas_hoy > 0 %}
+                        <p class="text-[10px] text-slate-400">{{ item.completadas_hoy }}/{{ item.total_citas_hoy }} citas completadas</p>
+                        {% else %}
+                        <p class="text-[10px] text-slate-400">Sin citas asignadas hoy</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- BARRA DE PROGRESO -->
+                {% if item.total_citas_hoy > 0 %}
+                <div class="mb-3">
+                    <div class="flex justify-between text-[10px] text-slate-400 mb-1.5">
+                        <span class="font-semibold">Progreso del día</span>
+                        <span class="font-black text-slate-600">{{ item.completadas_hoy }}/{{ item.total_citas_hoy }}</span>
+                    </div>
+                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-700
+                            {% if estado == 'en_proceso' %}bg-gradient-to-r from-emerald-400 to-emerald-600
+                            {% elif estado == 'disponible' %}bg-gradient-to-r from-blue-400 to-[#003399]
+                            {% else %}bg-gradient-to-r from-rose-400 to-rose-600{% endif %}"
+                             style="width:{% widthratio item.completadas_hoy item.total_citas_hoy 100 %}%">
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- ACCIONES -->
+                <div class="flex gap-2">
+                    <button onclick="abrirModalEditarPerfil({{ t.pk }},'{{ t.nombre_completo|escapejs }}','{{ perfil.nivel|default:1 }}','{{ perfil.especialidades|default:'' }}')"
+                            class="flex-1 py-2 rounded-xl text-[10px] font-bold border border-slate-200 hover:border-[#003399] hover:bg-[#EEF2FF] text-slate-500 hover:text-[#003399] transition flex items-center justify-center gap-1.5">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Editar
+                    </button>
+                    {% if estado == 'disponible' and citas_sin_tecnico %}
+                    <button onclick="abrirModalAsignar({{ t.pk }},'{{ t.nombre_completo|escapejs }}')"
+                            class="flex-1 py-2 rounded-xl text-[10px] font-black
+                                   bg-[#003399] hover:bg-[#002266] text-white transition active:scale-95 shadow-sm
+                                   flex items-center justify-center gap-1.5">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Asignar
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Sin técnicos -->
+    <div class="bg-white rounded-[24px] border border-slate-100 p-12 text-center shadow-sm">
+        <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </div>
+        <p class="text-sm font-extrabold text-slate-700 mb-1">Sin técnicos registrados</p>
+        <p class="text-xs text-slate-400 mb-5">Agrega el primer técnico para comenzar el monitoreo de operaciones.</p>
+        <button onclick="abrirModal('modal-crear-tecnico')"
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#003399] text-white font-bold text-xs rounded-xl shadow-md hover:bg-[#002266] transition">
+            + Añadir Técnico
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ════ CITAS SIN TÉCNICO ═══════════════════════════════════════════════════ -->
+{% if citas_sin_tecnico %}
+<div class="mb-6">
+    <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-400 dot-pulse"></span>
+            <h2 class="text-[14px] sm:text-[16px] font-extrabold text-slate-800">Citas Pendientes de Asignación</h2>
+        </div>
+        <span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full border border-amber-200">
+            {{ citas_sin_tecnico|length }} pendiente{{ citas_sin_tecnico|length|pluralize:"s" }}
+        </span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {% for cita in citas_sin_tecnico %}
+        <div class="bg-white rounded-2xl border border-amber-100 p-3.5 shadow-sm flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[11px] font-bold text-slate-800 truncate">{{ cita.servicio.nombre }}</p>
+                    <p class="text-[10px] text-slate-400">{{ cita.cliente.nombre_completo|truncatechars:20 }} · {{ cita.hora_inicio|time:"H:i" }}</p>
+                </div>
+            </div>
+            {% if disponibles_hoy > 0 %}
+            <button onclick="abrirModalAsignarCita({{ cita.pk }})"
+                    class="flex-shrink-0 px-3 py-1.5 bg-[#003399] hover:bg-[#002266] text-white font-bold text-[10px] rounded-xl transition active:scale-95">
+                Asignar
+            </button>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ════ DIRECTORIO ══════════════════════════════════════════════════════════ -->
+<div class="bg-white rounded-[24px] border border-slate-100 shadow-sm p-4 sm:p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+            <div class="w-1.5 h-6 rounded-full bg-slate-300"></div>
+            <h3 class="font-extrabold text-slate-800 text-sm sm:text-base">Directorio de Personal</h3>
+        </div>
+        <span class="text-[10px] text-slate-400 font-semibold">{{ total_tecnicos }} registrado{{ total_tecnicos|pluralize:"s" }}</span>
+    </div>
+    {% if tecnicos %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {% for t in tecnicos %}
+        {% with perfil=t.perfil_tecnico %}
+        <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-[#F8FAFC] border border-slate-100 hover:border-slate-200 transition">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-[#003399] text-white font-black text-sm
+                        flex items-center justify-center flex-shrink-0 shadow-sm">
+                {{ t.nombre_completo|slice:":2"|upper }}
+            </div>
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                    <p class="text-[12px] font-extrabold text-slate-800 truncate">{{ t.nombre_completo }}</p>
+                    {% if perfil %}<span class="text-[9px] font-black px-1.5 py-0.5 rounded-md border nivel-{{ perfil.nivel }}">N{{ perfil.nivel }}</span>{% endif %}
+                </div>
+                <p class="text-[10px] text-slate-400 truncate">{{ t.correo }}</p>
+                {% if perfil and perfil.get_especialidades_list %}
+                <div class="flex gap-1 mt-1.5 flex-wrap">
+                    {% for esp in perfil.get_especialidades_list %}
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded
+                        {% if esp == 'CELULAR' %}chip-cel{% elif esp == 'PC_MESA' %}chip-pc{% else %}chip-lap{% endif %}">
+                        {% if esp == 'CELULAR' %}📱{% elif esp == 'PC_MESA' %}🖥{% else %}💻{% endif %}
+                    </span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 {% if t.activo %}bg-emerald-400{% else %}bg-rose-400{% endif %}"></span>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-xs text-slate-400 text-center py-6">No hay técnicos registrados.</p>
+    {% endif %}
+</div>
+
+<!-- ═══ MODAL: CREAR / VINCULAR TÉCNICO ═══════════════════════════════════════ -->
+<div id="modal-crear-tecnico" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4 flex">
+    <div class="bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl w-full sm:max-w-lg p-6 border border-slate-100 max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+            <h3 class="font-extrabold text-slate-800 text-base">Registrar Técnico</h3>
+            <button onclick="cerrarModal('modal-crear-tecnico')"
+                    class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 text-lg transition">✕</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex border-b border-slate-100 mb-5 gap-4">
+            <button type="button" onclick="switchTab('tab-nuevo','tab-vincular')"
+                    id="tab-nuevo" class="modal-tab active pb-2 text-xs font-bold text-slate-400 transition">
+                👤 Nuevo usuario
+            </button>
+            <button type="button" onclick="switchTab('tab-vincular','tab-nuevo')"
+                    id="tab-vincular" class="modal-tab pb-2 text-xs font-bold text-slate-400 transition">
+                🔗 Vincular existente
             </button>
         </div>
+
+        <form method="POST" action="{% url 'admin_tecnicos' %}">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="crear_tecnico">
+
+            <!-- Panel Nuevo -->
+            <div id="panel-nuevo" class="space-y-3 text-xs mb-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1.5">Nombre Completo *</label>
+                        <input type="text" name="nombre_completo" id="inp-nombre-nuevo"
+                               class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl focus:outline-none focus:border-[#003399] transition text-xs">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1.5">Teléfono</label>
+                        <input type="text" name="telefono" placeholder="300 000 0000"
+                               class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl focus:outline-none focus:border-[#003399] transition text-xs">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1.5">Correo Electrónico *</label>
+                    <input type="email" name="correo" id="inp-correo-nuevo"
+                           class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl focus:outline-none focus:border-[#003399] transition text-xs">
+                    <p class="text-[10px] text-slate-400 mt-1">⚡ Se genera contraseña temporal automáticamente.</p>
+                </div>
+            </div>
+
+            <!-- Panel Vincular -->
+            <div id="panel-vincular" class="hidden mb-5">
+                <label class="block text-xs font-bold text-slate-600 mb-1.5">Seleccionar Usuario</label>
+                <select name="usuario_existente_id" id="sel-usuario-existente"
+                        class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#003399] transition">
+                    <option value="">— Seleccionar —</option>
+                    {% for u in usuarios_vinculables %}
+                    <option value="{{ u.pk }}" data-nombre="{{ u.nombre_completo }}">{{ u.nombre_completo }} ({{ u.correo }})</option>
+                    {% endfor %}
+                </select>
+                <p class="text-[10px] text-slate-400 mt-1">El usuario será promovido a <strong>Técnico</strong>.</p>
+            </div>
+
+            <!-- Nivel + Especialidades compartidos -->
+            <div class="border-t border-slate-100 pt-4 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-2">Nivel de Competencia *</label>
+                    <div class="space-y-2">
+                        {% for val, label in niveles %}
+                        <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#003399] hover:bg-[#EEF2FF] cursor-pointer transition">
+                            <input type="radio" name="nivel" value="{{ val }}" {% if val == 1 %}checked{% endif %} class="mt-0.5 accent-[#003399] flex-shrink-0">
+                            <div>
+                                <p class="text-xs font-bold text-slate-800">
+                                    <span class="inline-block px-1.5 py-0.5 rounded-md mr-1 text-[9px] font-black border nivel-{{ val }}">N{{ val }}</span>
+                                    {{ label|truncatewords:3 }}
+                                </p>
+                                <p class="text-[10px] text-slate-400 mt-0.5">
+                                    {% if val == 1 %}Mantenimiento básico, formateo y cambio de repuestos modulares.
+                                    {% elif val == 2 %}Software avanzado, firmware y reparación de chasis/conectores.
+                                    {% else %}Microelectrónica y microsoldadura en placa base.{% endif %}
+                                </p>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-2">Especialidades *</label>
+                    <div class="grid grid-cols-3 gap-2 check-esp">
+                        {% for val, label in dispositivos %}
+                        <label class="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-slate-100 hover:border-[#003399] hover:bg-[#EEF2FF] cursor-pointer transition text-center">
+                            <input type="checkbox" name="especialidades" value="{{ val }}">
+                            <span class="text-xl">{% if val == 'CELULAR' %}📱{% elif val == 'PC_MESA' %}🖥{% else %}💻{% endif %}</span>
+                            <span class="text-[10px] font-bold text-slate-700">{{ label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5">Observaciones internas</label>
+                    <textarea name="observaciones" rows="2" placeholder="Habilidades especiales, disponibilidad, etc."
+                              class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#003399] transition resize-none"></textarea>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-2 mt-5 pt-4 border-t border-slate-100">
+                <button type="button" onclick="cerrarModal('modal-crear-tecnico')"
+                        class="w-full sm:w-auto px-4 py-2.5 border border-slate-200 rounded-xl text-slate-600 font-bold text-xs hover:bg-slate-50 transition">Cancelar</button>
+                <button type="submit"
+                        class="w-full sm:w-auto px-5 py-2.5 bg-[#003399] text-white font-bold text-xs rounded-xl shadow-md hover:bg-[#002266] transition active:scale-95">Registrar Técnico</button>
+            </div>
+        </form>
     </div>
 </div>
 
-{% endblock %}
+<!-- ═══ MODAL: EDITAR PERFIL ══════════════════════════════════════════════════ -->
+<div id="modal-editar-perfil" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4 flex">
+    <div class="bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl w-full sm:max-w-lg p-6 border border-slate-100 max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+            <div>
+                <h3 class="font-extrabold text-slate-800 text-base">Editar Perfil Técnico</h3>
+                <p id="edit-tecnico-nombre" class="text-[11px] text-slate-400 mt-0.5"></p>
+            </div>
+            <button onclick="cerrarModal('modal-editar-perfil')"
+                    class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 text-lg transition">✕</button>
+        </div>
+        <form method="POST" action="{% url 'admin_tecnicos' %}">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="editar_perfil">
+            <input type="hidden" name="tecnico_id" id="edit-tecnico-id">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-2">Nivel de Competencia *</label>
+                    <div class="space-y-2">
+                        {% for val, label in niveles %}
+                        <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#003399] hover:bg-[#EEF2FF] cursor-pointer transition">
+                            <input type="radio" name="nivel" value="{{ val }}" id="edit-nivel-{{ val }}" class="mt-0.5 accent-[#003399] flex-shrink-0">
+                            <div>
+                                <p class="text-xs font-bold text-slate-800">
+                                    <span class="inline-block px-1.5 py-0.5 rounded-md mr-1 text-[9px] font-black border nivel-{{ val }}">N{{ val }}</span>
+                                    {{ label|truncatewords:3 }}
+                                </p>
+                                <p class="text-[10px] text-slate-400 mt-0.5">
+                                    {% if val == 1 %}Mantenimiento básico, formateo y cambio de repuestos modulares.
+                                    {% elif val == 2 %}Software avanzado, firmware y reparación de chasis/conectores.
+                                    {% else %}Microelectrónica y microsoldadura en placa base.{% endif %}
+                                </p>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-2">Especialidades *</label>
+                    <div class="grid grid-cols-3 gap-2 check-esp">
+                        {% for val, label in dispositivos %}
+                        <label class="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-slate-100 hover:border-[#003399] hover:bg-[#EEF2FF] cursor-pointer transition text-center">
+                            <input type="checkbox" name="especialidades" value="{{ val }}" class="edit-esp-check">
+                            <span class="text-xl">{% if val == 'CELULAR' %}📱{% elif val == 'PC_MESA' %}🖥{% else %}💻{% endif %}</span>
+                            <span class="text-[10px] font-bold text-slate-700">{{ label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5">Observaciones</label>
+                    <textarea name="observaciones" id="edit-observaciones" rows="2"
+                              class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#003399] transition resize-none"></textarea>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 mt-5 pt-4 border-t border-slate-100">
+                <button type="button" onclick="cerrarModal('modal-editar-perfil')"
+                        class="w-full sm:w-auto px-4 py-2.5 border border-slate-200 rounded-xl text-slate-600 font-bold text-xs hover:bg-slate-50 transition">Cancelar</button>
+                <button type="submit"
+                        class="w-full sm:w-auto px-5 py-2.5 bg-[#003399] text-white font-bold text-xs rounded-xl shadow-md hover:bg-[#002266] transition active:scale-95">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-{% block scripts %}
+<!-- ═══ MODAL: ASIGNAR A CITA ═════════════════════════════════════════════════ -->
+<div id="modal-asignar" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4 flex">
+    <div class="bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl w-full sm:max-w-sm p-6 border border-slate-100 max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+            <h3 class="font-extrabold text-slate-800 text-base">Asignar Tarea</h3>
+            <button onclick="cerrarModal('modal-asignar')"
+                    class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 text-lg transition">✕</button>
+        </div>
+        <p class="text-xs text-slate-400 mb-4">Asignando a: <strong id="modal-tecnico-nombre" class="text-slate-800"></strong></p>
+        <form method="POST" action="{% url 'admin_tecnicos' %}">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="asignar_tecnico">
+            <input type="hidden" name="tecnico_id" id="modal-tecnico-id">
+            <div class="space-y-2 mb-5">
+                {% for cita in citas_sin_tecnico %}
+                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#003399] hover:bg-[#EEF2FF] cursor-pointer transition">
+                    <input type="radio" name="cita_id" value="{{ cita.pk }}" id="asignar-cita-{{ cita.pk }}" required class="accent-[#003399]">
+                    <div class="min-w-0">
+                        <p class="text-xs font-bold text-slate-800 truncate">{{ cita.servicio.nombre }}</p>
+                        <p class="text-[10px] text-slate-400">{{ cita.cliente.nombre_completo }} · {{ cita.hora_inicio|time:"H:i" }}</p>
+                    </div>
+                </label>
+                {% empty %}
+                <p class="text-xs text-slate-400 text-center py-3">Sin citas pendientes de asignación.</p>
+                {% endfor %}
+            </div>
+            <div class="flex gap-2">
+                <button type="button" onclick="cerrarModal('modal-asignar')"
+                        class="flex-1 py-2.5 border border-slate-200 rounded-xl text-slate-600 font-bold text-xs hover:bg-slate-50 transition">Cancelar</button>
+                <button type="submit"
+                        class="flex-1 py-2.5 bg-[#003399] text-white font-bold text-xs rounded-xl shadow-md hover:bg-[#002266] transition active:scale-95">Asignar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══ JAVASCRIPT ════════════════════════════════════════════════════════════ -->
 <script>
-// ─────────────────────────────────────────────
-// 1. Mapa Interactivo (Leaflet.js)
-// ─────────────────────────────────────────────
-function inicializarMapa() {
-    const map = L.map('mapa-tecnicos', { zoomControl: true }).setView([19.4326, -99.1332], 12);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    const tecnicos = [
-        { nombre: 'Marta Sánchez', status: 'Disponible', lat: 19.4326, lng: -99.1332, color: '#22C55E' },
-        { nombre: 'Alejandro Ruiz', status: 'En Ruta - Cita #102', lat: 19.4500, lng: -99.1500, color: '#0284C7' },
-        { nombre: 'Roberto Gómez', status: 'Ausente', lat: 19.4180, lng: -99.1150, color: '#EF4444' },
-        { nombre: 'Kevin Torres', status: 'Disponible', lat: 19.4400, lng: -99.1200, color: '#22C55E' },
-    ];
-
-    tecnicos.forEach(t => {
-        const marker = L.circleMarker([t.lat, t.lng], {
-            radius: 9, fillColor: t.color, color: '#ffffff',
-            weight: 2.5, opacity: 1, fillOpacity: 0.9
-        }).addTo(map);
-        marker.bindPopup(`<div style="font-family:Inter,sans-serif;font-size:12px"><b style="color:#003399">👷 ${t.nombre}</b><br><span style="color:#64748b">${t.status}</span></div>`);
+function abrirModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+function cerrarModal(id) {
+    document.getElementById(id).classList.add('hidden');
+    document.body.style.overflow = '';
+}
+['modal-crear-tecnico','modal-editar-perfil','modal-asignar'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) {
+        if (e.target === this) cerrarModal(id);
     });
+});
+function switchTab(actId, inactId) {
+    document.getElementById(actId).classList.add('active');
+    document.getElementById(inactId).classList.remove('active');
+    const map = {'tab-nuevo':'panel-nuevo','tab-vincular':'panel-vincular'};
+    document.getElementById(map[actId]).classList.remove('hidden');
+    document.getElementById(map[inactId]).classList.add('hidden');
 }
-
-// ─────────────────────────────────────────────
-// 2. Modal de Ficha Técnica
-// ─────────────────────────────────────────────
-function abrirFichaTecnico(nombre, correo, id, especialidad, rating, clave) {
-    document.getElementById('ft-nombre').textContent = nombre;
-    document.getElementById('ft-correo').textContent = correo;
-    document.getElementById('ft-id').textContent = 'ID: ' + id;
-    document.getElementById('ft-especialidad').textContent = especialidad;
-    document.getElementById('ft-rating').textContent = rating;
-    document.getElementById('ft-clave').textContent = clave;
-    const modal = document.getElementById('modal-ficha-tecnico');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+function abrirModalEditarPerfil(id, nombre, nivel, especialidades) {
+    document.getElementById('edit-tecnico-id').value = id;
+    document.getElementById('edit-tecnico-nombre').textContent = nombre;
+    document.querySelectorAll('#modal-editar-perfil input[name="nivel"]')
+        .forEach(r => { r.checked = parseInt(r.value) === parseInt(nivel); });
+    const espList = especialidades ? especialidades.split(',').map(s=>s.trim()) : [];
+    document.querySelectorAll('.edit-esp-check').forEach(c => { c.checked = espList.includes(c.value); });
+    abrirModal('modal-editar-perfil');
 }
-
-function cerrarFichaTecnico() {
-    const modal = document.getElementById('modal-ficha-tecnico');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+function abrirModalAsignar(id, nombre) {
+    document.getElementById('modal-tecnico-id').value = id;
+    document.getElementById('modal-tecnico-nombre').textContent = nombre;
+    abrirModal('modal-asignar');
 }
-
-function copiarClave() {
-    const clave = document.getElementById('ft-clave').textContent;
-    navigator.clipboard.writeText(clave);
-    showToast(`🔑 Clave "${clave}" copiada al portapapeles.`, 'success');
+function abrirModalAsignarCita(citaId) {
+    const r = document.getElementById('asignar-cita-' + citaId);
+    if (r) r.checked = true;
+    abrirModal('modal-asignar');
 }
-
-// ─────────────────────────────────────────────
-// 3. Modal Nuevo Técnico (placeholder)
-// ─────────────────────────────────────────────
-function abrirModalNuevoTecnico() {
-    showToast('🛠️ Formulario de "Añadir Técnico" próximamente.', 'success');
-}
-
-// ─────────────────────────────────────────────
-// 4. Exportar CSV (simulación)
-// ─────────────────────────────────────────────
-function exportarTecnicosCSV() {
-    showToast('📊 Lista de técnicos exportada (.csv).', 'success');
-}
-
-// ─────────────────────────────────────────────
-// Inicialización
-// ─────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    inicializarMapa();
+document.getElementById('sel-usuario-existente').addEventListener('change', function() {
+    const n = this.options[this.selectedIndex].dataset.nombre || '';
+    document.getElementById('inp-nombre-nuevo').value = n;
 });
 </script>
 {% endblock %}

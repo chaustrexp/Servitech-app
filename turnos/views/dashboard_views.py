@@ -761,12 +761,66 @@ def agregar_repuesto(request):
 # ─────────────────────────────────────────────
 #  GESTIÓN DE USUARIOS (ADMIN)
 # ─────────────────────────────────────────────
+# ─────────────────────────────────────────────
+#  GESTIÓN DE USUARIOS (ADMIN)
+# ─────────────────────────────────────────────
 @login_required
 def admin_usuarios(request):
     if not request.user.es_admin:
         return redirect('home')
-    usuarios = Usuario.objects.all().order_by('-fecha_registro')
-    return render(request, 'turnos/administracion/admin_usuarios.html', {'usuarios': usuarios})
+    
+    hoy = date.today()
+    inicio_mes = date(hoy.year, hoy.month, 1)
+
+    qs = Usuario.objects.all().order_by('-fecha_registro')
+
+    # Filtros desde GET
+    search = request.GET.get('search', '').strip()
+    rol = request.GET.get('rol', '').strip()
+    estado = request.GET.get('estado', '').strip()
+
+    if search:
+        from django.db.models import Q
+        qs = qs.filter(Q(nombre_completo__icontains=search) | Q(correo__icontains=search) | Q(telefono__icontains=search))
+    if rol and rol != 'TODOS':
+        qs = qs.filter(rol=rol)
+    if estado:
+        if estado == 'ACTIVO':
+            qs = qs.filter(activo=True)
+        elif estado == 'INACTIVO':
+            qs = qs.filter(activo=False)
+
+    # Conteo general para KPIs
+    total_usuarios   = Usuario.objects.count()
+    usuarios_activos = Usuario.objects.filter(activo=True).count()
+    nuevos_mes       = Usuario.objects.filter(fecha_registro__gte=inicio_mes).count()
+
+    # Conteo por rol
+    total_clientes = Usuario.objects.filter(rol=Usuario.Rol.CLIENTE).count()
+    total_tecnicos = Usuario.objects.filter(rol=Usuario.Rol.TECNICO).count()
+    total_admins   = Usuario.objects.filter(rol=Usuario.Rol.ADMINISTRADOR).count()
+
+    # Paginación (10 usuarios por página)
+    from django.core.paginator import Paginator
+    paginator   = Paginator(qs, 10)
+    page_number = request.GET.get('page', 1)
+    page_obj    = paginator.get_page(page_number)
+
+    context = {
+        'usuarios':         page_obj,
+        'page_obj':         page_obj,
+        'total_filtrados':  qs.count(),
+        'total_usuarios':   total_usuarios,
+        'usuarios_activos': usuarios_activos,
+        'nuevos_mes':       nuevos_mes,
+        'total_clientes':   total_clientes,
+        'total_tecnicos':   total_tecnicos,
+        'total_admins':     total_admins,
+        'search':           search,
+        'filtro_rol':       rol,
+        'filtro_estado':    estado,
+    }
+    return render(request, 'turnos/administracion/admin_usuarios.html', context)
 
 
 @login_required
@@ -856,23 +910,31 @@ def admin_crear_servicio(request):
         nombre      = request.POST.get('nombre', '').strip()
         desc        = request.POST.get('descripcion', '').strip()
         tipo        = request.POST.get('tipo_dispositivo', 'CELULAR')
-        duracion    = int(request.POST.get('duracion_minutos', 60))
-        buffer      = int(request.POST.get('buffer_minutos', 0))
-        precio_raw  = request.POST.get('precio_base', '').strip()
-        precio_base = float(precio_raw) if precio_raw else None
+        duracion    = int(request.POST.get('duracion_minutos', 60) or 60)
+        buffer      = int(request.POST.get('buffer_minutos', 0) or 0)
         esp_id      = request.POST.get('especialidad_id')
+        
         if not nombre:
             messages.error(request, 'El nombre es obligatorio.')
         else:
             try:
-                especialidad = get_object_or_404(Especialidad, pk=esp_id)
-                Servicio.objects.create(nombre=nombre, descripcion=desc or None,
-                    tipo_dispositivo=tipo, duracion_minutos=duracion,
-                    buffer_minutos=buffer, precio_base=precio_base,
-                    especialidad=especialidad)
-                messages.success(request, f'Servicio "{nombre}" creado.')
+                especialidad = None
+                if esp_id:
+                    especialidad = Especialidad.objects.filter(pk=esp_id).first()
+                if not especialidad:
+                    especialidad, _ = Especialidad.objects.get_or_create(nombre='HARDWARE', defaults={'descripcion': 'General Hardware'})
+
+                Servicio.objects.create(
+                    nombre=nombre,
+                    descripcion=desc or None,
+                    tipo_dispositivo=tipo,
+                    duracion_minutos=duracion,
+                    buffer_minutos=buffer,
+                    especialidad=especialidad
+                )
+                messages.success(request, f'¡Servicio "{nombre}" creado con éxito!')
             except Exception as e:
-                messages.error(request, f'Error: {e}')
+                messages.error(request, f'Error al crear servicio: {e}')
     return redirect('admin_servicios')
 
 
@@ -885,16 +947,18 @@ def admin_editar_servicio(request, servicio_id):
         servicio.nombre           = request.POST.get('nombre', servicio.nombre).strip()
         servicio.descripcion      = request.POST.get('descripcion', '').strip() or None
         servicio.tipo_dispositivo = request.POST.get('tipo_dispositivo', servicio.tipo_dispositivo)
-        servicio.duracion_minutos = int(request.POST.get('duracion_minutos', servicio.duracion_minutos))
-        servicio.buffer_minutos   = int(request.POST.get('buffer_minutos', servicio.buffer_minutos))
+        servicio.duracion_minutos = int(request.POST.get('duracion_minutos', servicio.duracion_minutos) or 60)
+        servicio.buffer_minutos   = int(request.POST.get('buffer_minutos', servicio.buffer_minutos) or 0)
         esp_id = request.POST.get('especialidad_id')
         if esp_id:
-            servicio.especialidad = get_object_or_404(Especialidad, pk=esp_id)
+            esp = Especialidad.objects.filter(pk=esp_id).first()
+            if esp:
+                servicio.especialidad = esp
         try:
             servicio.save()
-            messages.success(request, f'Servicio "{servicio.nombre}" actualizado.')
+            messages.success(request, f'¡Servicio "{servicio.nombre}" actualizado correctamente!')
         except Exception as e:
-            messages.error(request, f'Error: {e}')
+            messages.error(request, f'Error al actualizar servicio: {e}')
     return redirect('admin_servicios')
 
 
@@ -1134,38 +1198,178 @@ def admin_reportes(request):
     total       = citas_mes_qs.count()
     finalizadas = citas_mes_qs.filter(estado__nombre__iexact='Finalizada').count()
     canceladas  = citas_mes_qs.filter(estado__nombre__iexact='Cancelada').count()
-    tasa_exito  = round(finalizadas / total * 100, 1) if total > 0 else 0
+    en_proceso  = citas_mes_qs.filter(estado__nombre__in=['Diagnóstico', 'En Reparación', 'EN_DIAGNOSTICO', 'EN_REPARACION']).count()
+    tasa_exito  = round(finalizadas / total * 100, 1) if total > 0 else 0.0
 
+    # Servicios populares
     servicios_populares = (Cita.objects
         .filter(fecha__year=hoy.year, fecha__month=hoy.month)
         .values('servicio__nombre').annotate(total=Count('id')).order_by('-total')[:5])
 
+    # Distribución por tipo de dispositivo
+    dist_dispositivos = (Cita.objects
+        .values('servicio__tipo_dispositivo')
+        .annotate(total=Count('id'))
+        .order_by('-total'))
+    
+    total_dispositivos = sum(item['total'] for item in dist_dispositivos) or 1
+    tipos_stats = {
+        'celulares_pct': round(sum(item['total'] for item in dist_dispositivos if item['servicio__tipo_dispositivo'] == 'CELULAR') / total_dispositivos * 100, 1),
+        'laptops_pct':   round(sum(item['total'] for item in dist_dispositivos if item['servicio__tipo_dispositivo'] == 'LAPTOP') / total_dispositivos * 100, 1),
+        'pc_pct':        round(sum(item['total'] for item in dist_dispositivos if item['servicio__tipo_dispositivo'] == 'PC') / total_dispositivos * 100, 1),
+    }
+
+    # Técnicos TOP
     tecnicos_top = (Cita.objects
         .filter(fecha__year=hoy.year, fecha__month=hoy.month, tecnico__isnull=False)
         .values('tecnico__nombre_completo').annotate(total=Count('id')).order_by('-total')[:5])
 
+    # Tendencia de los últimos 6 meses para el gráfico Chart.js
     MESES_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
-    citas_por_mes = []
-    max_val = 1
+    chart_labels = []
+    chart_data = []
+    chart_metas = []
     for i in range(5, -1, -1):
         primer_dia = date(hoy.year, hoy.month, 1)
         mes_obj = primer_dia
         for _ in range(i):
             mes_obj = (mes_obj.replace(day=1) - timedelta(days=1)).replace(day=1)
         ultimo = calendar.monthrange(mes_obj.year, mes_obj.month)[1]
-        cnt = Cita.objects.filter(fecha__gte=mes_obj, fecha__lte=mes_obj.replace(day=ultimo)).count()
-        citas_por_mes.append({'mes_label': MESES_ES[mes_obj.month - 1], 'total': cnt})
-        if cnt > max_val:
-            max_val = cnt
+        cnt = Cita.objects.filter(fecha__gte=mes_obj, fecha__lte=mes_obj.replace(day=ultimo), estado__nombre__iexact='Finalizada').count()
+        chart_labels.append(MESES_ES[mes_obj.month - 1])
+        chart_data.append(cnt)
+        chart_metas.append(max(cnt + 2, 5))
+
+    # Citas/reportes recientes (últimos 5 registros)
+    reportes_recientes = Cita.objects.select_related('cliente', 'servicio', 'estado', 'tecnico').order_by('-fecha_creacion')[:5]
 
     context = {
-        'reporte': {'total': total, 'finalizadas': finalizadas, 'canceladas': canceladas, 'tasa_exito': tasa_exito},
+        'reporte': {
+            'total': total,
+            'finalizadas': finalizadas,
+            'canceladas': canceladas,
+            'en_proceso': en_proceso,
+            'tasa_exito': tasa_exito
+        },
         'servicios_populares': servicios_populares,
+        'tipos_stats':         tipos_stats,
         'tecnicos_top':        tecnicos_top,
-        'citas_por_mes':       citas_por_mes,
-        'citas_por_mes_max':   max_val,
+        'chart_labels_json':   chart_labels,
+        'chart_data_json':     chart_data,
+        'chart_metas_json':    chart_metas,
+        'reportes_recientes':  reportes_recientes,
     }
     return render(request, 'turnos/administracion/admin_reportes.html', context)
+
+
+@login_required
+def admin_exportar_analitico_excel(request):
+    """Exporta el informe analítico completo a Excel con openpyxl."""
+    if not request.user.es_admin:
+        return redirect('home')
+
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    from django.http import HttpResponse
+
+    hoy = date.today()
+    citas_mes_qs = Cita.objects.filter(fecha__year=hoy.year, fecha__month=hoy.month)
+    total       = citas_mes_qs.count()
+    finalizadas = citas_mes_qs.filter(estado__nombre__iexact='Finalizada').count()
+    canceladas  = citas_mes_qs.filter(estado__nombre__iexact='Cancelada').count()
+    tasa_exito  = f"{round(finalizadas / total * 100, 1)}%" if total > 0 else "0%"
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Informe Analítico"
+    ws.views.sheetView[0].showGridLines = True
+
+    font_title = Font(name='Arial', size=14, bold=True, color='FFFFFF')
+    font_header = Font(name='Arial', size=10, bold=True, color='FFFFFF')
+    font_body = Font(name='Arial', size=10)
+    font_bold = Font(name='Arial', size=10, bold=True)
+    fill_navy = PatternFill(start_color='002B75', end_color='002B75', fill_type='solid')
+    fill_gray = PatternFill(start_color='F8FAFC', end_color='F8FAFC', fill_type='solid')
+    align_center = Alignment(horizontal='center', vertical='center')
+    thin_side = Side(border_style="thin", color="CBD5E1")
+    border_all = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
+
+    # 1. Banner
+    ws.merge_cells('A1:F2')
+    title_cell = ws['A1']
+    title_cell.value = f"INFORME ANALÍTICO DE RENDIMIENTO — SERVITECH ({hoy.strftime('%B %Y').upper()})"
+    title_cell.font = font_title
+    title_cell.fill = fill_navy
+    title_cell.alignment = align_center
+
+    # 2. Resumen KPIs
+    ws['A4'] = "Resumen de Métricas del Mes"
+    ws['A4'].font = Font(name='Arial', size=11, bold=True, color='002B75')
+
+    metrics = [
+        ("Citas Totales", total),
+        ("Servicios Finalizados", finalizadas),
+        ("Citas Canceladas", canceladas),
+        ("Tasa de Éxito", tasa_exito)
+    ]
+    for idx, (m_name, m_val) in enumerate(metrics, start=5):
+        ws[f'A{idx}'] = m_name
+        ws[f'A{idx}'].font = font_bold
+        ws[f'A{idx}'].border = border_all
+        ws[f'A{idx}'].fill = fill_gray
+        
+        ws[f'B{idx}'] = m_val
+        ws[f'B{idx}'].font = font_body
+        ws[f'B{idx}'].border = border_all
+        ws[f'B{idx}'].alignment = align_center
+
+    # 3. Listado de Citas Recientes
+    ws['A10'] = "Detalle de Atenciones Recientes"
+    ws['A10'].font = Font(name='Arial', size=11, bold=True, color='002B75')
+
+    headers = ["#", "Fecha", "Cliente", "Servicio", "Técnico", "Estado"]
+    for col_idx, text in enumerate(headers, start=1):
+        cell = ws.cell(row=11, column=col_idx, value=text)
+        cell.font = font_header
+        cell.fill = fill_navy
+        cell.alignment = align_center
+        cell.border = border_all
+
+    citas_recientes = Cita.objects.select_related('cliente', 'servicio', 'estado', 'tecnico').order_by('-fecha_creacion')[:20]
+    row_num = 12
+    for idx, c in enumerate(citas_recientes, start=1):
+        ws.cell(row=row_num, column=1, value=f"{idx:02d}").alignment = align_center
+        ws.cell(row=row_num, column=2, value=c.fecha.strftime('%d/%m/%Y')).alignment = align_center
+        ws.cell(row=row_num, column=3, value=c.cliente.nombre_completo)
+        ws.cell(row=row_num, column=4, value=c.servicio.nombre if c.servicio else '—')
+        ws.cell(row=row_num, column=5, value=c.tecnico.nombre_completo if c.tecnico else 'Sin Asignar')
+        ws.cell(row=row_num, column=6, value=c.estado.nombre if c.estado else '—').alignment = align_center
+
+        for col_idx in range(1, 7):
+            cell = ws.cell(row=row_num, column=col_idx)
+            cell.font = font_body
+            cell.border = border_all
+            if idx % 2 == 0:
+                cell.fill = fill_gray
+        row_num += 1
+
+    for col_idx in range(1, 7):
+        max_len = 0
+        col_letter = get_column_letter(col_idx)
+        for row in ws.iter_rows(min_row=3, min_col=col_idx, max_col=col_idx):
+            for cell in row:
+                try:
+                    if cell.value:
+                        max_len = max(max_len, len(str(cell.value)))
+                except Exception:
+                    pass
+        ws.column_dimensions[col_letter].width = max(max_len + 4, 14)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="Informe_Analitico_{hoy.strftime("%Y%m%d")}.xlsx"'
+    wb.save(response)
+    return response
 
 
 # ─────────────────────────────────────────────
@@ -1175,8 +1379,205 @@ def admin_reportes(request):
 def admin_tecnicos(request):
     if not request.user.es_admin:
         return redirect('home')
-    tecnicos = Usuario.objects.filter(rol=Usuario.Rol.TECNICO).order_by('nombre_completo')
-    return render(request, 'turnos/administracion/admin_tecnicos.html', {'tecnicos': tecnicos})
+
+    from ..models import Cita, EstadoCita, PerfilTecnico
+    from django.utils import timezone
+    import uuid
+
+    hoy = timezone.now().date()
+
+    # ══════════════════════════════════════════════════════════════════════════
+    #  POST: Acciones
+    # ══════════════════════════════════════════════════════════════════════════
+    if request.method == 'POST':
+        accion = request.POST.get('accion', '')
+
+        # ── 1. Crear nuevo técnico + PerfilTecnico ────────────────────────────
+        if accion == 'crear_tecnico':
+            nombre_completo = request.POST.get('nombre_completo', '').strip()
+            correo          = request.POST.get('correo', '').strip()
+            telefono        = request.POST.get('telefono', '').strip()
+            nivel           = request.POST.get('nivel', '1')
+            especialidades  = request.POST.getlist('especialidades')  # lista de checkboxes
+            observaciones   = request.POST.get('observaciones', '').strip()
+            usuario_id      = request.POST.get('usuario_existente_id', '').strip()
+
+            # Validaciones
+            if not nombre_completo:
+                messages.error(request, 'El nombre completo es obligatorio.')
+                return redirect('admin_tecnicos')
+            if not especialidades:
+                messages.error(request, 'Selecciona al menos una especialidad.')
+                return redirect('admin_tecnicos')
+
+            if usuario_id:
+                # Vincular usuario existente
+                try:
+                    tecnico = Usuario.objects.get(pk=usuario_id)
+                    if tecnico.rol != Usuario.Rol.TECNICO:
+                        tecnico.rol = Usuario.Rol.TECNICO
+                        tecnico.save(update_fields=['rol'])
+                    creado = False
+                except Usuario.DoesNotExist:
+                    messages.error(request, 'El usuario seleccionado no existe.')
+                    return redirect('admin_tecnicos')
+            else:
+                # Crear nuevo usuario
+                if not correo:
+                    messages.error(request, 'El correo es obligatorio para crear un nuevo técnico.')
+                    return redirect('admin_tecnicos')
+                if Usuario.objects.filter(correo__iexact=correo).exists():
+                    messages.error(request, f'Ya existe un usuario con el correo {correo}.')
+                    return redirect('admin_tecnicos')
+                pw_temporal = uuid.uuid4().hex[:10]  # contraseña aleatoria
+                tecnico = Usuario.objects.create_user(
+                    correo=correo,
+                    password=pw_temporal,
+                    nombre_completo=nombre_completo,
+                    telefono=telefono or None,
+                    rol=Usuario.Rol.TECNICO,
+                    activo=True,
+                )
+                creado = True
+
+            # Crear o actualizar el PerfilTecnico
+            perfil, _ = PerfilTecnico.objects.update_or_create(
+                tecnico=tecnico,
+                defaults={
+                    'nivel':          int(nivel),
+                    'especialidades': ','.join(especialidades),
+                    'observaciones':  observaciones or None,
+                }
+            )
+
+            msg = f'Técnico {tecnico.nombre_completo} {"creado" if creado else "actualizado"} con Nivel {nivel}.'
+            if creado:
+                msg += f' Contraseña temporal: {pw_temporal} (cámbiela al primer inicio de sesión).'
+            messages.success(request, msg)
+
+        # ── 2. Editar perfil de un técnico existente ──────────────────────────
+        elif accion == 'editar_perfil':
+            tecnico_id     = request.POST.get('tecnico_id')
+            nivel          = request.POST.get('nivel', '1')
+            especialidades = request.POST.getlist('especialidades')
+            observaciones  = request.POST.get('observaciones', '').strip()
+
+            if not especialidades:
+                messages.error(request, 'Selecciona al menos una especialidad.')
+                return redirect('admin_tecnicos')
+            try:
+                tecnico = Usuario.objects.get(pk=tecnico_id, rol=Usuario.Rol.TECNICO)
+                perfil, _ = PerfilTecnico.objects.update_or_create(
+                    tecnico=tecnico,
+                    defaults={
+                        'nivel':          int(nivel),
+                        'especialidades': ','.join(especialidades),
+                        'observaciones':  observaciones or None,
+                    }
+                )
+                messages.success(request, f'Perfil de {tecnico.nombre_completo} actualizado — Nivel {nivel}.')
+            except Usuario.DoesNotExist:
+                messages.error(request, 'Técnico no encontrado.')
+
+        # ── 3. Asignar técnico a una cita ─────────────────────────────────────
+        elif accion == 'asignar_tecnico':
+            tecnico_id = request.POST.get('tecnico_id')
+            cita_id    = request.POST.get('cita_id')
+            if tecnico_id and cita_id:
+                try:
+                    cita    = Cita.objects.get(pk=cita_id)
+                    tecnico = Usuario.objects.get(pk=tecnico_id, rol=Usuario.Rol.TECNICO)
+                    cita.tecnico = tecnico
+                    cita.save(update_fields=['tecnico'])
+                    messages.success(request, f'Técnico {tecnico.nombre_completo} asignado a la cita #{cita_id}.')
+                except (Cita.DoesNotExist, Usuario.DoesNotExist):
+                    messages.error(request, 'No se pudo completar la asignación.')
+
+        return redirect('admin_tecnicos')
+
+    # ══════════════════════════════════════════════════════════════════════════
+    #  GET: Preparar datos
+    # ══════════════════════════════════════════════════════════════════════════
+    tecnicos = Usuario.objects.filter(
+        rol=Usuario.Rol.TECNICO
+    ).select_related('perfil_tecnico').order_by('nombre_completo')
+
+    # ── Enriquecer cada técnico con datos de monitoreo ───────────────────────
+    tecnicos_monitoreo = []
+    for t in tecnicos:
+        citas_hoy = Cita.objects.filter(
+            tecnico=t, fecha=hoy
+        ).select_related('estado', 'cliente', 'servicio').order_by('hora_inicio')
+
+        cita_activa = citas_hoy.exclude(
+            estado__nombre__in=['Cancelada', 'Completada', 'No asistió']
+        ).first()
+
+        if not t.activo:
+            estado_monitor = 'inactivo'
+        elif cita_activa:
+            nombre_estado = (cita_activa.estado.nombre if cita_activa.estado else '').lower()
+            if 'proceso' in nombre_estado or 'atendi' in nombre_estado or 'en curso' in nombre_estado:
+                estado_monitor = 'en_proceso'
+            elif 'pausa' in nombre_estado or 'novedad' in nombre_estado or 'retraso' in nombre_estado:
+                estado_monitor = 'pausado'
+            else:
+                estado_monitor = 'en_proceso'
+        else:
+            estado_monitor = 'disponible'
+
+        total_hoy       = citas_hoy.count()
+        completadas_hoy = citas_hoy.filter(estado__nombre__in=['Completada', 'Atendida']).count()
+
+        # Obtener perfil si existe
+        try:
+            perfil = t.perfil_tecnico
+        except Exception:
+            perfil = None
+
+        tecnicos_monitoreo.append({
+            'tecnico':         t,
+            'perfil':          perfil,
+            'cita_activa':     cita_activa,
+            'citas_hoy':       list(citas_hoy[:3]),
+            'total_citas_hoy': total_hoy,
+            'completadas_hoy': completadas_hoy,
+            'estado_monitor':  estado_monitor,
+        })
+
+    orden_estado = {'en_proceso': 0, 'disponible': 1, 'pausado': 2, 'inactivo': 3}
+    tecnicos_monitoreo.sort(key=lambda x: orden_estado.get(x['estado_monitor'], 4))
+
+    total_tecnicos  = tecnicos.count()
+    en_proceso_hoy  = sum(1 for t in tecnicos_monitoreo if t['estado_monitor'] == 'en_proceso')
+    disponibles_hoy = sum(1 for t in tecnicos_monitoreo if t['estado_monitor'] == 'disponible')
+    pausados_hoy    = sum(1 for t in tecnicos_monitoreo if t['estado_monitor'] == 'pausado')
+
+    citas_sin_tecnico = Cita.objects.filter(
+        tecnico__isnull=True, fecha=hoy
+    ).exclude(
+        estado__nombre__in=['Cancelada', 'Completada']
+    ).select_related('cliente', 'servicio', 'estado').order_by('hora_inicio')[:5]
+
+    # Usuarios NO-técnicos para el selector de vincular usuario existente
+    usuarios_vinculables = Usuario.objects.filter(
+        activo=True
+    ).exclude(rol=Usuario.Rol.TECNICO).order_by('nombre_completo')[:30]
+
+    context = {
+        'tecnicos':            tecnicos,
+        'tecnicos_monitoreo':  tecnicos_monitoreo,
+        'total_tecnicos':      total_tecnicos,
+        'en_proceso_hoy':      en_proceso_hoy,
+        'disponibles_hoy':     disponibles_hoy,
+        'pausados_hoy':        pausados_hoy,
+        'citas_sin_tecnico':   citas_sin_tecnico,
+        'hoy':                 hoy,
+        'usuarios_vinculables': usuarios_vinculables,
+        'niveles':             PerfilTecnico.Nivel.choices,
+        'dispositivos':        PerfilTecnico.Dispositivo.choices,
+    }
+    return render(request, 'turnos/administracion/admin_tecnicos.html', context)
 
 
 # ─────────────────────────────────────────────
@@ -1186,89 +1587,333 @@ def admin_tecnicos(request):
 def admin_inventario(request):
     if not request.user.es_admin:
         return redirect('home')
-    from ..models import Repuesto
-    from django.db.models import Sum, F
-    import decimal
+    from ..models import Repuesto, Inventario
 
+    # ── REGISTRO DE INGRESO DE STOCK (POST) ──────────────────────────────────
+    if request.method == 'POST':
+        nombre    = request.POST.get('nombre', '').strip()
+        categoria = request.POST.get('categoria', 'OTROS').strip()
+        cantidad  = request.POST.get('cantidad', '0').strip()
+        proveedor = request.POST.get('proveedor', '').strip()
+        notas     = request.POST.get('notas', '').strip()
+        imagen    = request.FILES.get('imagen')
+
+        # Validaciones básicas
+        errores = []
+        if not nombre:
+            errores.append('El nombre del artículo es obligatorio.')
+        try:
+            cantidad_int = int(cantidad)
+            if cantidad_int < 1:
+                raise ValueError
+        except (ValueError, TypeError):
+            errores.append('La cantidad debe ser un número entero mayor a 0.')
+
+        if errores:
+            for e in errores:
+                messages.error(request, e)
+            return redirect('admin_inventario')
+
+        # Buscar o crear el Repuesto (artículo)
+        repuesto, creado = Repuesto.objects.get_or_create(
+            nombre__iexact=nombre,
+            defaults={
+                'nombre':    nombre,
+                'categoria': categoria,
+                'precio':    0,
+                'proveedor': proveedor or None,
+                'imagen':    imagen,
+                'activo':    True,
+            }
+        )
+
+        if not creado:
+            # Si ya existía, actualizar proveedor/categoría/imagen si se enviaron
+            actualizado = False
+            if proveedor and repuesto.proveedor != proveedor:
+                repuesto.proveedor = proveedor
+                actualizado = True
+            if categoria and repuesto.categoria != categoria:
+                repuesto.categoria = categoria
+                actualizado = True
+            if imagen:
+                repuesto.imagen = imagen
+                actualizado = True
+            if actualizado:
+                repuesto.save(update_fields=['proveedor', 'categoria', 'imagen'])
+
+        # Actualizar stock en el artículo
+        repuesto.stock += cantidad_int
+        repuesto.save(update_fields=['stock'])
+
+        # Registrar movimiento en tabla Inventario
+        Inventario.objects.create(
+            repuesto=repuesto,
+            cantidad=cantidad_int,
+            tipo='ENTRADA',
+            usuario=request.user,
+            motivo=notas or f'Ingreso manual - Proveedor: {proveedor}' if proveedor else 'Ingreso manual',
+        )
+
+        accion = 'creado y registrado' if creado else 'actualizado'
+        messages.success(
+            request,
+            f'✅ ¡{nombre}! Stock {accion}: +{cantidad_int} unidades. Total actual: {repuesto.stock} u.'
+        )
+        return redirect('admin_inventario')
+
+    # ── GET: preparar datos para el template ─────────────────────────────────
     repuestos = Repuesto.objects.filter(activo=True).order_by('categoria', 'nombre')
 
-    # ── Métricas ──
-    stock_critico   = repuestos.filter(stock__lt=3).count()
-    stock_agotado   = repuestos.filter(stock=0).count()
-    total_items     = repuestos.count()
+    # Métricas
+    stock_critico = repuestos.filter(stock__lt=5).count()
+    stock_agotado = repuestos.filter(stock=0).count()
+    total_items   = repuestos.count()
+    valorizacion  = sum(r.stock * r.precio for r in repuestos if r.stock > 0)
 
-    # Valorización total: suma(stock * precio)
-    valorizacion = sum(
-        r.stock * r.precio for r in repuestos if r.stock > 0
-    )
+    # Alertas de stock (< 5 unidades)
+    alertas_stock = repuestos.filter(stock__lt=5).order_by('stock')[:6]
 
-    # Stock máximo para calcular porcentajes de barra (cap en 20 para la barra visual)
-    STOCK_MAX_BARRA = 20
+    # Últimos 10 ingresos registrados
+    from django.utils import timezone
+    from datetime import timedelta
+    ultimos_ingresos = Inventario.objects.filter(
+        tipo='ENTRADA'
+    ).select_related('repuesto', 'usuario').order_by('-fecha')[:10]
 
-    # Enriquecer cada repuesto con % de barra y color de estado
-    repuestos_list = []
-    for r in repuestos:
-        pct = min(int((r.stock / STOCK_MAX_BARRA) * 100), 100) if STOCK_MAX_BARRA > 0 else 0
-        if r.stock == 0:
-            estado = 'agotado'
-            color  = 'bg-rose-500'
-        elif r.stock < 3:
-            estado = 'critico'
-            color  = 'bg-amber-500'
-        elif r.stock < 8:
-            estado = 'bajo'
-            color  = 'bg-yellow-400'
-        else:
-            estado = 'ok'
-            color  = 'bg-emerald'
-        r.pct_stock = pct
-        r.estado_stock = estado
-        r.color_barra  = color
-        repuestos_list.append(r)
-
-    # Órdenes sugeridas: ítems con stock < 5
-    ordenes_sugeridas = [r for r in repuestos_list if r.stock < 5]
+    # Ingresos de hoy
+    hoy = timezone.now().date()
+    ingresos_hoy   = Inventario.objects.filter(tipo='ENTRADA', fecha__date=hoy).count()
+    proveedores_hoy = Repuesto.objects.filter(
+        inventarios__tipo='ENTRADA',
+        inventarios__fecha__date=hoy
+    ).values('proveedor').distinct().count()
 
     context = {
-        'repuestos':        repuestos_list,
+        'repuestos':        repuestos,
         'stock_critico':    stock_critico,
         'stock_agotado':    stock_agotado,
         'total_items':      total_items,
         'valorizacion':     valorizacion,
-        'ordenes_sugeridas': ordenes_sugeridas,
+        'alertas_stock':    alertas_stock,
+        'ultimos_ingresos': ultimos_ingresos,
+        'ingresos_hoy':     ingresos_hoy,
+        'proveedores_hoy':  proveedores_hoy,
         'categorias':       Repuesto.CATEGORIA_CHOICES,
     }
     return render(request, 'turnos/administracion/admin_inventario.html', context)
 
+
+# ─────────────────────────────────────────────
+#  HISTORIAL COMPLETO DE INVENTARIO
+# ─────────────────────────────────────────────
+@login_required
+def admin_historial_inventario(request):
+    """Historial completo de movimientos de inventario con filtros."""
+    if not request.user.es_admin:
+        return redirect('home')
+
+    from ..models import Repuesto, Inventario
+    from django.utils import timezone
+    from django.core.paginator import Paginator
+
+    # ── Filtros desde GET ──────────────────────────────────────────────────────
+    tipo_filtro      = request.GET.get('tipo', '')       # ENTRADA | SALIDA | AJUSTE
+    categoria_filtro = request.GET.get('categoria', '')  # categoria de repuesto
+    busqueda         = request.GET.get('q', '').strip()
+    fecha_desde      = request.GET.get('fecha_desde', '')
+    fecha_hasta      = request.GET.get('fecha_hasta', '')
+
+    movimientos = Inventario.objects.select_related(
+        'repuesto', 'usuario'
+    ).order_by('-fecha')
+
+    if tipo_filtro:
+        movimientos = movimientos.filter(tipo=tipo_filtro)
+    if categoria_filtro:
+        movimientos = movimientos.filter(repuesto__categoria=categoria_filtro)
+    if busqueda:
+        movimientos = movimientos.filter(repuesto__nombre__icontains=busqueda)
+    if fecha_desde:
+        movimientos = movimientos.filter(fecha__date__gte=fecha_desde)
+    if fecha_hasta:
+        movimientos = movimientos.filter(fecha__date__lte=fecha_hasta)
+
+    # ── Paginación (20 por página) ─────────────────────────────────────────────
+    paginator   = Paginator(movimientos, 20)
+    page_number = request.GET.get('page', 1)
+    page_obj    = paginator.get_page(page_number)
+
+    # ── Resumen global (sin filtros para tener totales reales) ─────────────────
+    total_entradas = Inventario.objects.filter(tipo='ENTRADA').count()
+    total_salidas  = Inventario.objects.filter(tipo='SALIDA').count()
+    total_ajustes  = Inventario.objects.filter(tipo='AJUSTE').count()
+    total_registros = Inventario.objects.count()
+
+    # Artículos únicos con movimientos
+    articulos_con_movimiento = Inventario.objects.values('repuesto').distinct().count()
+
+    context = {
+        'page_obj':       page_obj,
+        'movimientos':    page_obj.object_list,
+        'total_entradas': total_entradas,
+        'total_salidas':  total_salidas,
+        'total_ajustes':  total_ajustes,
+        'total_registros':total_registros,
+        'articulos_con_movimiento': articulos_con_movimiento,
+        # Filtros activos para mantenerlos en el template
+        'tipo_filtro':      tipo_filtro,
+        'categoria_filtro': categoria_filtro,
+        'busqueda':         busqueda,
+        'fecha_desde':      fecha_desde,
+        'fecha_hasta':      fecha_hasta,
+        'categorias':       Repuesto.CATEGORIA_CHOICES,
+        'tipos':            Inventario.TIPO_MOVIMIENTO_CHOICES,
+    }
+    return render(request, 'turnos/administracion/admin_historial_inventario.html', context)
+
+
 @login_required
 def admin_exportar_usuarios_excel(request):
+    """Exporta el directorio de usuarios a Excel con formato institucional."""
     if not request.user.es_admin:
         return redirect('home')
     
     import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
     from django.http import HttpResponse
     from turnos.models import Usuario
 
+    qs = Usuario.objects.all().order_by('-fecha_registro')
+
+    # Filtros desde GET
+    search = request.GET.get('search', '').strip()
+    rol = request.GET.get('rol', '').strip()
+    estado_param = request.GET.get('estado', '').strip()
+
+    if search:
+        from django.db.models import Q
+        qs = qs.filter(Q(nombre_completo__icontains=search) | Q(correo__icontains=search) | Q(telefono__icontains=search))
+    if rol and rol != 'TODOS':
+        qs = qs.filter(rol=rol)
+    if estado_param:
+        if estado_param == 'ACTIVO':
+            qs = qs.filter(activo=True)
+        elif estado_param == 'INACTIVO':
+            qs = qs.filter(activo=False)
+
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "Usuarios"
+    ws.title = "Directorio Usuarios"
 
-    headers = ['ID', 'Nombre Completo', 'Correo', 'Teléfono', 'Rol', 'Estado']
-    ws.append(headers)
+    # Mostrar cuadrícula
+    ws.views.sheetView[0].showGridLines = True
 
-    usuarios = Usuario.objects.all().order_by('id_usuario')
-    for u in usuarios:
-        estado = 'Activo' if u.activo else 'Inactivo'
-        ws.append([
-            u.id_usuario,
-            u.nombre_completo,
-            u.correo,
-            u.telefono or '',
-            u.get_rol_display(),
-            estado
-        ])
+    # Estilos
+    font_title = Font(name='Arial', size=14, bold=True, color='FFFFFF')
+    font_header = Font(name='Arial', size=10, bold=True, color='FFFFFF')
+    font_body = Font(name='Arial', size=10)
+    font_bold = Font(name='Arial', size=10, bold=True)
+    
+    fill_navy = PatternFill(start_color='002B75', end_color='002B75', fill_type='solid')
+    fill_gray = PatternFill(start_color='F8FAFC', end_color='F8FAFC', fill_type='solid')
+    
+    align_center = Alignment(horizontal='center', vertical='center')
+    align_left = Alignment(horizontal='left', vertical='center')
+    
+    thin_side = Side(border_style="thin", color="CBD5E1")
+    border_all = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
+
+    # 1. Banner Superior
+    ws.merge_cells('A1:F2')
+    title_cell = ws['A1']
+    title_cell.value = "DIRECTORIO DE USUARIOS REGISTRADOS - SERVITECH"
+    title_cell.font = font_title
+    title_cell.fill = fill_navy
+    title_cell.alignment = align_center
+
+    # 2. Encabezados
+    headers = ['ID', 'Nombre Completo', 'Correo Electrónico', 'Teléfono', 'Rol', 'Estado']
+    for col_idx, text in enumerate(headers, start=1):
+        cell = ws.cell(row=4, column=col_idx, value=text)
+        cell.font = font_header
+        cell.fill = fill_navy
+        cell.alignment = align_center
+        cell.border = border_all
+
+    # 3. Filas de datos
+    row_num = 5
+    for idx, u in enumerate(qs, start=1):
+        ws.cell(row=row_num, column=1, value=u.pk).alignment = align_center
+        ws.cell(row=row_num, column=2, value=u.nombre_completo).alignment = align_left
+        ws.cell(row=row_num, column=3, value=u.correo).alignment = align_left
+        ws.cell(row=row_num, column=4, value=u.telefono or '—').alignment = align_center
+        ws.cell(row=row_num, column=5, value=u.get_rol_display()).alignment = align_center
+        
+        est_txt = 'Activo' if u.activo else 'Inactivo'
+        ws.cell(row=row_num, column=6, value=est_txt).alignment = align_center
+
+        for col_idx in range(1, 7):
+            cell = ws.cell(row=row_num, column=col_idx)
+            cell.font = font_body
+            cell.border = border_all
+            if idx % 2 == 0:
+                cell.fill = fill_gray
+        row_num += 1
+
+    # Autoajustar ancho de columnas
+    for col_idx in range(1, 7):
+        max_len = 0
+        col_letter = get_column_letter(col_idx)
+        for row in ws.iter_rows(min_row=3, min_col=col_idx, max_col=col_idx):
+            for cell in row:
+                try:
+                    if cell.value:
+                        max_len = max(max_len, len(str(cell.value)))
+                except Exception:
+                    pass
+        ws.column_dimensions[col_letter].width = max(max_len + 5, 14)
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename="directorio_usuarios.xlsx"'
     wb.save(response)
     return response
+
+
+# ─────────────────────────────────────────────
+#  MI PERFIL (ADMINISTRADOR)
+# ─────────────────────────────────────────────
+@login_required
+def admin_perfil(request):
+    """Perfil del Administrador: actualización de datos, foto y contraseña."""
+    if not request.user.es_admin:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = EditarPerfilForm(
+            request.POST,
+            request.FILES,
+            instance=request.user,
+            current_user=request.user
+        )
+        if form.is_valid():
+            usuario = form.save(commit=False)
+            usuario.save()
+            # Si se cambió la contraseña re-autenticamos la sesión para no cerrar la sesión
+            from django.contrib.auth import update_session_auth_hash
+            if form.cleaned_data.get('password_new'):
+                update_session_auth_hash(request, usuario)
+            messages.success(request, '¡Tu perfil fue actualizado con éxito!')
+            return redirect('admin_perfil')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{error}")
+    else:
+        form = EditarPerfilForm(instance=request.user, current_user=request.user)
+
+    return render(request, 'turnos/administracion/admin_perfil.html', {
+        'form': form,
+        'usuario': request.user,
+    })

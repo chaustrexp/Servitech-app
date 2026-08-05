@@ -78,8 +78,8 @@ class RegistroUsuarioForm(UserCreationForm):
 
 class EditarPerfilForm(forms.ModelForm):
     """
-    Formulario para que el cliente edite sus datos personales:
-    nombre completo, correo y teléfono.
+    Formulario para editar datos personales del usuario:
+    nombre completo, correo, teléfono, foto de perfil y contraseña opcional.
     """
     nombre_completo = forms.CharField(
         max_length=150,
@@ -108,13 +108,36 @@ class EditarPerfilForm(forms.ModelForm):
         }),
         label="Teléfono"
     )
+    foto_perfil = forms.ImageField(
+        required=False,
+        label="Foto de Perfil",
+        widget=forms.FileInput(attrs={'accept': 'image/*', 'class': 'hidden', 'id': 'foto-perfil-input'})
+    )
+    password_new = forms.CharField(
+        required=False,
+        min_length=6,
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-4 py-2.5 rounded-lg border border-slate-300 outline-none transition',
+            'placeholder': 'Dejar vacío para no cambiar',
+            'autocomplete': 'new-password'
+        }),
+        label="Nueva Contraseña"
+    )
+    password_confirm = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-4 py-2.5 rounded-lg border border-slate-300 outline-none transition',
+            'placeholder': 'Repetir nueva contraseña',
+            'autocomplete': 'new-password'
+        }),
+        label="Confirmar Contraseña"
+    )
 
     class Meta:
         model = Usuario
-        fields = ('nombre_completo', 'correo', 'telefono')
+        fields = ('nombre_completo', 'correo', 'telefono', 'foto_perfil')
 
     def __init__(self, *args, **kwargs):
-        # Guardamos referencia al usuario actual para validar correo único
         self.current_user = kwargs.pop('current_user', None)
         super().__init__(*args, **kwargs)
 
@@ -127,13 +150,29 @@ class EditarPerfilForm(forms.ModelForm):
             raise ValidationError("Ya existe una cuenta asociada a este correo electrónico.")
         return correo
 
+    def clean(self):
+        cleaned_data = super().clean()
+        pw_new = cleaned_data.get('password_new')
+        pw_confirm = cleaned_data.get('password_confirm')
+        if pw_new and pw_new != pw_confirm:
+            self.add_error('password_confirm', 'Las contraseñas no coinciden.')
+        return cleaned_data
+
     def save(self, commit=True):
         usuario = super().save(commit=False)
-        # Mantener username sincronizado con correo (es el USERNAME_FIELD)
         usuario.username = usuario.correo
+        # Cambio de contraseña si se proporcionó
+        pw_new = self.cleaned_data.get('password_new')
+        if pw_new:
+            usuario.set_password(pw_new)
+        # Foto de perfil: si se subió una nueva
+        foto = self.cleaned_data.get('foto_perfil')
+        if foto:
+            usuario.foto_perfil = foto
         if commit:
             usuario.save()
         return usuario
+
 
 
 class CustomLoginForm(AuthenticationForm):

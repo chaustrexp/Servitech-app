@@ -1,0 +1,370 @@
+{% extends 'turnos/administracion/admin_base.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil - Panel de Administración | ServiTech{% endblock %}
+
+{% block extra_head %}
+<style>
+.foto-dropzone { transition: border-color .2s, background .2s; }
+.foto-dropzone:hover { border-color: #003399; background: #EEF2FF; }
+.foto-dropzone.drag-over { border-color: #003399; background: #EEF2FF; transform: scale(1.02); }
+.campo-error { border-color: #f43f5e !important; }
+.msg-error { color: #f43f5e; font-size: 11px; margin-top: 4px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ════════════════════════════════════════════
+     CABECERA
+════════════════════════════════════════════ -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 mt-1">
+    <div>
+        <h1 class="text-[22px] sm:text-[28px] font-extrabold text-[#0f172a] tracking-tight leading-none mb-1">Mi Perfil</h1>
+        <p class="text-[12px] sm:text-[13px] text-slate-500 font-medium leading-none">Gestión de datos de cuenta y credenciales de Administrador.</p>
+    </div>
+    <a href="{% url 'admin_dashboard' %}"
+       class="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs sm:text-[13px] transition shadow-sm">
+        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        <span>Volver al Inicio</span>
+    </a>
+</div>
+
+<!-- Alertas de django messages -->
+{% if messages %}
+<div class="mb-5 space-y-2">
+    {% for message in messages %}
+    <div class="p-3.5 rounded-2xl text-xs font-bold flex items-center gap-3 shadow-sm
+                {% if message.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200
+                {% else %}bg-rose-50 text-rose-800 border border-rose-200{% endif %}">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {% if message.tags == 'success' %}
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            {% else %}
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            {% endif %}
+        </svg>
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ════════════════════════════════════════════
+     LAYOUT: tarjeta perfil + formulario
+════════════════════════════════════════════ -->
+<form id="form-perfil" method="POST" action="{% url 'admin_perfil' %}" enctype="multipart/form-data" novalidate>
+{% csrf_token %}
+
+<div class="flex flex-col lg:grid lg:grid-cols-3 gap-5 mb-6">
+
+    <!-- ──────────────────────────────────────
+         TARJETA LATERAL DE PERFIL
+    ────────────────────────────────────────── -->
+    <div class="bg-white rounded-[24px] border border-slate-100 shadow-sm flex flex-col items-center text-center relative overflow-hidden">
+        <!-- Banner azul -->
+        <div class="w-full h-20 sm:h-24 bg-gradient-to-br from-[#003399] to-blue-500 flex-shrink-0"></div>
+
+        <!-- ── AVATAR CON UPLOADER ── -->
+        <div class="relative -mt-12 mb-4 z-10">
+            <!-- Foto actual / preview -->
+            <div id="avatar-wrapper"
+                 class="foto-dropzone w-24 h-24 rounded-full overflow-hidden ring-4 ring-white shadow-lg bg-white cursor-pointer border-2 border-dashed border-transparent relative group"
+                 onclick="document.getElementById('foto-perfil-input').click()"
+                 title="Haz clic o arrastra una imagen para cambiar la foto">
+                <img id="avatar-preview"
+                     src="{% if usuario.foto_perfil %}{{ usuario.foto_perfil.url }}{% else %}{% static 'img/foto de perfil administrador.png' %}{% endif %}"
+                     alt="Foto de Perfil"
+                     class="w-full h-full object-cover">
+                <!-- Overlay de cámara al hover -->
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center rounded-full">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </div>
+            </div>
+            <!-- Input oculto de archivo -->
+            {{ form.foto_perfil }}
+            <!-- Indicador de estado activo -->
+            <span class="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-emerald-500 ring-2 ring-white z-20" title="Activo"></span>
+        </div>
+
+        <!-- Nombre y correo -->
+        <div class="px-4 sm:px-6 pb-5 w-full">
+            <h2 id="preview-nombre" class="text-[16px] sm:text-[18px] font-black text-slate-800 leading-tight mb-1">{{ usuario.nombre_completo }}</h2>
+            <p id="preview-correo" class="text-xs font-semibold text-slate-400 mb-3 truncate px-2">{{ usuario.correo }}</p>
+
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-100 text-[#003399] font-extrabold text-[11px] rounded-full mb-4">
+                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <span>Super Administrador</span>
+            </div>
+
+            <!-- Información de cuenta -->
+            <div class="w-full space-y-2.5 pt-4 border-t border-slate-100 text-left text-xs text-slate-600">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-slate-400 font-semibold">ID de Usuario:</span>
+                    <span class="font-bold text-slate-800">#{{ usuario.pk }}</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-slate-400 font-semibold">Miembro desde:</span>
+                    <span class="font-bold text-slate-800">{{ usuario.fecha_registro|date:"d M Y" }}</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-slate-400 font-semibold">Estado:</span>
+                    <span class="font-bold text-emerald-600 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Activo
+                    </span>
+                </div>
+            </div>
+
+            <!-- Botón auxiliar cambiar foto -->
+            <button type="button"
+                    onclick="document.getElementById('foto-perfil-input').click()"
+                    class="mt-4 w-full py-2 rounded-xl border border-slate-200 hover:border-[#003399] hover:bg-[#EEF2FF] text-slate-600 hover:text-[#003399] font-bold text-xs transition flex items-center justify-center gap-2">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Cambiar Foto
+            </button>
+            <!-- Nombre del archivo seleccionado -->
+            <p id="foto-nombre-archivo" class="mt-2 text-[10px] text-slate-400 truncate hidden"></p>
+        </div>
+    </div>
+
+    <!-- ──────────────────────────────────────
+         FORMULARIO DE EDICIÓN
+    ────────────────────────────────────────── -->
+    <div class="lg:col-span-2 bg-white rounded-[24px] border border-slate-100 p-4 sm:p-6 shadow-sm">
+
+        <!-- Sección: Información Personal -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-100">
+            <div>
+                <h3 class="text-[16px] sm:text-[17px] font-extrabold text-slate-800">Información Personal</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">Actualiza tus datos de contacto.</p>
+            </div>
+            <span class="self-start sm:self-auto text-[11px] font-bold text-[#003399] bg-[#EEF2FF] px-3 py-1 rounded-xl whitespace-nowrap">Editando Perfil</span>
+        </div>
+
+        <div class="space-y-4">
+            <!-- Fila 1: Nombre + Correo -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5" for="id_nombre_completo">Nombre Completo *</label>
+                    <input type="text" id="id_nombre_completo" name="nombre_completo"
+                           value="{{ form.nombre_completo.value|default:usuario.nombre_completo }}"
+                           required
+                           oninput="document.getElementById('preview-nombre').textContent = this.value || '{{ usuario.nombre_completo }}'"
+                           class="w-full px-4 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs sm:text-[13px] text-slate-800 font-semibold focus:outline-none focus:border-[#003399] focus:bg-white transition {% if form.nombre_completo.errors %}campo-error{% endif %}">
+                    {% if form.nombre_completo.errors %}<p class="msg-error">{{ form.nombre_completo.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5" for="id_correo">Correo Electrónico *</label>
+                    <input type="email" id="id_correo" name="correo"
+                           value="{{ form.correo.value|default:usuario.correo }}"
+                           required
+                           oninput="document.getElementById('preview-correo').textContent = this.value || '{{ usuario.correo }}'"
+                           class="w-full px-4 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs sm:text-[13px] text-slate-800 font-semibold focus:outline-none focus:border-[#003399] focus:bg-white transition {% if form.correo.errors %}campo-error{% endif %}">
+                    {% if form.correo.errors %}<p class="msg-error">{{ form.correo.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            <!-- Fila 2: Teléfono + Rol -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5" for="id_telefono">Teléfono de Contacto</label>
+                    <input type="text" id="id_telefono" name="telefono"
+                           value="{{ form.telefono.value|default:usuario.telefono|default:'' }}"
+                           placeholder="Ej: 300 123 4567"
+                           class="w-full px-4 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs sm:text-[13px] text-slate-800 font-semibold focus:outline-none focus:border-[#003399] focus:bg-white transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Rol de Sistema</label>
+                    <input type="text" value="Administrador de Sistema" disabled
+                           class="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs sm:text-[13px] text-slate-500 font-bold cursor-not-allowed truncate">
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── Sección: Cambio de Contraseña ─── -->
+        <div class="mt-6 pt-5 border-t border-slate-100">
+            <button type="button" id="btn-toggle-pw"
+                    onclick="toggleCambioContrasena()"
+                    class="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-[#003399] transition mb-4">
+                <svg id="pw-chevron" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+                <span>🔒 Cambiar Contraseña</span>
+                <span class="text-[10px] font-semibold text-slate-400">(opcional)</span>
+            </button>
+
+            <div id="seccion-contrasena" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5" for="id_password_new">Nueva Contraseña</label>
+                    <div class="relative">
+                        <input type="password" id="id_password_new" name="password_new"
+                               placeholder="Mínimo 6 caracteres"
+                               autocomplete="new-password"
+                               class="w-full px-4 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs sm:text-[13px] text-slate-800 focus:outline-none focus:border-[#003399] focus:bg-white transition pr-10 {% if form.password_new.errors %}campo-error{% endif %}">
+                        <button type="button" onclick="togglePw('id_password_new', 'eye1')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <svg id="eye1" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    {% if form.password_new.errors %}<p class="msg-error">{{ form.password_new.errors.0 }}</p>{% endif %}
+                    <!-- Barra de fortaleza -->
+                    <div class="mt-2 flex gap-1">
+                        <div id="strength-bar-1" class="h-1 flex-1 rounded-full bg-slate-200 transition"></div>
+                        <div id="strength-bar-2" class="h-1 flex-1 rounded-full bg-slate-200 transition"></div>
+                        <div id="strength-bar-3" class="h-1 flex-1 rounded-full bg-slate-200 transition"></div>
+                        <div id="strength-bar-4" class="h-1 flex-1 rounded-full bg-slate-200 transition"></div>
+                    </div>
+                    <p id="strength-label" class="text-[10px] text-slate-400 mt-1"></p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5" for="id_password_confirm">Confirmar Contraseña</label>
+                    <div class="relative">
+                        <input type="password" id="id_password_confirm" name="password_confirm"
+                               placeholder="Repetir contraseña"
+                               autocomplete="new-password"
+                               class="w-full px-4 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs sm:text-[13px] text-slate-800 focus:outline-none focus:border-[#003399] focus:bg-white transition pr-10 {% if form.password_confirm.errors %}campo-error{% endif %}">
+                        <button type="button" onclick="togglePw('id_password_confirm', 'eye2')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <svg id="eye2" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    {% if form.password_confirm.errors %}<p class="msg-error">{{ form.password_confirm.errors.0 }}</p>{% endif %}
+                    <p id="pw-match-msg" class="text-[10px] mt-1 hidden"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mt-5">
+            <a href="{% url 'admin_dashboard' %}"
+               class="w-full sm:w-auto text-center px-5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-xl transition">
+                Cancelar
+            </a>
+            <button type="submit"
+                    class="w-full sm:w-auto px-6 py-2.5 bg-[#003399] hover:bg-[#002266] text-white font-extrabold text-xs rounded-xl shadow-md transition active:scale-95 flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>Guardar Cambios</span>
+            </button>
+        </div>
+    </div>
+</div>
+</form>
+
+<!-- ════════════════════════════════════════════
+     JAVASCRIPT: Preview foto, Drag & Drop,
+     Toggle contraseña, Fortaleza, Match
+════════════════════════════════════════════ -->
+<script>
+// ── PREVIEW DE FOTO AL SELECCIONAR ──────────
+const fotoInput = document.getElementById('foto-perfil-input');
+const avatarPreview = document.getElementById('avatar-preview');
+const fotoNombreArchivo = document.getElementById('foto-nombre-archivo');
+
+fotoInput.addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+        alert('Por favor selecciona un archivo de imagen válido (jpg, png, webp...)');
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        alert('La imagen no puede superar 5 MB.');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+        avatarPreview.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+    fotoNombreArchivo.textContent = '📎 ' + file.name;
+    fotoNombreArchivo.classList.remove('hidden');
+});
+
+// ── DRAG & DROP sobre el avatar ─────────────
+const avatarWrapper = document.getElementById('avatar-wrapper');
+avatarWrapper.addEventListener('dragover', e => { e.preventDefault(); avatarWrapper.classList.add('drag-over'); });
+avatarWrapper.addEventListener('dragleave', () => avatarWrapper.classList.remove('drag-over'));
+avatarWrapper.addEventListener('drop', e => {
+    e.preventDefault();
+    avatarWrapper.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+        // Inyectar en el input
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fotoInput.files = dt.files;
+        fotoInput.dispatchEvent(new Event('change'));
+    }
+});
+
+// ── TOGGLE SECCIÓN CONTRASEÑA ───────────────
+function toggleCambioContrasena() {
+    const sec = document.getElementById('seccion-contrasena');
+    const chevron = document.getElementById('pw-chevron');
+    const hidden = sec.classList.contains('hidden');
+    sec.classList.toggle('hidden', !hidden);
+    sec.classList.toggle('grid', hidden);
+    chevron.style.transform = hidden ? 'rotate(90deg)' : 'rotate(0deg)';
+}
+
+// ── TOGGLE VISIBILIDAD CONTRASEÑA ───────────
+function togglePw(inputId, eyeId) {
+    const input = document.getElementById(inputId);
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+// ── FORTALEZA DE CONTRASEÑA ─────────────────
+const barColors = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-emerald-500'];
+const barLabels = ['', 'Débil', 'Regular', 'Buena', 'Fuerte'];
+
+document.getElementById('id_password_new').addEventListener('input', function () {
+    const pw = this.value;
+    let score = 0;
+    if (pw.length >= 6) score++;
+    if (pw.length >= 10) score++;
+    if (/[A-Z]/.test(pw) && /[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+    for (let i = 1; i <= 4; i++) {
+        const bar = document.getElementById('strength-bar-' + i);
+        bar.className = 'h-1 flex-1 rounded-full transition ' + (i <= score ? barColors[score - 1] : 'bg-slate-200');
+    }
+    document.getElementById('strength-label').textContent = pw ? barLabels[score] || barLabels[4] : '';
+    checkPasswordMatch();
+});
+
+// ── VALIDACIÓN MATCH CONTRASEÑAS ────────────
+document.getElementById('id_password_confirm').addEventListener('input', checkPasswordMatch);
+function checkPasswordMatch() {
+    const pw1 = document.getElementById('id_password_new').value;
+    const pw2 = document.getElementById('id_password_confirm').value;
+    const msg = document.getElementById('pw-match-msg');
+    if (!pw2) { msg.classList.add('hidden'); return; }
+    msg.classList.remove('hidden');
+    if (pw1 === pw2) {
+        msg.textContent = '✓ Las contraseñas coinciden';
+        msg.className = 'text-[10px] mt-1 text-emerald-600';
+    } else {
+        msg.textContent = '✗ Las contraseñas no coinciden';
+        msg.className = 'text-[10px] mt-1 text-rose-500';
+    }
+}
+
+// Si hay errores en contraseña, abre la sección automáticamente
+{% if form.password_new.errors or form.password_confirm.errors %}
+toggleCambioContrasena();
+{% endif %}
+</script>
+{% endblock %}

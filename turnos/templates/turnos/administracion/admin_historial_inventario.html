@@ -1,0 +1,358 @@
+{% extends 'turnos/administracion/admin_base.html' %}
+{% load static %}
+
+{% block title %}Historial de Inventario | ServiTech{% endblock %}
+
+{% block extra_head %}
+<style>
+.badge-entrada { background:#d1fae5; color:#065f46; border:1px solid #a7f3d0; }
+.badge-salida  { background:#fee2e2; color:#7f1d1d; border:1px solid #fca5a5; }
+.badge-ajuste  { background:#fef3c7; color:#78350f; border:1px solid #fcd34d; }
+.cat-pantallas { background:#dbeafe; color:#1e3a8a; }
+.cat-baterias  { background:#fef9c3; color:#713f12; }
+.cat-conectores{ background:#f3e8ff; color:#5b21b6; }
+.cat-camaras   { background:#fce7f3; color:#831843; }
+.cat-adhesivos { background:#e0f2fe; color:#0c4a6e; }
+.cat-modulos   { background:#d1fae5; color:#065f46; }
+.cat-otros     { background:#f1f5f9; color:#475569; }
+.filter-tag    { display:inline-flex; align-items:center; gap:4px; background:#EEF2FF; color:#003399;
+                 font-weight:700; font-size:10px; padding:2px 8px; border-radius:20px; border:1px solid #c7d2fe; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ════ CABECERA ════════════════════════════════════════════════════════════ -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 mt-1">
+    <div>
+        <div class="flex items-center gap-2 mb-1">
+            <a href="{% url 'admin_inventario' %}" class="text-slate-400 hover:text-[#003399] transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+            </a>
+            <h1 class="text-[22px] sm:text-[28px] font-extrabold text-[#0f172a] tracking-tight leading-none">
+                Historial de Inventario
+            </h1>
+        </div>
+        <p class="text-[12px] sm:text-[13px] text-slate-500 font-medium">
+            {{ total_registros }} movimiento{{ total_registros|pluralize:"s" }} registrado{{ total_registros|pluralize:"s" }} en total
+        </p>
+    </div>
+    <a href="{% url 'admin_inventario' %}"
+       class="flex items-center justify-center gap-2 bg-[#003399] hover:bg-[#002266] text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-[13px] transition shadow-md active:scale-95">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>Nuevo Ingreso</span>
+    </a>
+</div>
+
+<!-- ════ MÉTRICAS RESUMEN ════════════════════════════════════════════════════ -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+    <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm text-center">
+        <p class="text-[26px] sm:text-[30px] font-black text-slate-800 leading-none mb-0.5">{{ total_registros }}</p>
+        <p class="text-[10px] sm:text-[11px] font-semibold text-slate-500">Total movimientos</p>
+    </div>
+    <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100 shadow-sm text-center">
+        <p class="text-[26px] sm:text-[30px] font-black text-emerald-700 leading-none mb-0.5">{{ total_entradas }}</p>
+        <p class="text-[10px] sm:text-[11px] font-semibold text-slate-500">Entradas</p>
+    </div>
+    <div class="bg-rose-50 rounded-2xl p-4 border border-rose-100 shadow-sm text-center">
+        <p class="text-[26px] sm:text-[30px] font-black text-rose-600 leading-none mb-0.5">{{ total_salidas }}</p>
+        <p class="text-[10px] sm:text-[11px] font-semibold text-slate-500">Salidas</p>
+    </div>
+    <div class="bg-amber-50 rounded-2xl p-4 border border-amber-100 shadow-sm text-center">
+        <p class="text-[26px] sm:text-[30px] font-black text-amber-700 leading-none mb-0.5">{{ total_ajustes }}</p>
+        <p class="text-[10px] sm:text-[11px] font-semibold text-slate-500">Ajustes</p>
+    </div>
+</div>
+
+<!-- ════ FILTROS ════════════════════════════════════════════════════════════ -->
+<div class="bg-white rounded-[20px] sm:rounded-[24px] border border-slate-100 shadow-sm p-4 sm:p-5 mb-5">
+    <form method="GET" action="{% url 'admin_historial_inventario' %}" id="form-filtros">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+
+            <!-- Búsqueda -->
+            <div class="lg:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Buscar artículo</label>
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" name="q" value="{{ busqueda }}" placeholder="Nombre del artículo..."
+                           class="w-full pl-9 pr-4 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#003399] focus:bg-white transition">
+                </div>
+            </div>
+
+            <!-- Tipo -->
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tipo</label>
+                <select name="tipo"
+                        class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#003399] cursor-pointer transition"
+                        onchange="this.form.submit()">
+                    <option value="">Todos los tipos</option>
+                    {% for val, label in tipos %}
+                    <option value="{{ val }}" {% if tipo_filtro == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Categoría -->
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Categoría</label>
+                <select name="categoria"
+                        class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#003399] cursor-pointer transition"
+                        onchange="this.form.submit()">
+                    <option value="">Todas las categorías</option>
+                    {% for val, label in categorias %}
+                    <option value="{{ val }}" {% if categoria_filtro == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex items-end gap-2">
+                <button type="submit"
+                        class="flex-1 py-2.5 bg-[#003399] hover:bg-[#002266] text-white font-bold text-xs rounded-xl transition active:scale-95">
+                    Filtrar
+                </button>
+                {% if tipo_filtro or categoria_filtro or busqueda or fecha_desde or fecha_hasta %}
+                <a href="{% url 'admin_historial_inventario' %}"
+                   class="flex-shrink-0 py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition"
+                   title="Limpiar filtros">✕</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Rango de fechas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-slate-100">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Desde</label>
+                <input type="date" name="fecha_desde" value="{{ fecha_desde }}"
+                       class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#003399] transition">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Hasta</label>
+                <input type="date" name="fecha_hasta" value="{{ fecha_hasta }}"
+                       class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#003399] transition">
+            </div>
+        </div>
+    </form>
+
+    <!-- Tags de filtros activos -->
+    {% if tipo_filtro or categoria_filtro or busqueda or fecha_desde or fecha_hasta %}
+    <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100">
+        <span class="text-[10px] text-slate-400 font-semibold self-center">Filtros activos:</span>
+        {% if busqueda %}<span class="filter-tag">🔍 {{ busqueda }}</span>{% endif %}
+        {% if tipo_filtro %}<span class="filter-tag">📦 {{ tipo_filtro }}</span>{% endif %}
+        {% if categoria_filtro %}<span class="filter-tag">🏷 {{ categoria_filtro }}</span>{% endif %}
+        {% if fecha_desde %}<span class="filter-tag">📅 Desde: {{ fecha_desde }}</span>{% endif %}
+        {% if fecha_hasta %}<span class="filter-tag">📅 Hasta: {{ fecha_hasta }}</span>{% endif %}
+        <span class="text-[10px] text-slate-400 self-center ml-auto">
+            {{ page_obj.paginator.count }} resultado{{ page_obj.paginator.count|pluralize:"s" }}
+        </span>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ════ TABLA DE MOVIMIENTOS ════════════════════════════════════════════════ -->
+<div class="bg-white rounded-[20px] sm:rounded-[24px] border border-slate-100 shadow-sm overflow-hidden mb-6">
+
+    {% if movimientos %}
+
+    <!-- Vista Móvil: Cards -->
+    <div class="block sm:hidden divide-y divide-slate-100">
+        {% for mov in movimientos %}
+        <div class="p-4">
+            <div class="flex items-start justify-between gap-3 mb-2">
+                <div class="flex items-center gap-3 min-w-0">
+                    <!-- Icono tipo -->
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs flex-shrink-0
+                        {% if mov.tipo == 'ENTRADA' %}bg-emerald-100 text-emerald-700
+                        {% elif mov.tipo == 'SALIDA' %}bg-rose-100 text-rose-700
+                        {% else %}bg-amber-100 text-amber-700{% endif %}">
+                        {% if mov.tipo == 'ENTRADA' %}↑{% elif mov.tipo == 'SALIDA' %}↓{% else %}⇄{% endif %}
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-bold text-slate-800 truncate">{{ mov.repuesto.nombre }}</p>
+                        <p class="text-[10px] text-slate-400">{{ mov.repuesto.get_categoria_display }}</p>
+                    </div>
+                </div>
+                <span class="text-xs font-black flex-shrink-0
+                    {% if mov.tipo == 'ENTRADA' %}text-emerald-700{% elif mov.tipo == 'SALIDA' %}text-rose-600{% else %}text-amber-600{% endif %}">
+                    {% if mov.tipo == 'ENTRADA' %}+{% elif mov.tipo == 'SALIDA' %}-{% else %}±{% endif %}{{ mov.cantidad }} u.
+                </span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] text-slate-400">{{ mov.fecha|date:"d M Y, H:i" }}</span>
+                {% if mov.usuario %}
+                <span class="text-[10px] text-slate-500 font-semibold truncate max-w-[120px]">{{ mov.usuario.nombre_completo }}</span>
+                {% endif %}
+            </div>
+            {% if mov.motivo %}
+            <p class="text-[10px] text-slate-400 mt-1 truncate">📝 {{ mov.motivo }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Tabla Desktop -->
+    <div class="hidden sm:block overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-[#F8FAFC] border-b border-slate-100">
+                    <th class="py-3 px-5">#</th>
+                    <th class="py-3 px-5">Artículo</th>
+                    <th class="py-3 px-5">Categoría</th>
+                    <th class="py-3 px-5">Tipo</th>
+                    <th class="py-3 px-5 text-center">Cantidad</th>
+                    <th class="py-3 px-5">Proveedor / Notas</th>
+                    <th class="py-3 px-5">Registrado por</th>
+                    <th class="py-3 px-5 text-right">Fecha</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+                {% for mov in movimientos %}
+                <tr class="hover:bg-slate-50/60 transition group">
+                    <!-- ID -->
+                    <td class="py-3.5 px-5 text-slate-400 font-mono text-[11px]">#{{ mov.pk }}</td>
+
+                    <!-- Artículo -->
+                    <td class="py-3.5 px-5">
+                        <p class="font-bold text-slate-800 leading-tight">{{ mov.repuesto.nombre }}</p>
+                        {% if mov.repuesto.proveedor %}
+                        <p class="text-[10px] text-slate-400 mt-0.5">{{ mov.repuesto.proveedor }}</p>
+                        {% endif %}
+                    </td>
+
+                    <!-- Categoría -->
+                    <td class="py-3.5 px-5">
+                        <span class="inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full
+                            {% if mov.repuesto.categoria == 'PANTALLAS' %}cat-pantallas
+                            {% elif mov.repuesto.categoria == 'BATERIAS' %}cat-baterias
+                            {% elif mov.repuesto.categoria == 'CONECTORES' %}cat-conectores
+                            {% elif mov.repuesto.categoria == 'CAMARAS' %}cat-camaras
+                            {% elif mov.repuesto.categoria == 'ADHESIVOS' %}cat-adhesivos
+                            {% elif mov.repuesto.categoria == 'MODULOS' %}cat-modulos
+                            {% else %}cat-otros{% endif %}">
+                            {{ mov.repuesto.get_categoria_display }}
+                        </span>
+                    </td>
+
+                    <!-- Tipo -->
+                    <td class="py-3.5 px-5">
+                        <span class="inline-flex items-center gap-1.5 text-[10px] font-black px-2.5 py-1 rounded-full border
+                            {% if mov.tipo == 'ENTRADA' %}badge-entrada
+                            {% elif mov.tipo == 'SALIDA' %}badge-salida
+                            {% else %}badge-ajuste{% endif %}">
+                            {% if mov.tipo == 'ENTRADA' %}↑ Entrada
+                            {% elif mov.tipo == 'SALIDA' %}↓ Salida
+                            {% else %}⇄ Ajuste{% endif %}
+                        </span>
+                    </td>
+
+                    <!-- Cantidad -->
+                    <td class="py-3.5 px-5 text-center font-black
+                        {% if mov.tipo == 'ENTRADA' %}text-emerald-700
+                        {% elif mov.tipo == 'SALIDA' %}text-rose-600
+                        {% else %}text-amber-600{% endif %}">
+                        {% if mov.tipo == 'ENTRADA' %}+{% elif mov.tipo == 'SALIDA' %}-{% else %}±{% endif %}{{ mov.cantidad }}
+                    </td>
+
+                    <!-- Proveedor / Notas -->
+                    <td class="py-3.5 px-5 text-slate-500 max-w-[180px]">
+                        <p class="truncate">{{ mov.motivo|default:"—" }}</p>
+                    </td>
+
+                    <!-- Registrado por -->
+                    <td class="py-3.5 px-5 text-slate-500">
+                        {% if mov.usuario %}
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-blue-100 text-[#003399] text-[9px] font-black flex items-center justify-center flex-shrink-0">
+                                {{ mov.usuario.nombre_completo|slice:":2"|upper }}
+                            </div>
+                            <span class="truncate max-w-[100px]">{{ mov.usuario.nombre_completo|truncatechars:18 }}</span>
+                        </div>
+                        {% else %}—{% endif %}
+                    </td>
+
+                    <!-- Fecha -->
+                    <td class="py-3.5 px-5 text-right text-slate-400 font-medium whitespace-nowrap">
+                        {{ mov.fecha|date:"d M Y" }}<br>
+                        <span class="text-[10px]">{{ mov.fecha|date:"H:i" }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <!-- Sin resultados -->
+    <div class="text-center py-16">
+        <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+        </div>
+        <p class="text-sm font-bold text-slate-500 mb-1">No se encontraron movimientos</p>
+        <p class="text-xs text-slate-400 mb-4">
+            {% if tipo_filtro or categoria_filtro or busqueda %}
+            Prueba cambiando los filtros de búsqueda.
+            {% else %}
+            Registra el primer ingreso de stock desde el módulo de inventario.
+            {% endif %}
+        </p>
+        {% if tipo_filtro or categoria_filtro or busqueda %}
+        <a href="{% url 'admin_historial_inventario' %}"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
+            Limpiar filtros
+        </a>
+        {% else %}
+        <a href="{% url 'admin_inventario' %}"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-[#003399] text-white font-bold text-xs rounded-xl shadow-sm hover:bg-[#002266] transition">
+            + Registrar Ingreso
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- ════ PAGINACIÓN ══════════════════════════════════════════════════════════ -->
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-6">
+    <p class="text-xs text-slate-400">
+        Mostrando <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong>
+        de <strong>{{ page_obj.paginator.count }}</strong> registros
+    </p>
+    <div class="flex items-center gap-1.5">
+
+        {% if page_obj.has_previous %}
+        <a href="?{% if busqueda %}q={{ busqueda }}&{% endif %}{% if tipo_filtro %}tipo={{ tipo_filtro }}&{% endif %}{% if categoria_filtro %}categoria={{ categoria_filtro }}&{% endif %}{% if fecha_desde %}fecha_desde={{ fecha_desde }}&{% endif %}{% if fecha_hasta %}fecha_hasta={{ fecha_hasta }}&{% endif %}page={{ page_obj.previous_page_number }}"
+           class="w-9 h-9 rounded-xl border border-slate-200 hover:border-[#003399] hover:bg-[#EEF2FF] flex items-center justify-center text-slate-500 hover:text-[#003399] transition">
+            ‹
+        </a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+        <span class="w-9 h-9 rounded-xl bg-[#003399] text-white font-black text-xs flex items-center justify-center shadow-sm">{{ num }}</span>
+        {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+        <a href="?{% if busqueda %}q={{ busqueda }}&{% endif %}{% if tipo_filtro %}tipo={{ tipo_filtro }}&{% endif %}{% if categoria_filtro %}categoria={{ categoria_filtro }}&{% endif %}{% if fecha_desde %}fecha_desde={{ fecha_desde }}&{% endif %}{% if fecha_hasta %}fecha_hasta={{ fecha_hasta }}&{% endif %}page={{ num }}"
+           class="w-9 h-9 rounded-xl border border-slate-200 hover:border-[#003399] hover:bg-[#EEF2FF] text-slate-600 hover:text-[#003399] font-bold text-xs flex items-center justify-center transition">
+            {{ num }}
+        </a>
+        {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?{% if busqueda %}q={{ busqueda }}&{% endif %}{% if tipo_filtro %}tipo={{ tipo_filtro }}&{% endif %}{% if categoria_filtro %}categoria={{ categoria_filtro }}&{% endif %}{% if fecha_desde %}fecha_desde={{ fecha_desde }}&{% endif %}{% if fecha_hasta %}fecha_hasta={{ fecha_hasta }}&{% endif %}page={{ page_obj.next_page_number }}"
+           class="w-9 h-9 rounded-xl border border-slate-200 hover:border-[#003399] hover:bg-[#EEF2FF] flex items-center justify-center text-slate-500 hover:text-[#003399] transition">
+            ›
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
