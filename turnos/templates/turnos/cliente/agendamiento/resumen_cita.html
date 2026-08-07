@@ -137,7 +137,13 @@
         <div class="w-full lg:w-[320px] flex flex-col gap-4">
             <!-- Imagen decorativa -->
             <div class="bg-gradient-to-br from-[#002b75] to-[#1a4db3] rounded-xl overflow-hidden relative h-52 flex items-end p-6 shadow-md">
+                {% if dispositivo == 'CELULAR' %}
+                <div class="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1580927752452-89d86da3fa0a?w=400')] bg-cover bg-center"></div>
+                {% elif dispositivo == 'LAPTOP' %}
+                <div class="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400')] bg-cover bg-center"></div>
+                {% else %}
                 <div class="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400')] bg-cover bg-center"></div>
+                {% endif %}
                 <div class="relative z-10">
                     <div class="inline-flex items-center gap-2 bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full mb-3 shadow">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>

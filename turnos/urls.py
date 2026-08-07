@@ -39,6 +39,7 @@ urlpatterns = [
     path('admin-panel/inventario/historial/',               views.admin_historial_inventario, name='admin_historial_inventario'),
     path('admin-panel/perfil/',                             views.admin_perfil,           name='admin_perfil'),
     path('tecnico/', views.dashboard_tecnico, name='dashboard_tecnico'),
+    path('tecnico/toggle-pausa/', views.tecnico_toggle_pausa, name='tecnico_toggle_pausa'),
     path('tecnico/agenda/', views.tecnico_agenda, name='tecnico_agenda'),
     path('tecnico/citas/<int:cita_id>/aceptar/', views.aceptar_cita, name='aceptar_cita'),
     path('tecnico/citas/<int:cita_id>/finalizar/', views.finalizar_cita, name='finalizar_cita'),

@@ -28,7 +28,12 @@ def seleccionar_servicio(request):
             request.session['wizard_servicio'] = servicio
             return redirect('seleccionar_fecha_hora')
             
-    return render(request, 'turnos/cliente/agendamiento/seleccionar_servicio.html', {'dispositivo': dispositivo})
+    servicios_disponibles = Servicio.objects.filter(tipo_dispositivo__iexact=dispositivo, activo=True)
+            
+    return render(request, 'turnos/cliente/agendamiento/seleccionar_servicio.html', {
+        'dispositivo': dispositivo,
+        'servicios_disponibles': servicios_disponibles
+    })
 
 @login_required
 def seleccionar_fecha_hora(request):
