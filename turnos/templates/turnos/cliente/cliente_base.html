@@ -15,7 +15,7 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .nav-item { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:500; color:#64748b; transition:all .15s; text-decoration:none; }
         .nav-item:hover { background:#f1f5f9; color:#1e293b; }
-        .nav-item.active { background:#eff6ff; color:#002b75; font-weight:600; }
+        .nav-item.active { background:#eff6ff; color:#2563eb; font-weight:700; }
         .sidebar-transition { transition: transform 0.3s ease; }
     </style>
 </head>
@@ -29,11 +29,15 @@
            class="sidebar-transition fixed top-0 left-0 h-full w-[200px] bg-white border-r border-slate-100 z-40 flex flex-col -translate-x-full md:translate-x-0">
 
         <!-- Logo -->
-        <div class="px-5 pt-6 pb-5 border-b border-slate-100">
+        <div class="px-5 pt-6 pb-6 border-b border-slate-100">
             <a href="{% url 'cliente_inicio' %}" class="flex items-center gap-3">
-                <img src="{% static 'img/logo.jpg' %}" alt="ServiTech"
-                     class="w-9 h-9 rounded-xl object-cover border border-slate-200 shadow-sm">
-                <span class="text-lg font-extrabold text-[#002b75] tracking-tight">ServiTech</span>
+                <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
+                    <img src="{% static 'img/logo.jpg' %}" alt="Logo ServiTech" class="w-full h-full object-contain rounded-lg">
+                </div>
+                <div class="leading-tight">
+                    <p class="text-[17px] font-extrabold text-[#0e3687] tracking-tight">ServiTech</p>
+                    <p class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Panel del<br>Cliente</p>
+                </div>
             </a>
         </div>
 
@@ -86,6 +90,12 @@
                 </svg>
                 Agendar Cita
             </a>
+            
+            <!-- Botón Ayuda -->
+            <button type="button" onclick="document.getElementById('modal-ayuda-global').classList.remove('hidden')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Centro de Ayuda
+            </button>
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
                 <button type="submit"
@@ -142,7 +152,163 @@
     <!-- Toast -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-[100] space-y-2 pointer-events-none"></div>
 
+    <!-- ═══ MODAL AYUDA GLOBAL ═══ -->
+    <div id="modal-ayuda-global" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4 flex transition-opacity duration-300">
+        <div class="bg-white rounded-t-[24px] sm:rounded-[20px] shadow-2xl w-full sm:max-w-md overflow-hidden relative">
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-[#eff6ff] flex items-center justify-center border border-blue-100">
+                        <svg class="w-5 h-5 text-[#0e3687]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-[18px]">Centro de Ayuda</h3>
+                        <p class="text-[12px] text-slate-500">¿Necesitas soporte técnico?</p>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-ayuda-global').classList.add('hidden')" class="text-slate-400 hover:bg-slate-100 p-2 rounded-xl transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <a href="#" onclick="abrirModal('modal-manual-usuario'); return false;" class="flex items-start gap-4 p-4 rounded-xl border border-slate-200 hover:border-[#0e3687] hover:bg-[#eff6ff] transition group cursor-pointer">
+                    <div class="p-2.5 bg-[#f0f4f8] rounded-xl group-hover:bg-white transition text-[#0e3687] shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-[13px] group-hover:text-[#0e3687] transition">Manual de Usuario</h4>
+                        <p class="text-[12px] text-slate-500 mt-1 leading-snug">Consulta la documentación completa y aprende a usar todas las herramientas del sistema.</p>
+                    </div>
+                </a>
+                <a href="#" onclick="abrirModal('modal-soporte-tecnico'); return false;" class="flex items-start gap-4 p-4 rounded-xl border border-slate-200 hover:border-[#0e3687] hover:bg-[#eff6ff] transition group cursor-pointer">
+                    <div class="p-2.5 bg-[#f0f4f8] rounded-xl group-hover:bg-white transition text-[#0e3687] shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-[13px] group-hover:text-[#0e3687] transition">Soporte Técnico Especializado</h4>
+                        <p class="text-[12px] text-slate-500 mt-1 leading-snug">Contacta directamente con nuestro equipo de asistencia técnica para resolver incidencias.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+                <button type="button" onclick="document.getElementById('modal-ayuda-global').classList.add('hidden')" class="px-5 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 font-bold text-[13px] hover:bg-slate-50 hover:border-slate-300 transition w-full sm:w-auto">
+                    Cerrar panel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL MANUAL DE USUARIO ═══ -->
+    <div id="modal-manual-usuario" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4 flex transition-opacity duration-300">
+        <div class="bg-white rounded-t-[24px] sm:rounded-[20px] shadow-2xl w-full sm:max-w-xl max-h-[92vh] overflow-hidden flex flex-col relative">
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-[#eff6ff] flex items-center justify-center border border-blue-100">
+                        <svg class="w-5 h-5 text-[#0e3687]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-[18px]">Manual de Usuario</h3>
+                        <p class="text-[12px] text-slate-500">Preguntas Frecuentes y Documentación</p>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-manual-usuario').classList.add('hidden')" class="text-slate-400 hover:bg-slate-100 p-2 rounded-xl transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-4">
+                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                    <div class="bg-slate-50 px-4 py-3 font-bold text-[13px] text-slate-700 border-b border-slate-200">
+                        ¿Cómo agendar un nuevo servicio?
+                    </div>
+                    <div class="p-4 text-[13px] text-slate-600 bg-white leading-relaxed">
+                        Para agendar un servicio, debes ir a la sección <strong>"Nuevo Servicio"</strong> en el panel izquierdo. Selecciona el cliente, el dispositivo y el servicio requerido. Finalmente, asigna una fecha y hora.
+                    </div>
+                </div>
+                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                    <div class="bg-slate-50 px-4 py-3 font-bold text-[13px] text-slate-700 border-b border-slate-200">
+                        ¿Cómo vinculo a un técnico que ya es cliente?
+                    </div>
+                    <div class="p-4 text-[13px] text-slate-600 bg-white leading-relaxed">
+                        Ve a la sección <strong>"Usuarios"</strong> o <strong>"Técnicos"</strong>, haz clic en "Nuevo Técnico", y selecciona la pestaña superior que dice <strong>"Vincular existente"</strong>. Ahí podrás buscar al usuario y darle permisos de técnico.
+                    </div>
+                </div>
+                
+                <a href="javascript:void(0)" onclick="window.print()" class="mt-6 w-full flex items-center justify-center gap-2 py-3 bg-[#eff6ff] text-[#0e3687] font-bold text-[13px] rounded-xl hover:bg-blue-100 transition border border-blue-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Descargar Manual Completo (PDF)
+                </a>
+            </div>
+            <div class="px-6 py-4 bg-white border-t border-slate-100 flex justify-end">
+                <button type="button" onclick="document.getElementById('modal-manual-usuario').classList.add('hidden')" class="px-5 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-700 font-bold text-[13px] hover:bg-slate-50 transition">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL SOPORTE TÉCNICO ═══ -->
+    <div id="modal-soporte-tecnico" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4 flex transition-opacity duration-300">
+        <div class="bg-white rounded-t-[24px] sm:rounded-[20px] shadow-2xl w-full sm:max-w-md overflow-hidden relative">
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-[#eff6ff] flex items-center justify-center border border-blue-100">
+                        <svg class="w-5 h-5 text-[#0e3687]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-[18px]">Soporte Técnico</h3>
+                        <p class="text-[12px] text-slate-500">Crear un ticket de soporte</p>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-soporte-tecnico').classList.add('hidden')" class="text-slate-400 hover:bg-slate-100 p-2 rounded-xl transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <form onsubmit="event.preventDefault(); document.getElementById('modal-soporte-tecnico').classList.add('hidden'); mostrarToast('Tu ticket de soporte ha sido enviado con éxito', 'success');" class="flex flex-col">
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-[12px] font-bold text-slate-700 mb-1.5">Asunto del Problema <span class="text-rose-500">*</span></label>
+                        <select required class="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-[13px] focus:outline-none focus:border-[#0e3687] focus:ring-1 focus:ring-[#0e3687]">
+                            <option value="">Selecciona una opción...</option>
+                            <option value="error">Error en el sistema</option>
+                            <option value="duda">Duda sobre una función</option>
+                            <option value="sugerencia">Sugerencia de mejora</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[12px] font-bold text-slate-700 mb-1.5">Descripción Detallada <span class="text-rose-500">*</span></label>
+                        <textarea required rows="4" placeholder="Explícanos tu problema o duda para que podamos ayudarte mejor..."
+                                  class="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-[13px] focus:outline-none focus:border-[#0e3687] focus:ring-1 focus:ring-[#0e3687] resize-y"></textarea>
+                    </div>
+                    <p class="text-[11px] text-slate-400 leading-tight">
+                        Nuestro equipo revisará tu solicitud y se pondrá en contacto contigo a través del correo registrado de tu cuenta en menos de 24 horas hábiles.
+                    </p>
+                </div>
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3 rounded-b-[20px]">
+                    <button type="button" onclick="document.getElementById('modal-soporte-tecnico').classList.add('hidden')"
+                            class="px-5 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-700 font-bold text-[13px] hover:bg-slate-50 transition">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="px-5 py-2.5 bg-[#0e3687] text-white font-bold text-[13px] rounded-lg shadow-sm hover:bg-[#09255d] transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                        Enviar Ticket
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        function abrirModal(id) {
+            // Cerramos modal ayuda si abrimos otro
+            if (id !== 'modal-ayuda-global') {
+                document.getElementById('modal-ayuda-global').classList.add('hidden');
+            }
+            document.getElementById(id).classList.remove('hidden');
+        }
+
         function openSidebar() {
             document.getElementById('sidebar').classList.remove('-translate-x-full');
             document.getElementById('sidebar-overlay').classList.remove('hidden');

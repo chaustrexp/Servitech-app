@@ -81,23 +81,44 @@ def dashboard_tecnico(request):
     from datetime import date
     hoy = date.today()
 
+    try:
+        especialidad = request.user.perfil_tecnico.especialidad
+    except Exception:
+        especialidad = 'tecnico_general'
+
+    dispositivos_permitidos = []
+    if especialidad == 'tecnico_celular':
+        dispositivos_permitidos = ['CELULAR']
+    elif especialidad == 'tecnico_pc':
+        dispositivos_permitidos = ['PC']
+    elif especialidad == 'tecnico_laptop':
+        dispositivos_permitidos = ['LAPTOP']
+    else: # tecnico_general
+        filtro_dispositivo = request.GET.get('filtro_dispositivo')
+        if filtro_dispositivo in ['CELULAR', 'PC', 'LAPTOP']:
+            dispositivos_permitidos = [filtro_dispositivo]
+        else:
+            dispositivos_permitidos = ['CELULAR', 'PC', 'LAPTOP']
+
+    base_qs = Cita.objects.filter(servicio__tipo_dispositivo__in=dispositivos_permitidos)
+
     # Citas programadas para hoy asignadas al técnico
-    citas_hoy_count = Cita.objects.filter(fecha=hoy, tecnico=request.user).count()
+    citas_hoy_count = base_qs.filter(fecha=hoy, tecnico=request.user).count()
 
     # Citas en proceso asignadas al técnico (En diagnóstico o En reparación)
-    en_proceso_count = Cita.objects.filter(
+    en_proceso_count = base_qs.filter(
         tecnico=request.user,
         estado__nombre__in=['EN_DIAGNOSTICO', 'EN_REPARACION', 'En Diagnóstico', 'En Reparación']
     ).count()
 
     # Citas finalizadas asignadas al técnico
-    finalizadas_count = Cita.objects.filter(
+    finalizadas_count = base_qs.filter(
         tecnico=request.user,
         estado__nombre__iexact='finalizada'
     ).count()
 
     # Citas con retraso asignadas al técnico
-    retrasos_count = Cita.objects.filter(
+    retrasos_count = base_qs.filter(
         tecnico=request.user,
         estado__nombre__iexact='retrasada'
     ).count()
@@ -108,10 +129,69 @@ def dashboard_tecnico(request):
         'CONFIRMADA', 'Confirmada', 'confirmada',
         'REAGENDADA', 'Reagendada', 'reagendada',
     ]
-    citas_disponibles = Cita.objects.filter(
+    citas_disponibles = base_qs.filter(
         estado__nombre__in=ESTADOS_DISPONIBLES,
         tecnico__isnull=True
     ).select_related('cliente', 'servicio', 'estado').order_by('fecha', 'hora_inicio')
+
+    # ────────────────────────────────────────────────────────
+    # Rendimiento Semanal (Lunes a Domingo de la semana actual)
+    # ────────────────────────────────────────────────────────
+    from datetime import timedelta
+    from django.utils import timezone
+    hoy = timezone.now().date()
+    inicio_semana = hoy - timedelta(days=hoy.weekday()) # Lunes
+    dias_semana = []
+    max_citas_dia = 1
+    total_semana = 0
+    
+    for i in range(7):
+        dia = inicio_semana + timedelta(days=i)
+        count = Cita.objects.filter(
+            tecnico=request.user,
+            fecha=dia,
+            estado__nombre__iexact='finalizada'
+        ).count()
+        dias_semana.append({'nombre': dia.strftime('%a')[:3].capitalize(), 'count': count, 'fecha': dia})
+        total_semana += count
+        if count > max_citas_dia:
+            max_citas_dia = count
+
+    # Calcular porcentajes para la altura de las barras
+    for d in dias_semana:
+        d['porcentaje'] = int((d['count'] / max_citas_dia) * 100) if max_citas_dia > 0 else 0
+        d['es_hoy'] = (d['fecha'] == hoy)
+
+    # ────────────────────────────────────────────────────────
+    # Tarea Actual (Cita en curso)
+    # ────────────────────────────────────────────────────────
+    tarea_actual = base_qs.filter(
+        tecnico=request.user,
+        estado__nombre__in=['EN_DIAGNOSTICO', 'EN_REPARACION', 'En Diagnóstico', 'En Reparación', 'En proceso', 'EN_PROCESO']
+    ).order_by('hora_inicio').first()
+
+    progreso_tarea = 0
+    pasos_tarea = []
+    
+    if tarea_actual:
+        est = tarea_actual.estado.nombre.upper()
+        if 'DIAGN' in est:
+            progreso_tarea = 35
+            pasos_tarea = [
+                {'nombre': 'Revisión inicial', 'completado': True},
+                {'nombre': 'Diagnóstico de hardware', 'completado': False},
+                {'nombre': 'Presupuesto pendiente', 'completado': False},
+            ]
+        elif 'REPAR' in est or 'PROCESO' in est:
+            progreso_tarea = 70
+            pasos_tarea = [
+                {'nombre': 'Diagnóstico completado', 'completado': True},
+                {'nombre': 'Reparación en curso', 'completado': True},
+                {'nombre': 'Pruebas finales pendientes', 'completado': False},
+            ]
+        else:
+            progreso_tarea = 10
+            pasos_tarea = [{'nombre': 'Esperando revisión', 'completado': False}]
 
     context = {
         'citas_hoy_count': citas_hoy_count,
@@ -121,6 +201,11 @@ def dashboard_tecnico(request):
         'citas_disponibles': citas_disponibles,
         'total_disponibles': citas_disponibles.count(),
         'hoy': hoy,
+        'dias_semana': dias_semana,
+        'total_semana': total_semana,
+        'tarea_actual': tarea_actual,
+        'progreso_tarea': progreso_tarea,
+        'pasos_tarea': pasos_tarea,
     }
     return render(request, 'turnos/tecnico/tecnico_inicio.html', context)
 
@@ -142,9 +227,30 @@ def tecnico_agenda(request):
     inicio_semana = hoy - timedelta(days=hoy.weekday()) + timedelta(weeks=semana_offset)
     fin_semana = inicio_semana + timedelta(days=6)
 
+    try:
+        especialidad = request.user.perfil_tecnico.especialidad
+    except Exception:
+        especialidad = 'tecnico_general'
+
+    dispositivos_permitidos = []
+    if especialidad == 'tecnico_celular':
+        dispositivos_permitidos = ['CELULAR']
+    elif especialidad == 'tecnico_pc':
+        dispositivos_permitidos = ['PC']
+    elif especialidad == 'tecnico_laptop':
+        dispositivos_permitidos = ['LAPTOP']
+    else: # tecnico_general
+        filtro_dispositivo = request.GET.get('filtro_dispositivo')
+        if filtro_dispositivo in ['CELULAR', 'PC', 'LAPTOP']:
+            dispositivos_permitidos = [filtro_dispositivo]
+        else:
+            dispositivos_permitidos = ['CELULAR', 'PC', 'LAPTOP']
+
+    base_qs = Cita.objects.filter(servicio__tipo_dispositivo__in=dispositivos_permitidos)
+
     # Citas del técnico para la semana
     citas_semana_qs = (
-        Cita.objects
+        base_qs
         .filter(tecnico=request.user, fecha__range=(inicio_semana, fin_semana))
         .select_related('cliente', 'servicio', 'estado')
         .order_by('fecha', 'hora_inicio')
@@ -153,7 +259,7 @@ def tecnico_agenda(request):
     # Si no tiene citas asignadas en esa semana, incluir todas las citas de la semana para visualización de agenda
     if not citas_semana_qs.exists():
         citas_semana_qs = (
-            Cita.objects
+            base_qs
             .filter(fecha__range=(inicio_semana, fin_semana))
             .select_related('cliente', 'servicio', 'estado')
             .order_by('fecha', 'hora_inicio')
@@ -646,7 +752,7 @@ def exportar_inventario_excel(request):
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from django.http import HttpResponse
 
-    if request.user.rol != Usuario.Rol.TECNICO:
+    if request.user.rol not in [Usuario.Rol.TECNICO, Usuario.Rol.ADMINISTRADOR]:
         return redirect('home')
 
     repuestos = Repuesto.objects.filter(activo=True).order_by('categoria', 'nombre')
@@ -1397,8 +1503,7 @@ def admin_tecnicos(request):
             nombre_completo = request.POST.get('nombre_completo', '').strip()
             correo          = request.POST.get('correo', '').strip()
             telefono        = request.POST.get('telefono', '').strip()
-            nivel           = request.POST.get('nivel', '1')
-            especialidades  = request.POST.getlist('especialidades')  # lista de checkboxes
+            especialidad    = request.POST.get('especialidad', 'tecnico_general')
             observaciones   = request.POST.get('observaciones', '').strip()
             usuario_id      = request.POST.get('usuario_existente_id', '').strip()
 
@@ -1406,8 +1511,8 @@ def admin_tecnicos(request):
             if not nombre_completo:
                 messages.error(request, 'El nombre completo es obligatorio.')
                 return redirect('admin_tecnicos')
-            if not especialidades:
-                messages.error(request, 'Selecciona al menos una especialidad.')
+            if not especialidad:
+                messages.error(request, 'Selecciona una especialidad.')
                 return redirect('admin_tecnicos')
 
             if usuario_id:
@@ -1444,13 +1549,12 @@ def admin_tecnicos(request):
             perfil, _ = PerfilTecnico.objects.update_or_create(
                 tecnico=tecnico,
                 defaults={
-                    'nivel':          int(nivel),
-                    'especialidades': ','.join(especialidades),
+                    'especialidad':   especialidad,
                     'observaciones':  observaciones or None,
                 }
             )
 
-            msg = f'Técnico {tecnico.nombre_completo} {"creado" if creado else "actualizado"} con Nivel {nivel}.'
+            msg = f'Técnico {tecnico.nombre_completo} {"creado" if creado else "actualizado"} exitosamente.'
             if creado:
                 msg += f' Contraseña temporal: {pw_temporal} (cámbiela al primer inicio de sesión).'
             messages.success(request, msg)
@@ -1458,24 +1562,22 @@ def admin_tecnicos(request):
         # ── 2. Editar perfil de un técnico existente ──────────────────────────
         elif accion == 'editar_perfil':
             tecnico_id     = request.POST.get('tecnico_id')
-            nivel          = request.POST.get('nivel', '1')
-            especialidades = request.POST.getlist('especialidades')
+            especialidad   = request.POST.get('especialidad', 'tecnico_general')
             observaciones  = request.POST.get('observaciones', '').strip()
 
-            if not especialidades:
-                messages.error(request, 'Selecciona al menos una especialidad.')
+            if not especialidad:
+                messages.error(request, 'Selecciona una especialidad.')
                 return redirect('admin_tecnicos')
             try:
                 tecnico = Usuario.objects.get(pk=tecnico_id, rol=Usuario.Rol.TECNICO)
                 perfil, _ = PerfilTecnico.objects.update_or_create(
                     tecnico=tecnico,
                     defaults={
-                        'nivel':          int(nivel),
-                        'especialidades': ','.join(especialidades),
+                        'especialidad':   especialidad,
                         'observaciones':  observaciones or None,
                     }
                 )
-                messages.success(request, f'Perfil de {tecnico.nombre_completo} actualizado — Nivel {nivel}.')
+                messages.success(request, f'Perfil de {tecnico.nombre_completo} actualizado exitosamente.')
             except Usuario.DoesNotExist:
                 messages.error(request, 'Técnico no encontrado.')
 
@@ -1513,6 +1615,12 @@ def admin_tecnicos(request):
             estado__nombre__in=['Cancelada', 'Completada', 'No asistió']
         ).first()
 
+        # Obtener perfil si existe
+        try:
+            perfil = t.perfil_tecnico
+        except Exception:
+            perfil = None
+
         if not t.activo:
             estado_monitor = 'inactivo'
         elif cita_activa:
@@ -1523,17 +1631,13 @@ def admin_tecnicos(request):
                 estado_monitor = 'pausado'
             else:
                 estado_monitor = 'en_proceso'
+        elif perfil and getattr(perfil, 'en_pausa_manual', False):
+            estado_monitor = 'pausado'
         else:
             estado_monitor = 'disponible'
 
         total_hoy       = citas_hoy.count()
         completadas_hoy = citas_hoy.filter(estado__nombre__in=['Completada', 'Atendida']).count()
-
-        # Obtener perfil si existe
-        try:
-            perfil = t.perfil_tecnico
-        except Exception:
-            perfil = None
 
         tecnicos_monitoreo.append({
             'tecnico':         t,
@@ -1575,7 +1679,7 @@ def admin_tecnicos(request):
         'hoy':                 hoy,
         'usuarios_vinculables': usuarios_vinculables,
         'niveles':             PerfilTecnico.Nivel.choices,
-        'dispositivos':        PerfilTecnico.Dispositivo.choices,
+        'dispositivos':        PerfilTecnico.EspecialidadTecnico.choices,
     }
     return render(request, 'turnos/administracion/admin_tecnicos.html', context)
 
@@ -1917,3 +2021,39 @@ def admin_perfil(request):
         'form': form,
         'usuario': request.user,
     })
+
+
+# ─────────────────────────────────────────────
+#  TOGGLE DE PAUSA MANUAL (TÉCNICO)
+# ─────────────────────────────────────────────
+@login_required
+def tecnico_toggle_pausa(request):
+    """
+    Alterna el estado de pausa manual del técnico.
+    """
+    if request.method == 'POST' and request.user.rol == Usuario.Rol.TECNICO:
+        try:
+            perfil = request.user.perfil_tecnico
+            
+            # Si quiere pausar, verificar que no tenga citas activas
+            if not perfil.en_pausa_manual:
+                from django.utils import timezone
+                from datetime import date
+                hoy = timezone.now().date()
+                citas_activas = request.user.citas_asignadas.filter(
+                    fecha=hoy
+                ).exclude(estado__nombre__in=['Cancelada', 'Completada', 'No asistió'])
+                
+                if citas_activas.exists():
+                    messages.error(request, "No puedes pausar tu turno mientras tengas citas activas o pendientes.")
+                    return redirect('dashboard_tecnico')
+                    
+            perfil.en_pausa_manual = not perfil.en_pausa_manual
+            perfil.save(update_fields=['en_pausa_manual'])
+            
+            estado_msg = "EN PAUSA" if perfil.en_pausa_manual else "DISPONIBLE"
+            messages.success(request, f"Turno actualizado. Ahora estás {estado_msg}.")
+        except Exception as e:
+            messages.error(request, f"Error al cambiar estado: {e}")
+            
+    return redirect('dashboard_tecnico')
