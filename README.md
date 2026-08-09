@@ -114,6 +114,23 @@ Si necesitas vaciar la base de datos por completo y generar un entorno de prueba
 
 > ⚠️ **Advertencia:** Esto eliminará todos los datos de tu base de datos actual.
 
+### 🧹 Limpieza de tablas manuales obsoletas (Solo pgAdmin)
+Si previamente se crearon tablas manuales en pgAdmin (aquellas que NO tienen los prefijos `turnos_`, `auth_` ni `django_`), es estrictamente necesario eliminarlas. Django se encarga de gestionar sus propias tablas automáticamente. 
+
+Abre tu herramienta de consultas de pgAdmin y ejecuta el siguiente comando SQL para limpiar la base de datos de tablas duplicadas antiguas:
+```sql
+DROP TABLE IF EXISTS 
+    historial_cita,
+    notificacion,
+    horario_tecnico,
+    cita,
+    servicio,
+    estado_cita,
+    especialidad,
+    usuario 
+CASCADE;
+```
+
 ### Ejecución Manual
 Asegúrate de estar en tu entorno virtual y ejecuta:
 ```bash
