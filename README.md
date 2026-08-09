@@ -108,6 +108,27 @@ python manage.py runserver
 
 ---
 
+## 🧪 Limpieza y Generación de Datos de Prueba
+
+Si necesitas vaciar la base de datos por completo y generar un entorno de pruebas con datos falsos (administradores, clientes, técnicos, servicios y citas preconfiguradas), puedes usar los scripts de inicialización.
+
+> ⚠️ **Advertencia:** Esto eliminará todos los datos de tu base de datos actual.
+
+### Ejecución Manual
+Asegúrate de estar en tu entorno virtual y ejecuta:
+```bash
+python manage.py flush --no-input
+python seed_full.py
+```
+> Consulta el archivo `usuarios_prueba.md` en la raíz del proyecto para ver los usuarios y contraseñas generados.
+
+### Ejecución Automatizada
+Hemos provisto scripts autoejecutables para facilitar este proceso:
+- **En Windows:** Haz doble clic o ejecuta en consola `reset_db.bat`.
+- **En macOS/Linux:** Ejecuta `./reset_db.sh` (asegúrate de darle permisos con `chmod +x reset_db.sh`).
+
+---
+
 ## 💡 Solución a Errores Comunes
 
 ### ❌ `ModuleNotFoundError: No module named 'dotenv'` en Windows
