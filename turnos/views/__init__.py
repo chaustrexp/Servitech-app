@@ -31,6 +31,7 @@ from .dashboard_views import (
     admin_perfil,
     # Técnico
     dashboard_tecnico,
+    tecnico_toggle_pausa,
     tecnico_agenda,
     aceptar_cita,
     finalizar_cita,

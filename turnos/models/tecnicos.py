@@ -13,10 +13,11 @@ class PerfilTecnico(models.Model):
         NIVEL_2 = 2, 'Nivel 2 — Software avanzado, firmware y reparación de chasis/conectores'
         NIVEL_3 = 3, 'Nivel 3 — Microelectrónica y microsoldadura en placa base'
 
-    class Dispositivo(models.TextChoices):
-        CELULAR  = 'CELULAR',  'Celular'
-        PC_MESA  = 'PC_MESA',  'PC de Mesa'
-        PORTATIL = 'PORTATIL', 'Portátil'
+    class EspecialidadTecnico(models.TextChoices):
+        CELULAR = 'tecnico_celular', 'Especialista en Celulares'
+        PC = 'tecnico_pc', 'Especialista en PC de mesa'
+        LAPTOP = 'tecnico_laptop', 'Especialista en Portátiles/Laptops'
+        GENERAL = 'tecnico_general', 'Técnico General (Todos)'
 
     tecnico = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -29,19 +30,20 @@ class PerfilTecnico(models.Model):
         default=Nivel.NIVEL_1,
         verbose_name='Nivel de Competencia',
     )
-    # Especialidades: guardadas como string con separador ','
-    # Ej: "CELULAR,PORTATIL"
-    especialidades = models.CharField(
-        max_length=100,
-        blank=True,
-        default='',
-        verbose_name='Dispositivos que atiende',
-        help_text='Lista separada por comas: CELULAR, PC_MESA, PORTATIL',
+    especialidad = models.CharField(
+        max_length=30,
+        choices=EspecialidadTecnico.choices,
+        default=EspecialidadTecnico.GENERAL,
+        verbose_name='Especialidad Técnica',
     )
     observaciones = models.TextField(
         blank=True,
         null=True,
         verbose_name='Observaciones internas',
+    )
+    en_pausa_manual = models.BooleanField(
+        default=False,
+        verbose_name='Pausa Manual',
     )
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
@@ -54,18 +56,6 @@ class PerfilTecnico(models.Model):
         return f"{self.tecnico.nombre_completo} — Nivel {self.nivel}"
 
     # ── Helpers ──────────────────────────────────────────────────────────────
-    def get_especialidades_list(self):
-        """Devuelve las especialidades como lista limpia."""
-        return [e.strip() for e in self.especialidades.split(',') if e.strip()]
-
-    def set_especialidades_list(self, lista):
-        """Recibe una lista y la guarda como string separado por comas."""
-        self.especialidades = ','.join(lista)
-
-    def get_especialidades_display(self):
-        """Devuelve etiquetas legibles de las especialidades."""
-        mapa = dict(PerfilTecnico.Dispositivo.choices)
-        return [mapa.get(e, e) for e in self.get_especialidades_list()]
 
     @property
     def nivel_color(self):

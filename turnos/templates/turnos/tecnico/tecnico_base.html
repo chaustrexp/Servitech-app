@@ -13,7 +13,7 @@
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .nav-item-active { background-color: #eef2ff; color: #002b75; font-weight: 600; }
+        .nav-item-active { background-color: #eff6ff; color: #2563eb; font-weight: 700; }
         .sidebar-transition { transition: transform 0.3s ease; }
         .cita-card { transition: box-shadow 0.2s ease, transform 0.2s ease; }
         .cita-card:hover { box-shadow: 0 8px 25px -5px rgba(0,43,117,0.12); transform: translateY(-1px); }
@@ -31,11 +31,15 @@
            class="sidebar-transition fixed top-0 left-0 h-full w-56 bg-white border-r border-slate-100 shadow-sm z-40 flex flex-col -translate-x-full md:translate-x-0">
 
         <!-- Logo + Nombre -->
-        <div class="px-5 pt-6 pb-4 border-b border-slate-100">
+        <div class="px-5 pt-6 pb-6 border-b border-slate-100">
             <a href="{% url 'dashboard_tecnico' %}" class="flex items-center gap-3">
-                <img src="{% static 'img/logo.jpg' %}" alt="ServiTech Logo"
-                     class="w-9 h-9 rounded-xl object-cover shadow-sm border border-slate-200">
-                <span class="text-lg font-extrabold text-[#002b75] tracking-tight">ServiTech</span>
+                <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
+                    <img src="{% static 'img/logo.jpg' %}" alt="Logo ServiTech" class="w-full h-full object-contain rounded-lg">
+                </div>
+                <div class="leading-tight">
+                    <p class="text-[17px] font-extrabold text-[#0e3687] tracking-tight">ServiTech</p>
+                    <p class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Panel del<br>Técnico</p>
+                </div>
             </a>
         </div>
 

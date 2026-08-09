@@ -7,15 +7,34 @@
 <!-- ═══════════════════════════════════════════
      HEADER MINIMAL — Título | Subtítulo
 ═══════════════════════════════════════════ -->
-<div class="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-0 mb-6 md:mb-8">
-    <h1 class="text-base sm:text-lg font-bold text-[#002b75] leading-tight whitespace-nowrap">
-        <span id="saludo-hora">Hola</span>,&nbsp;{{ request.user.nombre_completo|default:"Técnico"|truncatewords:1 }}
-    </h1>
-    <span class="hidden xs:inline mx-3 text-slate-300 font-light text-lg select-none">|</span>
-    <p class="text-slate-400 text-xs sm:text-sm font-normal leading-tight">
-        <span id="subtitulo-dinamico">Bienvenido de nuevo.</span>
-        <span id="texto-citas-hoy">Tienes citas pendientes para hoy.</span>
-    </p>
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
+    <div class="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-0">
+        <h1 class="text-base sm:text-lg font-bold text-[#002b75] leading-tight whitespace-nowrap">
+            <span id="saludo-hora">Hola</span>,&nbsp;{{ request.user.nombre_completo|default:"Técnico"|truncatewords:1 }}
+        </h1>
+        <span class="hidden xs:inline mx-3 text-slate-300 font-light text-lg select-none">|</span>
+        <p class="text-slate-400 text-xs sm:text-sm font-normal leading-tight">
+            <span id="subtitulo-dinamico">Bienvenido de nuevo.</span>
+            <span id="texto-citas-hoy">Tienes citas pendientes para hoy.</span>
+        </p>
+    </div>
+    
+    <div>
+        <form action="{% url 'tecnico_toggle_pausa' %}" method="POST">
+            {% csrf_token %}
+            {% if request.user.perfil_tecnico.en_pausa_manual %}
+            <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-sm transition" title="Actualmente en pausa. Haz clic para recibir citas de nuevo.">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Reanudar Turno
+            </button>
+            {% else %}
+            <button type="submit" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-sm transition" title="Haz clic para no recibir más citas por ahora.">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Pausar Turno
+            </button>
+            {% endif %}
+        </form>
+    </div>
 </div>
 {% endblock page_header %}
 
@@ -92,11 +111,25 @@
             <h2 class="text-lg md:text-xl font-bold text-slate-800">Citas Disponibles</h2>
             <p class="text-xs text-slate-400 mt-0.5">Selecciona y acepta cualquier cita para agregarla a tu agenda</p>
         </div>
-        <span id="badge-citas-disponibles"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 w-fit">
-            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-            <span id="contador-disponibles">{{ total_disponibles|default:0 }} disponibles</span>
-        </span>
+        
+        <div class="flex items-center gap-3">
+            {% if request.user.perfil_tecnico.especialidad == 'tecnico_general' %}
+            <form method="GET" action="" class="flex items-center gap-2">
+                <select name="filtro_dispositivo" onchange="this.form.submit()" class="text-sm border-slate-200 rounded-lg text-slate-600 px-3 py-1.5 focus:border-[#002b75] focus:ring-[#002b75] shadow-sm">
+                    <option value="">Todos los dispositivos</option>
+                    <option value="CELULAR" {% if request.GET.filtro_dispositivo == 'CELULAR' %}selected{% endif %}>Celulares</option>
+                    <option value="PC" {% if request.GET.filtro_dispositivo == 'PC' %}selected{% endif %}>PC de Mesa</option>
+                    <option value="LAPTOP" {% if request.GET.filtro_dispositivo == 'LAPTOP' %}selected{% endif %}>Laptops</option>
+                </select>
+            </form>
+            {% endif %}
+
+            <span id="badge-citas-disponibles"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 w-fit">
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                <span id="contador-disponibles">{{ total_disponibles|default:0 }} disponibles</span>
+            </span>
+        </div>
     </div>
 
     <!-- Lista de citas disponibles -->
@@ -207,40 +240,23 @@
     <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
         <h3 class="text-lg font-bold text-slate-800 mb-5">Rendimiento Semanal</h3>
         <div class="flex items-end gap-1.5 md:gap-2 h-32 md:h-40">
-            <!-- Barras del gráfico -->
-            <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#dce6f5] rounded-t-lg min-h-[4px]" style="height:55%"></div>
-                <span class="text-[10px] md:text-xs text-slate-400 font-medium">Lun</span>
+            <!-- Barras del gráfico dinámicas -->
+            {% for d in dias_semana %}
+            <div class="flex-1 flex flex-col items-center gap-1.5" title="{{ d.count }} citas">
+                {% if d.es_hoy %}
+                <div class="w-full bg-[#002b75] rounded-t-lg min-h-[4px]" style="height:{{ d.porcentaje }}%"></div>
+                <span class="text-[10px] md:text-xs text-[#002b75] font-bold">{{ d.nombre }}</span>
+                {% else %}
+                <div class="w-full bg-[#dce6f5] rounded-t-lg min-h-[4px]" style="height:{{ d.porcentaje }}%"></div>
+                <span class="text-[10px] md:text-xs text-slate-400 font-medium">{{ d.nombre }}</span>
+                {% endif %}
             </div>
-            <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#dce6f5] rounded-t-lg min-h-[4px]" style="height:40%"></div>
-                <span class="text-[10px] md:text-xs text-slate-400 font-medium">Mar</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#dce6f5] rounded-t-lg min-h-[4px]" style="height:80%"></div>
-                <span class="text-[10px] md:text-xs text-slate-400 font-medium">Mié</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#002b75] rounded-t-lg min-h-[4px]" style="height:65%"></div>
-                <span class="text-[10px] md:text-xs text-[#002b75] font-bold">Jue</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#dce6f5] rounded-t-lg min-h-[4px]" style="height:20%"></div>
-                <span class="text-[10px] md:text-xs text-slate-400 font-medium">Vie</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#dce6f5] rounded-t-lg min-h-[4px]" style="height:5%"></div>
-                <span class="text-[10px] md:text-xs text-slate-400 font-medium">Sáb</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full bg-[#dce6f5] rounded-t-lg min-h-[4px]" style="height:5%"></div>
-                <span class="text-[10px] md:text-xs text-slate-400 font-medium">Dom</span>
-            </div>
+            {% endfor %}
         </div>
         <div class="mt-4 grid grid-cols-3 gap-2 md:gap-3">
             <div class="bg-[#f4f7fb] rounded-xl p-3 text-center">
                 <p class="text-xs text-slate-500 font-medium">Total semana</p>
-                <p class="text-xl font-extrabold text-[#002b75]">18</p>
+                <p class="text-xl font-extrabold text-[#002b75]">{{ total_semana }}</p>
             </div>
             <div class="bg-[#f4f7fb] rounded-xl p-3 text-center">
                 <p class="text-xs text-slate-500 font-medium">Satisfacción</p>
@@ -257,50 +273,53 @@
     <div class="lg:col-span-2 bg-[#002b75] rounded-2xl shadow-sm p-6 flex flex-col">
         <div class="flex items-center justify-between mb-1">
             <h3 class="text-lg font-bold text-white">Tarea Actual</h3>
+            {% if tarea_actual %}
             <span class="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></span>
+            {% else %}
+            <span class="w-2.5 h-2.5 bg-slate-400 rounded-full"></span>
+            {% endif %}
         </div>
-        <p class="text-blue-200 text-sm mb-5">MacBook Pro M2 — Juan Pérez</p>
+        
+        {% if tarea_actual %}
+        <p class="text-blue-200 text-sm mb-5">{{ tarea_actual.servicio.nombre|truncatechars:20 }} — {{ tarea_actual.cliente.nombre_completo|truncatewords:2 }}</p>
 
         <div class="mb-4">
             <div class="flex justify-between items-center mb-2">
                 <span class="text-sm text-blue-200 font-medium">Progreso Diagnóstico</span>
-                <span id="pct-progreso" class="text-sm font-bold text-white">65%</span>
+                <span id="pct-progreso" class="text-sm font-bold text-white">{{ progreso_tarea }}%</span>
             </div>
             <div class="bg-white/20 rounded-full h-2.5">
-                <div id="barra-progreso" class="progress-fill bg-white rounded-full h-2.5" style="width: 0%"></div>
+                <div id="barra-progreso" class="progress-fill bg-white rounded-full h-2.5" style="width: {{ progreso_tarea }}%"></div>
             </div>
         </div>
 
         <div class="space-y-2 mb-5">
-            <div class="flex items-center gap-2 text-sm text-blue-200">
+            {% for paso in pasos_tarea %}
+            <div class="flex items-center gap-2 text-sm {% if paso.completado %}text-blue-200{% else %}text-blue-200/60{% endif %}">
+                {% if paso.completado %}
                 <svg class="w-4 h-4 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                 </svg>
-                Diagnóstico de hardware completado
-            </div>
-            <div class="flex items-center gap-2 text-sm text-blue-200">
-                <svg class="w-4 h-4 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clip-rule="evenodd" />
-                </svg>
-                Pantalla identificada como defectuosa
-            </div>
-            <div class="flex items-center gap-2 text-sm text-blue-200/60">
+                {% else %}
                 <svg class="w-4 h-4 text-white/30 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Reemplazo de pantalla pendiente
+                {% endif %}
+                {{ paso.nombre }}
             </div>
+            {% endfor %}
         </div>
 
-        <button onclick="continuarReparacion()"
-            class="mt-auto w-full bg-white hover:bg-slate-50 text-[#002b75] font-bold py-3 rounded-xl transition-all shadow text-sm">
+        <a href="{% url 'tecnico_agenda' %}" class="mt-auto w-full block text-center bg-white hover:bg-slate-50 text-[#002b75] font-bold py-3 rounded-xl transition-all shadow text-sm">
             Continuar Reparación
-        </button>
+        </a>
+        {% else %}
+        <div class="flex-1 flex flex-col items-center justify-center text-center opacity-70 my-8">
+            <svg class="w-12 h-12 text-blue-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
+            <p class="text-white font-medium">¡Estás al día!</p>
+            <p class="text-blue-200 text-sm mt-1">No tienes tareas activas en progreso en este momento.</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 
