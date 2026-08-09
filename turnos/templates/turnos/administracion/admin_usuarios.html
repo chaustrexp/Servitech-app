@@ -73,59 +73,71 @@
 <div class="kpis-container grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5 mb-6 mt-1">
 
     <!-- KPI: Total Usuarios -->
-    <div class="bg-white rounded-[20px] p-3.5 sm:p-5 shadow-sm border border-slate-100 flex items-start justify-between hover:shadow-md transition-shadow">
-        <div>
-            <p class="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Total Usuarios</p>
-            <h3 class="text-[24px] sm:text-[32px] font-bold text-slate-800 leading-none mb-1.5">{{ total_usuarios|default:0 }}</h3>
-            <div class="flex items-center gap-1 text-[11px] sm:text-[12px] text-emerald-600 font-semibold">
-                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-[20px] p-4 sm:p-5 shadow-sm border border-slate-200 flex items-start justify-between hover:border-slate-300 transition-colors">
+        <div class="flex flex-col justify-between h-full w-full">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <p class="text-[10px] sm:text-[11px] font-extrabold text-[#0e3687] uppercase tracking-wider mb-1">Total Usuarios</p>
+                    <h3 class="text-[28px] sm:text-[32px] font-bold text-[#0e3687] leading-none">{{ total_usuarios|default:0 }}</h3>
+                </div>
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-[14px] bg-[#eff6ff] text-[#0e3687] flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="flex items-center gap-1.5 text-[11px] sm:text-[12px] text-emerald-700 font-bold">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                 </svg>
                 <span class="truncate">Registrados</span>
             </div>
         </div>
-        <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-        </div>
     </div>
 
     <!-- KPI: Usuarios Activos -->
-    <div class="bg-white rounded-[20px] p-3.5 sm:p-5 shadow-sm border border-slate-100 flex items-start justify-between hover:shadow-md transition-shadow">
-        <div>
-            <p class="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Usuarios Activos</p>
-            <h3 class="text-[24px] sm:text-[32px] font-bold text-slate-800 leading-none mb-1.5">{{ usuarios_activos|default:0 }}</h3>
-            <div class="flex items-center gap-1 text-[11px] sm:text-[12px] text-slate-500 font-semibold">
-                <svg class="w-3.5 h-3.5 text-[#059669] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-[20px] p-4 sm:p-5 shadow-sm border border-slate-200 flex items-start justify-between hover:border-slate-300 transition-colors">
+        <div class="flex flex-col justify-between h-full w-full">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <p class="text-[10px] sm:text-[11px] font-extrabold text-[#0e3687] uppercase tracking-wider mb-1">Usuarios Activos</p>
+                    <h3 class="text-[28px] sm:text-[32px] font-bold text-[#0e3687] leading-none">{{ usuarios_activos|default:0 }}</h3>
+                </div>
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-[14px] bg-[#e6f4ea] text-[#0d652d] flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="flex items-center gap-1.5 text-[11px] sm:text-[12px] text-[#0d652d] font-bold">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <span class="truncate">Habilitados</span>
             </div>
         </div>
-        <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#D1FAE5] text-[#059669] flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-        </div>
     </div>
 
     <!-- KPI: Nuevos Este Mes -->
-    <div class="bg-white rounded-[20px] p-3.5 sm:p-5 shadow-sm border border-slate-100 flex items-start justify-between hover:shadow-md transition-shadow col-span-2 sm:col-span-1">
-        <div>
-            <p class="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nuevos Este Mes</p>
-            <h3 class="text-[24px] sm:text-[32px] font-bold text-slate-800 leading-none mb-1.5">{{ nuevos_mes|default:0 }}</h3>
-            <div class="flex items-center gap-1 text-[11px] sm:text-[12px] text-slate-500 font-semibold">
-                <svg class="w-3.5 h-3.5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-[20px] p-4 sm:p-5 shadow-sm border border-slate-200 flex items-start justify-between hover:border-slate-300 transition-colors col-span-2 sm:col-span-1">
+        <div class="flex flex-col justify-between h-full w-full">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <p class="text-[10px] sm:text-[11px] font-extrabold text-[#0e3687] uppercase tracking-wider mb-1">Nuevos Este Mes</p>
+                    <h3 class="text-[28px] sm:text-[32px] font-bold text-[#0e3687] leading-none">{{ nuevos_mes|default:0 }}</h3>
+                </div>
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-[14px] bg-[#fef3c7] text-[#b45309] flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="flex items-center gap-1.5 text-[11px] sm:text-[12px] text-slate-500 font-bold">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
                 <span class="truncate">Inscritos este mes</span>
             </div>
-        </div>
-        <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#FEF9C3] text-[#CA8A04] flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-            </svg>
         </div>
     </div>
 </div>

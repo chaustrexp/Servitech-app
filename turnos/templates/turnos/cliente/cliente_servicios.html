@@ -1,4 +1,5 @@
 {% extends 'turnos/cliente/cliente_base.html' %}
+{% load static %}
 
 {% block title %}Servicios - ServiTech{% endblock %}
 
@@ -29,7 +30,7 @@
     <!-- Tarjeta: Celulares -->
     <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
         <div class="h-48 w-full overflow-hidden bg-slate-100 relative">
-            <img src="https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&q=80&w=600" 
+            <img src="{% static 'img/celular_software.png' %}" 
                  alt="Reparación de celulares" class="w-full h-full object-cover">
         </div>
         <div class="p-6 flex flex-col flex-grow">
@@ -50,7 +51,7 @@
                         24-48h
                     </div>
                 </div>
-                <button onclick="openServicioModal('Celulares', 'Reparación de pantallas, baterías y fallas de placa para todas las marcas líderes. Repuestos originales certificados.', 'Desde $45.00', '24-48h', 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&q=80&w=600')" class="block w-full text-center bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
+                <button onclick='openServicioModal("Celulares", "Reparación de pantallas, baterías y fallas de placa para todas las marcas líderes. Repuestos originales certificados.", "Desde $45.00", "24-48h", "{% static "img/celular_software.png" %}")' class="block w-full text-center bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
                     Ver detalles / Agendar
                 </button>
             </div>
@@ -60,7 +61,7 @@
     <!-- Tarjeta: Laptops -->
     <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
         <div class="h-48 w-full overflow-hidden bg-slate-100 relative">
-            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=600" 
+            <img src="{% static 'img/laptop_software.png' %}" 
                  alt="Reparación de laptops" class="w-full h-full object-cover">
         </div>
         <div class="p-6 flex flex-col flex-grow">
@@ -78,7 +79,7 @@
                     <span class="text-slate-800 text-sm font-bold">Desde $70.00</span>
                     <span class="text-slate-500 text-xs font-medium">3-5 días</span>
                 </div>
-                <button onclick="openServicioModal('Laptops', 'Mantenimiento preventivo, cambio de teclado, reparación de bisagras y upgrades de hardware.', 'Desde $70.00', '3-5 días', 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=600')" class="block w-full text-center bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
+                <button onclick='openServicioModal("Laptops", "Mantenimiento preventivo, cambio de teclado, reparación de bisagras y upgrades de hardware.", "Desde $70.00", "3-5 días", "{% static "img/laptop_software.png" %}")' class="block w-full text-center bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
                     Ver detalles / Agendar
                 </button>
             </div>
@@ -88,8 +89,8 @@
     <!-- Tarjeta: PCs Escritorio -->
     <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
         <div class="h-48 w-full overflow-hidden bg-slate-100 relative">
-            <img src="https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&q=80&w=600" 
-                 alt="Armado de PCs" class="w-full h-full object-cover">
+            <img src="{% static 'img/pc_software.png' %}" 
+                 alt="Reparación de PCs" class="w-full h-full object-cover">
         </div>
         <div class="p-6 flex flex-col flex-grow">
             <div class="flex items-center gap-2 text-[#002b75] mb-3">
@@ -106,71 +107,14 @@
                     <span class="text-slate-800 text-sm font-bold">Desde $60.00</span>
                     <span class="text-slate-500 text-xs font-medium">2-3 días</span>
                 </div>
-                <button onclick="openServicioModal('PCs Escritorio', 'Ensamble a medida, optimización de sistemas de enfriamiento líquido y limpieza profunda.', 'Desde $60.00', '2-3 días', 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&q=80&w=600')" class="block w-full text-center bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
+                <button onclick='openServicioModal("PCs Escritorio", "Ensamble a medida, optimización de sistemas de enfriamiento líquido y limpieza profunda.", "Desde $60.00", "2-3 días", "{% static "img/pc_software.png" %}")' class="block w-full text-center bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
                     Ver detalles / Agendar
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Tarjeta: Consolas -->
-    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
-        <div class="h-48 w-full overflow-hidden bg-slate-100 relative">
-            <img src="https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?auto=format&fit=crop&q=80&w=600" 
-                 alt="Reparación de Consolas" class="w-full h-full object-cover">
-        </div>
-        <div class="p-6 flex flex-col flex-grow">
-            <div class="flex items-center gap-2 text-[#002b75] mb-3">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span class="text-xs font-bold tracking-widest uppercase">Gaming</span>
-            </div>
-            <h3 class="text-xl font-bold text-slate-800 mb-2">Consolas</h3>
-            <p class="text-sm text-slate-500 leading-relaxed mb-6">
-                Reparación de puertos HDMI, joysticks, problemas de encendido y mantenimiento de sobrecalentamiento.
-            </p>
-            
-            <div class="mt-auto">
-                <div class="flex items-center justify-between mb-5">
-                    <span class="text-slate-800 text-sm font-bold">Desde $55.00</span>
-                    <span class="text-slate-500 text-xs font-medium">3-4 días</span>
-                </div>
-                <button onclick="openServicioModal('Consolas', 'Reparación de puertos HDMI, joysticks, problemas de encendido y mantenimiento de sobrecalentamiento.', 'Desde $55.00', '3-4 días', 'https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?auto=format&fit=crop&q=80&w=600')" class="block w-full text-center bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
-                    Ver detalles / Agendar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tarjeta: Recuperación -->
-    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col md:col-span-2 lg:col-span-1">
-        <div class="h-48 w-full overflow-hidden bg-slate-100 relative">
-            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=600" 
-                 alt="Recuperación de Datos" class="w-full h-full object-cover">
-        </div>
-        <div class="p-6 flex flex-col flex-grow h-full justify-between">
-            <div>
-                <div class="flex items-center gap-2 text-[#002b75] mb-3">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                    <span class="text-xs font-bold tracking-widest uppercase">Seguridad</span>
-                </div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">Recuperación de Datos</h3>
-                <p class="text-sm text-slate-500 leading-relaxed mb-6">
-                    Recuperamos tu información valiosa de discos duros dañados, unidades de estado sólido y memorias corruptas con total privacidad garantizada.
-                </p>
-                <div class="mb-6">
-                    <p class="text-lg font-bold text-[#002b75]">Cotización previa</p>
-                    <div class="flex items-center gap-1.5 text-slate-500 text-xs font-medium mt-1">
-                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        Evaluación en 2h
-                    </div>
-                </div>
-            </div>
-            
-            <button onclick="openServicioModal('Recuperación de Datos', 'Recuperamos tu información valiosa de discos duros dañados, unidades de estado sólido y memorias corruptas con total privacidad garantizada.', 'Cotización previa', 'Evaluación en 2h', 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=600')" class="block w-full text-center border-2 border-[#002b75] text-[#002b75] hover:bg-blue-50 font-bold py-2.5 rounded-xl text-sm transition-colors">
-                Ver detalles / Agendar
-            </button>
-        </div>
-    </div>
+    <!-- (Se han removido las tarjetas de Consolas y Recuperación a petición del usuario) -->
 </div>
 
 <!-- Banner: Por qué elegirnos -->
