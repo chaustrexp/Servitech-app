@@ -235,9 +235,13 @@
             <div class="space-y-2">
                 {% for r in reportes_recientes %}
                 <div class="flex items-center gap-3 px-2 py-2.5 border-b border-slate-50 hover:bg-slate-50/50 rounded-xl transition-colors">
-                    <div class="w-8 h-8 rounded-lg bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0 font-bold text-xs">
-                        {{ r.cliente.nombre_completo|slice:":1" }}
-                    </div>
+                    {% if r.cliente.foto_perfil %}
+                        <img src="{{ r.cliente.foto_perfil.url }}" class="w-8 h-8 rounded-lg object-cover flex-shrink-0">
+                    {% else %}
+                        <div class="w-8 h-8 rounded-lg bg-[#EEF2FF] text-[#003399] flex items-center justify-center flex-shrink-0 font-bold text-xs">
+                            {{ r.cliente.nombre_completo|slice:":1" }}
+                        </div>
+                    {% endif %}
                     <div class="flex-1 min-w-0">
                         <p class="text-[12px] font-bold text-slate-700 truncate leading-tight">{{ r.cliente.nombre_completo }}</p>
                         <p class="text-[11px] text-slate-400 mt-0.5 truncate">{{ r.servicio.nombre }}</p>
@@ -448,6 +452,9 @@ function inicializarGraficoDonut() {
 }
 
 function descargarPDF() {
+    // Al usar window.print() con reglas de @media print en el CSS,
+    // el usuario puede elegir "Guardar como PDF" nativamente en su navegador,
+    // lo que es mucho más rápido y menos propenso a errores de caché o librerías JS.
     window.print();
 }
 

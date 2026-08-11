@@ -137,7 +137,11 @@
                         {% elif estado == 'disponible' %}bg-[#0e3687]
                         {% elif estado == 'pausado' %}bg-[#9f1239]
                         {% else %}bg-slate-400{% endif %}">
-                        {{ t.nombre_completo|slice:":2"|upper }}
+                        {% if t.foto_perfil %}
+                            <img src="{{ t.foto_perfil.url }}" class="w-full h-full rounded-full object-cover">
+                        {% else %}
+                            {{ t.nombre_completo|slice:":2"|upper }}
+                        {% endif %}
                         
                         <!-- Indicador de estado (dot) -->
                         <div class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white
@@ -155,7 +159,7 @@
 
                 <!-- Badges -->
                 <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
-                    <span class="text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider
+                    <span id="badge-tecnico-{{ t.pk }}" class="text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider
                         {% if estado == 'en_proceso' %}bg-[#22c55e] text-white
                         {% elif estado == 'disponible' %}bg-blue-100 text-[#0e3687]
                         {% elif estado == 'pausado' %}bg-[#eab308] text-white
@@ -241,7 +245,7 @@
 
                 <!-- ACCIONES -->
                 <div class="flex gap-2 w-full mt-auto">
-                    <button onclick="abrirModalEditarPerfil({{ t.pk }},'{{ t.nombre_completo|escapejs }}','{{ perfil.nivel|default:1 }}','{{ perfil.especialidades|default:'' }}')"
+                    <button onclick="abrirModalEditarPerfil({{ t.pk }},'{{ t.nombre_completo|escapejs }}','{{ t.genero|default:"" }}','{{ perfil.especialidad|default:"" }}','{{ perfil.observaciones|default_if_none:""|escapejs }}')"
                             class="flex-1 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 text-[12px] font-bold transition flex items-center justify-center gap-2">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
@@ -332,7 +336,11 @@
         {% with perfil=t.perfil_tecnico %}
         <div class="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 hover:border-slate-300 transition">
             <div class="w-10 h-10 rounded-lg bg-[#0e3687] text-white font-bold text-sm flex items-center justify-center flex-shrink-0">
-                {{ t.nombre_completo|slice:":2"|upper }}
+                {% if t.foto_perfil %}
+                    <img src="{{ t.foto_perfil.url }}" class="w-full h-full rounded-lg object-cover">
+                {% else %}
+                    {{ t.nombre_completo|slice:":2"|upper }}
+                {% endif %}
             </div>
             <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-1.5 mb-0.5">
@@ -431,8 +439,11 @@
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-[12px] font-bold text-slate-700 mb-1.5">Contraseña *</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                        <div>
+                            <label class="block text-[12px] font-bold text-slate-700 mb-1.5">Contraseña *</label>
+
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -544,6 +555,15 @@
                 <input type="hidden" name="accion" value="editar_perfil">
                 <input type="hidden" name="tecnico_id" id="edit-tecnico-id">
                 
+                <!-- Género -->
+                <div>
+                    <label class="block text-[12px] font-bold text-slate-700 mb-1.5">Género (Foto de perfil) *</label>
+                    <select name="genero" id="edit-genero" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:border-[#0e3687] focus:ring-1 focus:ring-[#0e3687]" required>
+                        <option value="hombre">Hombre</option>
+                        <option value="mujer">Mujer</option>
+                    </select>
+                </div>
+                
                 <!-- Especialidad Técnica -->
                 <div>
                     <label class="block text-[13px] font-bold text-slate-800 mb-3 flex items-center gap-1">
@@ -653,13 +673,28 @@ function switchTab(actId, inactId) {
     document.getElementById(map[actId]).classList.remove('hidden');
     document.getElementById(map[inactId]).classList.add('hidden');
 }
-function abrirModalEditarPerfil(id, nombre, nivel, especialidades) {
+function abrirModalEditarPerfil(id, nombre, genero, especialidad, observaciones) {
     document.getElementById('edit-tecnico-id').value = id;
     document.getElementById('edit-tecnico-nombre').textContent = nombre;
-    document.querySelectorAll('#modal-editar-perfil input[name="nivel"]')
-        .forEach(r => { r.checked = parseInt(r.value) === parseInt(nivel); });
-    const espList = especialidades ? especialidades.split(',').map(s=>s.trim()) : [];
-    document.querySelectorAll('.edit-esp-check').forEach(c => { c.checked = espList.includes(c.value); });
+    
+    const generoElement = document.getElementById('edit-genero');
+    if (generoElement) {
+        if (genero === 'M' || genero === 'hombre') {
+            generoElement.value = 'hombre';
+        } else if (genero === 'F' || genero === 'mujer') {
+            generoElement.value = 'mujer';
+        } else {
+            generoElement.value = 'hombre'; // Default
+        }
+    }
+    
+    document.querySelectorAll('.edit-esp-check').forEach(c => { 
+        c.checked = (c.value === especialidad); 
+    });
+    const obsElement = document.getElementById('edit-observaciones');
+    if(obsElement) {
+        obsElement.value = (observaciones === 'None') ? '' : observaciones;
+    }
     abrirModal('modal-editar-perfil');
 }
 function abrirModalAsignar(id, nombre) {
@@ -676,5 +711,35 @@ document.getElementById('sel-usuario-existente').addEventListener('change', func
     const n = this.options[this.selectedIndex].dataset.nombre || '';
     document.getElementById('inp-nombre-nuevo').value = n;
 });
+</script>
+
+<script>
+    // Polling estado de tecnicos
+    setInterval(() => {
+        fetch("{% url 'api_estado_tecnicos' %}")
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                data.tecnicos.forEach(t => {
+                    const badge = document.getElementById('badge-tecnico-' + t.id);
+                    if(badge) {
+                        if(t.estado === 'en_proceso') {
+                            badge.className = 'text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-[#22c55e] text-white';
+                            badge.textContent = 'En proceso';
+                        } else if(t.estado === 'disponible') {
+                            badge.className = 'text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-blue-100 text-[#0e3687]';
+                            badge.textContent = 'Disponible';
+                        } else if(t.estado === 'pausado') {
+                            badge.className = 'text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-[#eab308] text-white';
+                            badge.textContent = 'En pausa';
+                        } else {
+                            badge.className = 'text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-[#ef4444] text-white';
+                            badge.textContent = 'Inactivo';
+                        }
+                    }
+                });
+            }
+        });
+    }, 5000);
 </script>
 {% endblock %}

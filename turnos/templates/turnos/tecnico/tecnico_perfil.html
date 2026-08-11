@@ -22,7 +22,7 @@
                 <!-- Avatar en grande -->
                 <div class="relative w-32 h-32 mx-auto mb-4 group cursor-pointer" onclick="abrirModalFoto()">
                     <img id="foto-perfil-card" 
-                         src="{% static 'img/foto de perfil tecnico.png' %}" 
+                         src="{% if request.user.foto_perfil %}{{ request.user.foto_perfil.url }}{% else %}{% static 'img/foto de perfil tecnico.png' %}{% endif %}" 
                          alt="Foto de perfil" 
                          class="w-full h-full rounded-3xl object-cover border-4 border-slate-50 shadow-inner group-hover:opacity-85 transition">
                     <div class="absolute inset-0 bg-black/40 rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-xs font-bold">

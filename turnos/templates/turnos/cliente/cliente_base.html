@@ -17,6 +17,33 @@
         .nav-item:hover { background:#f1f5f9; color:#1e293b; }
         .nav-item.active { background:#eff6ff; color:#2563eb; font-weight:700; }
         .sidebar-transition { transition: transform 0.3s ease; }
+        @media print {
+            body * { visibility: hidden; }
+            #modal-manual-usuario, #modal-manual-usuario * { visibility: visible; }
+            #modal-manual-usuario {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white !important;
+                padding: 0 !important;
+            }
+            #modal-manual-usuario > div {
+                max-width: 100% !important;
+                max-height: none !important;
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+            }
+            #modal-manual-usuario a[onclick="window.print()"],
+            #modal-manual-usuario .border-t,
+            #modal-manual-usuario button {
+                display: none !important;
+            }
+            #modal-manual-usuario .overflow-y-auto {
+                overflow: visible !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-[#f4f7fb] min-h-screen flex overflow-x-hidden">

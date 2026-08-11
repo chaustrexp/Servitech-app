@@ -35,6 +35,12 @@ class Usuario(AbstractUser):
     nombre_completo = models.CharField(max_length=150)
     correo = models.EmailField(max_length=150, unique=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
+    genero = models.CharField(
+        max_length=1, 
+        choices=[('M', 'Hombre'), ('F', 'Mujer')], 
+        blank=True, 
+        null=True
+    )
     rol = models.CharField(
         max_length=30,
         choices=Rol.choices,

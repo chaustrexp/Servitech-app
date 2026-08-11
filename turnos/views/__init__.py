@@ -7,7 +7,8 @@ from .agendamiento_views import (
     cita_confirmada,
     detalle_cita,
     ver_turno,
-    notificar_retraso
+    notificar_retraso,
+    api_estado_cita
 )
 from .dashboard_views import (
     # Admin
@@ -32,6 +33,7 @@ from .dashboard_views import (
     # Técnico
     dashboard_tecnico,
     tecnico_toggle_pausa,
+    api_estado_tecnicos,
     tecnico_agenda,
     aceptar_cita,
     finalizar_cita,
@@ -40,6 +42,7 @@ from .dashboard_views import (
     tecnico_cliente_historial,
     tecnico_clientes_historial_general,
     tecnico_soporte,
+    tecnico_crear_ticket,
     tecnico_reporte_mensual,
     tecnico_perfil,
     exportar_inventario_excel,

@@ -1,6 +1,25 @@
 {% extends 'turnos/cliente/agendamiento/wizard_base.html' %}
 
-{% block title %}Detalle de Ticket #ST-{{ cita.pk }} - ServiTech{% endblock %}
+{% block title %}Detalle de Ticket #ST-{{ cita.pk }} - ServiTech
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const currentEstado = "{{ estado_nombre|escapejs }}";
+        const citaId = "{{ cita.pk }}";
+        
+        setInterval(() => {
+            fetch(`/api/cita/${citaId}/estado/`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.estado && data.estado !== currentEstado) {
+                        window.location.reload();
+                    }
+                })
+                .catch(err => console.error("Error fetching status:", err));
+        }, 5000); // Revisa cada 5 segundos
+    });
+</script>
+{% endblock %}
+
 
 {% block content %}
 <div class="max-w-2xl mx-auto px-4 py-6">
@@ -132,37 +151,7 @@
         <!-- QR Code -->
         <div class="flex flex-col items-center py-2">
             <div class="w-36 h-36 border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm flex items-center justify-center">
-                <svg viewBox="0 0 100 100" class="w-full h-full p-2" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="5" y="5" width="30" height="30" fill="none" stroke="#002b75" stroke-width="4"/>
-                    <rect x="10" y="10" width="20" height="20" fill="#002b75"/>
-                    <rect x="65" y="5" width="30" height="30" fill="none" stroke="#002b75" stroke-width="4"/>
-                    <rect x="70" y="10" width="20" height="20" fill="#002b75"/>
-                    <rect x="5" y="65" width="30" height="30" fill="none" stroke="#002b75" stroke-width="4"/>
-                    <rect x="10" y="70" width="20" height="20" fill="#002b75"/>
-                    <rect x="40" y="5" width="5" height="5" fill="#002b75"/>
-                    <rect x="50" y="5" width="5" height="5" fill="#002b75"/>
-                    <rect x="55" y="10" width="5" height="5" fill="#002b75"/>
-                    <rect x="40" y="15" width="10" height="5" fill="#002b75"/>
-                    <rect x="45" y="25" width="5" height="5" fill="#002b75"/>
-                    <rect x="40" y="35" width="5" height="5" fill="#002b75"/>
-                    <rect x="50" y="30" width="10" height="5" fill="#002b75"/>
-                    <rect x="40" y="45" width="5" height="5" fill="#002b75"/>
-                    <rect x="50" y="45" width="5" height="5" fill="#002b75"/>
-                    <rect x="60" y="45" width="5" height="5" fill="#002b75"/>
-                    <rect x="70" y="45" width="5" height="5" fill="#002b75"/>
-                    <rect x="80" y="45" width="10" height="5" fill="#002b75"/>
-                    <rect x="40" y="55" width="10" height="5" fill="#002b75"/>
-                    <rect x="55" y="55" width="5" height="5" fill="#002b75"/>
-                    <rect x="70" y="55" width="10" height="5" fill="#002b75"/>
-                    <rect x="40" y="65" width="5" height="5" fill="#002b75"/>
-                    <rect x="50" y="65" width="5" height="5" fill="#002b75"/>
-                    <rect x="60" y="70" width="5" height="5" fill="#002b75"/>
-                    <rect x="75" y="65" width="10" height="5" fill="#002b75"/>
-                    <rect x="40" y="75" width="5" height="5" fill="#002b75"/>
-                    <rect x="50" y="80" width="10" height="5" fill="#002b75"/>
-                    <rect x="65" y="80" width="5" height="5" fill="#002b75"/>
-                    <rect x="80" y="75" width="10" height="5" fill="#002b75"/>
-                </svg>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ request.scheme }}://{{ request.get_host }}{% url 'ver_turno' cita.pk %}" alt="QR Code del Turno" class="w-full h-full p-2" />
             </div>
             <p class="text-xs text-slate-500 text-center mt-3 max-w-xs">
                 Muestra este código al llegar a la recepción para un registro inmediato.
@@ -307,4 +296,23 @@
     {% endif %}
 
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const currentEstado = "{{ estado_nombre|escapejs }}";
+        const citaId = "{{ cita.pk }}";
+        
+        setInterval(() => {
+            fetch(`/api/cita/${citaId}/estado/`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.estado && data.estado !== currentEstado) {
+                        window.location.reload();
+                    }
+                })
+                .catch(err => console.error("Error fetching status:", err));
+        }, 5000); // Revisa cada 5 segundos
+    });
+</script>
 {% endblock %}
+

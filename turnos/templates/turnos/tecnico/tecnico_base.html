@@ -49,7 +49,7 @@
             <div class="flex items-center gap-3">
                 <div class="relative group cursor-pointer" onclick="abrirModalFoto()">
                     <img id="foto-perfil-sidebar"
-                         src="{% static 'img/foto de perfil tecnico.png' %}"
+                         src="{% if request.user.foto_perfil %}{{ request.user.foto_perfil.url }}{% else %}{% static 'img/foto de perfil tecnico.png' %}{% endif %}"
                          alt="Foto de perfil"
                          class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md">
                     <div class="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
@@ -403,7 +403,7 @@
             </div>
             <div class="flex justify-center mb-5">
                 <div class="relative">
-                    <img id="foto-preview" src="{% static 'img/foto de perfil tecnico.png' %}"
+                    <img id="foto-preview" src="{% if request.user.foto_perfil %}{{ request.user.foto_perfil.url }}{% else %}{% static 'img/foto de perfil tecnico.png' %}{% endif %}"
                          alt="Preview" class="w-28 h-28 rounded-full object-cover border-4 border-[#eef2ff] shadow-md">
                     <div class="absolute bottom-1 right-1 bg-[#002b75] rounded-full p-1.5 shadow">
                         <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -443,9 +443,8 @@
             document.getElementById('sidebar-overlay').classList.add('hidden');
         }
 
-        let turnoPausado = false;
+        let turnoPausado = {% if request.user.perfiltecnico.en_pausa_manual %}true{% else %}false{% endif %};
         function togglePausarTurno() {
-            turnoPausado = !turnoPausado;
             const btn      = document.getElementById('btn-pausar');
             const texto    = document.getElementById('texto-pausar');
             const iconEl   = document.getElementById('icon-pausar');
@@ -455,41 +454,60 @@
             const textoHdr = document.getElementById('texto-estado-header');
             const modalPausa = document.getElementById('modal-pausa-turno');
 
-            if (turnoPausado) {
-                texto.textContent = 'Reanudar Turno';
-                btn.className = 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 transition-all';
-                dot.className = 'w-2 h-2 rounded-full bg-amber-400 flex-shrink-0';
-                estadoSb.textContent = 'En Pausa';
-                estadoSb.className = 'text-xs text-amber-600 font-medium';
-                if (toggleHdr) toggleHdr.checked = false;
-                if (textoHdr) { textoHdr.textContent = 'En Pausa'; textoHdr.className = 'text-sm font-semibold text-amber-600'; }
-                iconEl.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>';
-                
-                // Mostrar el modal de bloqueo por pausa
-                if (modalPausa) {
-                    modalPausa.classList.remove('hidden');
-                    modalPausa.classList.add('flex');
+            // Envío Ajax
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '{{ csrf_token }}';
+            fetch('/tecnico/toggle-pausa/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(!data.success) {
+                    mostrarToast(data.error, 'error');
+                    return;
                 }
                 
-                mostrarToast('⏸️ Turno pausado', 'warning');
-            } else {
-                texto.textContent = 'Pausar Turno';
-                btn.className = 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all';
-                dot.className = 'w-2 h-2 rounded-full bg-green-400 flex-shrink-0';
-                estadoSb.textContent = 'Disponible';
-                estadoSb.className = 'text-xs text-green-600 font-medium';
-                if (toggleHdr) toggleHdr.checked = true;
-                if (textoHdr) { textoHdr.textContent = 'Disponible'; textoHdr.className = 'text-sm font-semibold text-green-600'; }
-                iconEl.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>';
-                
-                // Ocultar el modal de bloqueo por pausa
-                if (modalPausa) {
-                    modalPausa.classList.add('hidden');
-                    modalPausa.classList.remove('flex');
+                turnoPausado = data.pausado;
+
+                if (turnoPausado) {
+                    texto.textContent = 'Reanudar Turno';
+                    btn.className = 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 transition-all';
+                    dot.className = 'w-2 h-2 rounded-full bg-amber-400 flex-shrink-0';
+                    estadoSb.textContent = 'En Pausa';
+                    estadoSb.className = 'text-xs text-amber-600 font-medium';
+                    if (toggleHdr) toggleHdr.checked = false;
+                    if (textoHdr) { textoHdr.textContent = 'En Pausa'; textoHdr.className = 'text-sm font-semibold text-amber-600'; }
+                    iconEl.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+                    
+                    // Mostrar el modal de bloqueo por pausa
+                    if (modalPausa) {
+                        modalPausa.classList.remove('hidden');
+                        modalPausa.classList.add('flex');
+                    }
+                    
+                    mostrarToast('⏸️ Turno pausado', 'warning');
+                } else {
+                    texto.textContent = 'Pausar Turno';
+                    btn.className = 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all';
+                    dot.className = 'w-2 h-2 rounded-full bg-green-400 flex-shrink-0';
+                    estadoSb.textContent = 'Disponible';
+                    estadoSb.className = 'text-xs text-green-600 font-medium';
+                    if (toggleHdr) toggleHdr.checked = true;
+                    if (textoHdr) { textoHdr.textContent = 'Disponible'; textoHdr.className = 'text-sm font-semibold text-green-600'; }
+                    iconEl.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+                    
+                    // Ocultar el modal de bloqueo por pausa
+                    if (modalPausa) {
+                        modalPausa.classList.add('hidden');
+                        modalPausa.classList.remove('flex');
+                    }
+                    
+                    mostrarToast('✅ Turno reanudado', 'success');
                 }
-                
-                mostrarToast('✅ Turno reanudado', 'success');
-            }
+            });
         }
 
         function abrirModalFoto() {
@@ -581,7 +599,7 @@
         }
     </script>
     <!-- MODAL BLOQUEO POR PAUSA (Turno Pausado) -->
-    <div id="modal-pausa-turno" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/80 backdrop-blur-md">
+    <div id="modal-pausa-turno" class="fixed inset-0 z-[100] {% if request.user.perfiltecnico.en_pausa_manual %}flex{% else %}hidden{% endif %} items-center justify-center bg-slate-900/80 backdrop-blur-md">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-8 text-center border border-slate-100">
             <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">

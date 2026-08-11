@@ -30,9 +30,13 @@
         
         <div class="flex gap-4 items-start mb-4">
             <!-- Avatar -->
-            <div class="w-12 h-12 rounded-full bg-slate-100 text-[#002b75] flex items-center justify-center font-black text-lg flex-shrink-0">
-                {{ cliente.nombre_completo|make_list|first|upper }}
-            </div>
+            {% if cliente.foto_perfil %}
+                <img src="{{ cliente.foto_perfil.url }}" class="w-12 h-12 rounded-full object-cover flex-shrink-0 border border-slate-200">
+            {% else %}
+                <div class="w-12 h-12 rounded-full bg-slate-100 text-[#002b75] flex items-center justify-center font-black text-lg flex-shrink-0">
+                    {{ cliente.nombre_completo|make_list|first|upper }}
+                </div>
+            {% endif %}
             
             <div class="flex-1 min-w-0">
                 <div class="flex items-center justify-between gap-2">

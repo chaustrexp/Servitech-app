@@ -232,6 +232,9 @@
                         {% if cita.observaciones %}
                         <p class="text-xs text-slate-400 mt-1 italic truncate">📝 {{ cita.observaciones|truncatechars:55 }}</p>
                         {% endif %}
+                        {% if cita.minutos_retraso > 0 %}
+                        <p class="text-xs text-red-500 font-bold mt-1">⚠️ Retraso notificado: {{ cita.minutos_retraso }} min</p>
+                        {% endif %}
                     </div>
                 </div>
                 {% endwith %}
@@ -349,9 +352,46 @@
                     <p id="dc-horario" class="font-bold text-slate-800 text-sm">—</p>
                 </div>
             </div>
-            <div class="bg-slate-50 rounded-xl p-3.5">
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Estado</p>
-                <span id="dc-estado-badge" class="text-xs font-bold px-3 py-1 rounded-full bg-yellow-100 text-yellow-800">—</span>
+            <div class="bg-slate-50 rounded-xl p-4">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-3">Estado de la Cita</p>
+                <div class="relative flex items-center justify-between mx-2">
+                    <!-- Línea de fondo -->
+                    <div class="absolute top-4 left-4 right-4 h-0.5 bg-slate-200"></div>
+                    <!-- Línea de progreso -->
+                    <div id="stepper-progress" class="absolute top-4 left-4 h-0.5 bg-[#002b75] transition-all duration-500" style="width: 0%"></div>
+                    
+                    <!-- Step 0: Creada -->
+                    <div class="relative flex flex-col items-center gap-1 z-10 w-1/4">
+                        <div id="step-0-icon" class="w-8 h-8 rounded-full bg-[#002b75] flex items-center justify-center transition-all shadow-sm">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <span id="step-0-text" class="text-[9px] font-bold text-[#002b75] text-center mt-1">Creada</span>
+                    </div>
+                    
+                    <!-- Step 1: Confirmada -->
+                    <div class="relative flex flex-col items-center gap-1 z-10 w-1/4">
+                        <div id="step-1-icon" class="w-8 h-8 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        <span id="step-1-text" class="text-[9px] font-medium text-slate-400 text-center mt-1">Confirmada</span>
+                    </div>
+                    
+                    <!-- Step 2: Diagnóstico/Reparación -->
+                    <div class="relative flex flex-col items-center gap-1 z-10 w-1/4">
+                        <div id="step-2-icon" class="w-8 h-8 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
+                        </div>
+                        <span id="step-2-text" class="text-[9px] font-medium text-slate-400 text-center mt-1">Diagnóstico</span>
+                    </div>
+                    
+                    <!-- Step 3: Finalizada -->
+                    <div class="relative flex flex-col items-center gap-1 z-10 w-1/4">
+                        <div id="step-3-icon" class="w-8 h-8 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <span id="step-3-text" class="text-[9px] font-medium text-slate-400 text-center mt-1">Finalizada</span>
+                    </div>
+                </div>
             </div>
             <div id="dc-obs-wrap" class="hidden bg-slate-50 rounded-xl p-3.5">
                 <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Observaciones del Cliente</p>
@@ -419,7 +459,8 @@ const CITAS_DATA = {
         hora_inicio:  "{{ cita.hora_inicio|time:'H:i' }}",
         hora_fin:     "{{ cita.hora_fin|time:'H:i' }}",
         estado:       "{{ cita.estado.nombre|escapejs }}",
-        observaciones:"{{ cita.observaciones|default:''|escapejs }}"
+        observaciones:"{{ cita.observaciones|default:''|escapejs }}",
+        minutos_retraso:"{{ cita.minutos_retraso }}"
     }{% if not forloop.last %},{% endif %}
 {% endfor %}
 };
@@ -446,15 +487,28 @@ if (typeof diaActivo !== 'number') diaActivo = 0;
 function setVista(vista) {
     const btnSem = document.getElementById('btn-vista-semana');
     const btnDia = document.getElementById('btn-vista-dia');
-    const activeClass = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-white text-[#002b75] shadow-sm transition-all';
-    const inactClass  = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-700 transition-all';
+    const activeClass = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-[#002b75] shadow-sm transition-all';
+    const inactClass  = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all';
+
+    const vistaDesktop = document.getElementById('vista-desktop');
+    const vistaMovil = document.getElementById('vista-movil');
+
+    // Remove responsive classes that force default behavior
+    vistaDesktop.classList.remove('hidden', 'sm:block');
+    vistaMovil.classList.remove('sm:hidden');
 
     if (vista === 'semana') {
         btnSem.className = activeClass;
         btnDia.className = inactClass;
+        
+        vistaDesktop.style.display = 'block';
+        vistaMovil.style.display = 'none';
     } else {
         btnDia.className = activeClass;
         btnSem.className = inactClass;
+        
+        vistaDesktop.style.display = 'none';
+        vistaMovil.style.display = 'block';
         seleccionarDia(diaActivo);
     }
 }
@@ -503,8 +557,10 @@ function filtrarPorEstado(estado) {
             card.style.display = '';
             return;
         }
-        const cardEstado = (card.dataset.estado || '').toUpperCase().replace(/\s+/g,'_');
-        const filtroNorm = estado.toUpperCase().replace(/\s+/g,'_');
+        // Normalize accents
+        const removeAccents = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const cardEstado = removeAccents((card.dataset.estado || '').toUpperCase()).replace(/\s+/g,'_');
+        const filtroNorm = removeAccents(estado.toUpperCase()).replace(/\s+/g,'_');
         card.style.display = cardEstado === filtroNorm ? '' : 'none';
     });
 }
@@ -573,16 +629,59 @@ function verDetalleCita(citaId) {
     document.getElementById('dc-cliente').textContent   = cita.cliente;
     document.getElementById('dc-fecha').textContent     = cita.fecha;
     document.getElementById('dc-horario').textContent   = cita.hora_inicio + ' – ' + cita.hora_fin;
+    
+    const divRetraso = document.getElementById('dc-retraso');
+    if (cita.minutos_retraso && parseInt(cita.minutos_retraso) > 0) {
+        divRetraso.textContent = `⚠️ Retraso: +${cita.minutos_retraso} min`;
+        divRetraso.classList.remove('hidden');
+    } else {
+        divRetraso.classList.add('hidden');
+    }
 
-    const badge = document.getElementById('dc-estado-badge');
     const est = (cita.estado || '').toUpperCase();
-    badge.textContent = est;
-    if (est.includes('FINALIZ'))      badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800';
-    else if (est.includes('RETRAS'))  badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-red-100 text-red-800';
-    else if (est.includes('DIAGN'))   badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-purple-100 text-purple-800';
-    else if (est.includes('REPARAC')) badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-orange-100 text-orange-800';
-    else if (est.includes('CONFIRM')) badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-green-100 text-green-800';
-    else                              badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-yellow-100 text-yellow-800';
+    
+    // Update Stepper
+    let currentStep = 0;
+    if (est.includes('CONFIRM') || est.includes('RETRAS')) currentStep = 1;
+    else if (est.includes('DIAGN') || est.includes('REPARAC')) currentStep = 2;
+    else if (est.includes('FINALIZ')) currentStep = 3;
+
+    if (est.includes('REPARAC')) {
+        document.getElementById('step-2-text').textContent = 'Reparación';
+    } else {
+        document.getElementById('step-2-text').textContent = 'Diagnóstico';
+    }
+
+    const progressWidths = ['0%', '33.33%', '66.66%', '100%'];
+    document.getElementById('stepper-progress').style.width = progressWidths[currentStep];
+
+    const icons = {
+        0: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>',
+        1: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>',
+        2: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>',
+        3: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>'
+    };
+
+    for (let i = 0; i <= 3; i++) {
+        const iconDiv = document.getElementById(`step-${i}-icon`);
+        const textSpan = document.getElementById(`step-${i}-text`);
+        
+        if (i < currentStep) {
+            iconDiv.className = 'w-8 h-8 rounded-full bg-[#002b75] flex items-center justify-center transition-all shadow-sm';
+            iconDiv.innerHTML = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>';
+            textSpan.className = 'text-[9px] font-medium text-slate-500 text-center mt-1';
+        } else if (i === currentStep) {
+            iconDiv.className = 'w-8 h-8 rounded-full bg-[#002b75] ring-4 ring-blue-100 flex items-center justify-center transition-all shadow-md';
+            let iconSvg = icons[i].replace('class="w-4 h-4"', 'class="w-4 h-4 text-white"');
+            iconDiv.innerHTML = iconSvg;
+            textSpan.className = 'text-[9px] font-bold text-[#002b75] text-center mt-1';
+        } else {
+            iconDiv.className = 'w-8 h-8 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all';
+            let iconSvg = icons[i].replace('class="w-4 h-4"', 'class="w-4 h-4 text-slate-400"');
+            iconDiv.innerHTML = iconSvg;
+            textSpan.className = 'text-[9px] font-medium text-slate-400 text-center mt-1';
+        }
+    }
 
     const obsWrap = document.getElementById('dc-obs-wrap');
     if (cita.observaciones) {
