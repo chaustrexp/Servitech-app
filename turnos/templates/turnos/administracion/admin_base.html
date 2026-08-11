@@ -175,7 +175,7 @@
                 <button onclick="window.location.href='{% url 'admin_perfil' %}'"
                         class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-slate-50 transition group">
                     <div class="w-7 h-7 rounded-full overflow-hidden ring-2 ring-slate-200 group-hover:ring-[#1d4ed8] transition">
-                        <img src="{% static 'img/foto de perfil administrador.png' %}" alt="Admin" class="w-full h-full object-cover">
+                        <img src="{% if request.user.foto_perfil %}{{ request.user.foto_perfil.url }}{% else %}{% static 'img/foto de perfil administrador.png' %}{% endif %}" alt="Admin" class="w-full h-full object-cover">
                     </div>
                     <div class="hidden sm:block text-left">
                         <p class="text-xs font-bold text-slate-700 group-hover:text-[#1d4ed8] transition leading-none truncate max-w-[80px]">

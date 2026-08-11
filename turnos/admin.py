@@ -34,3 +34,16 @@ admin.site.register(HistorialCita)
 admin.site.register(Notificacion)
 admin.site.register(Repuesto)
 admin.site.register(Inventario)
+
+from .models.soporte import EstadoSistema, TicketSoporte
+
+@admin.register(EstadoSistema)
+class EstadoSistemaAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'estado', 'ultima_actualizacion')
+    list_filter = ('estado',)
+
+@admin.register(TicketSoporte)
+class TicketSoporteAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'area', 'urgencia', 'estado', 'tecnico', 'fecha_creacion')
+    list_filter = ('estado', 'urgencia', 'area')
+    search_fields = ('titulo', 'descripcion')

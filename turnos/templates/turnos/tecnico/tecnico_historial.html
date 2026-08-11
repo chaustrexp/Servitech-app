@@ -264,9 +264,13 @@
         <div class="p-3.5 flex flex-col gap-2 bg-white hover:bg-slate-50/60 transition">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-full bg-blue-50 text-[#003399] flex items-center justify-center text-xs font-bold uppercase border border-blue-100">
-                        {{ cita.cliente.nombre_completo|slice:":1" }}
-                    </div>
+                    {% if cita.cliente.foto_perfil %}
+                        <img src="{{ cita.cliente.foto_perfil.url }}" class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-slate-200">
+                    {% else %}
+                        <div class="w-8 h-8 rounded-full bg-blue-50 text-[#003399] flex items-center justify-center text-xs font-bold uppercase border border-blue-100">
+                            {{ cita.cliente.nombre_completo|slice:":1" }}
+                        </div>
+                    {% endif %}
                     <div>
                         <p class="text-xs font-bold text-slate-800 leading-tight">{{ cita.cliente.nombre_completo }}</p>
                         <p class="text-[10px] text-slate-400">ID: #{{ cita.pk }}</p>
@@ -315,9 +319,13 @@
                     <!-- Cliente -->
                     <td class="py-4 px-6">
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-[#1d4ed8] font-bold text-[13px] border border-slate-300">
-                                {{ cita.cliente.nombre_completo|slice:":1" }}
-                            </div>
+                            {% if cita.cliente.foto_perfil %}
+                                <img src="{{ cita.cliente.foto_perfil.url }}" class="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-slate-200">
+                            {% else %}
+                                <div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-[#1d4ed8] font-bold text-[13px] border border-slate-300">
+                                    {{ cita.cliente.nombre_completo|slice:":1" }}
+                                </div>
+                            {% endif %}
                             <div>
                                 <p class="text-[13px] font-bold text-slate-800 leading-tight">{{ cita.cliente.nombre_completo }}</p>
                                 <p class="text-[11px] text-slate-500 mt-0.5">{{ cita.cliente.user.email|default:"Sin email" }}</p>

@@ -235,9 +235,13 @@
         <div class="p-3.5 flex flex-col gap-2.5 bg-white hover:bg-slate-50/60 transition">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-full bg-blue-50 text-[#003399] flex items-center justify-center text-xs font-bold uppercase border border-blue-100">
-                        {{ u.nombre_completo|slice:":2" }}
-                    </div>
+                    {% if u.foto_perfil %}
+                        <img src="{{ u.foto_perfil.url }}" class="w-9 h-9 rounded-full object-cover border border-blue-100 flex-shrink-0">
+                    {% else %}
+                        <div class="w-9 h-9 rounded-full bg-blue-50 text-[#003399] flex items-center justify-center text-xs font-bold uppercase border border-blue-100 flex-shrink-0">
+                            {{ u.nombre_completo|slice:":2" }}
+                        </div>
+                    {% endif %}
                     <div>
                         <p class="text-xs sm:text-sm font-bold text-slate-800 leading-tight">{{ u.nombre_completo }}</p>
                         <p class="text-[10px] text-slate-400">ID: #{{ u.pk }}</p>
@@ -298,9 +302,13 @@
                 <tr class="hover:bg-slate-50/50 transition-colors group user-row" data-rol="{{ u.rol }}">
                     <td class="py-4 px-6">
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-slate-200 text-[#003399] flex items-center justify-center text-[12px] font-bold flex-shrink-0 uppercase border border-slate-300">
-                                {{ u.nombre_completo|slice:":2" }}
-                            </div>
+                            {% if u.foto_perfil %}
+                                <img src="{{ u.foto_perfil.url }}" class="w-9 h-9 rounded-full object-cover border border-slate-300 flex-shrink-0">
+                            {% else %}
+                                <div class="w-9 h-9 rounded-full bg-slate-200 text-[#003399] flex items-center justify-center text-[12px] font-bold flex-shrink-0 uppercase border border-slate-300">
+                                    {{ u.nombre_completo|slice:":2" }}
+                                </div>
+                            {% endif %}
                             <div>
                                 <p class="text-[13px] font-bold text-slate-800 leading-tight">{{ u.nombre_completo }}</p>
                                 <p class="text-[11px] text-slate-400">ID: #{{ u.pk }}</p>

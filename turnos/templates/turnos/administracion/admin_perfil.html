@@ -74,7 +74,7 @@
                  onclick="document.getElementById('foto-perfil-input').click()"
                  title="Haz clic o arrastra una imagen para cambiar la foto">
                 <img id="avatar-preview"
-                     src="{% if usuario.foto_perfil %}{{ usuario.foto_perfil.url }}{% else %}{% static 'img/foto de perfil administrador.png' %}{% endif %}"
+                     src="{% if usuario.foto_perfil %}{{ usuario.foto_perfil.url }}{% else %}{% if request.user.foto_perfil %}{{ request.user.foto_perfil.url }}{% else %}{% static 'img/foto de perfil administrador.png' %}{% endif %}{% endif %}"
                      alt="Foto de Perfil"
                      class="w-full h-full object-cover">
                 <!-- Overlay de cámara al hover -->

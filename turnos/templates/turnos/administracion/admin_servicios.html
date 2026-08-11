@@ -134,29 +134,11 @@
         <div class="relative h-[160px] overflow-hidden bg-slate-800">
             <!-- Imagen dinámica y específica de reparación según el tipo de dispositivo -->
             {% if s.tipo_dispositivo == 'CELULAR' %}
-                {% if s.id|divisibleby:3 %}
-                    <img src="https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=600&q=80" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
-                {% elif s.id|divisibleby:2 %}
-                    <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=600&q=80" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
-                {% else %}
-                    <img src="https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=600&q=80" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
-                {% endif %}
+                <img src="{% static 'img/catalogo/celular.png' %}" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
             {% elif s.tipo_dispositivo == 'LAPTOP' %}
-                {% if s.id|divisibleby:3 %}
-                    <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
-                {% elif s.id|divisibleby:2 %}
-                    <img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=600&q=80" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
-                {% else %}
-                    <img src="https://images.unsplash.com/photo-1517059224940-d4af9eec41b7?w=600&q=80" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
-                {% endif %}
+                <img src="{% static 'img/catalogo/laptop.png' %}" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
             {% else %}
-                {% if s.id|divisibleby:3 %}
-                    <img src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=600&q=80" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
-                {% elif s.id|divisibleby:2 %}
-                    <img src="https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&q=80" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
-                {% else %}
-                    <img src="https://images.unsplash.com/photo-1563770660941-20978e870e26?w=600&q=80" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
-                {% endif %}
+                <img src="{% static 'img/catalogo/pc.png' %}" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
             {% endif %}
             
             <div class="absolute top-4 left-4">

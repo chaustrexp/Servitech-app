@@ -497,12 +497,50 @@ def _tag_filtro(cliente):
 
 
 
+from turnos.models.soporte import TicketSoporte, EstadoSistema
+import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
 @login_required
 def tecnico_soporte(request):
     """Soporte operativo para el técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
         return redirect('home')
-    return render(request, 'turnos/tecnico/tecnico_soporte.html')
+        
+    tickets = TicketSoporte.objects.filter(tecnico=request.user).order_by('-fecha_creacion')
+    sistemas = EstadoSistema.objects.all().order_by('nombre')
+    
+    context = {
+        'tickets': tickets,
+        'sistemas': sistemas
+    }
+    return render(request, 'turnos/tecnico/tecnico_soporte.html', context)
+
+@login_required
+@require_POST
+def tecnico_crear_ticket(request):
+    if request.user.rol != Usuario.Rol.TECNICO:
+        return JsonResponse({'success': False, 'error': 'No autorizado'}, status=403)
+        
+    try:
+        data = json.loads(request.body)
+        titulo = data.get('titulo')
+        area = data.get('area')
+        urgencia = data.get('urgencia')
+        descripcion = data.get('descripcion')
+        
+        ticket = TicketSoporte.objects.create(
+            titulo=titulo,
+            area=area,
+            urgencia=urgencia,
+            descripcion=descripcion,
+            tecnico=request.user
+        )
+        return JsonResponse({'success': True, 'message': 'Ticket creado con éxito'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
 
 
 @login_required
@@ -714,7 +752,10 @@ def cliente_servicios(request):
     """Catálogo de servicios para el cliente"""
     if request.user.rol != Usuario.Rol.CLIENTE:
         return redirect('home')
-    return render(request, 'turnos/cliente/cliente_servicios.html')
+    
+    from ..models import Servicio
+    servicios = Servicio.objects.filter(activo=True).order_by('nombre')
+    return render(request, 'turnos/cliente/cliente_servicios.html', {'servicios': servicios})
 
 @login_required
 def cliente_perfil(request):
@@ -1559,6 +1600,14 @@ def admin_tecnicos(request):
                     rol=Usuario.Rol.TECNICO,
                     activo=True,
                 )
+                
+                genero = request.POST.get('genero')
+                if genero == 'mujer':
+                    tecnico.foto_perfil = 'perfiles/foto de perfil rol tecnico (2).png'
+                else:
+                    tecnico.foto_perfil = 'perfiles/foto de perfil rol tecnico.png'
+                tecnico.save(update_fields=['foto_perfil'])
+                
                 creado = True
 
             # Crear o actualizar el PerfilTecnico
@@ -1572,7 +1621,7 @@ def admin_tecnicos(request):
 
             msg = f'Técnico {tecnico.nombre_completo} {"creado" if creado else "actualizado"} exitosamente.'
             if creado:
-                msg += f' Contraseña temporal: {pw_temporal} (cámbiela al primer inicio de sesión).'
+                msg += f' Contraseña temporal: {password_nuevo} (cámbiela al primer inicio de sesión).'
             messages.success(request, msg)
 
         # ── 2. Editar perfil de un técnico existente ──────────────────────────
@@ -1580,12 +1629,20 @@ def admin_tecnicos(request):
             tecnico_id     = request.POST.get('tecnico_id')
             especialidad   = request.POST.get('especialidad', 'tecnico_general')
             observaciones  = request.POST.get('observaciones', '').strip()
+            genero         = request.POST.get('genero')
 
             if not especialidad:
                 messages.error(request, 'Selecciona una especialidad.')
                 return redirect('admin_tecnicos')
             try:
                 tecnico = Usuario.objects.get(pk=tecnico_id, rol=Usuario.Rol.TECNICO)
+                if genero == 'hombre':
+                    tecnico.genero = 'M'
+                    tecnico.save(update_fields=['genero'])
+                elif genero == 'mujer':
+                    tecnico.genero = 'F'
+                    tecnico.save(update_fields=['genero'])
+                    
                 perfil, _ = PerfilTecnico.objects.update_or_create(
                     tecnico=tecnico,
                     defaults={
@@ -2042,37 +2099,80 @@ def admin_perfil(request):
 # ─────────────────────────────────────────────
 #  TOGGLE DE PAUSA MANUAL (TÉCNICO)
 # ─────────────────────────────────────────────
+from django.http import JsonResponse
+
 @login_required
 def tecnico_toggle_pausa(request):
     """
-    Alterna el estado de pausa manual del técnico.
+    Alterna el estado de pausa manual del técnico. Soporta AJAX.
     """
     if request.method == 'POST' and request.user.rol == Usuario.Rol.TECNICO:
         try:
             perfil = request.user.perfil_tecnico
             
-            # Si quiere pausar, verificar que no tenga citas activas
             if not perfil.en_pausa_manual:
                 from django.utils import timezone
-                from datetime import date
                 hoy = timezone.now().date()
-                citas_activas = request.user.citas_asignadas.filter(
+                citas_activas = request.user.citas_tecnico.filter(
                     fecha=hoy
                 ).exclude(estado__nombre__in=['Cancelada', 'Completada', 'No asistió'])
                 
                 if citas_activas.exists():
+                    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
+                        return JsonResponse({'success': False, 'error': "No puedes pausar tu turno mientras tengas citas activas o pendientes."})
                     messages.error(request, "No puedes pausar tu turno mientras tengas citas activas o pendientes.")
                     return redirect('dashboard_tecnico')
                     
             perfil.en_pausa_manual = not perfil.en_pausa_manual
             perfil.save(update_fields=['en_pausa_manual'])
             
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
+                return JsonResponse({'success': True, 'pausado': perfil.en_pausa_manual})
+                
             estado_msg = "EN PAUSA" if perfil.en_pausa_manual else "DISPONIBLE"
             messages.success(request, f"Turno actualizado. Ahora estás {estado_msg}.")
         except Exception as e:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
+                return JsonResponse({'success': False, 'error': str(e)})
             messages.error(request, f"Error al cambiar estado: {e}")
             
     return redirect('dashboard_tecnico')
+
+def api_estado_tecnicos(request):
+    """
+    Devuelve el estado de todos los técnicos para actualizar el panel de admin en tiempo real.
+    """
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return JsonResponse({'success': False, 'error': 'No autorizado'}, status=403)
+        
+    tecnicos = Usuario.objects.filter(rol=Usuario.Rol.TECNICO, is_active=True)
+    data = []
+    
+    from django.utils import timezone
+    hoy = timezone.localdate()
+    ahora = timezone.localtime().time()
+    
+    for t in tecnicos:
+        perfil = t.perfil_tecnico if hasattr(t, 'perfil_tecnico') else None
+        estado = 'disponible'
+        
+        if perfil and perfil.en_pausa_manual:
+            estado = 'pausado'
+        else:
+            cita_activa = t.citas_tecnico.filter(
+                fecha=hoy, 
+                hora_inicio__lte=ahora, 
+                hora_fin__gte=ahora
+            ).exclude(estado__nombre__in=['Cancelada', 'Completada', 'No asistió']).first()
+            if cita_activa:
+                estado = 'en_proceso'
+                
+        data.append({
+            'id': t.pk,
+            'estado': estado
+        })
+        
+    return JsonResponse({'success': True, 'tecnicos': data})
 
 
 @login_required

@@ -18,6 +18,7 @@ urlpatterns = [
     path('servicios/resumen/', views.resumen_cita, name='resumen_cita'),
     path('cita/<int:cita_id>/confirmada/', views.cita_confirmada, name='cita_confirmada'),
     path('cita/<int:cita_id>/', views.detalle_cita, name='detalle_cita'),
+    path('api/cita/<int:cita_id>/estado/', views.api_estado_cita, name='api_estado_cita'),
 
     # ── Dashboards Admin ──────────────────────────────────────────
     path('admin-panel/',                                    views.admin_dashboard,       name='admin_dashboard'),
@@ -40,6 +41,7 @@ urlpatterns = [
     path('admin-panel/perfil/',                             views.admin_perfil,           name='admin_perfil'),
     path('tecnico/', views.dashboard_tecnico, name='dashboard_tecnico'),
     path('tecnico/toggle-pausa/', views.tecnico_toggle_pausa, name='tecnico_toggle_pausa'),
+    path('api/estado-tecnicos/', views.api_estado_tecnicos, name='api_estado_tecnicos'),
     path('tecnico/agenda/', views.tecnico_agenda, name='tecnico_agenda'),
     path('tecnico/historial/', views.tecnico_historial, name='tecnico_historial'),
     path('tecnico/historial/exportar/', views.exportar_historial_excel, name='exportar_historial_excel'),
@@ -50,6 +52,7 @@ urlpatterns = [
     path('tecnico/clientes/', views.tecnico_clientes, name='tecnico_clientes'),
     path('tecnico/clientes/<int:cliente_id>/historial/', views.tecnico_cliente_historial, name='tecnico_cliente_historial'),
     path('tecnico/soporte/', views.tecnico_soporte, name='tecnico_soporte'),
+    path('tecnico/soporte/crear/', views.tecnico_crear_ticket, name='tecnico_crear_ticket'),
     path('tecnico/reporte/', views.tecnico_reporte_mensual, name='tecnico_reporte_mensual'),
     path('tecnico/perfil/', views.tecnico_perfil, name='tecnico_perfil'),
     path('tecnico/inventario/exportar/', views.exportar_inventario_excel, name='exportar_inventario_excel'),

@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from datetime import datetime, timedelta
@@ -185,15 +186,27 @@ def detalle_cita(request, cita_id):
     dispositivo_display = dispositivo_map.get(tipo_disp, cita.servicio.tipo_dispositivo.title() if cita.servicio and cita.servicio.tipo_dispositivo else 'Equipo')
 
     estado_nombre = cita.estado.nombre if cita.estado else 'Confirmada'
+    
+    est_upper = estado_nombre.upper()
+    
+    # Determinar índice actual basado en subcadenas (más robusto)
+    if 'FINALIZ' in est_upper:
+        estado_actual_idx = 3
+    elif 'DIAGN' in est_upper or 'REPARAC' in est_upper:
+        estado_actual_idx = 2
+    elif 'CONFIRM' in est_upper or 'RETRAS' in est_upper:
+        estado_actual_idx = 1
+    else:
+        estado_actual_idx = 0
+        
+    nombre_paso_2 = 'Reparación' if 'REPARAC' in est_upper else 'Diagnóstico'
+
     estados_progreso = [
         {'nombre': 'Creada',      'icono': 'check'},
         {'nombre': 'Confirmada',  'icono': 'calendar'},
-        {'nombre': 'Diagnóstico', 'icono': 'wrench'},
+        {'nombre': nombre_paso_2, 'icono': 'wrench'},
         {'nombre': 'Finalizada',  'icono': 'flag'},
     ]
-    estado_actual_idx = next(
-        (i for i, e in enumerate(estados_progreso) if e['nombre'] == estado_nombre), 1
-    )
 
     return render(request, 'turnos/contingencias/detalle_cita.html', {
         'cita': cita,
@@ -225,3 +238,12 @@ def notificar_retraso(request, turno_id):
             messages.warning(request, "Ya notificaste un retraso para este turno.")
 
     return redirect('ver_turno', turno_id=turno.pk)
+
+@login_required
+def api_estado_cita(request, cita_id):
+    cita = get_object_or_404(Cita, pk=cita_id)
+    if request.user != cita.cliente and request.user != cita.tecnico and request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        from django.http import Http404
+        raise Http404('No tienes permiso.')
+    estado_nombre = cita.estado.nombre if cita.estado else 'Confirmada'
+    return JsonResponse({'estado': estado_nombre})

@@ -32,7 +32,7 @@
         <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 flex flex-col items-center text-center shadow-sm relative">
             <div class="relative mb-4">
                 <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-slate-100 relative group cursor-pointer" onclick="document.getElementById('profile-upload').click()">
-                    <img id="profile-preview" src="{% static 'img/foto de perfil cliente.png' %}" 
+                    <img id="profile-preview" src="{% if request.user.foto_perfil %}{{ request.user.foto_perfil.url }}{% else %}{% static 'img/foto de perfil cliente.png' %}{% endif %}" 
                          alt="Avatar" class="w-full h-full object-cover group-hover:opacity-75 transition">
                     <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
                         <span class="text-xs font-bold text-white bg-black/50 px-2 py-1 rounded">Cambiar</span>
