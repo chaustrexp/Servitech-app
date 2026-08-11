@@ -1,15 +1,16 @@
-{% extends 'turnos/administracion/admin_base.html' %}
+{% extends 'turnos/tecnico/tecnico_base.html' %}
 {% load static %}
 
-{% block title %}Gestión de Citas - Panel de Administración | ServiTech{% endblock %}
+{% block title %}Mi Historial - Panel del Técnico | ServiTech{% endblock %}
 
 {% block extra_head %}
 <style>
 @media print {
     /* Ocultar interfaz, navegación, botones, filtros y KPIs */
-    aside, header, #sidebar, #sidebar-overlay, #toast-container,
+    aside, #sidebar, #sidebar-overlay, #toast-container,
     .no-print, form#form-filtros, .kpis-container, .btn-acciones-head,
-    .col-acciones, button, .paginacion-container {
+    .col-acciones, button, .paginacion-container, .table-header-container,
+    .top-bar-mobile {
         display: none !important;
     }
 
@@ -27,6 +28,16 @@
 
     div[class*="ml-"] {
         margin-left: 0 !important;
+    }
+
+    /* Evitar que la tabla se corte en impresión */
+    .overflow-x-auto {
+        overflow: visible !important;
+    }
+    
+    /* Forzar que la tabla se muestre en impresión aunque se esté en móvil */
+    .hidden.sm\:block {
+        display: block !important;
     }
 
     /* Mostrar membrete oficial de informe */
@@ -163,8 +174,8 @@
 <!-- ════════════════════════════════════════════
      2. FILTROS AVANZADOS
 ════════════════════════════════════════════ -->
-<form method="GET" action="{% url 'admin_citas' %}" class="bg-white rounded-[20px] border border-slate-100 p-3.5 sm:p-5 shadow-sm mb-6" id="form-filtros">
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-4 items-end">
+<form method="GET" action="{% url 'tecnico_historial' %}" class="bg-white rounded-[20px] border border-slate-100 p-3.5 sm:p-5 shadow-sm mb-6" id="form-filtros">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 items-end">
 
         <!-- Filtro Cliente -->
         <div class="col-span-2 sm:col-span-1">
@@ -176,25 +187,10 @@
             </div>
         </div>
 
-        <!-- Filtro Técnico -->
-        <div class="col-span-1">
-            <label class="block text-[11px] sm:text-[12px] font-bold text-slate-700 mb-1">Técnico</label>
-            <div class="relative">
-                <select name="tecnico" onchange="document.getElementById('form-filtros').submit()"
-                        class="w-full px-3 py-2 sm:py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-xl text-xs sm:text-[13px] text-slate-700 focus:outline-none focus:border-[#003399] focus:bg-white cursor-pointer appearance-none transition">
-                    <option value="">Todos los técnicos</option>
-                    {% for t in tecnicos %}
-                    <option value="{{ t.id }}" {% if filtro_tecnico == t.id|stringformat:"s" %}selected{% endif %}>{{ t.nombre_completo }}</option>
-                    {% endfor %}
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </div>
-            </div>
-        </div>
+        
 
         <!-- Filtro Estado -->
-        <div class="col-span-1">
+        <div class="col-span-2 sm:col-span-1">
             <label class="block text-[11px] sm:text-[12px] font-bold text-slate-700 mb-1">Estado</label>
             <div class="relative">
                 <select name="estado" onchange="document.getElementById('form-filtros').submit()"
@@ -230,7 +226,7 @@
 
         <!-- Botón Limpiar -->
         <div class="col-span-2 sm:col-span-1 flex items-end">
-            <a href="{% url 'admin_citas' %}"
+            <a href="{% url 'tecnico_historial' %}"
                class="w-full py-2 sm:py-2.5 rounded-xl bg-[#EEF2FF] text-[#003399] hover:bg-[#E0E7FF] text-xs font-bold transition flex items-center justify-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
@@ -246,8 +242,8 @@
 ════════════════════════════════════════════ -->
 <div class="bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden mb-6">
     <!-- Cabecera de Tabla -->
-    <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-        <h2 class="text-[18px] font-bold text-slate-800">Listado de Citas</h2>
+    <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 table-header-container">
+        <h2 class="text-[18px] font-bold text-slate-800">Mi Historial de Citas</h2>
         <div class="flex items-center gap-3">
             <button onclick="exportarCitasExcel()" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition" title="Exportar">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -286,11 +282,14 @@
                 </span>
             </div>
 
-            <div class="text-xs text-slate-600 space-y-0.5 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
+            <div class="text-xs text-slate-600 space-y-0.5 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100 mb-2">
                 <p class="font-bold text-[#003399] truncate">{{ cita.servicio.nombre|default:"Servicio General" }}</p>
-                <p><strong>Técnico:</strong> {{ cita.tecnico.nombre_completo|default:"Sin asignar" }}</p>
+                
                 <p><strong>Fecha/Hora:</strong> {{ cita.fecha|date:"d/m/Y" }} — {{ cita.hora_inicio|time:"H:i" }}</p>
             </div>
+            <a href="{% url 'detalle_cita' cita.id %}" class="w-full block text-center py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 hover:bg-slate-200 transition">
+                Ver Detalles
+            </a>
         </div>
         {% empty %}
         <div class="p-8 text-center text-slate-400 text-xs">No hay citas registradas.</div>
@@ -304,7 +303,7 @@
                 <tr class="bg-[#F8FAFC] border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                     <th class="py-4 px-6">Cliente</th>
                     <th class="py-4 px-6">Servicio</th>
-                    <th class="py-4 px-6">Técnico</th>
+                    
                     <th class="py-4 px-6">Fecha / Hora</th>
                     <th class="py-4 px-6">Estado</th>
                     <th class="py-4 px-6 text-right col-acciones">Acciones</th>
@@ -343,21 +342,7 @@
                         </div>
                     </td>
 
-                    <!-- Técnico -->
-                    <td class="py-4 px-6">
-                        {% if cita.tecnico %}
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-7 h-7 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px] font-bold">
-                                {{ cita.tecnico.nombre_completo|slice:":1" }}
-                            </div>
-                            <span class="text-[13px] text-slate-700 font-medium">
-                                {{ cita.tecnico.nombre_completo }}
-                            </span>
-                        </div>
-                        {% else %}
-                        <span class="text-[12px] text-slate-400 italic">Sin asignar</span>
-                        {% endif %}
-                    </td>
+                    
 
                     <!-- Fecha / Hora -->
                     <td class="py-4 px-6">
@@ -400,32 +385,12 @@
 
                     <!-- Acciones -->
                     <td class="py-4 px-6 text-right col-acciones">
-                        <div class="flex items-center justify-end gap-1">
-                            <a href="{% url 'detalle_cita' cita.id %}" class="p-1.5 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition inline-block" title="Ver detalles">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                            </a>
-                            
-                            <form method="POST" action="{% url 'admin_citas' %}" class="inline-block" onsubmit="return confirm('¿Marcar como cancelada esta cita?');">
-                                {% csrf_token %}
-                                <input type="hidden" name="accion" value="cancelar_cita">
-                                <input type="hidden" name="cita_id" value="{{ cita.id }}">
-                                <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition" title="Cancelar cita">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </button>
-                            </form>
-                            
-                            <form method="POST" action="{% url 'admin_citas' %}" class="inline-block" onsubmit="return confirm('¿Eliminar permanentemente esta cita del registro?');">
-                                {% csrf_token %}
-                                <input type="hidden" name="accion" value="eliminar_cita">
-                                <input type="hidden" name="cita_id" value="{{ cita.id }}">
-                                <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:bg-red-100 hover:text-red-600 transition" title="Eliminar definitivamente">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </form>
-                        </div>
+                        <a href="{% url 'detalle_cita' cita.id %}" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition inline-block" title="Ver detalles">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </a>
                     </td>
                 </tr>
                 {% empty %}
@@ -447,7 +412,7 @@
         </p>
         <div class="flex items-center gap-2">
             {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.tecnico %}&tecnico={{ request.GET.tecnico }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_ini %}&fecha_ini={{ request.GET.fecha_ini }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" 
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_ini %}&fecha_ini={{ request.GET.fecha_ini }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" 
                class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             </a>
@@ -462,7 +427,7 @@
             </button>
             
             {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.tecnico %}&tecnico={{ request.GET.tecnico }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_ini %}&fecha_ini={{ request.GET.fecha_ini }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" 
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_ini %}&fecha_ini={{ request.GET.fecha_ini }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" 
                class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </a>
@@ -495,7 +460,7 @@ function exportarCitasExcel() {
     }
     
     // Redirigir a la vista de exportación con los query params
-    window.location.href = "{% url 'admin_exportar_citas_excel' %}" + qs;
+    window.location.href = "{% url 'exportar_historial_excel' %}" + qs;
 }
 </script>
 {% endblock %}

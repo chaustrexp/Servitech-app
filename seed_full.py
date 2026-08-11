@@ -76,7 +76,12 @@ def run():
         if c:
             t.set_password('tecnico123')
             t.save()
-            PerfilTecnico.objects.create(tecnico=t, especialidades='CELULAR,PORTATIL')
+            esp_val = 'tecnico_general'
+            if 'Celulares' in nombre:
+                esp_val = 'tecnico_celular'
+            elif 'Laptops' in nombre:
+                esp_val = 'tecnico_laptop'
+            PerfilTecnico.objects.create(tecnico=t, especialidad=esp_val)
         tecnicos.append(t)
 
     # 4. Crear Clientes
