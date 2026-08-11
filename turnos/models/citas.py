@@ -12,6 +12,7 @@ class EstadoCita(models.Model):
 class Cita(models.Model):
     cliente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='citas_cliente')
     tecnico = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='citas_tecnico')
+    dispositivo = models.ForeignKey('Dispositivo', on_delete=models.SET_NULL, null=True, blank=True, related_name='citas_dispositivo')
     servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
     estado = models.ForeignKey(EstadoCita, on_delete=models.PROTECT, null=True, blank=True)
     

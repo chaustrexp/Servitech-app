@@ -3,890 +3,202 @@
 
 {% block title %}Clientes - Técnico | ServiTech{% endblock %}
 
-{% block page_header %}
-<!-- ══════════════════════════════════════════════
-     HEADER GESTIÓN DE CLIENTES
-══════════════════════════════════════════════ -->
-<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
-    <!-- Título + tabs -->
+{% block content %}
+<!-- Encabezado de Página -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
     <div>
-        <h1 class="text-2xl md:text-3xl font-extrabold text-[#002b75] tracking-tight">Gestión de Clientes</h1>
-        <p class="text-slate-500 font-medium text-sm mt-0.5 mb-4">Administra tu cartera de clientes y niveles de fidelización.</p>
-        <!-- Tabs de filtro -->
-        <div class="flex bg-slate-100 rounded-xl p-1 gap-1 w-fit border border-slate-200">
-            <button onclick="filtrarTab('todos', this)"
-                    class="tab-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-[#002b75] text-white shadow-sm transition-all">
-                Todos
-            </button>
-            <button onclick="filtrarTab('recientes', this)"
-                    class="tab-btn px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all">
-                Recientes
-            </button>
-            <button onclick="filtrarTab('fieles', this)"
-                    class="tab-btn px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all">
-                Fieles
-            </button>
-            <button onclick="filtrarTab('inactivos', this)"
-                    class="tab-btn px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all">
-                Inactivos
-            </button>
-        </div>
-    </div>
-    <!-- Acciones derechas -->
-    <div class="flex flex-wrap items-center gap-2 mt-1">
-        <button onclick="abrirModalFiltros()"
-                class="flex items-center gap-2 bg-white border border-slate-200 hover:border-[#002b75] text-slate-700 hover:text-[#002b75] text-sm font-semibold px-3 py-2 rounded-xl shadow-sm transition-all">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
-            </svg>
-            Filtros
-        </button>
-        <button onclick="abrirModalNuevoCliente()"
-                class="flex items-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white text-sm font-semibold px-3 py-2 rounded-xl shadow transition-all">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-            </svg>
-            Nuevo Cliente
-        </button>
+        <h2 class="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+            Directorio de Clientes
+            <span class="px-2.5 py-0.5 rounded-full bg-[#002b75]/10 text-[#002b75] text-xs font-bold">{{ total_clientes }}</span>
+        </h2>
+        <p class="text-sm text-slate-500 mt-1 font-medium">Gestiona y revisa el historial clínico de los clientes.</p>
     </div>
 </div>
-{% endblock page_header %}
 
-{% block content %}
+<!-- Filtros Rápidos -->
+<div class="flex gap-2 mb-6 overflow-x-auto pb-2" style="-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none">
+    <button onclick="filtrarClientes('todos')" class="filtro-btn activo px-4 py-2 rounded-full text-sm font-bold bg-[#002b75] text-white transition whitespace-nowrap">Todos</button>
+    <button onclick="filtrarClientes('recientes')" class="filtro-btn px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition whitespace-nowrap">Recientes</button>
+    <button onclick="filtrarClientes('fieles')" class="filtro-btn px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition whitespace-nowrap">Fieles</button>
+    <button onclick="filtrarClientes('inactivos')" class="filtro-btn px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition whitespace-nowrap">Inactivos</button>
+</div>
 
-<!-- ══════════════════════════════════════════════
-     TARJETAS DE CLIENTES
-══════════════════════════════════════════════ -->
-<div id="grid-clientes" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
-
+<!-- Grid de Clientes -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
     {% for cliente in clientes %}
-    <div class="cliente-card bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-all"
-         data-nombre="{{ cliente.nombre_completo }}"
-         data-telefono="{{ cliente.telefono|default:'' }}"
-         data-tag="{{ cliente.tag_filtro }}">
-
-        <!-- Fila superior: foto + nombre + badge -->
-        <div class="flex items-start gap-3">
-            <div class="w-12 h-12 rounded-full bg-[#eef2ff] border-2 border-white shadow flex-shrink-0 flex items-center justify-center text-[#002b75] font-extrabold text-lg uppercase">
-                {{ cliente.nombre_completo|first }}
+    <div class="cliente-card bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative" data-tag="{{ cliente.tag_filtro }}">
+        
+        <div class="flex gap-4 items-start mb-4">
+            <!-- Avatar -->
+            <div class="w-12 h-12 rounded-full bg-slate-100 text-[#002b75] flex items-center justify-center font-black text-lg flex-shrink-0">
+                {{ cliente.nombre_completo|make_list|first|upper }}
             </div>
+            
             <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 flex-wrap mb-0.5">
-                    <p class="font-extrabold text-slate-800 text-base leading-tight">{{ cliente.nombre_completo }}</p>
-                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold {{ cliente.nivel.bg }} {{ cliente.nivel.text }} tracking-widest uppercase">
+                <div class="flex items-center justify-between gap-2">
+                    <h3 class="font-bold text-slate-800 text-lg truncate">{{ cliente.nombre_completo }}</h3>
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider {{ cliente.nivel.bg }} {{ cliente.nivel.text }}">
                         {{ cliente.nivel.label }}
                     </span>
                 </div>
-                <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                    <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                    </svg>
+                <p class="text-sm text-slate-500 font-medium flex items-center gap-1 mt-0.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                     {{ cliente.telefono|default:"Sin teléfono" }}
-                </div>
+                </p>
             </div>
         </div>
 
-        <!-- Historial -->
-        <div class="bg-[#f8fafc] rounded-xl p-3 border border-slate-100">
-            <div class="flex items-center justify-between mb-1">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Historial</span>
-                <span class="text-[11px] font-bold text-[#002b75]">{{ cliente.total_citas }} Servicio{{ cliente.total_citas|pluralize }}</span>
+        <div class="bg-slate-50 rounded-xl p-3 mb-4">
+            <div class="flex justify-between items-center mb-1">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Historial</p>
+                <p class="text-[11px] font-bold text-[#002b75]">{{ cliente.total_citas }} Servicio{% if cliente.total_citas != 1 %}s{% endif %}</p>
             </div>
-            {% if cliente.ultimo_servicio %}
-            <p class="text-xs text-slate-500 italic truncate">Último: {{ cliente.ultimo_servicio }}</p>
-            {% else %}
-            <p class="text-xs text-slate-400 italic">Sin servicios registrados</p>
-            {% endif %}
-            <div class="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                {% if cliente.ultima_fecha %}
-                    Último contacto: {{ cliente.ultima_fecha|date:"d M" }}
-                {% else %}
-                    Registrado: {{ cliente.fecha_registro|date:"d M Y" }}
-                {% endif %}
-            </div>
+            <p class="text-xs text-slate-600 truncate"><span class="italic text-slate-400">Último:</span> {{ cliente.ultimo_servicio|default:"Ninguno" }}</p>
+            <p class="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Último contacto: {{ cliente.ultima_fecha|date:"d M"|default:"N/A" }}
+            </p>
         </div>
 
-        <!-- Acciones -->
-        <div class="flex items-center gap-2 pt-1">
-            <button onclick="enviarMensaje('{{ cliente.nombre_completo }}')"
-                    class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition" title="Enviar mensaje">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                </svg>
-            </button>
-            <button onclick="abrirHistorial('{{ cliente.nombre_completo }}', '{{ cliente.nivel.label }}', {{ cliente.total_citas }}, '{{ cliente.ultimo_servicio|default:"Sin servicios" }}', '{{ cliente.telefono|default:"N/A" }}')"
-                    class="flex-1 flex items-center justify-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white text-xs font-bold py-2.5 rounded-xl transition shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+        <div class="flex gap-2">
+            <button onclick="verHistorialCliente({{ cliente.id_usuario }}, '{{ cliente.nombre_completo|escapejs }}')" class="flex-1 bg-[#002b75] hover:bg-[#001f54] text-white text-sm font-bold py-2.5 rounded-xl transition">
                 Ver Historial
             </button>
-            {% if cliente.telefono %}
-            <button onclick="llamarCliente('{{ cliente.telefono }}', '{{ cliente.nombre_completo }}')"
-                    class="p-2 bg-white border border-slate-200 hover:border-[#002b75] hover:text-[#002b75] text-slate-500 rounded-xl transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                </svg>
-            </button>
-            {% endif %}
+            <a href="https://wa.me/{{ cliente.telefono|default:''|cut:' '|cut:'+' }}" target="_blank" class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-green-500 hover:border-green-500 hover:bg-green-50 transition flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+            </a>
         </div>
     </div>
     {% empty %}
-    <div class="col-span-3 py-10 text-center">
-        <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-            <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-        </div>
-        <p class="font-bold text-slate-600 text-sm">No hay clientes registrados</p>
-        <p class="text-xs text-slate-400 mt-1">Agrega un nuevo cliente para comenzar.</p>
+    <div class="col-span-full py-12 text-center bg-white rounded-2xl border border-slate-100">
+        <p class="text-slate-500 font-medium">No hay clientes registrados.</p>
     </div>
     {% endfor %}
-
 </div>
 
-
-
-<!-- Estado vacío (filtros JS) -->
-<div id="sin-resultados" class="hidden py-10 text-center mb-6">
-    <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-        <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
-    </div>
-    <p class="font-bold text-slate-600 text-sm">Sin clientes en esta categoría</p>
-    <p class="text-xs text-slate-400 mt-1">Prueba otra pestaña o agrega un nuevo cliente.</p>
-</div>
-
-
-<!-- ══════════════════════════════════════════════
-     FILA MEDIA: Actividad Reciente + Insights
-══════════════════════════════════════════════ -->
-<div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">
-
-    <!-- Actividad Reciente -->
-    <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <div class="flex items-center justify-between mb-5">
-            <h3 class="font-bold text-slate-800 text-base">Actividad Reciente</h3>
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                Actualizado ahora
-            </span>
-        </div>
-        <div class="space-y-3">
-            <!-- Item 1 -->
-            <div onclick="abrirDetalleActividad('Servicio completado', 'Elena R.', 'Mantenimiento de servidor central', '€145.00', 'Hace 2 horas', 'completado')"
-                 class="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-bold text-slate-800 text-sm">Servicio completado: Elena R.</p>
-                    <p class="text-xs text-slate-500 truncate">Mantenimiento de servidor central</p>
-                </div>
-                <div class="text-right flex-shrink-0">
-                    <p class="font-extrabold text-slate-800 text-sm">€145.00</p>
-                    <p class="text-[11px] text-slate-400">Hace 2 horas</p>
-                </div>
-            </div>
-            <!-- Item 2 -->
-            <div onclick="abrirDetalleActividad('Llamada programada', 'Javier G.', 'Seguimiento de instalación', 'Próximo', 'Mañana 10:00', 'programado')"
-                 class="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-bold text-slate-800 text-sm">Llamada programada: Javier G.</p>
-                    <p class="text-xs text-slate-500 truncate">Seguimiento de instalación</p>
-                </div>
-                <div class="text-right flex-shrink-0">
-                    <p class="font-extrabold text-[#002b75] text-sm">Próximo</p>
-                    <p class="text-[11px] text-slate-400">Mañana 10:00</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Insights de Clientes -->
-    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col gap-4">
-        <h3 class="font-bold text-slate-800 text-base">Insights de Clientes</h3>
-
-        <!-- Métricas rápidas -->
-        <div class="grid grid-cols-1 xs:grid-cols-2 gap-3">
-                <button onclick="abrirInsight('crecimiento')"
-                        class="bg-emerald-50 border border-emerald-100 hover:border-emerald-300 rounded-xl p-3 text-left transition-all cursor-pointer w-full">
-                    <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">Crecimiento</p>
-                    <p class="text-2xl font-extrabold text-emerald-700">+12%</p>
-                    <p class="text-[11px] text-emerald-500 font-medium mt-0.5">Este mes</p>
-                </button>
-                <button onclick="abrirInsight('nuevos')"
-                        class="bg-[#eef2ff] border border-indigo-100 hover:border-[#002b75] rounded-xl p-3 text-left transition-all cursor-pointer w-full">
-                    <p class="text-[10px] font-bold text-[#002b75] uppercase tracking-wider mb-1">Nuevos</p>
-                    <p class="text-2xl font-extrabold text-[#002b75]">24</p>
-                    <p class="text-[11px] text-slate-400 font-medium mt-0.5">Últimos 30 días</p>
-                </button>
-        </div>
-
-        <!-- Filtros Rápidos -->
-        <div>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Filtros Rápidos</p>
-            <div class="space-y-2">
-                <button onclick="aplicarFiltroRapido('riesgo', this)"
-                        class="filtro-rapido w-full flex items-center justify-between px-3 py-2.5 bg-red-50 border border-red-100 hover:border-red-300 rounded-xl transition-all">
-                    <span class="text-sm font-bold text-red-700">Riesgo de Fuga</span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-500 text-white">8</span>
-                </button>
-                <button onclick="aplicarFiltroRapido('top', this)"
-                        class="filtro-rapido w-full flex items-center justify-between px-3 py-2.5 bg-emerald-50 border border-emerald-100 hover:border-emerald-300 rounded-xl transition-all">
-                    <span class="text-sm font-bold text-emerald-700">Top Spenders</span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500 text-white">15</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<!-- ══════════════════════════════════════════════
-     ESTADÍSTICAS DE ATENCIÓN (FILA INFERIOR)
-══════════════════════════════════════════════ -->
-<div class="bg-[#002b75] rounded-2xl p-6 shadow-sm text-white relative overflow-hidden">
-    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:18px_18px] pointer-events-none"></div>
-    <div class="relative z-10">
-        <div class="flex items-center justify-between mb-5">
-            <p class="text-sm font-extrabold text-white uppercase tracking-wider">Estadísticas de Atención a Clientes</p>
-            <span class="text-xs text-blue-200 font-medium">Histórico del Taller</span>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <!-- Satisfechos -->
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-green-400 flex-shrink-0"></span>
-                        <span class="text-sm font-bold text-white">Servicios Exitosos</span>
-                    </div>
-                    <span class="text-sm font-extrabold text-green-300">85%</span>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-2">
-                    <div class="h-2 rounded-full bg-green-400 transition-all duration-700" style="width:85%"></div>
-                </div>
-                <p class="text-[11px] text-blue-200 mt-1.5">Reparaciones entregadas correctamente</p>
-            </div>
-            <!-- Garantía -->
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0"></span>
-                        <span class="text-sm font-bold text-white">Retornos / Garantía</span>
-                    </div>
-                    <span class="text-sm font-extrabold text-amber-300">10%</span>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-2">
-                    <div class="h-2 rounded-full bg-amber-400 transition-all duration-700" style="width:10%"></div>
-                </div>
-                <p class="text-[11px] text-blue-200 mt-1.5">Equipos que regresaron por ajustes</p>
-            </div>
-            <!-- Sin Solución -->
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-slate-300 flex-shrink-0"></span>
-                        <span class="text-sm font-bold text-white">Sin Solución</span>
-                    </div>
-                    <span class="text-sm font-extrabold text-slate-300">5%</span>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-2">
-                    <div class="h-2 rounded-full bg-slate-300 transition-all duration-700" style="width:5%"></div>
-                </div>
-                <p class="text-[11px] text-blue-200 mt-1.5">Cancelados o devueltos sin reparar</p>
-            </div>
-        </div>
-        <div class="border-t border-white/10 pt-4 mt-5 flex items-center gap-3">
-            <div class="w-7 h-7 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                </svg>
-            </div>
-            <p class="text-xs text-blue-200 italic font-medium">Buscando siempre el 100% de calidad en cada reparación.</p>
-        </div>
-    </div>
-</div>
-
-
-<!-- ══════════════════════════════════════════════
-     MODAL: HISTORIAL DEL CLIENTE
-══════════════════════════════════════════════ -->
-<div id="modal-historial-cliente" class="fixed inset-0 z-50 hidden items-center justify-center">
+<!-- Modal Historial Clínico -->
+<div id="modal-historial" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarHistorial()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 z-10">
-        <div class="flex items-start justify-between mb-5">
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] z-10 flex flex-col overflow-hidden">
+        <div class="bg-[#002b75] px-6 py-4 flex items-center justify-between flex-shrink-0">
             <div>
-                <h3 id="hist-nombre" class="text-lg font-extrabold text-slate-800">—</h3>
-                <span id="hist-nivel-badge" class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider">—</span>
+                <h3 class="text-white font-black text-lg">Historial Clínico</h3>
+                <p id="mh-cliente-nombre" class="text-blue-200 text-sm">Cargando...</p>
             </div>
-            <button onclick="cerrarHistorial()" class="text-slate-400 hover:text-slate-700 mt-1">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
+            <button onclick="cerrarHistorial()" class="text-white/60 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-        <div class="grid grid-cols-2 gap-3 mb-4">
-            <div class="bg-[#eef2ff] rounded-xl p-3">
-                <p class="text-[10px] font-bold text-slate-400 uppercase">Total Servicios</p>
-                <p id="hist-total" class="text-2xl font-extrabold text-[#002b75] mt-0.5">—</p>
+        <div id="mh-contenido" class="p-6 overflow-y-auto flex-1 bg-slate-50">
+            <!-- Cargando -->
+            <div class="flex justify-center py-10">
+                <svg class="w-8 h-8 animate-spin text-[#002b75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             </div>
-            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                <p class="text-[10px] font-bold text-slate-400 uppercase">Teléfono</p>
-                <p id="hist-tel" class="text-sm font-bold text-slate-700 mt-1 break-all">—</p>
-            </div>
-        </div>
-        <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-100 mb-4">
-            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Último Servicio</p>
-            <p id="hist-ultimo" class="text-sm font-semibold text-slate-700">—</p>
-        </div>
-        <div class="space-y-2 max-h-44 overflow-y-auto pr-1 mb-5">
-            <div class="flex justify-between items-center p-2.5 bg-emerald-50 border border-emerald-100 rounded-xl">
-                <div><p class="text-xs font-bold text-slate-800">Mantenimiento preventivo</p><p class="text-[11px] text-slate-500">15 Oct 2026</p></div>
-                <span class="text-xs font-bold text-emerald-700">Finalizado</span>
-            </div>
-            <div class="flex justify-between items-center p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-                <div><p class="text-xs font-bold text-slate-800">Cambio de componentes</p><p class="text-[11px] text-slate-500">02 Sep 2026</p></div>
-                <span class="text-xs font-bold text-slate-600">Finalizado</span>
-            </div>
-            <div class="flex justify-between items-center p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-                <div><p class="text-xs font-bold text-slate-800">Diagnóstico general</p><p class="text-[11px] text-slate-500">18 Ago 2026</p></div>
-                <span class="text-xs font-bold text-slate-600">Finalizado</span>
-            </div>
-        </div>
-        <div class="flex gap-3">
-            <button onclick="cerrarHistorial()"
-                    class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
-                Cerrar
-            </button>
-            <button onclick="abrirModalNuevoServicio(); cerrarHistorial();"
-                    class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">
-                + Nuevo Servicio
-            </button>
         </div>
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     MODAL: NUEVO CLIENTE
-══════════════════════════════════════════════ -->
-<div id="modal-nuevo-cliente" class="fixed inset-0 z-50 hidden items-center justify-center">
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarModalNuevoCliente()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 z-10">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-slate-800">Nuevo Cliente</h3>
-            <button onclick="cerrarModalNuevoCliente()" class="text-slate-400 hover:text-slate-700">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        <form onsubmit="registrarNuevoCliente(event)" class="space-y-4">
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Nombre</label>
-                    <input type="text" id="nc-nombre" required placeholder="Ej: Elena"
-                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-[#002b75]">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Apellido</label>
-                    <input type="text" id="nc-apellido" required placeholder="Ej: Rodríguez"
-                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-[#002b75]">
-                </div>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 mb-1">Teléfono</label>
-                <input type="tel" id="nc-telefono" placeholder="+34 600 000 000"
-                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-[#002b75]">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 mb-1">Correo electrónico</label>
-                <input type="email" id="nc-correo" placeholder="cliente@correo.com"
-                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-[#002b75]">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 mb-1">Nivel de Fidelidad</label>
-                <select id="nc-nivel" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800">
-                    <option value="Silver">Silver</option>
-                    <option value="Gold">Gold</option>
-                    <option value="Platinum">Platinum</option>
-                </select>
-            </div>
-            <div class="flex gap-3 pt-2">
-                <button type="button" onclick="cerrarModalNuevoCliente()"
-                        class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
-                    Cancelar
-                </button>
-                <button type="submit"
-                        class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">
-                    Registrar
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- ══════════════════════════════════════════════
-     MODAL: FILTROS AVANZADOS
-══════════════════════════════════════════════ -->
-<div id="modal-filtros" class="fixed inset-0 z-50 hidden items-center justify-center">
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarModalFiltros()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 z-10">
-        <div class="flex items-center justify-between mb-5">
-            <h3 class="text-lg font-bold text-slate-800">Filtros Avanzados</h3>
-            <button onclick="cerrarModalFiltros()" class="text-slate-400 hover:text-slate-700">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        <div class="space-y-4">
-            <div>
-                <label class="block text-xs font-bold text-slate-600 mb-2">Nivel de Fidelidad</label>
-                <div class="flex gap-2 flex-wrap">
-                    <button onclick="toggleFiltroChip(this,'nivel','todos')"    class="filtro-chip-nivel active-chip px-3 py-1.5 rounded-lg text-xs font-bold bg-[#002b75] text-white border border-[#002b75] transition-all">Todos</button>
-                    <button onclick="toggleFiltroChip(this,'nivel','platinum')" class="filtro-chip-nivel px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:border-purple-400 transition-all">Platinum</button>
-                    <button onclick="toggleFiltroChip(this,'nivel','gold')"     class="filtro-chip-nivel px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:border-yellow-400 transition-all">Gold</button>
-                    <button onclick="toggleFiltroChip(this,'nivel','silver')"   class="filtro-chip-nivel px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:border-slate-400 transition-all">Silver</button>
-                </div>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 mb-2">Estado</label>
-                <div class="flex gap-2 flex-wrap">
-                    <button onclick="toggleFiltroChip(this,'estado','activos')"   class="filtro-chip-estado px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:border-emerald-400 transition-all">Activos</button>
-                    <button onclick="toggleFiltroChip(this,'estado','inactivos')" class="filtro-chip-estado px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:border-red-400 transition-all">Inactivos</button>
-                    <button onclick="toggleFiltroChip(this,'estado','nuevos')"    class="filtro-chip-estado px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:border-blue-400 transition-all">Nuevos</button>
-                </div>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 mb-2">Último contacto</label>
-                <select id="filtro-fecha" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#002b75]">
-                    <option value="">Cualquier fecha</option>
-                    <option value="7">Últimos 7 días</option>
-                    <option value="30">Últimos 30 días</option>
-                    <option value="90">Últimos 3 meses</option>
-                    <option value="180">Últimos 6 meses</option>
-                </select>
-            </div>
-        </div>
-        <div class="flex gap-3 mt-6">
-            <button onclick="limpiarFiltros()"
-                    class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
-                Limpiar
-            </button>
-            <button onclick="aplicarFiltros()"
-                    class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">
-                Aplicar Filtros
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- ══════════════════════════════════════════════
-     MODAL: LLAMAR CLIENTE
-══════════════════════════════════════════════ -->
-<div id="modal-llamar" class="fixed inset-0 z-50 hidden items-center justify-center">
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarModalLlamar()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-xs mx-4 p-6 z-10 text-center">
-        <div class="w-16 h-16 bg-[#eef2ff] rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-[#002b75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-            </svg>
-        </div>
-        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Llamar a</p>
-        <p id="llamar-nombre" class="text-lg font-extrabold text-slate-800 mb-1">—</p>
-        <p id="llamar-tel" class="text-base font-bold text-[#002b75] mb-5">—</p>
-        <div class="flex gap-3">
-            <button onclick="cerrarModalLlamar()"
-                    class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
-                Cancelar
-            </button>
-            <button onclick="confirmarLlamada()"
-                    class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-bold text-sm transition shadow flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                </svg>
-                Llamar ahora
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- ══════════════════════════════════════════════
-     MODAL: ENVIAR MENSAJE
-══════════════════════════════════════════════ -->
-<div id="modal-mensaje" class="fixed inset-0 z-50 hidden items-center justify-center">
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarModalMensaje()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 z-10">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-800">Enviar Mensaje</h3>
-                <p id="msg-para" class="text-xs text-slate-400 mt-0.5">Para: —</p>
-            </div>
-            <button onclick="cerrarModalMensaje()" class="text-slate-400 hover:text-slate-700">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        <div class="mb-3">
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Plantillas rápidas</p>
-            <div class="flex gap-2 flex-wrap">
-                <button onclick="usarPlantilla('Hola, le contactamos para recordarle su próxima cita de mantenimiento.')"
-                        class="px-2.5 py-1 bg-[#eef2ff] text-[#002b75] text-[10px] font-bold rounded-lg hover:bg-[#dce4f8] transition">Recordatorio cita</button>
-                <button onclick="usarPlantilla('Su equipo ya está listo para ser recogido. ¡Gracias por confiar en ServiTech!')"
-                        class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-lg hover:bg-emerald-100 transition">Equipo listo</button>
-                <button onclick="usarPlantilla('Le enviamos el presupuesto para el servicio solicitado. Quedo a disposición para cualquier consulta.')"
-                        class="px-2.5 py-1 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-lg hover:bg-amber-100 transition">Presupuesto</button>
-            </div>
-        </div>
-        <textarea id="msg-texto" rows="4" placeholder="Escribe tu mensaje aquí..."
-                  class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#002b75] resize-none transition-all mb-4"></textarea>
-        <div class="flex gap-3">
-            <button onclick="cerrarModalMensaje()"
-                    class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
-                Cancelar
-            </button>
-            <button onclick="enviarMensajeConfirmar()"
-                    class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-bold text-sm transition shadow flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                </svg>
-                Enviar
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- ══════════════════════════════════════════════
-     MODAL: DETALLE ACTIVIDAD RECIENTE
-══════════════════════════════════════════════ -->
-<div id="modal-actividad" class="fixed inset-0 z-50 hidden items-center justify-center">
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarDetalleActividad()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 z-10">
-        <div class="flex items-center justify-between mb-4">
-            <h3 id="act-titulo" class="text-base font-bold text-slate-800">—</h3>
-            <button onclick="cerrarDetalleActividad()" class="text-slate-400 hover:text-slate-700">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        <div class="space-y-3 mb-5">
-            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                <p class="text-[10px] font-bold text-slate-400 uppercase">Cliente</p>
-                <p id="act-cliente" class="text-sm font-bold text-slate-800 mt-0.5">—</p>
-            </div>
-            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                <p class="text-[10px] font-bold text-slate-400 uppercase">Descripción</p>
-                <p id="act-desc" class="text-sm font-semibold text-slate-700 mt-0.5">—</p>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase">Monto / Estado</p>
-                    <p id="act-monto" class="text-sm font-extrabold text-[#002b75] mt-0.5">—</p>
-                </div>
-                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase">Tiempo</p>
-                    <p id="act-tiempo" class="text-sm font-bold text-slate-700 mt-0.5">—</p>
-                </div>
-            </div>
-        </div>
-        <div id="act-acciones" class="flex gap-3"></div>
-    </div>
-</div>
-
-<!-- ══════════════════════════════════════════════
-     MODAL: INSIGHT DETALLE
-══════════════════════════════════════════════ -->
-<div id="modal-insight" class="fixed inset-0 z-50 hidden items-center justify-center">
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="cerrarInsight()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 z-10">
-        <div class="flex items-center justify-between mb-5">
-            <h3 id="insight-titulo" class="text-base font-bold text-slate-800">—</h3>
-            <button onclick="cerrarInsight()" class="text-slate-400 hover:text-slate-700">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        <div id="insight-contenido" class="space-y-3 mb-5"></div>
-        <button onclick="cerrarInsight()"
-                class="w-full py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">
-            Cerrar
-        </button>
-    </div>
-</div>
-
-{% endblock %}
-
-{% block scripts %}
 <script>
-    /* ══════════════════════════════════════════
-       TABS DE FILTRO
-    ══════════════════════════════════════════ */
-    function filtrarTab(tab, btn) {
-        document.querySelectorAll('.tab-btn').forEach(b => {
-            b.className = 'tab-btn px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all';
-        });
-        btn.className = 'tab-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-[#002b75] text-white shadow-sm transition-all';
-        // Desactivar filtros rápidos al usar tab
-        document.querySelectorAll('.filtro-rapido').forEach(b => b.classList.remove('ring-2','ring-offset-1'));
-        _aplicarFiltroCards({ tab });
-    }
+function filtrarClientes(filtro) {
+    // UI Botones
+    document.querySelectorAll('.filtro-btn').forEach(btn => {
+        btn.classList.remove('bg-[#002b75]', 'text-white', 'activo');
+        btn.classList.add('bg-white', 'border-slate-200', 'text-slate-600');
+    });
+    event.target.classList.remove('bg-white', 'border-slate-200', 'text-slate-600');
+    event.target.classList.add('bg-[#002b75]', 'text-white', 'activo');
 
-    /* ══════════════════════════════════════════
-       FILTROS RÁPIDOS (Riesgo / Top)
-    ══════════════════════════════════════════ */
-    let _filtroRapidoActivo = null;
-    function aplicarFiltroRapido(tipo, btn) {
-        if (_filtroRapidoActivo === tipo) {
-            // Toggle off → volver a "todos"
-            _filtroRapidoActivo = null;
-            btn.classList.remove('ring-2','ring-offset-1','ring-red-400','ring-emerald-400');
-            _aplicarFiltroCards({ tab: 'todos' });
-            // Resetear tab visual
-            document.querySelectorAll('.tab-btn')[0].className = 'tab-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-[#002b75] text-white shadow-sm transition-all';
-            document.querySelectorAll('.tab-btn').forEach((b,i) => { if(i>0) b.className='tab-btn px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all'; });
-            return;
-        }
-        _filtroRapidoActivo = tipo;
-        document.querySelectorAll('.filtro-rapido').forEach(b => b.classList.remove('ring-2','ring-offset-1','ring-red-400','ring-emerald-400'));
-        if (tipo === 'riesgo') btn.classList.add('ring-2','ring-offset-1','ring-red-400');
-        if (tipo === 'top')    btn.classList.add('ring-2','ring-offset-1','ring-emerald-400');
-        _aplicarFiltroCards({ rapido: tipo });
-        mostrarToast(tipo === 'riesgo' ? '⚠️ Filtrando: Riesgo de Fuga' : '💎 Filtrando: Top Spenders');
-    }
-
-    function _aplicarFiltroCards({ tab, rapido } = {}) {
-        const cards = document.querySelectorAll('.cliente-card');
-        let visibles = 0;
-        cards.forEach(card => {
-            const tags = card.dataset.tag || '';
-            let show = false;
-            if (rapido)        show = tags.includes(rapido);
-            else if (tab)      show = tab === 'todos' || tags.includes(tab);
-            else               show = true;
-            card.style.display = show ? '' : 'none';
-            if (show) visibles++;
-        });
-        const grid = document.getElementById('grid-clientes');
-        const empty = document.getElementById('sin-resultados');
-        grid.classList.toggle('hidden', visibles === 0);
-        empty.classList.toggle('hidden', visibles > 0);
-    }
-
-    /* ══════════════════════════════════════════
-       MODAL FILTROS AVANZADOS
-    ══════════════════════════════════════════ */
-    let _filtroNivel = 'todos', _filtroEstado = null;
-
-    function abrirModalFiltros() {
-        const m = document.getElementById('modal-filtros');
-        m.classList.remove('hidden'); m.classList.add('flex');
-    }
-    function cerrarModalFiltros() {
-        const m = document.getElementById('modal-filtros');
-        m.classList.add('hidden'); m.classList.remove('flex');
-    }
-    function toggleFiltroChip(btn, grupo, valor) {
-        document.querySelectorAll(`.filtro-chip-${grupo}`).forEach(b => {
-            b.className = b.className.replace('bg-[#002b75] text-white border-[#002b75]', 'bg-white text-slate-600 border-slate-200');
-        });
-        btn.className = btn.className.replace('bg-white text-slate-600 border-slate-200', 'bg-[#002b75] text-white border-[#002b75]');
-        if (grupo === 'nivel') _filtroNivel = valor;
-        if (grupo === 'estado') _filtroEstado = valor;
-    }
-    function aplicarFiltros() {
-        const cards = document.querySelectorAll('.cliente-card');
-        let visibles = 0;
-        cards.forEach(card => {
-            const tags = card.dataset.tag || '';
-            const nombre = (card.dataset.nombre || '').toLowerCase();
-            let show = true;
-            if (_filtroNivel && _filtroNivel !== 'todos') show = show && tags.includes(_filtroNivel);
-            if (_filtroEstado) show = show && tags.includes(_filtroEstado);
-            card.style.display = show ? '' : 'none';
-            if (show) visibles++;
-        });
-        document.getElementById('grid-clientes').classList.toggle('hidden', visibles === 0);
-        document.getElementById('sin-resultados').classList.toggle('hidden', visibles > 0);
-        cerrarModalFiltros();
-        mostrarToast(`✅ Filtros aplicados — ${visibles} cliente(s)`);
-    }
-    function limpiarFiltros() {
-        _filtroNivel = 'todos'; _filtroEstado = null;
-        document.querySelectorAll('.filtro-chip-nivel, .filtro-chip-estado').forEach(b => {
-            b.className = b.className.replace('bg-[#002b75] text-white border-[#002b75]', 'bg-white text-slate-600 border-slate-200');
-        });
-        document.querySelector('.filtro-chip-nivel').className = document.querySelector('.filtro-chip-nivel').className.replace('bg-white text-slate-600 border-slate-200','bg-[#002b75] text-white border-[#002b75]');
-        document.getElementById('filtro-fecha').value = '';
-        _aplicarFiltroCards({ tab: 'todos' });
-        cerrarModalFiltros();
-        mostrarToast('🧹 Filtros limpiados');
-    }
-
-    /* ══════════════════════════════════════════
-       MODAL LLAMAR CLIENTE
-    ══════════════════════════════════════════ */
-    function llamarCliente(telefono, nombre) {
-        document.getElementById('llamar-nombre').textContent = nombre || telefono;
-        document.getElementById('llamar-tel').textContent = telefono;
-        const m = document.getElementById('modal-llamar');
-        m.classList.remove('hidden'); m.classList.add('flex');
-    }
-    function cerrarModalLlamar() {
-        const m = document.getElementById('modal-llamar');
-        m.classList.add('hidden'); m.classList.remove('flex');
-    }
-    function confirmarLlamada() {
-        const tel = document.getElementById('llamar-tel').textContent;
-        cerrarModalLlamar();
-        mostrarToast(`📞 Iniciando llamada a ${tel}...`);
-    }
-
-    /* ══════════════════════════════════════════
-       MODAL ENVIAR MENSAJE
-    ══════════════════════════════════════════ */
-    function enviarMensaje(nombre) {
-        document.getElementById('msg-para').textContent = `Para: ${nombre}`;
-        document.getElementById('msg-texto').value = '';
-        const m = document.getElementById('modal-mensaje');
-        m.classList.remove('hidden'); m.classList.add('flex');
-    }
-    function cerrarModalMensaje() {
-        const m = document.getElementById('modal-mensaje');
-        m.classList.add('hidden'); m.classList.remove('flex');
-    }
-    function usarPlantilla(texto) {
-        document.getElementById('msg-texto').value = texto;
-        document.getElementById('msg-texto').focus();
-    }
-    function enviarMensajeConfirmar() {
-        const texto = document.getElementById('msg-texto').value.trim();
-        if (!texto) { mostrarToast('⚠️ Escribe un mensaje antes de enviar', 'warning'); return; }
-        const para = document.getElementById('msg-para').textContent.replace('Para: ', '');
-        cerrarModalMensaje();
-        mostrarToast(`✉️ Mensaje enviado a ${para}`, 'success');
-    }
-
-    /* ══════════════════════════════════════════
-       MODAL DETALLE ACTIVIDAD
-    ══════════════════════════════════════════ */
-    function abrirDetalleActividad(tipo, cliente, desc, monto, tiempo, estado) {
-        document.getElementById('act-titulo').textContent = tipo + ': ' + cliente;
-        document.getElementById('act-cliente').textContent = cliente;
-        document.getElementById('act-desc').textContent = desc;
-        document.getElementById('act-monto').textContent = monto;
-        document.getElementById('act-tiempo').textContent = tiempo;
-        // Acciones según tipo
-        const acciones = document.getElementById('act-acciones');
-        if (estado === 'completado') {
-            acciones.innerHTML = `
-                <button onclick="cerrarDetalleActividad()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">Cerrar</button>
-                <button onclick="cerrarDetalleActividad(); mostrarToast('📋 Generando reporte...');" class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">Ver Reporte</button>`;
+    // Filtrar Cards
+    document.querySelectorAll('.cliente-card').forEach(card => {
+        const tags = card.getAttribute('data-tag');
+        if (filtro === 'todos' || tags.includes(filtro)) {
+            card.style.display = 'block';
         } else {
-            acciones.innerHTML = `
-                <button onclick="cerrarDetalleActividad()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">Cerrar</button>
-                <button onclick="cerrarDetalleActividad(); mostrarToast('📅 Cita confirmada en agenda');" class="flex-1 py-2.5 rounded-xl bg-[#002b75] hover:bg-[#001f54] text-white font-semibold text-sm transition shadow">Confirmar Cita</button>`;
+            card.style.display = 'none';
         }
-        const m = document.getElementById('modal-actividad');
-        m.classList.remove('hidden'); m.classList.add('flex');
-    }
-    function cerrarDetalleActividad() {
-        const m = document.getElementById('modal-actividad');
-        m.classList.add('hidden'); m.classList.remove('flex');
+    });
+}
+
+function verHistorialCliente(clienteId, nombre) {
+    document.getElementById('modal-historial').classList.remove('hidden');
+    document.getElementById('modal-historial').classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('mh-cliente-nombre').textContent = nombre;
+    
+    document.getElementById('mh-contenido').innerHTML = `<div class="flex justify-center py-10"><svg class="w-8 h-8 animate-spin text-[#002b75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg></div>`;
+
+    fetch(`/tecnico/clientes/${clienteId}/historial/`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                renderHistorial(data.dispositivos);
+            } else {
+                document.getElementById('mh-contenido').innerHTML = `<p class="text-red-500 text-center py-10">Error al cargar historial: ${data.error}</p>`;
+            }
+        })
+        .catch(err => {
+            document.getElementById('mh-contenido').innerHTML = `<p class="text-red-500 text-center py-10">Error de conexión.</p>`;
+        });
+}
+
+function cerrarHistorial() {
+    document.getElementById('modal-historial').classList.add('hidden');
+    document.getElementById('modal-historial').classList.remove('flex');
+    document.body.style.overflow = '';
+}
+
+function renderHistorial(dispositivos) {
+    const cont = document.getElementById('mh-contenido');
+    if(!dispositivos || dispositivos.length === 0) {
+        cont.innerHTML = `
+        <div class="text-center py-12">
+            <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">📭</div>
+            <p class="text-slate-500 font-medium">Este cliente no tiene reparaciones registradas.</p>
+        </div>`;
+        return;
     }
 
-    /* ══════════════════════════════════════════
-       MODAL INSIGHT
-    ══════════════════════════════════════════ */
-    const _insightData = {
-        crecimiento: {
-            titulo: 'Crecimiento de Clientes',
-            items: [
-                { label: 'Este mes', valor: '+12%', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' },
-                { label: 'Mes anterior', valor: '+8%', color: 'text-emerald-600', bg: 'bg-slate-50 border-slate-100' },
-                { label: 'Promedio trimestral', valor: '+10%', color: 'text-[#002b75]', bg: 'bg-[#eef2ff] border-indigo-100' },
-                { label: 'Meta del mes', valor: '+15%', color: 'text-amber-700', bg: 'bg-amber-50 border-amber-100' },
-            ]
-        },
-        nuevos: {
-            titulo: 'Nuevos Clientes',
-            items: [
-                { label: 'Últimos 30 días', valor: '24', color: 'text-[#002b75]', bg: 'bg-[#eef2ff] border-indigo-100' },
-                { label: 'Últimos 7 días', valor: '6', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' },
-                { label: 'Hoy', valor: '1', color: 'text-slate-700', bg: 'bg-slate-50 border-slate-100' },
-                { label: 'Canal principal', valor: 'Referidos', color: 'text-purple-700', bg: 'bg-purple-50 border-purple-100' },
-            ]
-        }
-    };
-    function abrirInsight(tipo) {
-        const data = _insightData[tipo];
-        if (!data) return;
-        document.getElementById('insight-titulo').textContent = data.titulo;
-        document.getElementById('insight-contenido').innerHTML = data.items.map(item => `
-            <div class="flex items-center justify-between p-3 ${item.bg} border rounded-xl">
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">${item.label}</p>
-                <p class="text-base font-extrabold ${item.color}">${item.valor}</p>
-            </div>`).join('');
-        const m = document.getElementById('modal-insight');
-        m.classList.remove('hidden'); m.classList.add('flex');
-    }
-    function cerrarInsight() {
-        const m = document.getElementById('modal-insight');
-        m.classList.add('hidden'); m.classList.remove('flex');
-    }
-
-    /* ══════════════════════════════════════════
-       MODAL HISTORIAL
-    ══════════════════════════════════════════ */
-    function abrirHistorial(nombre, nivel, total, ultimo, telefono) {
-        document.getElementById('hist-nombre').textContent = nombre;
-        document.getElementById('hist-total').textContent = total;
-        document.getElementById('hist-tel').textContent = telefono;
-        document.getElementById('hist-ultimo').textContent = ultimo;
-        const badge = document.getElementById('hist-nivel-badge');
-        const cfg = { 'Platinum': 'bg-purple-100 text-purple-700', 'Gold': 'bg-yellow-100 text-yellow-700', 'Silver': 'bg-slate-100 text-slate-600' };
-        badge.textContent = nivel;
-        badge.className = `inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${cfg[nivel] || 'bg-slate-100 text-slate-600'}`;
-        const m = document.getElementById('modal-historial-cliente');
-        m.classList.remove('hidden'); m.classList.add('flex');
-    }
-    function cerrarHistorial() {
-        const m = document.getElementById('modal-historial-cliente');
-        m.classList.add('hidden'); m.classList.remove('flex');
-    }
-
-    /* ══════════════════════════════════════════
-       MODAL NUEVO CLIENTE
-    ══════════════════════════════════════════ */
-    function abrirModalNuevoCliente() {
-        const m = document.getElementById('modal-nuevo-cliente');
-        m.classList.remove('hidden'); m.classList.add('flex');
-    }
-    function cerrarModalNuevoCliente() {
-        const m = document.getElementById('modal-nuevo-cliente');
-        m.classList.add('hidden'); m.classList.remove('flex');
-    }
-    function registrarNuevoCliente(e) {
-        e.preventDefault();
-        const nombre = document.getElementById('nc-nombre').value;
-        const apellido = document.getElementById('nc-apellido').value;
-        cerrarModalNuevoCliente();
-        mostrarToast(`✅ Cliente "${nombre} ${apellido}" registrado`, 'success');
-        e.target.reset();
-    }
+    let html = '<div class="space-y-6">';
+    dispositivos.forEach(disp => {
+        html += `
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-slate-100 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                <div>
+                    <h4 class="font-black text-slate-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        ${disp.marca} ${disp.modelo}
+                    </h4>
+                    <p class="text-xs text-slate-500 mt-0.5">IMEI/Serial: <span class="font-bold">${disp.imei_serial || 'No registrado'}</span></p>
+                </div>
+                <span class="text-xs font-bold bg-white px-2 py-1 rounded shadow-sm border border-slate-200">${disp.citas.length} servicio(s)</span>
+            </div>
+            <div class="p-4">
+                <div class="relative border-l-2 border-slate-200 ml-3 space-y-6">`;
+        
+        disp.citas.forEach(cita => {
+            html += `
+                    <div class="relative pl-6">
+                        <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-white ${cita.estado === 'FINALIZADA' ? 'bg-emerald-500' : 'bg-[#002b75]'}"></div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h5 class="font-bold text-slate-800 text-sm">${cita.servicio}</h5>
+                                    <p class="text-xs text-slate-500">${cita.fecha}</p>
+                                </div>
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${cita.estado === 'FINALIZADA' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">${cita.estado}</span>
+                            </div>
+                            ${cita.observaciones ? `<p class="text-xs text-slate-600 italic bg-white p-2 rounded border border-slate-100 mt-2">"${cita.observaciones}"</p>` : ''}
+                        </div>
+                    </div>`;
+        });
+        
+        html += `
+                </div>
+            </div>
+        </div>`;
+    });
+    html += '</div>';
+    cont.innerHTML = html;
+}
 </script>
 {% endblock %}
