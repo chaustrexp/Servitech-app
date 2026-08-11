@@ -20,6 +20,7 @@
         .progress-fill { transition: width 1s ease-in-out; }
         .modal-backdrop { backdrop-filter: blur(4px); }
     </style>
+    {% block extra_head %}{% endblock %}
 </head>
 <body class="bg-[#f0f4f8] min-h-screen flex overflow-x-hidden">
 
@@ -91,6 +92,16 @@
                           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
                 Mi Agenda
+            </a>
+
+            <a href="{% url 'tecnico_historial' %}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all
+                      {% if request.resolver_match.url_name == 'tecnico_historial' %}nav-item-active{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                </svg>
+                Mi Historial
             </a>
 
             <a href="{% url 'tecnico_dispositivos' %}"
@@ -181,7 +192,7 @@
     <!-- CONTENIDO PRINCIPAL -->
     <div class="flex-1 flex flex-col min-h-screen md:ml-56">
         <!-- Top bar móvil -->
-        <div class="md:hidden bg-white border-b border-slate-100 px-4 h-14 flex items-center justify-between sticky top-0 z-20">
+        <div class="md:hidden bg-white border-b border-slate-100 px-4 h-14 flex items-center justify-between sticky top-0 z-20 top-bar-mobile">
             <button onclick="openSidebar()" class="text-slate-600 hover:text-[#002b75] p-1">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>

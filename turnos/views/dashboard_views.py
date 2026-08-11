@@ -319,6 +319,9 @@ def tecnico_agenda(request):
             })
         grid_rows.append({'hora': hora_str, 'celdas': celdas})
 
+    from ..models import Repuesto
+    repuestos = Repuesto.objects.filter(activo=True, stock__gt=0).order_by('nombre')
+
     context = {
         'dias_semana': dias_semana,
         'citas_semana': citas_semana,
@@ -338,22 +341,33 @@ def tecnico_agenda(request):
 @login_required
 @require_POST
 def aceptar_cita(request, cita_id):
-    """Permite al técnico aceptar una cita disponible."""
+    """Permite al técnico aceptar una cita y pasarla a EN REPARACION."""
     if request.user.rol != Usuario.Rol.TECNICO:
         return JsonResponse({'success': False, 'error': 'No autorizado.'}, status=403)
 
     cita = get_object_or_404(Cita, id=cita_id)
-    if cita.tecnico is not None:
+    
+    # Check if someone else owns it
+    if cita.tecnico is not None and cita.tecnico != request.user:
         return JsonResponse({'success': False, 'error': 'Esta cita ya tiene un técnico asignado.'}, status=400)
 
-    # Asignar técnico
+    # Asignar técnico (si no lo tenía)
     cita.tecnico = request.user
+    
+    # Cambiar estado a EN REPARACION
+    from turnos.models.citas import EstadoCita
+    estado_rep, _ = EstadoCita.objects.get_or_create(nombre='EN REPARACION')
+    cita.estado = estado_rep
+    
     cita.save()
 
     return JsonResponse({
         'success': True,
-        'message': f'Cita de {cita.cliente.nombre_completo} aceptada con éxito.'
+        'message': f'Cita de {cita.cliente.nombre_completo} iniciada con éxito.'
     })
+
+import json
+from django.db import transaction
 
 @login_required
 @require_POST
@@ -393,7 +407,15 @@ def tecnico_dispositivos(request):
             Repuesto.objects.create(nombre=name, descripcion=desc, categoria=cat, stock=stock, precio=price)
 
     repuestos = Repuesto.objects.filter(activo=True).order_by('-fecha_registro')
-    return render(request, 'turnos/tecnico/tecnico_dispositivos.html', {'repuestos': repuestos})
+    
+    from turnos.models.inventario import Inventario
+    # Obtener la actividad reciente (salidas de inventario del usuario actual)
+    actividad_reciente = Inventario.objects.filter(usuario=request.user, tipo='SALIDA').order_by('-fecha')[:5]
+    
+    return render(request, 'turnos/tecnico/tecnico_dispositivos.html', {
+        'repuestos': repuestos,
+        'actividad_reciente': actividad_reciente
+    })
 
 @login_required
 def tecnico_clientes(request):
@@ -837,39 +859,6 @@ def exportar_inventario_excel(request):
 
 
 @login_required
-def agregar_repuesto(request):
-    """Agrega un nuevo repuesto a la base de datos."""
-    if request.user.rol != Usuario.Rol.TECNICO:
-        return redirect('home')
-
-    if request.method == 'POST':
-        nombre = request.POST.get('nombre')
-        descripcion = request.POST.get('descripcion')
-        categoria = request.POST.get('categoria')
-        stock = request.POST.get('stock', 0)
-        precio = request.POST.get('precio', 0.0)
-
-        try:
-            Repuesto.objects.create(
-                nombre=nombre,
-                descripcion=descripcion,
-                categoria=categoria,
-                stock=int(stock),
-                precio=float(precio)
-            )
-            messages.success(request, f'¡El repuesto "{nombre}" fue agregado con éxito!')
-        except Exception as e:
-            messages.error(request, f'Error al agregar repuesto: {str(e)}')
-
-    return redirect('tecnico_dispositivos')
-
-
-# ─────────────────────────────────────────────
-#  GESTIÓN DE USUARIOS (ADMIN)
-# ─────────────────────────────────────────────
-# ─────────────────────────────────────────────
-#  GESTIÓN DE USUARIOS (ADMIN)
-# ─────────────────────────────────────────────
 @login_required
 def admin_usuarios(request):
     if not request.user.es_admin:
@@ -1087,6 +1076,30 @@ def admin_toggle_servicio(request, servicio_id):
 def admin_citas(request):
     if request.user.rol != Usuario.Rol.ADMINISTRADOR:
         return redirect('home')
+        
+    if request.method == 'POST':
+        accion = request.POST.get('accion')
+        cita_id = request.POST.get('cita_id')
+        if accion == 'cancelar_cita' and cita_id:
+            
+            try:
+                cita = Cita.objects.get(id=cita_id)
+                estado_cancelada, _ = EstadoCita.objects.get_or_create(nombre='Cancelada')
+                cita.estado = estado_cancelada
+                cita.save()
+                messages.success(request, f'La cita #{cita.id} ha sido marcada como cancelada.')
+            except Cita.DoesNotExist:
+                messages.error(request, 'Cita no encontrada.')
+        elif accion == 'eliminar_cita' and cita_id:
+            
+            try:
+                cita = Cita.objects.get(id=cita_id)
+                cita_id_num = cita.id
+                cita.delete()
+                messages.success(request, f'La cita #{cita_id_num} ha sido eliminada definitivamente.')
+            except Cita.DoesNotExist:
+                messages.error(request, 'Cita no encontrada.')
+        return redirect('admin_citas')
 
     hoy = date.today()
 
@@ -1534,10 +1547,13 @@ def admin_tecnicos(request):
                 if Usuario.objects.filter(correo__iexact=correo).exists():
                     messages.error(request, f'Ya existe un usuario con el correo {correo}.')
                     return redirect('admin_tecnicos')
-                pw_temporal = uuid.uuid4().hex[:10]  # contraseña aleatoria
+                password_nuevo = request.POST.get('password', '').strip()
+                if not password_nuevo:
+                    password_nuevo = uuid.uuid4().hex[:10]
+                    
                 tecnico = Usuario.objects.create_user(
                     correo=correo,
-                    password=pw_temporal,
+                    password=password_nuevo,
                     nombre_completo=nombre_completo,
                     telefono=telefono or None,
                     rol=Usuario.Rol.TECNICO,
@@ -2057,3 +2073,242 @@ def tecnico_toggle_pausa(request):
             messages.error(request, f"Error al cambiar estado: {e}")
             
     return redirect('dashboard_tecnico')
+
+
+@login_required
+def tecnico_historial(request):
+    if request.user.rol != Usuario.Rol.TECNICO:
+        return redirect('home')
+
+    hoy = date.today()
+
+    # ── KPIs ──
+    qs_total = Cita.objects.filter(tecnico=request.user)
+    
+    citas_hoy      = qs_total.filter(fecha=hoy).count()
+    pendientes     = qs_total.filter(estado__nombre__in=['PENDIENTE', 'CONFIRMADA', 'RETRASADA', 'Pendiente', 'Confirmada']).count()
+    en_proceso     = qs_total.filter(estado__nombre__in=['EN_DIAGNOSTICO', 'EN_REPARACION', 'Diagnóstico', 'En Reparación', 'En Proceso']).count()
+    completadas    = qs_total.filter(estado__nombre__in=['FINALIZADA', 'Finalizada', 'Completada']).count()
+
+    # ── Filtros desde GET ──
+    qs = qs_total.select_related('cliente', 'servicio', 'estado').order_by('-fecha', '-hora_inicio')
+
+    filtro_cliente  = request.GET.get('cliente', '').strip()
+    filtro_estado   = request.GET.get('estado', '').strip()
+    filtro_fecha_ini = request.GET.get('fecha_ini', '').strip()
+    filtro_fecha_fin = request.GET.get('fecha_fin', '').strip()
+
+    if filtro_cliente:
+        qs = qs.filter(cliente__nombre_completo__icontains=filtro_cliente)
+    if filtro_estado:
+        qs = qs.filter(estado__nombre__iexact=filtro_estado)
+    if filtro_fecha_ini:
+        try:
+            from datetime import datetime
+            qs = qs.filter(fecha__gte=datetime.strptime(filtro_fecha_ini, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+    if filtro_fecha_fin:
+        try:
+            from datetime import datetime
+            qs = qs.filter(fecha__lte=datetime.strptime(filtro_fecha_fin, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+
+    # Paginación simple (25 por página)
+    from django.core.paginator import Paginator
+    paginator   = Paginator(qs, 25)
+    page_number = request.GET.get('page', 1)
+    page_obj    = paginator.get_page(page_number)
+
+    estados = EstadoCita.objects.all().order_by('nombre')
+
+    context = {
+        'citas':           page_obj,
+        'page_obj':        page_obj,
+        'total_citas':     qs.count(),
+        'citas_hoy':       citas_hoy,
+        'pendientes':      pendientes,
+        'en_proceso':      en_proceso,
+        'completadas':     completadas,
+        'estados':         estados,
+        'filtro_cliente':  filtro_cliente,
+        'filtro_estado':   filtro_estado,
+        'filtro_fecha_ini': filtro_fecha_ini,
+        'filtro_fecha_fin': filtro_fecha_fin,
+    }
+    return render(request, 'turnos/tecnico/tecnico_historial.html', context)
+
+@login_required
+def exportar_historial_excel(request):
+    if request.user.rol != Usuario.Rol.TECNICO:
+        return redirect('home')
+
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    from django.http import HttpResponse
+    from django.utils import timezone
+    from datetime import datetime
+
+    qs = Cita.objects.filter(tecnico=request.user).select_related('cliente', 'servicio', 'estado').order_by('-fecha', '-hora_inicio')
+
+    filtro_cliente  = request.GET.get('cliente', '').strip()
+    filtro_estado   = request.GET.get('estado', '').strip()
+    filtro_fecha_ini = request.GET.get('fecha_ini', '').strip()
+    filtro_fecha_fin = request.GET.get('fecha_fin', '').strip()
+
+    if filtro_cliente:
+        qs = qs.filter(cliente__nombre_completo__icontains=filtro_cliente)
+    if filtro_estado:
+        qs = qs.filter(estado__nombre__iexact=filtro_estado)
+    if filtro_fecha_ini:
+        try:
+            qs = qs.filter(fecha__gte=datetime.strptime(filtro_fecha_ini, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+    if filtro_fecha_fin:
+        try:
+            qs = qs.filter(fecha__lte=datetime.strptime(filtro_fecha_fin, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Historial Citas"
+
+    # Estilos
+    header_font = Font(name='Calibri', size=12, bold=True, color='FFFFFF')
+    header_fill = PatternFill(start_color='003399', end_color='003399', fill_type='solid')
+    header_alignment = Alignment(horizontal='center', vertical='center')
+    border = Border(
+        left=Side(border_style='thin', color='CBD5E1'),
+        right=Side(border_style='thin', color='CBD5E1'),
+        top=Side(border_style='thin', color='CBD5E1'),
+        bottom=Side(border_style='thin', color='CBD5E1')
+    )
+
+    headers = ['ID', 'Cliente', 'Servicio', 'Fecha', 'Hora', 'Estado', 'Dispositivo']
+    ws.append(headers)
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        cell.border = border
+        ws.column_dimensions[get_column_letter(col_num)].width = 20
+
+    ws.column_dimensions['B'].width = 30
+    ws.column_dimensions['C'].width = 30
+    ws.column_dimensions['G'].width = 25
+
+    row_num = 2
+    for cita in qs:
+        fecha_str = cita.fecha.strftime('%d/%m/%Y') if cita.fecha else ''
+        hora_str = cita.hora_inicio.strftime('%H:%M') if cita.hora_inicio else ''
+        ws.append([
+            cita.pk,
+            cita.cliente.nombre_completo if cita.cliente else 'N/A',
+            cita.servicio.nombre if cita.servicio else 'N/A',
+            fecha_str,
+            hora_str,
+            cita.estado.nombre if cita.estado else 'N/A',
+            cita.servicio.tipo_dispositivo if cita.servicio else 'N/A'
+        ])
+        for col_num in range(1, 8):
+            ws.cell(row=row_num, column=col_num).border = border
+        row_num += 1
+
+    timestamp = timezone.now().strftime('%Y%m%d_%H%M')
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="historial_tecnico_{timestamp}.xlsx"'
+    wb.save(response)
+    return response
+
+
+
+@login_required
+def tecnico_cliente_historial(request, cliente_id):
+    """Devuelve el historial clínico completo de los dispositivos de un cliente en formato JSON."""
+    if request.user.rol != Usuario.Rol.TECNICO:
+        return JsonResponse({'success': False, 'error': 'No autorizado'})
+
+    try:
+        cliente = Usuario.objects.get(id_usuario=cliente_id, rol=Usuario.Rol.CLIENTE)
+    except Usuario.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Cliente no encontrado'})
+
+    from turnos.models.dispositivos import Dispositivo
+    from turnos.models.citas import Cita
+
+    # Obtener dispositivos del cliente
+    dispositivos = Dispositivo.objects.filter(cliente=cliente).order_by('-fecha_registro')
+    
+    # También buscamos citas que no tengan dispositivo asignado y las agrupamos bajo "Dispositivo Genérico"
+    citas_sin_dispositivo = Cita.objects.filter(cliente=cliente, dispositivo__isnull=True).order_by('-fecha', '-hora_inicio')
+
+    data_dispositivos = []
+
+    for disp in dispositivos:
+        citas_disp = Cita.objects.filter(dispositivo=disp).order_by('-fecha', '-hora_inicio')
+        if citas_disp.exists():
+            citas_data = [{
+                'id': c.id,
+                'servicio': c.servicio.nombre,
+                'fecha': c.fecha.strftime('%d/%m/%Y'),
+                'estado': c.estado.nombre.upper() if c.estado else 'PENDIENTE',
+                'observaciones': c.observaciones or ''
+            } for c in citas_disp]
+            
+            data_dispositivos.append({
+                'id': disp.id,
+                'marca': disp.marca,
+                'modelo': disp.modelo,
+                'imei_serial': disp.imei_serial,
+                'citas': citas_data
+            })
+
+    if citas_sin_dispositivo.exists():
+        citas_data = [{
+            'id': c.id,
+            'servicio': c.servicio.nombre,
+            'fecha': c.fecha.strftime('%d/%m/%Y'),
+            'estado': c.estado.nombre.upper() if c.estado else 'PENDIENTE',
+            'observaciones': c.observaciones or ''
+        } for c in citas_sin_dispositivo]
+        
+        data_dispositivos.append({
+            'id': 0,
+            'marca': 'Equipo',
+            'modelo': 'Generico',
+            'imei_serial': 'No registrado',
+            'citas': citas_data
+        })
+
+    return JsonResponse({'success': True, 'dispositivos': data_dispositivos})
+
+
+@login_required
+def tecnico_clientes_historial_general(request):
+    """Devuelve el historial general de reparaciones (todas las citas finalizadas) del técnico."""
+    if request.user.rol != Usuario.Rol.TECNICO:
+        return JsonResponse({'success': False, 'error': 'No autorizado'})
+    
+    from turnos.models.citas import Cita
+    # Solo citas finalizadas del técnico
+    citas = Cita.objects.filter(
+        tecnico=request.user,
+        estado__nombre__icontains='FINALIZ'
+    ).select_related('cliente', 'servicio', 'dispositivo').order_by('-fecha', '-hora_inicio')[:50] # Top 50 para no saturar
+
+    data = []
+    for c in citas:
+        data.append({
+            'id': c.id,
+            'cliente': c.cliente.nombre_completo,
+            'fecha': c.fecha.strftime('%d/%m/%Y'),
+            'servicio': c.servicio.nombre,
+            'dispositivo': f"{c.dispositivo.marca} {c.dispositivo.modelo}" if c.dispositivo else "Equipo Genérico"
+        })
+        
+    return JsonResponse({'success': True, 'historial': data})

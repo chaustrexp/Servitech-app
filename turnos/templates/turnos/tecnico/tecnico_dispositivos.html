@@ -21,14 +21,6 @@
             </svg>
             <span class="hidden sm:inline">Exportar</span>
         </a>
-        <button onclick="abrirModalNuevoRepuesto()"
-                class="flex items-center gap-1.5 bg-[#002b75] hover:bg-[#001f54] text-white text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl shadow transition-all">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            <span class="hidden sm:inline">Agregar Repuesto</span>
-            <span class="sm:hidden">Agregar</span>
-        </button>
     </div>
 </div>
 {% endblock page_header %}
@@ -164,7 +156,7 @@
 
         <!-- Paginación -->
         <div class="p-6 border-t border-slate-100 flex items-center justify-between">
-            <span class="text-xs text-slate-400 font-medium">Mostrando 4 de 128 componentes</span>
+            <span data-stock-counter class="text-xs text-slate-400 font-medium">Mostrando {{ repuestos.count }} de {{ repuestos.count }} componentes</span>
             <div class="flex gap-2">
                 <button class="p-2 border border-slate-200 hover:border-[#002b75] rounded-xl text-slate-500 hover:text-[#002b75] transition shadow-sm" onclick="mostrarToast('Anterior')">
                     &lt;
@@ -270,20 +262,22 @@
 ══════════════════════════════════════════════ -->
 <h4 class="font-extrabold text-slate-800 text-lg mb-4">Actividad Reciente</h4>
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    
-    <!-- Actividad 1 -->
+    {% for act in actividad_reciente %}
     <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex items-center gap-4 hover:shadow-md transition">
-        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 text-lg">
-            📥
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-lg">
+            📦
         </div>
         <div>
-            <p class="font-bold text-slate-800 text-xs">Entrada Stock</p>
-            <p class="text-[11px] text-slate-500 font-medium">25x Baterías iPhone</p>
-            <p class="text-[10px] text-slate-400 mt-0.5">Hace 2 horas</p>
+            <p class="font-bold text-slate-800 text-xs">Salida Servicio</p>
+            <p class="text-[11px] text-slate-500 font-medium">{{ act.cantidad }}x {{ act.repuesto.nombre|truncatechars:20 }}</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">{{ act.fecha|timesince }}</p>
         </div>
     </div>
-
-    <!-- Actividad 2 -->
+    {% empty %}
+    <p class="text-xs text-slate-400 italic">No hay salidas recientes.</p>
+    {% endfor %}
+</div>
+  <!-- Actividad 2 -->
     <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex items-center gap-4 hover:shadow-md transition">
         <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-lg">
             ↗️
@@ -482,73 +476,10 @@
     </div>
 </div>
 
-    <!-- MODAL: AGREGAR NUEVO REPUESTO -->
-    <div id="modal-agregar-repuesto" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-hidden border border-slate-100 text-slate-800">
-            <!-- Cabecera -->
-            <div class="p-6 bg-gradient-to-r from-[#002b75] to-[#1e4fa8] text-white flex justify-between items-center">
-                <h3 class="font-extrabold text-lg">Agregar Nuevo Repuesto</h3>
-                <button onclick="cerrarModalNuevoRepuesto()" class="text-white/80 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <!-- Formulario -->
-            <form id="form-agregar-repuesto" action="{% url 'agregar_repuesto' %}" method="POST" class="p-6 space-y-4">
-                {% csrf_token %}
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombre del Repuesto</label>
-                    <input type="text" name="nombre" required placeholder="Ej: Pantalla OLED iPhone 15"
-                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#002b75]/25 focus:border-[#002b75] text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Descripción</label>
-                    <textarea name="descripcion" placeholder="Detalle técnico..." rows="2"
-                              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#002b75]/25 focus:border-[#002b75] text-sm"></textarea>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Categoría</label>
-                        <select name="categoria" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#002b75]/25 focus:border-[#002b75] text-sm">
-                            <option value="PANTALLAS">Pantallas</option>
-                            <option value="BATERIAS">Baterías</option>
-                            <option value="CONECTORES">Conectores</option>
-                            <option value="CAMARAS">Cámaras</option>
-                            <option value="OTROS">Otros</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Stock Inicial</label>
-                        <input type="number" name="stock" value="0" min="0" required
-                               class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#002b75]/25 focus:border-[#002b75] text-sm">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Precio Unitario ($)</label>
-                    <input type="number" name="precio" step="0.01" value="0.00" min="0" required
-                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#002b75]/25 focus:border-[#002b75] text-sm">
-                </div>
-                <button type="submit"
-                        class="w-full py-3 bg-[#002b75] hover:bg-[#001f54] text-white font-bold rounded-xl transition shadow-md hover:shadow-lg">
-                    Registrar Componente
-                </button>
-            </form>
-        </div>
-    </div>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
-    function abrirModalNuevoRepuesto() {
-        const m = document.getElementById('modal-agregar-repuesto');
-        if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
-    }
-    function cerrarModalNuevoRepuesto() {
-        const m = document.getElementById('modal-agregar-repuesto');
-        if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
-    }
 
     // ── Funciones abrir/cerrar modales de cabecera y pendientes ──
     function abrirModalRepuesto() {

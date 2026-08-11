@@ -3,8 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from datetime import datetime, timedelta
 
-from ..models import Cita, Especialidad, Servicio, EstadoCita
+from ..models import Cita, Especialidad, Servicio, EstadoCita, Usuario
 from ..services.asignacion import asignar_tecnico, NoTechnicianAvailable
+
 
 @login_required
 def seleccionar_dispositivo(request):
@@ -125,7 +126,10 @@ def resumen_cita(request):
 @login_required
 def cita_confirmada(request, cita_id):
     """Vista de éxito post-confirmación de cita."""
-    cita = get_object_or_404(Cita, pk=cita_id, cliente=request.user)
+    cita = get_object_or_404(Cita, pk=cita_id)
+    if request.user != cita.cliente and request.user != cita.tecnico and request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        from django.http import Http404
+        raise Http404('No tienes permiso para ver esta cita.')
 
     dispositivo_map = {'CELULAR': 'Celular', 'LAPTOP': 'Laptop', 'PC': 'PC'}
     tipo_disp = cita.servicio.tipo_dispositivo.upper() if cita.servicio and cita.servicio.tipo_dispositivo else ''
@@ -150,7 +154,10 @@ def cita_confirmada(request, cita_id):
 @login_required
 def detalle_cita(request, cita_id):
     """Ticket completo de la cita para el cliente."""
-    cita = get_object_or_404(Cita, pk=cita_id, cliente=request.user)
+    cita = get_object_or_404(Cita, pk=cita_id)
+    if request.user != cita.cliente and request.user != cita.tecnico and request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        from django.http import Http404
+        raise Http404('No tienes permiso para ver esta cita.')
 
     if request.method == 'POST':
         accion = request.POST.get('accion')
