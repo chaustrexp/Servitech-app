@@ -4,6 +4,7 @@ from django.contrib import messages
 from datetime import datetime, timedelta
 
 from ..models import Cita, Especialidad, Servicio, EstadoCita
+from ..services.asignacion import asignar_tecnico, NoTechnicianAvailable
 
 @login_required
 def seleccionar_dispositivo(request):
@@ -92,8 +93,15 @@ def resumen_cita(request):
 
         notas_usuario = (request.POST.get('observaciones') or request.POST.get('notas') or '').strip()
 
+        try:
+            tecnico_asignado = asignar_tecnico(fecha_obj, hora_inicio, tipo_dispositivo)
+        except NoTechnicianAvailable as e:
+            messages.error(request, str(e))
+            return redirect('seleccionar_fecha_hora')
+
         cita = Cita.objects.create(
             cliente=request.user,
+            tecnico=tecnico_asignado,
             servicio=servicio_obj,
             estado=estado,
             fecha=fecha_obj,
