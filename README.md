@@ -1,31 +1,53 @@
 # 🛠️ Servitech App
 
-Plataforma web diseñada para la gestión integral de servicios técnicos, agendamiento de citas y control de mantenimiento. El sistema permite conectar de forma eficiente a clientes, personal técnico y administradores.
+Plataforma web diseñada para la gestión integral de servicios técnicos, agendamiento de citas y control de mantenimiento. El sistema conecta de forma eficiente a clientes, personal técnico y administradores.
 
 ---
 
-## 👥 Roles de Usuario y Funcionalidades
+## 👥 Roles de Usuario
 
-La aplicación está estructurada para dar soporte a tres perfiles principales:
-
-* **🧑‍💻 Cliente:** Explora el catálogo de servicios, selecciona la fecha y hora de atención (`seleccionar_fecha_hora.html`), programa citas (`seleccionar_servicio.html`) y realiza seguimiento al estado de sus solicitudes.
-* **🔧 Técnico:** Consulta el historial de atenciones asignadas, gestiona las órdenes de trabajo e ingresa diagnósticos y actualizaciones en tiempo real.
-* **🛡️ Administrador:** Control total de usuarios, asignación de personal técnico, gestión de agendas y supervisión general de los servicios reportados.
+| Rol | Descripción |
+|-----|-------------|
+| 🧑‍💻 **Cliente** | Agenda citas, consulta servicios y hace seguimiento a sus solicitudes. |
+| 🔧 **Técnico** | Gestiona órdenes de trabajo, historial de atenciones y diagnósticos. |
+| 🛡️ **Administrador** | Control total de usuarios, citas, reportes, inventario y auditoría. |
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
-* **Backend:** Python / Django (Patrón MVT)
-* **Frontend:** HTML5, CSS3, JavaScript (Django Templates)
-* **Base de Datos:** SQLite / PostgreSQL / MySQL
-* **Control de Versiones:** Git & GitHub
+- **Backend:** Python 3.12 / Django 6.0
+- **Frontend:** HTML5, Tailwind CSS, JavaScript, Chart.js
+- **Base de Datos:** PostgreSQL (recomendado) / SQLite
+- **Exportaciones:** Excel (`openpyxl`) y PDF (`reportlab`) server-side
+- **Control de Versiones:** Git & GitHub
+
+---
+
+## ✨ Novedades Recientes
+
+### 🔒 Sistema de Auditoría (triggers PostgreSQL)
+Se implementó una tabla `auditoria_log` con triggers nativos de PostgreSQL que registran automáticamente cada `INSERT`, `UPDATE` y `DELETE` sobre las tablas de:
+- **Citas** (`turnos_cita`)
+- **Clientes / Usuarios** (`turnos_usuario`) — etiquetas `clientes` y `personas`
+- **Sesiones** (`django_session`)
+
+Cada registro guarda: tabla, operación, ID afectado, datos anteriores/nuevos (JSONB), usuario de BD, IP y timestamp.
+Visible en el admin de Django en `/admin/turnos/auditorialog/` (solo lectura).
+
+### 📄 Exportar Reportes a PDF
+El botón **"Exportar PDF"** en la sección de Reportes Analíticos ahora genera un PDF completo server-side con `reportlab`, incluyendo:
+- KPIs del mes (citas, finalizadas, canceladas, tasa de éxito)
+- Servicios más solicitados
+- Técnicos con más atenciones
+- Tabla de atenciones recientes
+
+### 📦 Modelo de Dispositivos
+Se agregó el modelo `Dispositivo` y su migración `0012`, permitiendo asociar dispositivos a citas.
 
 ---
 
 ## 🚀 Instalación y Configuración Local
-
-Sigue esta guía paso a paso para configurar y ejecutar el proyecto en tu máquina local usando PostgreSQL:
 
 ### 1. Clonar el repositorio
 ```bash
@@ -34,128 +56,103 @@ cd Servitech-app
 ```
 
 ### 2. Crear y activar el entorno virtual
-Es una buena práctica usar un entorno virtual para aislar las dependencias del proyecto.
 
-* **En Windows (PowerShell - Recomendado en VS Code):**
-  ```powershell
-  python -m venv venv
-  venv\Scripts\Activate.ps1
-  ```
-  *(Si te da un error de políticas de ejecución en PowerShell, puedes ejecutar `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process` en tu consola o usar directamente `venv\Scripts\python manage.py <comando>` sin activar).*
+**Windows (PowerShell):**
+```powershell
+python -m venv venv
+venv\Scripts\Activate.ps1
+```
 
-* **En Windows (CMD - Símbolo del sistema):**
-  ```cmd
-  python -m venv venv
-  venv\Scripts\activate
-  ```
+**Windows (CMD):**
+```cmd
+python -m venv venv
+venv\Scripts\activate
+```
 
-* **En macOS/Linux:**
-  ```bash
-  python3 -m venv venv
-  source venv/bin/activate
-  ```
+**macOS/Linux:**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
 
 ### 3. Instalar dependencias
-Con el entorno virtual activado, instala todas las librerías requeridas:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configurar la base de datos (PostgreSQL) y variables de entorno
-El proyecto utiliza un archivo `.env` para gestionar la conexión a la base de datos.
-
-1. En la raíz del proyecto (donde está `manage.py`), copia el archivo `.env.example` y renómbralo como `.env`:
-```bash
-# En Windows:
-copy .env.example .env
-
-# En macOS/Linux:
-cp .env.example .env
-```
-2. Abre el archivo `.env` recién creado y reemplaza `tu_contraseña_aqui` con tu contraseña de PostgreSQL:
+### 4. Configurar variables de entorno
+Crea un archivo `.env` en la raíz del proyecto (junto a `manage.py`):
 
 ```env
-# ⚠️ IMPORTANTE: USE_POSTGRES=True es obligatorio para conectar con PostgreSQL.
-# Sin esta variable, el proyecto usará SQLite y los usuarios de tu BD no aparecerán.
 USE_POSTGRES=True
 DB_NAME=servitech
 DB_USER=postgres
-DB_PASSWORD=tu_contraseña_aqui   # <-- Cambia solo esto
+DB_PASSWORD=tu_contraseña_aqui
 DB_HOST=localhost
 DB_PORT=5432
 ```
-*(Asegúrate de haber creado previamente una base de datos llamada `servitech` en tu motor de PostgreSQL, o utiliza el nombre que prefieras y configúralo en `DB_NAME`).*
 
-### 5. Aplicar migraciones a la base de datos
-Este comando creará las tablas necesarias en tu base de datos:
+> Asegúrate de haber creado previamente la base de datos `servitech` en PostgreSQL.
+
+### 5. Aplicar migraciones
 ```bash
-python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 6. Crear un superusuario (Recomendado)
-Para poder ingresar al panel de administración del sistema y gestionar usuarios:
+Esto también instalará automáticamente los **triggers de auditoría** en PostgreSQL.
+
+### 6. Crear superusuario (opcional)
 ```bash
 python manage.py createsuperuser
 ```
 
 ### 7. Levantar el servidor
-Finalmente, inicia el servidor de desarrollo de Django:
 ```bash
 python manage.py runserver
 ```
-¡Listo! Ya puedes acceder a la aplicación abriendo tu navegador en `http://127.0.0.1:8000/`.
+
+Abre `http://127.0.0.1:8000/` en tu navegador.
 
 ---
 
-## 🧪 Limpieza y Generación de Datos de Prueba
+## 🧪 Datos de Prueba
 
-Si necesitas vaciar la base de datos por completo y generar un entorno de pruebas con datos falsos (administradores, clientes, técnicos, servicios y citas preconfiguradas), puedes usar los scripts de inicialización.
+Para vaciar la base de datos y generar datos de prueba:
 
-> ⚠️ **Advertencia:** Esto eliminará todos los datos de tu base de datos actual.
+> ⚠️ **Advertencia:** Esto eliminará todos los datos actuales.
 
-### 🧹 Limpieza de tablas manuales obsoletas (Solo pgAdmin)
-Si previamente se crearon tablas manuales en pgAdmin (aquellas que NO tienen los prefijos `turnos_`, `auth_` ni `django_`), es estrictamente necesario eliminarlas. Django se encarga de gestionar sus propias tablas automáticamente. 
-
-Abre tu herramienta de consultas de pgAdmin y ejecuta el siguiente comando SQL para limpiar la base de datos de tablas duplicadas antiguas:
-```sql
-DROP TABLE IF EXISTS 
-    historial_cita,
-    notificacion,
-    horario_tecnico,
-    cita,
-    servicio,
-    estado_cita,
-    especialidad,
-    usuario 
-CASCADE;
-```
-
-### Ejecución Manual
-Asegúrate de estar en tu entorno virtual y ejecuta:
 ```bash
 python manage.py flush --no-input
 python seed_full.py
 ```
-> Consulta el archivo `usuarios_prueba.md` en la raíz del proyecto para ver los usuarios y contraseñas generados.
 
-### Ejecución Automatizada
-Hemos provisto scripts autoejecutables para facilitar este proceso:
-- **En Windows:** Haz doble clic o ejecuta en consola `reset_db.bat`.
-- **En macOS/Linux:** Ejecuta `./reset_db.sh` (asegúrate de darle permisos con `chmod +x reset_db.sh`).
+**Scripts automáticos:**
+- **Windows:** `reset_db.bat`
+- **macOS/Linux:** `./reset_db.sh`
+
+### Limpieza de tablas manuales (solo pgAdmin)
+Si existen tablas creadas manualmente que no tengan prefijo `turnos_`, `auth_` o `django_`, elimínalas antes de migrar:
+
+```sql
+DROP TABLE IF EXISTS
+    historial_cita, notificacion, horario_tecnico,
+    cita, servicio, estado_cita, especialidad, usuario
+CASCADE;
+```
 
 ---
 
 ## 💡 Solución a Errores Comunes
 
-### ❌ `ModuleNotFoundError: No module named 'dotenv'` en Windows
-Este error ocurre cuando ejecutas `python manage.py` sin que el entorno virtual esté activo (o porque no se activó correctamente).
-1. Asegúrate de haber instalado las dependencias con `pip install -r requirements.txt` dentro del entorno virtual.
-2. Si usas **PowerShell** (la terminal por defecto en VS Code), recuerda que ejecutar `venv\Scripts\activate` no funciona. Debes usar:
-   ```powershell
-   venv\Scripts\Activate.ps1
-   ```
-3. Alternativamente, puedes forzar el uso del Python del entorno virtual sin activarlo ejecutando:
-   ```powershell
-   venv\Scripts\python manage.py runserver
-   ```
+### `ModuleNotFoundError: No module named 'dotenv'`
+El entorno virtual no está activo. En PowerShell usa:
+```powershell
+venv\Scripts\Activate.ps1
+```
+O ejecuta directamente sin activar:
+```powershell
+venv\Scripts\python manage.py runserver
+```
+
+### `ProgrammingError: no existe la relación 'auth_user'`
+El proyecto usa un modelo de usuario personalizado (`turnos_usuario`). Asegúrate de aplicar todas las migraciones con `python manage.py migrate` antes de cualquier operación.

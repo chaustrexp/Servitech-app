@@ -36,6 +36,7 @@ urlpatterns = [
     path('admin-panel/tecnicos/',                           views.admin_tecnicos,         name='admin_tecnicos'),
     path('admin-panel/reportes/',                           views.admin_reportes,         name='admin_reportes'),
     path('admin-panel/reportes/exportar/',                  views.admin_exportar_analitico_excel, name='admin_exportar_analitico_excel'),
+    path('admin-panel/reportes/exportar-pdf/',              views.admin_exportar_analitico_pdf,   name='admin_exportar_analitico_pdf'),
     path('admin-panel/inventario/',                         views.admin_inventario,       name='admin_inventario'),
     path('admin-panel/inventario/historial/',               views.admin_historial_inventario, name='admin_historial_inventario'),
     path('admin-panel/perfil/',                             views.admin_perfil,           name='admin_perfil'),
