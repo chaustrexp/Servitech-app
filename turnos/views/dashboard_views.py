@@ -1423,6 +1423,170 @@ def admin_reportes(request):
 
 
 @login_required
+def admin_exportar_analitico_pdf(request):
+    """Exporta el informe analítico completo a PDF con reportlab."""
+    if not request.user.es_admin:
+        return redirect('home')
+
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.units import cm
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+    import io
+
+    hoy = date.today()
+    citas_mes_qs = Cita.objects.filter(fecha__year=hoy.year, fecha__month=hoy.month)
+    total       = citas_mes_qs.count()
+    finalizadas = citas_mes_qs.filter(estado__nombre__iexact='Finalizada').count()
+    canceladas  = citas_mes_qs.filter(estado__nombre__iexact='Cancelada').count()
+    en_proceso  = citas_mes_qs.filter(estado__nombre__in=['EN_DIAGNOSTICO','EN_REPARACION','Diagnóstico','En Reparación']).count()
+    tasa_exito  = round(finalizadas / total * 100, 1) if total > 0 else 0.0
+
+    reportes_recientes = Cita.objects.select_related('cliente','servicio','estado','tecnico').order_by('-fecha_creacion')[:10]
+
+    servicios_populares = (Cita.objects
+        .filter(fecha__year=hoy.year, fecha__month=hoy.month)
+        .values('servicio__nombre').annotate(total=Count('id')).order_by('-total')[:5])
+
+    tecnicos_top = (Cita.objects
+        .filter(fecha__year=hoy.year, fecha__month=hoy.month, tecnico__isnull=False)
+        .values('tecnico__nombre_completo').annotate(total=Count('id')).order_by('-total')[:5])
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=1.8*cm, leftMargin=1.8*cm,
+        topMargin=1.5*cm, bottomMargin=1.5*cm,
+        title='ServiTech — Informe Analítico'
+    )
+
+    AZUL      = colors.HexColor('#003399')
+    AZUL_CLARO= colors.HexColor('#EEF2FF')
+    GRIS      = colors.HexColor('#64748b')
+    GRIS_BORDE= colors.HexColor('#E2E8F0')
+    VERDE     = colors.HexColor('#047857')
+    VERDE_BG  = colors.HexColor('#D1FAE5')
+    BLANCO    = colors.white
+
+    estilos = getSampleStyleSheet()
+    titulo_e   = ParagraphStyle('titulo',   fontSize=18, textColor=AZUL,  fontName='Helvetica-Bold', spaceAfter=2)
+    subtitulo_e= ParagraphStyle('sub',      fontSize=9,  textColor=GRIS,  fontName='Helvetica',      spaceAfter=6)
+    seccion_e  = ParagraphStyle('seccion',  fontSize=11, textColor=AZUL,  fontName='Helvetica-Bold', spaceBefore=10, spaceAfter=4)
+    pie_e      = ParagraphStyle('pie',      fontSize=7,  textColor=GRIS,  fontName='Helvetica',      alignment=TA_RIGHT)
+
+    elementos = []
+
+    # ── Encabezado ──────────────────────────────
+    elementos.append(Paragraph('ServiTech — Informe Analítico de Operaciones', titulo_e))
+    elementos.append(Paragraph(f'Generado el {hoy.strftime("%d/%m/%Y")} · Datos del mes en curso', subtitulo_e))
+    elementos.append(HRFlowable(width='100%', thickness=1.5, color=AZUL, spaceAfter=10))
+
+    # ── KPIs ────────────────────────────────────
+    elementos.append(Paragraph('Resumen del Mes', seccion_e))
+    kpi_data = [
+        ['Citas Totales', 'Finalizadas', 'Canceladas', 'En Proceso', 'Tasa de Éxito'],
+        [str(total), str(finalizadas), str(canceladas), str(en_proceso), f'{tasa_exito}%'],
+    ]
+    kpi_tabla = Table(kpi_data, colWidths=[3.2*cm]*5)
+    kpi_tabla.setStyle(TableStyle([
+        ('BACKGROUND',  (0,0), (-1,0), AZUL),
+        ('TEXTCOLOR',   (0,0), (-1,0), BLANCO),
+        ('FONTNAME',    (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE',    (0,0), (-1,0), 8),
+        ('BACKGROUND',  (0,1), (-1,1), AZUL_CLARO),
+        ('FONTNAME',    (0,1), (-1,1), 'Helvetica-Bold'),
+        ('FONTSIZE',    (0,1), (-1,1), 14),
+        ('TEXTCOLOR',   (0,1), (-1,1), AZUL),
+        ('ALIGN',       (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN',      (0,0), (-1,-1), 'MIDDLE'),
+        ('ROWBACKGROUND',(0,1),(-1,1), AZUL_CLARO),
+        ('GRID',        (0,0), (-1,-1), 0.5, GRIS_BORDE),
+        ('TOPPADDING',  (0,0), (-1,-1), 8),
+        ('BOTTOMPADDING',(0,0),(-1,-1), 8),
+        ('ROUNDEDCORNERS', [4]),
+    ]))
+    elementos.append(kpi_tabla)
+    elementos.append(Spacer(1, 10))
+
+    # ── Servicios populares ──────────────────────
+    if servicios_populares:
+        elementos.append(Paragraph('Servicios Más Solicitados', seccion_e))
+        sp_data = [['Servicio', 'Cantidad']] + [[s['servicio__nombre'], str(s['total'])] for s in servicios_populares]
+        sp_tabla = Table(sp_data, colWidths=[12*cm, 4*cm])
+        sp_tabla.setStyle(TableStyle([
+            ('BACKGROUND',    (0,0), (-1,0), AZUL),
+            ('TEXTCOLOR',     (0,0), (-1,0), BLANCO),
+            ('FONTNAME',      (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE',      (0,0), (-1,-1), 9),
+            ('ROWBACKGROUNDS',(0,1), (-1,-1), [BLANCO, AZUL_CLARO]),
+            ('ALIGN',         (1,0), (1,-1), 'CENTER'),
+            ('GRID',          (0,0), (-1,-1), 0.5, GRIS_BORDE),
+            ('TOPPADDING',    (0,0), (-1,-1), 6),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ]))
+        elementos.append(sp_tabla)
+        elementos.append(Spacer(1, 10))
+
+    # ── Técnicos top ────────────────────────────
+    if tecnicos_top:
+        elementos.append(Paragraph('Técnicos con Más Atenciones', seccion_e))
+        tt_data = [['Técnico', 'Atenciones']] + [[t['tecnico__nombre_completo'], str(t['total'])] for t in tecnicos_top]
+        tt_tabla = Table(tt_data, colWidths=[12*cm, 4*cm])
+        tt_tabla.setStyle(TableStyle([
+            ('BACKGROUND',    (0,0), (-1,0), AZUL),
+            ('TEXTCOLOR',     (0,0), (-1,0), BLANCO),
+            ('FONTNAME',      (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE',      (0,0), (-1,-1), 9),
+            ('ROWBACKGROUNDS',(0,1), (-1,-1), [BLANCO, AZUL_CLARO]),
+            ('ALIGN',         (1,0), (1,-1), 'CENTER'),
+            ('GRID',          (0,0), (-1,-1), 0.5, GRIS_BORDE),
+            ('TOPPADDING',    (0,0), (-1,-1), 6),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ]))
+        elementos.append(tt_tabla)
+        elementos.append(Spacer(1, 10))
+
+    # ── Atenciones recientes ─────────────────────
+    elementos.append(Paragraph('Atenciones Recientes', seccion_e))
+    ar_data = [['Fecha', 'Cliente', 'Servicio', 'Técnico', 'Estado']]
+    for r in reportes_recientes:
+        ar_data.append([
+            r.fecha.strftime('%d/%m/%Y'),
+            r.cliente.nombre_completo,
+            r.servicio.nombre,
+            r.tecnico.nombre_completo if r.tecnico else 'Sin Asignar',
+            r.estado.nombre if r.estado else '—',
+        ])
+    ar_tabla = Table(ar_data, colWidths=[2.2*cm, 3.8*cm, 4.5*cm, 3.5*cm, 2.5*cm])
+    ar_tabla.setStyle(TableStyle([
+        ('BACKGROUND',    (0,0), (-1,0), AZUL),
+        ('TEXTCOLOR',     (0,0), (-1,0), BLANCO),
+        ('FONTNAME',      (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE',      (0,0), (-1,-1), 8),
+        ('ROWBACKGROUNDS',(0,1), (-1,-1), [BLANCO, AZUL_CLARO]),
+        ('GRID',          (0,0), (-1,-1), 0.5, GRIS_BORDE),
+        ('TOPPADDING',    (0,0), (-1,-1), 5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
+        ('WORDWRAP',      (0,0), (-1,-1), True),
+    ]))
+    elementos.append(ar_tabla)
+    elementos.append(Spacer(1, 16))
+    elementos.append(HRFlowable(width='100%', thickness=0.5, color=GRIS_BORDE))
+    elementos.append(Spacer(1, 4))
+    elementos.append(Paragraph(f'ServiTech · Informe generado automáticamente el {hoy.strftime("%d/%m/%Y")} · Confidencial', pie_e))
+
+    doc.build(elementos)
+    buffer.seek(0)
+
+    from django.http import FileResponse
+    nombre_archivo = f'ServiTech_Reporte_{hoy.strftime("%Y%m%d")}.pdf'
+    return FileResponse(buffer, as_attachment=True, filename=nombre_archivo, content_type='application/pdf')
+
+
+@login_required
 def admin_exportar_analitico_excel(request):
     """Exporta el informe analítico completo a Excel con openpyxl."""
     if not request.user.es_admin:

@@ -63,12 +63,12 @@ def run():
     # 3. Crear Técnicos
     print("Creando Técnicos...")
     tecnicos_data = [
-        ("Tecnico Celulares", "tec.cel@servitech.com", esp_cel),
-        ("Tecnico Laptops", "tec.lap@servitech.com", esp_lap),
-        ("Tecnico General", "tec.gen@servitech.com", esp_gen),
+        ("Tecnico Celulares", "tec.cel@servitech.com", PerfilTecnico.EspecialidadTecnico.CELULAR),
+        ("Tecnico Laptops",   "tec.lap@servitech.com", PerfilTecnico.EspecialidadTecnico.LAPTOP),
+        ("Tecnico General",   "tec.gen@servitech.com", PerfilTecnico.EspecialidadTecnico.GENERAL),
     ]
     tecnicos = []
-    for nombre, correo, esp in tecnicos_data:
+    for nombre, correo, esp_tecnico in tecnicos_data:
         t, c = Usuario.objects.get_or_create(
             correo=correo,
             defaults={'nombre_completo': nombre, 'rol': Usuario.Rol.TECNICO}
@@ -76,12 +76,7 @@ def run():
         if c:
             t.set_password('tecnico123')
             t.save()
-            esp_val = 'tecnico_general'
-            if 'Celulares' in nombre:
-                esp_val = 'tecnico_celular'
-            elif 'Laptops' in nombre:
-                esp_val = 'tecnico_laptop'
-            PerfilTecnico.objects.create(tecnico=t, especialidad=esp_val)
+            PerfilTecnico.objects.create(tecnico=t, especialidad=esp_tecnico)
         tecnicos.append(t)
 
     # 4. Crear Clientes
