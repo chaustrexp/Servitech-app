@@ -51,249 +51,215 @@
         <h1 class="text-2xl font-extrabold text-[#091124]">Detalle de Ticket</h1>
     </div>
 
-    <!-- ── CARD PRINCIPAL ── -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-4">
+    <!-- ── CONTENEDOR PRINCIPAL DOS COLUMNAS ── -->
+    <div class="bg-white rounded-[20px] border border-slate-200 shadow-sm overflow-hidden mb-6 flex flex-col md:flex-row">
         
-        <!-- ID + Badge Estado -->
-        <div class="flex items-start justify-between mb-6">
-            <div>
-                <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Identificador de Cita</p>
-                <p class="text-3xl font-extrabold text-[#002b75]">#CITA-{{ cita.pk|stringformat:"03d" }}</p>
+        <!-- COLUMNA IZQUIERDA -->
+        <div class="flex-1 p-6 md:p-8 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col">
+            
+            <!-- ID + Badge -->
+            <div class="flex items-start justify-between mb-8">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Identificador de Cita</p>
+                    <p class="text-3xl font-extrabold text-[#0e3687]">#CITA-{{ cita.pk|stringformat:"03d" }}</p>
+                </div>
+                {% if estado_nombre == 'Confirmada' %}
+                    <span class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                        CONFIRMADA
+                    </span>
+                {% elif estado_nombre == 'Cancelada' %}
+                    <span class="inline-flex items-center gap-1.5 bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                        CANCELADA
+                    </span>
+                {% elif estado_nombre == 'Finalizada' %}
+                    <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                        FINALIZADA
+                    </span>
+                {% else %}
+                    <span class="inline-flex items-center gap-1.5 bg-blue-50 text-[#0e3687] border border-blue-200 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#0e3687]"></span>
+                        {{ estado_nombre|upper }}
+                    </span>
+                {% endif %}
             </div>
-            {% if estado_nombre == 'Confirmada' %}
-                <span class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 text-xs font-bold px-3 py-1.5 rounded-full">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    CONFIRMADA
-                </span>
-            {% elif estado_nombre == 'Cancelada' %}
-                <span class="inline-flex items-center gap-1.5 bg-red-50 text-red-700 border border-red-200 text-xs font-bold px-3 py-1.5 rounded-full">
-                    <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                    CANCELADA
-                </span>
-            {% elif estado_nombre == 'Finalizada' %}
-                <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold px-3 py-1.5 rounded-full">
-                    <span class="w-2 h-2 rounded-full bg-slate-500"></span>
-                    FINALIZADA
-                </span>
-            {% else %}
-                <span class="inline-flex items-center gap-1.5 bg-blue-50 text-[#002b75] border border-blue-200 text-xs font-bold px-3 py-1.5 rounded-full">
-                    <span class="w-2 h-2 rounded-full bg-[#002b75]"></span>
-                    {{ estado_nombre|upper }}
-                </span>
-            {% endif %}
-        </div>
 
-        <!-- Información de la cita en grid -->
-        <div class="grid grid-cols-2 gap-x-6 gap-y-5 mb-6">
-            <!-- Columna izquierda -->
-            <div class="space-y-5">
+            <!-- Grid de Info -->
+            <div class="grid grid-cols-2 gap-x-6 gap-y-6 mb-8">
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Cliente</p>
-                    <p class="font-bold text-slate-800">{{ cita.cliente.nombre_completo }}</p>
+                    <p class="font-bold text-slate-800 text-[15px]">{{ cita.cliente.nombre_completo }}</p>
                 </div>
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Servicio</p>
-                    <p class="font-bold text-slate-800">{{ cita.servicio.nombre }}</p>
+                    <p class="font-bold text-slate-800 text-[15px]">{{ cita.servicio.nombre }}</p>
                 </div>
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Dispositivo</p>
-                    <p class="font-bold text-slate-800">{{ dispositivo }}</p>
+                    <p class="font-bold text-slate-800 text-[15px]">{{ dispositivo }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Técnico</p>
+                    {% if cita.tecnico %}
+                        <p class="font-bold text-slate-800 text-[15px]">{{ cita.tecnico.nombre_completo }}</p>
+                    {% else %}
+                        <p class="font-medium text-slate-400 text-[15px] italic">Por asignar</p>
+                    {% endif %}
                 </div>
             </div>
 
-            <!-- Columna derecha -->
-            <div class="space-y-5">
-                <div class="flex items-start gap-3">
-                    <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-0.5">Técnico Asignado</p>
-                        {% if cita.tecnico %}
-                            <p class="font-bold text-slate-800 text-sm">{{ cita.tecnico.nombre_completo }}</p>
-                            <p class="text-xs text-[#002b75] font-medium">Especialista Certificado</p>
-                        {% else %}
-                            <p class="font-medium text-slate-400 text-sm italic">Por asignar</p>
-                        {% endif %}
-                    </div>
+            <!-- Horario Reservado -->
+            <div class="bg-slate-50 rounded-xl p-5 mb-8">
+                <div class="flex items-center gap-2 mb-2">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <p class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">Horario Reservado</p>
                 </div>
+                <p class="font-bold text-slate-800 text-[14px]">
+                    {{ cita.fecha|date:"j \d\e M." }}, {{ cita.hora_inicio|time:"g:i A" }} - {{ cita.hora_fin|time:"g:i A" }}
+                </p>
+                <p class="text-[13px] text-slate-500 mt-0.5">Centro de Servicio Principal</p>
+            </div>
 
-                <div class="flex items-start gap-3">
-                    <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-0.5">Horario Reservado</p>
-                        <p class="font-bold text-slate-800 text-sm">
-                            {{ cita.fecha|date:"j \d\e N" }}, {{ cita.hora_inicio|time:"g:i A" }} - {{ cita.hora_fin|time:"g:i A" }}
-                        </p>
-                        <p class="text-xs text-slate-500">Centro de Servicio Principal</p>
-                    </div>
+            <!-- Notificar Retraso / Observaciones -->
+            <div class="mt-auto">
+                {% if estado_nombre == 'Confirmada' and cita.minutos_retraso == 0 %}
+                <div class="bg-[#fffbeb] border border-[#fef08a] rounded-xl p-4">
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <input type="hidden" name="accion" value="retraso">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="font-bold text-amber-900 text-[13px]">¿Vas con retraso?</p>
+                                <p class="text-[11px] text-amber-700 mb-2">Notifica para mantener tu turno.</p>
+                                <div class="flex items-center gap-2">
+                                    <select name="minutos" class="border border-amber-300 bg-white text-slate-700 text-[11px] font-medium rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-amber-400">
+                                        <option value="5">5 min</option>
+                                        <option value="10" selected>10 min</option>
+                                        <option value="15">15 min</option>
+                                        <option value="20">20 min</option>
+                                    </select>
+                                    <button type="submit" class="bg-[#0e3687] text-white font-bold text-[11px] px-3 py-1 rounded transition-colors hover:bg-[#08245e]">
+                                        Notificar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                {% elif cita.minutos_retraso > 0 %}
+                <div class="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
+                    <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <p class="text-sm text-green-700 font-medium">Retraso de <strong>{{ cita.minutos_retraso }} min</strong> notificado.</p>
+                </div>
+                {% endif %}
+
+                {% if cita.observaciones %}
+                <div class="mt-4 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+                    <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Notas del Cliente</p>
+                    <p class="font-medium text-slate-700 text-[12px] italic">{{ cita.observaciones }}</p>
+                </div>
+                {% endif %}
             </div>
         </div>
 
-        {% if cita.observaciones %}
-        <div class="mt-4 p-4 bg-slate-50 border border-slate-100 rounded-xl">
-            <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Notas / Observaciones del Cliente</p>
-            <p class="font-medium text-slate-700 text-sm italic">{{ cita.observaciones }}</p>
-        </div>
-        {% endif %}
-
-        <!-- Separador dashed -->
-        <div class="border-t border-dashed border-slate-200 my-6"></div>
-
-        <!-- QR Code -->
-        <div class="flex flex-col items-center py-2">
-            <div class="w-36 h-36 border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm flex items-center justify-center">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ request.scheme }}://{{ request.get_host }}{% url 'ver_turno' cita.pk %}" alt="QR Code del Turno" class="w-full h-full p-2" />
+        <!-- COLUMNA DERECHA (Pase Digital y Acciones) -->
+        <div class="w-full md:w-64 bg-slate-50/50 p-6 md:p-8 flex flex-col items-center">
+            
+            <p class="text-[10px] font-bold text-slate-500 tracking-widest uppercase mb-6">Pase Digital</p>
+            
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-3 flex flex-col items-center relative mb-4">
+                <div class="w-32 h-32 mb-4 bg-white flex items-center justify-center">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ request.scheme }}://{{ request.get_host }}{% url 'ver_turno' cita.pk %}" alt="QR Code" class="w-full h-full object-contain" />
+                </div>
+                <div class="absolute -bottom-3 bg-[#0e3687] text-white text-[9px] font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-md border border-[#0e3687]">
+                    ESCANEAR
+                </div>
             </div>
-            <p class="text-xs text-slate-500 text-center mt-3 max-w-xs">
-                Muestra este código al llegar a la recepción para un registro inmediato.
+            
+            <p class="text-[10px] text-slate-500 text-center leading-relaxed max-w-[160px] mb-8 mt-2">
+                Presenta este código en recepción para el registro automático.
             </p>
+
+            <div class="w-full space-y-3 mt-auto">
+                {% if estado_nombre != 'Cancelada' and estado_nombre != 'Finalizada' %}
+                <a href="{% url 'seleccionar_fecha_hora' %}" class="flex items-center justify-center gap-2 w-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-[12px] font-bold py-2.5 rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Reagendar
+                </a>
+                
+                <form method="POST" action="" onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta cita?')" class="w-full">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="cancelar">
+                    <button type="submit" class="flex items-center justify-center gap-2 w-full bg-white border border-red-200 text-red-600 hover:bg-red-50 text-[12px] font-bold py-2.5 rounded-lg transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        Cancelar
+                    </button>
+                </form>
+                {% endif %}
+            </div>
         </div>
     </div>
 
-    <!-- ── BARRA DE ESTADO PROGRESIVA ── -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-4">
-        <h2 class="font-bold text-slate-800 text-base mb-6">Estado de la Cita</h2>
+    <!-- ── SEGUIMIENTO DE LA CITA ── -->
+    <div class="bg-white rounded-[20px] border border-slate-200 shadow-sm p-6 md:p-8">
+        <div class="flex items-center gap-2 mb-8">
+            <div class="w-6 h-6 bg-blue-50 rounded flex items-center justify-center text-[#0e3687]">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            </div>
+            <h2 class="font-bold text-slate-800 text-[14px]">Seguimiento de la Cita</h2>
+        </div>
 
-        <div class="relative flex items-center justify-between">
+        <div class="relative flex items-center justify-between px-2 sm:px-8">
             <!-- Línea de fondo -->
-            <div class="absolute top-5 left-0 right-0 h-0.5 bg-slate-200"></div>
+            <div class="absolute top-5 left-10 right-10 h-[2px] bg-slate-100"></div>
             <!-- Línea de progreso -->
-            <div class="absolute top-5 left-0 h-0.5 bg-[#002b75] transition-all duration-700"
+            <div class="absolute top-5 left-10 h-[2px] bg-[#0e3687] transition-all duration-700"
                  style="width: {% if estado_actual_idx == 0 %}0%{% elif estado_actual_idx == 1 %}33%{% elif estado_actual_idx == 2 %}66%{% else %}100%{% endif %}">
             </div>
 
             {% for estado in estados_progreso %}
-            <div class="relative flex flex-col items-center gap-2 z-10">
+            <div class="relative flex flex-col items-center gap-3 z-10 w-24">
                 {% if forloop.counter0 <= estado_actual_idx %}
                     <div class="w-10 h-10 rounded-full
                         {% if forloop.counter0 == estado_actual_idx %}
-                            bg-[#002b75] ring-4 ring-blue-100 shadow-md
+                            bg-[#0e3687] shadow-lg ring-4 ring-white
                         {% else %}
-                            bg-[#002b75]
+                            bg-[#0e3687] ring-4 ring-white
                         {% endif %}
                         flex items-center justify-center">
                         {% if forloop.counter0 < estado_actual_idx %}
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                            </svg>
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                         {% elif estado.icono == 'calendar' %}
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         {% elif estado.icono == 'wrench' %}
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                            </svg>
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
                         {% else %}
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21l1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/>
-                            </svg>
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21l1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
                         {% endif %}
                     </div>
                 {% else %}
-                    <div class="w-10 h-10 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-full bg-white border border-slate-200 ring-4 ring-white flex items-center justify-center">
                         {% if estado.icono == 'wrench' %}
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                            </svg>
+                            <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
                         {% else %}
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
+                            <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         {% endif %}
                     </div>
                 {% endif %}
-                <span class="text-xs font-medium
-                    {% if forloop.counter0 == estado_actual_idx %}text-[#002b75] font-bold{% elif forloop.counter0 < estado_actual_idx %}text-slate-500{% else %}text-slate-400{% endif %}
-                    whitespace-nowrap">
+                <span class="text-[9px] font-bold uppercase tracking-wider
+                    {% if forloop.counter0 == estado_actual_idx %}text-[#0e3687]{% elif forloop.counter0 < estado_actual_idx %}text-slate-800{% else %}text-slate-400{% endif %}
+                    text-center">
                     {{ estado.nombre }}
                 </span>
             </div>
             {% endfor %}
         </div>
     </div>
-
-    <!-- ── NOTIFICAR RETRASO ── -->
-    {% if estado_nombre == 'Confirmada' and cita.minutos_retraso == 0 %}
-    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-4">
-        <form method="POST" action="">
-            {% csrf_token %}
-            <input type="hidden" name="accion" value="retraso">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <div class="flex items-center gap-3 flex-1">
-                    <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                    <div>
-                        <p class="font-bold text-amber-800 text-sm">¿Vas con retraso?</p>
-                        <p class="text-xs text-amber-600">Notifica al técnico para mantener tu turno.</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 flex-shrink-0">
-                    <select name="minutos" class="border border-amber-300 bg-white text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-1 focus:ring-amber-400 focus:outline-none">
-                        <option value="5">5 min</option>
-                        <option value="10" selected>10 min</option>
-                        <option value="15">15 min</option>
-                        <option value="20">20 min</option>
-                    </select>
-                    <button type="submit"
-                        class="bg-[#002b75] hover:bg-[#001f54] text-white font-bold text-sm px-5 py-2 rounded-lg transition-all whitespace-nowrap shadow-sm">
-                        Notificar Retraso
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-    {% elif cita.minutos_retraso > 0 %}
-    <div class="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4 flex items-center gap-3">
-        <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-        </svg>
-        <p class="text-sm text-green-700 font-medium">
-            Retraso de <strong>{{ cita.minutos_retraso }} minutos</strong> ya notificado al técnico.
-        </p>
-    </div>
-    {% endif %}
-
-    <!-- ── ACCIONES (REAGENDAR / CANCELAR) ── -->
-    {% if estado_nombre != 'Cancelada' and estado_nombre != 'Finalizada' %}
-    <div class="flex flex-col sm:flex-row justify-center gap-4 mt-2">
-        <a href="{% url 'seleccionar_fecha_hora' %}"
-           class="flex items-center justify-center gap-2 border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-sm px-6 py-3 rounded-xl transition-all">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            Reagendar Cita
-        </a>
-
-        <form method="POST" action="" onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta cita?')">
-            {% csrf_token %}
-            <input type="hidden" name="accion" value="cancelar">
-            <button type="submit"
-                class="w-full sm:w-auto flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 border border-red-200 font-medium text-sm px-6 py-3 rounded-xl transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-                Cancelar Cita
-            </button>
-        </form>
-    </div>
-
-    <p class="text-center text-xs text-slate-400 mt-4">
-        * Las cancelaciones deben realizarse con al menos 2 horas de antelación.
-    </p>
-    {% endif %}
 
 </div>
 

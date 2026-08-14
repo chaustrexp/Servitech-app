@@ -4,10 +4,11 @@
 {% block title %}Mi Agenda - Técnico | ServiTech{% endblock %}
 
 {% block page_header %}
-<div class="flex items-center gap-0 mb-6 md:mb-8">
-    <h1 class="text-base sm:text-lg font-bold text-[#002b75] leading-tight whitespace-nowrap">Mi Agenda</h1>
-    <span class="mx-3 text-slate-300 font-light text-lg select-none">|</span>
-    <p class="text-slate-400 text-xs sm:text-sm font-normal leading-tight truncate">{{ rango_str }}</p>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 md:mb-8">
+    <div>
+        <p class="text-[26px] font-bold text-[#0e3687] mb-0.5 tracking-tight">Mi Agenda</p>
+        <p class="text-[13px] text-slate-600 font-medium">{{ rango_str }}</p>
+    </div>
 </div>
 {% endblock page_header %}
 

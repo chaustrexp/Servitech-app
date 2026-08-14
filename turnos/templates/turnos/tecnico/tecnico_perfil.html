@@ -3,10 +3,11 @@
 
 {% block page_header %}
 <!-- Minimal header: Título | Subtítulo -->
-<div class="flex items-center gap-0 mb-6 md:mb-8">
-    <h1 class="text-base sm:text-lg font-bold text-[#002b75] leading-tight whitespace-nowrap">Mi Perfil</h1>
-    <span class="mx-3 text-slate-300 font-light text-lg select-none">|</span>
-    <p class="text-slate-400 text-xs sm:text-sm font-normal leading-tight">Datos personales y estadísticas de rendimiento.</p>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 md:mb-8">
+    <div>
+        <p class="text-[26px] font-bold text-[#0e3687] mb-0.5 tracking-tight">Mi Perfil</p>
+        <p class="text-[13px] text-slate-600 font-medium">Datos personales y estadísticas de rendimiento.</p>
+    </div>
 </div>
 {% endblock page_header %}
 
@@ -22,7 +23,7 @@
                 <!-- Avatar en grande -->
                 <div class="relative w-32 h-32 mx-auto mb-4 group cursor-pointer" onclick="abrirModalFoto()">
                     <img id="foto-perfil-card" 
-                         src="{% if request.user.foto_perfil %}{{ request.user.foto_perfil.url }}{% else %}{% static 'img/foto de perfil tecnico.png' %}{% endif %}" 
+                         src="{{ request.user.get_avatar_url }}" 
                          alt="Foto de perfil" 
                          class="w-full h-full rounded-3xl object-cover border-4 border-slate-50 shadow-inner group-hover:opacity-85 transition">
                     <div class="absolute inset-0 bg-black/40 rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-xs font-bold">

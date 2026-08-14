@@ -37,23 +37,24 @@
 
 {% block content %}
 <!-- ════ CABECERA ════════════════════════════════════════════════════════════ -->
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 mt-1">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6 mt-1">
     <div>
-        <h1 class="text-[28px] sm:text-[32px] font-extrabold text-[#0e3687] tracking-tight leading-none mb-1">
+        <h1 class="text-[26px] font-bold text-[#0e3687] tracking-tight leading-none mb-1">
             Centro de Operaciones
         </h1>
         <p class="text-[13px] text-slate-500 font-medium leading-none mt-2">
-            Monitoreo en tiempo real • {{ hoy|date:"l d \d\e F" }}
+            Monitoreo en tiempo real • {{ hoy|date:"l d \d\e F"|title }}
         </p>
     </div>
-    <button onclick="abrirModal('modal-crear-tecnico')"
-            class="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#0e3687] hover:bg-[#09255d]
-                   text-white font-bold px-5 py-2.5 rounded-lg text-xs sm:text-[13px] transition active:scale-95">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-        </svg>
-        Nuevo Técnico
-    </button>
+    <div class="flex flex-wrap md:flex-nowrap items-center gap-3 w-full md:w-auto">
+        <button onclick="abrirModal('modal-crear-tecnico')"
+                class="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#003399] hover:bg-[#002266] text-white font-bold px-5 py-2.5 rounded-lg text-xs sm:text-[13px] transition shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            Nuevo Técnico
+        </button>
+    </div>
 </div>
 
 <!-- Django Messages -->
@@ -77,45 +78,73 @@
 {% endif %}
 
 <!-- ════ MÉTRICAS ════════════════════════════════════════════════════════════ -->
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-    <div class="bg-white rounded-lg p-4 border border-slate-200">
-        <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Total</p>
-        <p class="text-[28px] font-black text-[#0e3687] leading-none flex items-baseline gap-2">
-            {{ total_tecnicos }} <span class="text-[13px] font-medium text-slate-500 font-normal">técnicos</span>
-        </p>
-    </div>
-    <div class="bg-white rounded-lg p-4 border border-emerald-500 relative overflow-hidden">
-        <!-- Decoration -->
-        <div class="absolute -top-6 -right-6 w-24 h-24 bg-emerald-100 rounded-full opacity-50"></div>
-        <div class="relative z-10">
-            <div class="flex items-center gap-1.5 mb-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
-                <p class="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">En proceso</p>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <!-- TOTAL -->
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex items-center justify-between hover:border-[#0e3687]/30 transition">
+        <div>
+            <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1">Total Técnicos</p>
+            <h3 class="text-[28px] font-bold text-[#0e3687] leading-none mb-2">{{ total_tecnicos }}</h3>
+            <div class="flex items-center gap-1.5 text-[12px] font-medium text-slate-500">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Registrados
             </div>
-            <p class="text-[28px] font-black text-emerald-600 leading-none flex items-baseline gap-2">
-                {{ en_proceso_hoy }} <span class="text-[13px] font-medium text-emerald-600 font-normal">atendiendo ahora</span>
-            </p>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-[#EEF2FF] text-[#0e3687] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         </div>
     </div>
-    <div class="bg-[#f8fafc] rounded-lg p-4 border border-blue-100">
-        <p class="text-[11px] font-bold text-[#0e3687] uppercase tracking-wider mb-2">Disponibles</p>
-        <p class="text-[28px] font-black text-[#0e3687] leading-none flex items-baseline gap-2">
-            {{ disponibles_hoy }} <span class="text-[13px] font-medium text-[#64748b] font-normal">listos para asignar</span>
-        </p>
+    
+    <!-- EN PROCESO -->
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex items-center justify-between hover:border-emerald-300 transition">
+        <div>
+            <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1">En Proceso</p>
+            <h3 class="text-[28px] font-bold text-[#0e3687] leading-none mb-2">{{ en_proceso_hoy }}</h3>
+            <div class="flex items-center gap-1.5 text-[12px] font-medium text-emerald-600">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                Atendiendo ahora
+            </div>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-[#E6F4EA] text-[#0D652D] flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        </div>
     </div>
-    <div class="bg-rose-50 rounded-lg p-4 border border-rose-100">
-        <p class="text-[11px] font-bold text-rose-600 uppercase tracking-wider mb-2">Con novedad</p>
-        <p class="text-[28px] font-black text-rose-600 leading-none flex items-baseline gap-2">
-            {{ pausados_hoy }} <span class="text-[13px] font-medium text-rose-600 font-normal">pausados / retraso</span>
-        </p>
+    
+    <!-- DISPONIBLE -->
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex items-center justify-between hover:border-blue-300 transition">
+        <div>
+            <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1">Disponibles</p>
+            <h3 class="text-[28px] font-bold text-[#0e3687] leading-none mb-2">{{ disponibles_hoy }}</h3>
+            <div class="flex items-center gap-1.5 text-[12px] font-medium text-blue-600">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Listos para asignar
+            </div>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+    </div>
+    
+    <!-- CON NOVEDAD -->
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex items-center justify-between hover:border-red-300 transition">
+        <div>
+            <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1">Con Novedad</p>
+            <h3 class="text-[28px] font-bold text-[#0e3687] leading-none mb-2">{{ pausados_hoy }}</h3>
+            <div class="flex items-center gap-1.5 text-[12px] font-medium text-red-500">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                Pausados / retraso
+            </div>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
     </div>
 </div>
 
 <!-- ════ MONITOREO ACTIVO ════════════════════════════════════════════════════ -->
 <div class="mb-8">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-4 px-1">
         <div class="flex items-center gap-2">
-            <div class="w-1.5 h-5 bg-[#0e3687]"></div>
+            <div class="w-1 h-5 bg-[#003399]"></div>
             <h2 class="text-[18px] font-bold text-slate-800 tracking-tight">Monitoreo en Tiempo Real</h2>
         </div>
         <span class="text-[12px] text-slate-400 font-medium">Hoy - {{ hoy|date:"d/m/Y" }}</span>
@@ -127,139 +156,110 @@
         {% with t=item.tecnico estado=item.estado_monitor cita=item.cita_activa perfil=item.perfil %}
 
         <!-- ── CARD DE MONITOREO ─────────────────────────────── -->
-        <div class="bg-white rounded-[20px] shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
-
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between overflow-hidden group">
+            
             <!-- CABECERA DEL CARD -->
-            <div class="flex items-start justify-between gap-2 mb-4 relative">
+            <div class="p-5 flex items-start justify-between gap-2 border-b border-slate-100">
                 <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-12 h-12 rounded-full font-bold text-lg flex items-center justify-center text-white relative flex-shrink-0
-                        {% if estado == 'en_proceso' %}bg-[#065f46]
-                        {% elif estado == 'disponible' %}bg-[#0e3687]
-                        {% elif estado == 'pausado' %}bg-[#9f1239]
-                        {% else %}bg-slate-400{% endif %}">
-                        {% if t.foto_perfil %}
-                            <img src="{{ t.foto_perfil.url }}" class="w-full h-full rounded-full object-cover">
-                        {% else %}
-                            {{ t.nombre_completo|slice:":2"|upper }}
-                        {% endif %}
-                        
-                        <!-- Indicador de estado (dot) -->
-                        <div class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white
-                            {% if estado == 'en_proceso' %}bg-emerald-500
-                            {% elif estado == 'disponible' %}bg-blue-400
-                            {% elif estado == 'pausado' %}bg-rose-500
-                            {% else %}bg-slate-400{% endif %}">
-                        </div>
-                    </div>
+                    <img src="{{ t.get_avatar_url }}" class="w-10 h-10 rounded-full object-cover bg-white border border-slate-200 flex-shrink-0">
                     <div class="min-w-0">
-                        <p class="font-bold text-slate-800 text-[14px] leading-tight truncate" title="{{ t.nombre_completo }}">{{ t.nombre_completo }}</p>
-                        <p class="text-[11px] text-slate-500 truncate" title="{{ t.correo }}">{{ t.correo }}</p>
+                        <p class="font-bold text-slate-800 text-[13px] leading-tight truncate" title="{{ t.nombre_completo }}">{{ t.nombre_completo }}</p>
+                        <p class="text-[11px] text-slate-500 truncate mt-0.5" title="{{ t.correo }}">{{ t.correo }}</p>
                     </div>
                 </div>
 
                 <!-- Badges -->
                 <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
-                    <span id="badge-tecnico-{{ t.pk }}" class="text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider
-                        {% if estado == 'en_proceso' %}bg-[#22c55e] text-white
-                        {% elif estado == 'disponible' %}bg-blue-100 text-[#0e3687]
-                        {% elif estado == 'pausado' %}bg-[#eab308] text-white
-                        {% else %}bg-[#ef4444] text-white{% endif %}">
+                    <span id="badge-tecnico-{{ t.pk }}" class="text-[10px] font-bold px-2 py-0.5 rounded-md tracking-wide
+                        {% if estado == 'en_proceso' %}bg-[#E6F4EA] text-[#0D652D]
+                        {% elif estado == 'disponible' %}bg-[#EEF2FF] text-[#003399]
+                        {% elif estado == 'pausado' %}bg-amber-50 text-amber-600
+                        {% else %}bg-rose-50 text-rose-600{% endif %}">
                         {% if estado == 'en_proceso' %}En proceso
                         {% elif estado == 'disponible' %}Disponible
                         {% elif estado == 'pausado' %}En pausa
                         {% else %}Inactivo{% endif %}
                     </span>
                     {% if perfil %}
-                    <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-[#e0e7ff] text-[#0e3687] uppercase">
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-400 tracking-widest uppercase">
                         Nivel {{ perfil.nivel }}
                     </span>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- SEPARADOR -->
-            <div class="mx-4 border-t border-slate-100"></div>
-
             <!-- CUERPO: tarea activa o estado -->
-            <div>
+            <div class="p-5 flex-1 flex flex-col justify-center min-h-[140px] bg-slate-50/50">
                 {% if cita %}
                 <!-- Tarea activa -->
-                <div class="rounded-xl p-4 mb-4
-                    {% if estado == 'en_proceso' %}bg-[#dcfce7]
-                    {% elif estado == 'pausado' %}bg-[#fefce8]
-                    {% else %}bg-slate-50{% endif %}">
-                    <div class="flex gap-2 mb-3 min-w-0">
+                <div class="rounded-xl p-4 w-full
+                    {% if estado == 'en_proceso' %}bg-white border border-emerald-100 shadow-sm
+                    {% elif estado == 'pausado' %}bg-white border border-amber-100 shadow-sm
+                    {% else %}bg-white border border-slate-100 shadow-sm{% endif %}">
+                    <div class="flex gap-2 mb-3 min-w-0 items-start">
                         <svg class="w-4 h-4 flex-shrink-0 mt-0.5
-                            {% if estado == 'en_proceso' %}text-[#22c55e]{% elif estado == 'pausado' %}text-[#eab308]{% else %}text-[#ef4444]{% endif %}"
+                            {% if estado == 'en_proceso' %}text-emerald-500{% elif estado == 'pausado' %}text-amber-500{% else %}text-slate-500{% endif %}"
                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
-                        <p class="text-[13px] font-bold text-slate-800 truncate" title="{{ cita.servicio.nombre }}">{{ cita.servicio.nombre }}</p>
-                    </div>
-                    <div class="space-y-2 pl-6">
-                        <div class="flex items-center gap-2 text-[12px] text-slate-600 min-w-0">
-                            <svg class="w-3.5 h-3.5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                            </svg>
-                            <span class="truncate" title="{{ cita.cliente.nombre_completo }}">{{ cita.cliente.nombre_completo }}</span>
-                        </div>
-                        <div class="flex items-center justify-between flex-wrap gap-2 text-[12px] text-slate-600 min-w-0">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-3.5 h-3.5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <div class="min-w-0">
+                            <p class="text-[13px] font-bold text-slate-800 truncate" title="{{ cita.servicio.nombre }}">{{ cita.servicio.nombre }}</p>
+                            <div class="flex items-center gap-1.5 mt-1 text-[11px] text-slate-500 min-w-0">
+                                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
-                                <span class="whitespace-nowrap">{{ cita.hora_inicio|time:"H:i" }} - {{ cita.hora_fin|time:"H:i" }}</span>
+                                <span class="truncate" title="{{ cita.cliente.nombre_completo }}">{{ cita.cliente.nombre_completo }}</span>
                             </div>
-                            {% if cita.estado %}
-                            <span class="bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px] whitespace-nowrap">
-                                {{ cita.estado.nombre }}
-                            </span>
-                            {% endif %}
                         </div>
+                    </div>
+                    <div class="flex items-center justify-between text-[11px] font-medium text-slate-500 border-t border-slate-100 pt-2 mt-2">
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>{{ cita.hora_inicio|time:"H:i" }} - {{ cita.hora_fin|time:"H:i" }}</span>
+                        </div>
+                        {% if cita.estado %}
+                        <span class="text-slate-400">
+                            {{ cita.estado.nombre }}
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
 
                 {% else %}
                 <!-- Sin tarea activa -->
-                <div class="rounded-xl p-6 mb-4 bg-slate-50 flex flex-col items-center text-center justify-center min-h-[140px]">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-3">
-                        <svg class="w-5 h-5 text-[#0e3687]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        </p>
-                        {% if item.total_citas_hoy > 0 %}
-                        <p class="text-[10px] text-slate-400">{{ item.completadas_hoy }}/{{ item.total_citas_hoy }} citas completadas</p>
-                        {% else %}
-                        <p class="text-[10px] text-slate-400">Sin citas asignadas hoy</p>
-                        {% endif %}
-                    </div>
+                <div class="flex flex-col items-center text-center justify-center py-4">
+                    <svg class="w-8 h-8 text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                    </svg>
+                    <p class="text-[12px] font-medium text-slate-400">Sin tareas asignadas</p>
+                    <p class="text-[11px] text-slate-400/70 mt-0.5">Hoy</p>
                 </div>
                 {% endif %}
-
-                <!-- BARRA DE PROGRESO -->
-                <div class="mb-4 text-[11px] text-slate-500 flex justify-between">
-                    <span>Progreso del día</span>
-                    <span class="font-bold text-slate-700">{{ item.completadas_hoy }}/{{ item.total_citas_hoy|default:0 }}</span>
-                </div>
-
-                <!-- ACCIONES -->
-                <div class="flex gap-2 w-full mt-auto">
-                    <button onclick="abrirModalEditarPerfil({{ t.pk }},'{{ t.nombre_completo|escapejs }}','{{ t.genero|default:"" }}','{{ perfil.especialidad|default:"" }}','{{ perfil.observaciones|default_if_none:""|escapejs }}')"
-                            class="flex-1 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 text-[12px] font-bold transition flex items-center justify-center gap-2">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                        </svg>
-                        Editar
-                    </button>
-                    {% if estado == 'disponible' and citas_sin_tecnico %}
-                    <button onclick="abrirModalAsignar({{ t.pk }},'{{ t.nombre_completo|escapejs }}')"
-                            class="flex-1 py-2 rounded-lg bg-[#0e3687] text-white text-[12px] font-bold hover:bg-[#09255d] transition flex items-center justify-center gap-2">
-                        Asignar
-                    </button>
-                    {% endif %}
-                </div>
             </div>
+
+            <!-- PIE DE CARD -->
+            <div class="px-5 py-3 border-t border-slate-100 flex items-center justify-between bg-white">
+                <span class="text-[11px] font-medium text-slate-400">Progreso del día: <span class="font-bold text-slate-600">{{ item.completadas_hoy }}/{{ item.total_citas_hoy|default:0 }}</span></span>
+                
+                <button onclick="abrirModalEditarPerfil({{ t.pk }},'{{ t.nombre_completo|escapejs }}','{{ t.genero|default:"" }}','{{ perfil.especialidad|default:"" }}','{{ perfil.observaciones|default_if_none:""|escapejs }}')"
+                        class="text-[12px] font-bold text-slate-500 hover:text-[#003399] transition flex items-center gap-1.5 group-hover:text-[#003399]">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                    Editar
+                </button>
+            </div>
+            
+            <!-- Botón flotante para asignar rápido si está disponible (opcional) -->
+            {% if estado == 'disponible' and citas_sin_tecnico %}
+            <button onclick="abrirModalAsignar({{ t.pk }},'{{ t.nombre_completo|escapejs }}')"
+                    class="absolute bottom-16 right-5 w-8 h-8 rounded-full bg-[#003399] text-white shadow-lg flex items-center justify-center hover:bg-[#002266] transition hover:scale-110" title="Asignar Cita">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            </button>
+            {% endif %}
         </div>
         {% endwith %}
         {% endfor %}
@@ -267,16 +267,16 @@
 
     {% else %}
     <!-- Sin técnicos -->
-    <div class="bg-white rounded-[24px] border border-slate-100 p-12 text-center shadow-sm">
-        <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-[#003399]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-xl border border-slate-200 p-12 text-center shadow-sm">
+        <div class="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mx-auto mb-4 border border-slate-100">
+            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
         </div>
-        <p class="text-sm font-extrabold text-slate-700 mb-1">Sin técnicos registrados</p>
-        <p class="text-xs text-slate-400 mb-5">Agrega el primer técnico para comenzar el monitoreo de operaciones.</p>
+        <p class="text-[14px] font-bold text-slate-800 mb-1">Sin técnicos registrados</p>
+        <p class="text-[13px] text-slate-500 mb-5 max-w-sm mx-auto">Agrega el primer técnico para comenzar el monitoreo de operaciones.</p>
         <button onclick="abrirModal('modal-crear-tecnico')"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#003399] text-white font-bold text-xs rounded-xl shadow-md hover:bg-[#002266] transition">
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#003399] text-white font-bold text-xs rounded-lg shadow-sm hover:bg-[#002266] transition">
             + Añadir Técnico
         </button>
     </div>
@@ -322,40 +322,38 @@
 {% endif %}
 
 <!-- ════ DIRECTORIO ══════════════════════════════════════════════════════════ -->
-<div class="bg-white rounded-[20px] border border-slate-200 shadow-sm p-4 sm:p-6 mb-6">
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-6">
     <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-2">
-            <div class="w-1.5 h-5 bg-slate-400"></div>
-            <h3 class="font-bold text-slate-800 text-[18px]">Directorio de Personal</h3>
+            <div class="w-1 h-5 bg-slate-400"></div>
+            <h3 class="font-bold text-slate-800 text-[16px] tracking-tight">Directorio de Personal</h3>
         </div>
-        <span class="text-[12px] text-slate-500 font-medium">{{ total_tecnicos }} registrados</span>
+        <span class="text-[11px] text-slate-500 font-medium bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-md">{{ total_tecnicos }} registrados</span>
     </div>
     {% if tecnicos %}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {% for t in tecnicos %}
-        {% with perfil=t.perfil_tecnico %}
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 hover:border-slate-300 transition">
-            <div class="w-10 h-10 rounded-lg bg-[#0e3687] text-white font-bold text-sm flex items-center justify-center flex-shrink-0">
-                {% if t.foto_perfil %}
-                    <img src="{{ t.foto_perfil.url }}" class="w-full h-full rounded-lg object-cover">
+        <div class="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 hover:border-[#003399]/30 hover:shadow-sm transition cursor-default">
+            <div class="flex items-center gap-3 min-w-0">
+                <img src="{{ t.get_avatar_url }}" class="w-9 h-9 rounded-full object-cover bg-slate-100 flex-shrink-0 border border-slate-200">
+                <div class="min-w-0">
+                    <p class="text-[12px] font-bold text-slate-800 truncate" title="{{ t.nombre_completo }}">{{ t.nombre_completo }}</p>
+                    <p class="text-[10px] text-slate-500 truncate" title="{{ t.correo }}">{{ t.correo }}</p>
+                </div>
+            </div>
+            <!-- Indicador de estado -->
+            <div class="flex-shrink-0 ml-2">
+                {% if t.is_active %}
+                <span class="block w-2 h-2 rounded-full bg-[#10b981]" title="Activo"></span>
                 {% else %}
-                    {{ t.nombre_completo|slice:":2"|upper }}
+                <span class="block w-2 h-2 rounded-full bg-[#ef4444]" title="Inactivo"></span>
                 {% endif %}
             </div>
-            <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-1.5 mb-0.5">
-                    <p class="text-[13px] font-bold text-slate-800 truncate">{{ t.nombre_completo }}</p>
-                    {% if perfil %}<span class="text-[9px] font-bold px-1.5 rounded bg-blue-100 text-[#0e3687]">N{{ perfil.nivel }}</span>{% endif %}
-                </div>
-                <p class="text-[11px] text-slate-500 truncate">{{ t.correo }}</p>
-            </div>
-            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[#065f46]"></span>
         </div>
-        {% endwith %}
         {% endfor %}
     </div>
     {% else %}
-    <p class="text-xs text-slate-400 text-center py-6">No hay técnicos registrados.</p>
+    <p class="text-[12px] text-slate-400 text-center py-6">No hay técnicos registrados.</p>
     {% endif %}
 </div>
 
@@ -452,7 +450,16 @@
                                    class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:border-[#0e3687] focus:ring-1 focus:ring-[#0e3687]" required>
                         </div>
                     </div>
+
+                    <div>
+                        <label class="block text-[12px] font-bold text-slate-700 mb-1.5">Género (Foto de perfil) *</label>
+                        <select name="genero" class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:border-[#0e3687] focus:ring-1 focus:ring-[#0e3687]" required>
+                            <option value="hombre">Hombre</option>
+                            <option value="mujer">Mujer</option>
+                        </select>
+                    </div>
                 </div>
+                </div> <!-- Cierra panel-nuevo -->
 
                 <!-- Panel Vincular -->
                 <div id="panel-vincular" class="hidden space-y-4">

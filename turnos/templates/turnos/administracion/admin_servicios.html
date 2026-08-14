@@ -104,7 +104,7 @@
 ════════════════════════════════════════════ -->
 <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8 mt-2 cabecera-pagina">
     <div>
-        <h1 class="text-[26px] font-bold text-[#003399] tracking-tight leading-none mb-2">Catálogo de Servicios</h1>
+        <h1 class="text-[26px] font-bold text-[#0e3687] tracking-tight leading-none mb-1">Catálogo de Servicios</h1>
         <p class="text-[13px] text-slate-500 font-medium max-w-lg leading-relaxed">
             Administra y actualiza la oferta técnica de ServiTech. Configura precios, tiempos de respuesta y visibilidad para tus clientes.
         </p>
@@ -126,19 +126,19 @@
 <!-- ════════════════════════════════════════════
      1. GRID DE TARJETAS DE SERVICIOS
 ════════════════════════════════════════════ -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" id="grid-servicios">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" id="grid-servicios">
 
     {% for s in servicios %}
-    <div class="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all flex flex-col justify-between">
+    <div class="bg-white rounded-[20px] shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition-all flex flex-col justify-between group">
         <!-- Banner con badge de estado e imagen representativa según tipo -->
         <div class="relative h-[160px] overflow-hidden bg-slate-800">
             <!-- Imagen dinámica y específica de reparación según el tipo de dispositivo -->
             {% if s.tipo_dispositivo == 'CELULAR' %}
-                <img src="{% static 'img/catalogo/celular.png' %}" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
+                <img src="{% static 'img/catalogo/celular.png' %}" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90 transition-all duration-500 group-hover:scale-105 {% if not s.activo %}grayscale{% endif %}">
             {% elif s.tipo_dispositivo == 'LAPTOP' %}
-                <img src="{% static 'img/catalogo/laptop.png' %}" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
+                <img src="{% static 'img/catalogo/laptop.png' %}" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90 transition-all duration-500 group-hover:scale-105 {% if not s.activo %}grayscale{% endif %}">
             {% else %}
-                <img src="{% static 'img/catalogo/pc.png' %}" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90">
+                <img src="{% static 'img/catalogo/pc.png' %}" alt="{{ s.nombre }}" class="w-full h-full object-cover opacity-90 transition-all duration-500 group-hover:scale-105 {% if not s.activo %}grayscale{% endif %}">
             {% endif %}
             
             <div class="absolute top-4 left-4">
@@ -147,20 +147,20 @@
                 </span>
             </div>
 
-            <span class="absolute top-4 right-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-[11px] font-bold {% if s.activo %}text-[#059669]{% else %}text-rose-600{% endif %} px-2.5 py-1 rounded-full shadow border border-white/20">
-                <span class="w-2 h-2 rounded-full {% if s.activo %}bg-[#22C55E]{% else %}bg-rose-500{% endif %}"></span>
+            <span class="absolute top-4 right-4 flex items-center gap-1.5 backdrop-blur-sm text-[11px] font-bold px-2.5 py-1 rounded-full shadow border {% if s.activo %}bg-white/90 text-[#059669] border-white/20{% else %}bg-rose-100/90 text-rose-700 border-rose-200/50{% endif %}">
+                <span class="w-2 h-2 rounded-full {% if s.activo %}bg-[#22C55E]{% else %}bg-rose-600{% endif %}"></span>
                 {% if s.activo %}Disponible{% else %}Inactivo{% endif %}
             </span>
         </div>
 
         <!-- Contenido -->
-        <div class="p-5 flex-1 flex flex-col justify-between">
+        <div class="p-5 flex-1 flex flex-col justify-between relative bg-white {% if not s.activo %}opacity-75{% endif %}">
             <div>
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-[16px] font-bold text-[#003399] leading-tight">{{ s.nombre }}</h3>
+                <div class="flex items-start justify-between mb-2">
+                    <h3 class="text-lg font-bold text-[#003399] leading-tight pr-4">{{ s.nombre }}</h3>
                     
-                    <!-- Botón Lápiz (Editar) y Toggle -->
-                    <div class="flex items-center gap-1 no-print">
+                    <!-- Botón Lápiz (Editar) y Toggle (Ocultos hasta el hover) -->
+                    <div class="flex items-center gap-1 no-print opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-5 right-5 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm border border-slate-100 p-0.5">
                         <button onclick="abrirModalEditarServicio({{ s.pk }}, '{{ s.nombre|escapejs }}', '{{ s.descripcion|default:''|escapejs }}', '{{ s.tipo_dispositivo|escapejs }}', {{ s.duracion_minutos }}, {{ s.buffer_minutos }}, '{{ s.especialidad.pk|default:'' }}')"
                                 class="p-1.5 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-[#003399] transition" title="Editar Servicio">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,10 +183,10 @@
                 </p>
             </div>
 
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+            <div class="pt-4 mt-2 border-t border-slate-100 flex items-center justify-between">
                 <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Especialidad</p>
-                    <span class="text-[12px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Especialidad</p>
+                    <span class="text-[11px] font-bold text-[#003399] bg-blue-50 border border-blue-100 px-2 py-0.5 rounded">
                         {{ s.especialidad.nombre|default:"General" }}
                     </span>
                 </div>
@@ -285,7 +285,7 @@
                 <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Descripción</label>
                 <textarea name="descripcion" rows="3" placeholder="Describe el alcance del servicio..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition resize-none"></textarea>
             </div>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Tipo de Dispositivo</label>
                     <select name="tipo_dispositivo" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition font-semibold">
@@ -303,7 +303,7 @@
                     </select>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Duración (Minutos)</label>
                     <input type="number" name="duracion_minutos" value="60" required min="10" step="5" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
@@ -326,9 +326,9 @@
 ════════════════════════════════════════════ -->
 <div id="modal-editar-servicio" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
     <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="cerrarModalEditarServicio()"></div>
-    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md z-10 overflow-hidden border border-slate-100">
+    <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md z-10 overflow-hidden border border-slate-100">
         <div class="px-6 py-4 flex items-center justify-between border-b border-slate-100">
-            <h3 class="font-bold text-[15px] text-slate-800">Editar Servicio Técnico</h3>
+            <h3 class="font-bold text-[16px] text-slate-800">Editar Servicio Técnico</h3>
             <button onclick="cerrarModalEditarServicio()" class="text-slate-400 hover:text-slate-600 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -336,44 +336,54 @@
         <form id="form-editar-servicio" method="POST" action="" class="p-6 space-y-4">
             {% csrf_token %}
             <div>
-                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Nombre del Servicio</label>
-                <input type="text" id="edit-serv-nombre" name="nombre" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombre del Servicio</label>
+                <input type="text" id="edit-serv-nombre" name="nombre" required class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-lg text-[13px] text-slate-800 focus:outline-none focus:border-[#003399] focus:bg-white transition">
             </div>
             <div>
-                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Descripción</label>
-                <textarea id="edit-serv-desc" name="descripcion" rows="3" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition resize-none"></textarea>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Descripción</label>
+                <textarea id="edit-serv-desc" name="descripcion" rows="3" class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-lg text-[13px] text-slate-800 focus:outline-none focus:border-[#003399] focus:bg-white transition resize-none"></textarea>
             </div>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Tipo de Dispositivo</label>
-                    <select id="edit-serv-tipo" name="tipo_dispositivo" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition font-semibold">
-                        <option value="CELULAR">Celular</option>
-                        <option value="LAPTOP">Laptop</option>
-                        <option value="PC">PC / Escritorio</option>
-                    </select>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tipo de Dispositivo</label>
+                    <div class="relative">
+                        <select id="edit-serv-tipo" name="tipo_dispositivo" class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-lg text-[13px] text-slate-800 focus:outline-none focus:border-[#003399] focus:bg-white transition appearance-none">
+                            <option value="CELULAR">Celular</option>
+                            <option value="LAPTOP">Laptop</option>
+                            <option value="PC">PC / Escritorio</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Especialidad</label>
-                    <select id="edit-serv-esp" name="especialidad_id" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
-                        {% for esp in especialidades %}
-                        <option value="{{ esp.pk }}">{{ esp.nombre }}</option>
-                        {% endfor %}
-                    </select>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Especialidad</label>
+                    <div class="relative">
+                        <select id="edit-serv-esp" name="especialidad_id" class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-lg text-[13px] text-slate-800 focus:outline-none focus:border-[#003399] focus:bg-white transition appearance-none">
+                            {% for esp in especialidades %}
+                            <option value="{{ esp.pk }}">{{ esp.nombre|upper }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Duración (Minutos)</label>
-                    <input type="number" id="edit-serv-duracion" name="duracion_minutos" required min="10" step="5" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Duración (Minutos)</label>
+                    <input type="number" id="edit-serv-duracion" name="duracion_minutos" required min="10" step="5" class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-lg text-[13px] text-slate-800 focus:outline-none focus:border-[#003399] focus:bg-white transition">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Tiempo Buffer (Min)</label>
-                    <input type="number" id="edit-serv-buffer" name="buffer_minutos" min="0" step="5" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-[#003399] transition">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tiempo Buffer (Min)</label>
+                    <input type="number" id="edit-serv-buffer" name="buffer_minutos" min="0" step="5" class="w-full px-3 py-2.5 bg-[#F8FAFC] border border-slate-200 rounded-lg text-[13px] text-slate-800 focus:outline-none focus:border-[#003399] focus:bg-white transition">
                 </div>
             </div>
-            <div class="pt-2 flex gap-3">
-                <button type="button" onclick="cerrarModalEditarServicio()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition">Cancelar</button>
-                <button type="submit" class="flex-1 py-2.5 rounded-xl bg-[#003399] hover:bg-[#002266] text-white font-bold text-[13px] transition shadow-sm">Guardar Cambios</button>
+            <div class="pt-4 mt-2 border-t border-slate-100 flex gap-3">
+                <button type="button" onclick="cerrarModalEditarServicio()" class="flex-1 py-2.5 rounded-lg border border-slate-200 bg-[#F8FAFC] text-[13px] font-bold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
+                <button type="submit" class="flex-1 py-2.5 rounded-lg bg-[#003399] hover:bg-[#002266] text-white font-bold text-[13px] transition shadow-sm">Guardar Cambios</button>
             </div>
         </form>
     </div>

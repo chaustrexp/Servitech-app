@@ -35,7 +35,7 @@
         <div class="px-5 pt-6 pb-6 border-b border-slate-100">
             <a href="{% url 'dashboard_tecnico' %}" class="flex items-center gap-3">
                 <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
-                    <img src="{% static 'img/logo.jpg' %}" alt="Logo ServiTech" class="w-full h-full object-contain rounded-lg">
+                    <img src="{% static 'img/Logo/logo.jpg' %}" alt="Logo ServiTech" class="w-full h-full object-contain rounded-lg">
                 </div>
                 <div class="leading-tight">
                     <p class="text-[17px] font-extrabold text-[#0e3687] tracking-tight">ServiTech</p>
@@ -49,7 +49,7 @@
             <div class="flex items-center gap-3">
                 <div class="relative group cursor-pointer" onclick="abrirModalFoto()">
                     <img id="foto-perfil-sidebar"
-                         src="{% if request.user.foto_perfil %}{{ request.user.foto_perfil.url }}{% else %}{% static 'img/foto de perfil tecnico.png' %}{% endif %}"
+                         src="{{ request.user.get_avatar_url }}"
                          alt="Foto de perfil"
                          class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md">
                     <div class="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
@@ -199,7 +199,7 @@
                 </svg>
             </button>
             <a href="{% url 'dashboard_tecnico' %}" class="flex items-center gap-2">
-                <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="w-7 h-7 rounded-lg object-cover">
+                <img src="{% static 'img/Logo/logo.jpg' %}" alt="Logo" class="w-7 h-7 rounded-lg object-cover">
                 <span class="font-extrabold text-[#002b75]">ServiTech</span>
             </a>
             <div class="w-8"></div>
@@ -403,7 +403,7 @@
             </div>
             <div class="flex justify-center mb-5">
                 <div class="relative">
-                    <img id="foto-preview" src="{% if request.user.foto_perfil %}{{ request.user.foto_perfil.url }}{% else %}{% static 'img/foto de perfil tecnico.png' %}{% endif %}"
+                    <img id="foto-preview" src="{{ request.user.get_avatar_url }}"
                          alt="Preview" class="w-28 h-28 rounded-full object-cover border-4 border-[#eef2ff] shadow-md">
                     <div class="absolute bottom-1 right-1 bg-[#002b75] rounded-full p-1.5 shadow">
                         <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

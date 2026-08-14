@@ -64,6 +64,27 @@ class Usuario(AbstractUser):
     def es_admin(self):
         return self.rol in [self.Rol.ADMINISTRADOR, 'ADMIN']
 
+    @property
+    def get_avatar_url(self):
+        if self.foto_perfil:
+            return self.foto_perfil.url
+            
+        from django.templatetags.static import static
+        genero_str = self.genero if self.genero else 'M'
+        
+        if self.rol in [self.Rol.ADMINISTRADOR, 'ADMIN']:
+            if genero_str == 'F':
+                return static('img/Perfil/Foto de perfil rol admin version mujer.png')
+            return static('img/Perfil/Foto de perfil rol admin.png')
+        elif self.rol == self.Rol.TECNICO:
+            if genero_str == 'F':
+                return static('img/Perfil/Foto de perfil rol tecnico version mujer.png')
+            return static('img/Perfil/Foto de perfil rol tecnico.png')
+        else:
+            if genero_str == 'F':
+                return static('img/Perfil/Foto de perfil rol cliente version mujer.png')
+            return static('img/Perfil/Foto de perfil rol cliente.png')
+
     def save(self, *args, **kwargs):
         if not self.username:
             self.username = self.correo
