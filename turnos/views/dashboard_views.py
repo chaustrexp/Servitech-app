@@ -1767,10 +1767,10 @@ def admin_tecnicos(request):
                 
                 genero = request.POST.get('genero')
                 if genero == 'mujer':
-                    tecnico.foto_perfil = 'perfiles/foto de perfil rol tecnico (2).png'
-                else:
-                    tecnico.foto_perfil = 'perfiles/foto de perfil rol tecnico.png'
-                tecnico.save(update_fields=['foto_perfil'])
+                    tecnico.genero = 'F'
+                elif genero == 'hombre':
+                    tecnico.genero = 'M'
+                tecnico.save(update_fields=['genero'])
                 
                 creado = True
 

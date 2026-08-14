@@ -5,10 +5,11 @@
 
 {% block page_header %}
 <!-- Minimal header: Título | Subtítulo -->
-<div class="flex items-center gap-0 mb-6 md:mb-8">
-    <h1 class="text-base sm:text-lg font-bold text-[#002b75] leading-tight whitespace-nowrap">Panel de Soporte</h1>
-    <span class="mx-3 text-slate-300 font-light text-lg select-none">|</span>
-    <p class="text-slate-400 text-xs sm:text-sm font-normal leading-tight">Herramientas, accesos y guías para personal técnico.</p>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 md:mb-8">
+    <div>
+        <p class="text-[26px] font-bold text-[#0e3687] mb-0.5 tracking-tight">Panel de Soporte</p>
+        <p class="text-[13px] text-slate-600 font-medium">Herramientas, accesos y guías para personal técnico.</p>
+    </div>
 </div>
 {% endblock page_header %}
 
@@ -557,7 +558,7 @@
     <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 z-10 flex flex-col overflow-hidden" style="height:480px">
         <!-- Cabecera chat -->
         <div class="bg-[#002b75] p-4 flex items-center gap-3 flex-shrink-0">
-            <img src="{% if request.user.foto_perfil %}{{ request.user.foto_perfil.url }}{% else %}{% static 'img/foto de perfil administrador.png' %}{% endif %}" alt="Admin"
+            <img src="{{ request.user.get_avatar_url }}" alt="Admin"
                  class="w-9 h-9 rounded-full object-cover border-2 border-white/30 flex-shrink-0">
             <div class="flex-1">
                 <p class="font-bold text-white text-sm">Marcos Rebolledo</p>
@@ -575,7 +576,7 @@
         <!-- Mensajes -->
         <div id="chat-mensajes" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
             <div class="flex items-start gap-2">
-                <img src="{% if request.user.foto_perfil %}{{ request.user.foto_perfil.url }}{% else %}{% static 'img/foto de perfil administrador.png' %}{% endif %}" class="w-7 h-7 rounded-full object-cover flex-shrink-0 mt-0.5">
+                <img src="{{ request.user.get_avatar_url }}" class="w-7 h-7 rounded-full object-cover flex-shrink-0 mt-0.5">
                 <div class="bg-white border border-slate-100 rounded-2xl rounded-tl-sm px-3 py-2 max-w-[75%] shadow-sm">
                     <p class="text-xs text-slate-700">Hola, soy Marcos. ¿En qué puedo ayudarte hoy?</p>
                     <p class="text-[10px] text-slate-400 mt-1">Ahora</p>
@@ -847,7 +848,7 @@
             const resp = respuestas[Math.floor(Math.random() * respuestas.length)];
             const msgAdmin = document.createElement('div');
             msgAdmin.className = 'flex items-start gap-2';
-            msgAdmin.innerHTML = `<img src="{% if request.user.foto_perfil %}{{ request.user.foto_perfil.url }}{% else %}{% static 'img/foto de perfil administrador.png' %}{% endif %}" class="w-7 h-7 rounded-full object-cover flex-shrink-0 mt-0.5">
+            msgAdmin.innerHTML = `<img src="{{ request.user.get_avatar_url }}" class="w-7 h-7 rounded-full object-cover flex-shrink-0 mt-0.5">
                 <div class="bg-white border border-slate-100 rounded-2xl rounded-tl-sm px-3 py-2 max-w-[75%] shadow-sm">
                     <p class="text-xs text-slate-700">${resp}</p>
                     <p class="text-[10px] text-slate-400 mt-1">Ahora</p>

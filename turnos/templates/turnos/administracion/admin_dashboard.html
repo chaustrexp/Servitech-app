@@ -120,45 +120,47 @@
         </div>
 
         <!-- Área del gráfico -->
-        <div class="relative flex-1 min-h-[180px] flex items-end justify-between px-4 pb-6 border-b border-slate-300">
-            <!-- Líneas horizontales de guía -->
-            <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6">
-                <div class="border-t border-slate-100 w-full"></div>
-                <div class="border-t border-slate-100 w-full"></div>
-                <div class="border-t border-slate-100 w-full"></div>
-            </div>
-
-            <!-- Barras -->
-            {% for dia in tendencias %}
-            <div class="relative h-full flex flex-col justify-end items-center group w-12 z-10">
-                
-                <!-- Tooltip -->
-                <div class="absolute bottom-full mb-2 hidden group-hover:block z-20">
-                    <div class="bg-white text-slate-800 text-[10px] font-bold rounded-lg px-2.5 py-1.5 shadow-lg border border-slate-100 whitespace-nowrap">
-                        <span class="text-[#0e3687]">Total: {{ dia.total }}</span> | 
-                        <span class="text-[#16a34a]">Finalizadas: {{ dia.finalizadas }}</span>
-                    </div>
+        <div class="relative flex-1 min-h-[180px] w-full overflow-x-auto pb-8 pt-4 hide-scrollbar">
+            <div class="min-w-[320px] sm:min-w-full flex items-end justify-between px-2 sm:px-4 h-full border-b border-slate-300 relative">
+                <!-- Líneas horizontales de guía -->
+                <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-0">
+                    <div class="border-t border-slate-100 w-full"></div>
+                    <div class="border-t border-slate-100 w-full"></div>
+                    <div class="border-t border-slate-100 w-full"></div>
                 </div>
 
-                <!-- Contenedor de barras apiladas visualmente -->
-                <div class="relative w-8 flex items-end justify-center h-[140px]">
-                    <!-- Barra Total (Fondo oscuro, más ancha) -->
-                    <div class="absolute bottom-0 w-full rounded-t-lg transition-all duration-500 {% if dia.total > 0 %}bg-[#0e3687]{% else %}bg-transparent{% endif %}"
-                         style="height: {% if max_tendencia > 0 %}{% widthratio dia.total max_tendencia 100 %}{% else %}0{% endif %}%;">
-                    </div>
+                <!-- Barras -->
+                {% for dia in tendencias %}
+                <div class="relative h-full flex flex-col justify-end items-center group w-10 sm:w-12 z-10">
                     
-                    <!-- Barra Finalizadas (Verde brillante, superpuesta, más estrecha) -->
-                    <div class="absolute bottom-0 w-5 rounded-t-sm transition-all duration-500 bg-[#5eead4]"
-                         style="height: {% if max_tendencia > 0 %}{% widthratio dia.finalizadas max_tendencia 100 %}{% else %}0{% endif %}%;">
+                    <!-- Tooltip -->
+                    <div class="absolute bottom-full mb-2 hidden group-hover:block z-20">
+                        <div class="bg-white text-slate-800 text-[10px] font-bold rounded-lg px-2.5 py-1.5 shadow-lg border border-slate-100 whitespace-nowrap">
+                            <span class="text-[#0e3687]">Total: {{ dia.total }}</span> | 
+                            <span class="text-[#16a34a]">Finalizadas: {{ dia.finalizadas }}</span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Etiqueta del día (eje X) posicionado absoluto debajo del borde -->
-                <span class="absolute -bottom-6 text-[12px] {% if dia.es_hoy %}font-bold text-[#0e3687]{% else %}font-medium text-slate-400{% endif %}">
-                    {{ dia.label }}
-                </span>
+                    <!-- Contenedor de barras apiladas visualmente -->
+                    <div class="relative w-full flex items-end justify-center h-[140px]">
+                        <!-- Barra Total (Fondo oscuro, más ancha) -->
+                        <div class="absolute bottom-0 w-6 sm:w-8 rounded-t-lg transition-all duration-500 {% if dia.total > 0 %}bg-[#0e3687]{% else %}bg-transparent{% endif %}"
+                             style="height: {% if max_tendencia > 0 %}{% widthratio dia.total max_tendencia 100 %}{% else %}0{% endif %}%;">
+                        </div>
+                        
+                        <!-- Barra Finalizadas (Verde brillante, superpuesta, más estrecha) -->
+                        <div class="absolute bottom-0 w-3 sm:w-5 rounded-t-sm transition-all duration-500 bg-[#5eead4]"
+                             style="height: {% if max_tendencia > 0 %}{% widthratio dia.finalizadas max_tendencia 100 %}{% else %}0{% endif %}%;">
+                        </div>
+                    </div>
+
+                    <!-- Etiqueta del día (eje X) posicionado absoluto debajo del borde -->
+                    <span class="absolute -bottom-6 text-[10px] sm:text-[12px] {% if dia.es_hoy %}font-bold text-[#0e3687]{% else %}font-medium text-slate-400{% endif %}">
+                        {{ dia.label }}
+                    </span>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
 
         <div class="mt-8 flex items-center justify-between text-[13px]">
@@ -248,26 +250,26 @@
     </div>
 </div>
 
-<!-- ═══ BANNER AI ═══ -->
+<!-- ═══ BANNER INICIO ═══ -->
 <div class="bg-[#0e3687] rounded-xl overflow-hidden p-6 flex flex-col sm:flex-row items-center justify-between gap-5 mt-2 shadow-sm">
     <div class="flex items-center gap-4">
         <div class="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center border border-white/20">
             <svg class="w-6 h-6 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
             </svg>
         </div>
         <div>
-            <p class="text-white font-bold text-[17px] tracking-tight">Optimización de Rutas AI ✨</p>
+            <p class="text-white font-bold text-[17px] tracking-tight">Todo listo para trabajar ✨</p>
             <p class="text-blue-100/80 text-[13px] mt-0.5 max-w-md font-medium">
-                Hemos calculado rutas eficientes. Ahorra un <span class="text-white font-bold">15%</span> de tiempo.
+                Mantén el control de tus servicios, usuarios e inventario desde el <span class="text-white font-bold">Panel Principal</span> de ServiTech.
             </p>
         </div>
     </div>
 
-    <button id="btn-optimizar" onclick="aplicarOptimizacion(this)"
+    <a href="{% url 'admin_reportes' %}"
             class="flex items-center gap-2 bg-white text-[#0e3687] font-bold px-5 py-2.5 rounded-lg hover:bg-slate-50 transition text-sm shadow-sm flex-shrink-0 border border-transparent">
-        Aplicar Optimización
-    </button>
+        Ver Reportes
+    </a>
 </div>
 
 {% endblock %}

@@ -18,30 +18,22 @@
         .nav-item.active { background:#eff6ff; color:#2563eb; font-weight:700; }
         .sidebar-transition { transition: transform 0.3s ease; }
         @media print {
-            body * { visibility: hidden; }
-            #modal-manual-usuario, #modal-manual-usuario * { visibility: visible; }
-            #modal-manual-usuario {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                background: white !important;
-                padding: 0 !important;
-            }
-            #modal-manual-usuario > div {
-                max-width: 100% !important;
-                max-height: none !important;
-                box-shadow: none !important;
-                border: none !important;
-                border-radius: 0 !important;
-            }
-            #modal-manual-usuario a[onclick="window.print()"],
-            #modal-manual-usuario .border-t,
-            #modal-manual-usuario button {
+            /* Ocultar todo el contenido de la página en la pantalla */
+            body > * {
                 display: none !important;
             }
-            #modal-manual-usuario .overflow-y-auto {
-                overflow: visible !important;
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            /* Mostrar únicamente el documento de impresión */
+            #print-manual {
+                display: block !important;
+                width: 100%;
+            }
+            @page {
+                margin: 2cm;
             }
         }
     </style>
@@ -59,7 +51,7 @@
         <div class="px-5 pt-6 pb-6 border-b border-slate-100">
             <a href="{% url 'cliente_inicio' %}" class="flex items-center gap-3">
                 <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
-                    <img src="{% static 'img/logo.jpg' %}" alt="Logo ServiTech" class="w-full h-full object-contain rounded-lg">
+                    <img src="{% static 'img/Logo/logo.jpg' %}" alt="Logo ServiTech" class="w-full h-full object-contain rounded-lg">
                 </div>
                 <div class="leading-tight">
                     <p class="text-[17px] font-extrabold text-[#0e3687] tracking-tight">ServiTech</p>
@@ -80,15 +72,6 @@
                 Dashboard
             </a>
 
-            <a href="{% url 'cliente_soporte' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'cliente_soporte' %}active{% endif %}">
-                <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Soporte Técnico
-            </a>
-
             <a href="{% url 'cliente_servicios' %}"
                class="nav-item {% if request.resolver_match.url_name == 'cliente_servicios' %}active{% endif %}">
                 <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,12 +89,21 @@
                 </svg>
                 Mi Perfil
             </a>
+
+            <a href="{% url 'cliente_soporte' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'cliente_soporte' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Soporte Técnico
+            </a>
         </nav>
 
         <!-- Agendar Cita + Cerrar Sesión -->
         <div class="px-3 pb-5 pt-3 border-t border-slate-100 space-y-2">
             <a href="{% url 'seleccionar_dispositivo' %}"
-               class="w-full flex items-center justify-center gap-2 bg-[#002b75] hover:bg-[#001f54] text-white font-bold py-2.5 px-4 rounded-xl transition text-sm">
+               class="w-full flex items-center justify-center gap-2 bg-[#0e3687] hover:bg-[#09255d] text-white font-bold py-2.5 px-4 rounded-xl transition text-sm shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -142,14 +134,14 @@
 
         <!-- Top bar móvil -->
         <div class="md:hidden bg-white border-b border-slate-100 px-4 h-14 flex items-center justify-between sticky top-0 z-20">
-            <button onclick="openSidebar()" class="text-slate-600 hover:text-[#002b75] p-1">
+            <button onclick="openSidebar()" class="text-slate-600 hover:text-[#0e3687] p-1">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
             </button>
             <a href="{% url 'cliente_inicio' %}" class="flex items-center gap-2">
-                <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="w-7 h-7 rounded-lg object-cover">
-                <span class="font-extrabold text-[#002b75]">ServiTech</span>
+                <img src="{% static 'img/Logo/logo.jpg' %}" alt="Logo" class="w-7 h-7 rounded-lg object-cover">
+                <span class="font-extrabold text-[#0e3687]">ServiTech</span>
             </a>
             <div class="w-8"></div>
         </div>
@@ -163,7 +155,7 @@
         <footer class="bg-white border-t border-slate-200 py-4 px-6 md:px-10">
             <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-400">
                 <div class="flex items-center gap-2">
-                    <span class="font-bold text-[#002b75]">ServiTech</span>
+                    <span class="font-bold text-[#0e3687]">ServiTech</span>
                     <span>© 2026 ServiTech. Todos los derechos reservados.</span>
                 </div>
                 <div class="flex gap-5">
@@ -269,6 +261,44 @@
                 <button type="button" onclick="document.getElementById('modal-manual-usuario').classList.add('hidden')" class="px-5 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-700 font-bold text-[13px] hover:bg-slate-50 transition">
                     Cerrar
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ DOCUMENTO DE IMPRESIÓN (SOLO VISIBLE AL IMPRIMIR) ═══ -->
+    <div id="print-manual" class="hidden">
+        <div style="font-family: 'Inter', sans-serif; color: #1e293b;">
+            <!-- Header del Documento -->
+            <div style="border-bottom: 3px solid #0e3687; padding-bottom: 20px; margin-bottom: 30px;">
+                <h1 style="font-size: 32px; font-weight: 800; color: #0e3687; margin: 0; line-height: 1.2;">Manual de Usuario</h1>
+                <p style="font-size: 16px; color: #64748b; margin-top: 8px;">Preguntas Frecuentes y Documentación Oficial - ServiTech</p>
+            </div>
+
+            <!-- Contenido -->
+            <div style="margin-bottom: 30px;">
+                <h2 style="font-size: 20px; font-weight: 700; color: #0e3687; margin-bottom: 12px;">1. ¿Cómo agendar un nuevo servicio?</h2>
+                <p style="font-size: 14px; line-height: 1.6; color: #334155; margin: 0;">
+                    Para agendar un servicio, debes ir a la sección <strong>"Nuevo Servicio"</strong> en el panel izquierdo de la aplicación. Selecciona el cliente, el dispositivo a reparar y el servicio específico requerido. Finalmente, asigna una fecha y hora acorde a la disponibilidad mostrada.
+                </p>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h2 style="font-size: 20px; font-weight: 700; color: #0e3687; margin-bottom: 12px;">2. ¿Cómo vinculo a un técnico que ya es cliente?</h2>
+                <p style="font-size: 14px; line-height: 1.6; color: #334155; margin: 0;">
+                    Ve a la sección de <strong>"Usuarios"</strong> o <strong>"Técnicos"</strong> en el panel de administración, haz clic en el botón "Nuevo Técnico", y selecciona la pestaña superior que dice <strong>"Vincular existente"</strong>. En esta vista podrás buscar al usuario previamente registrado como cliente y otorgarle los permisos necesarios de técnico sin necesidad de crear una cuenta duplicada.
+                </p>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <h2 style="font-size: 20px; font-weight: 700; color: #0e3687; margin-bottom: 12px;">3. Soporte Adicional</h2>
+                <p style="font-size: 14px; line-height: 1.6; color: #334155; margin: 0;">
+                    Si requieres asistencia técnica adicional que no se encuentre documentada en este manual, puedes utilizar el módulo de <strong>"Soporte Técnico"</strong> desde tu panel para crear un ticket formal, o comunicarte a la línea directa <strong>800-SERVITECH</strong>.
+                </p>
+            </div>
+
+            <!-- Footer de Impresión -->
+            <div style="margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 20px; text-align: center;">
+                <p style="font-size: 11px; color: #94a3b8; margin: 0;">Generado automáticamente por el Sistema ServiTech. Para uso exclusivo del personal y clientes autorizados.</p>
             </div>
         </div>
     </div>

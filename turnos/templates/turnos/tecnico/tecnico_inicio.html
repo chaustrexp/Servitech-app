@@ -7,18 +7,16 @@
 <!-- ═══════════════════════════════════════════
      HEADER MINIMAL — Título | Subtítulo
 ═══════════════════════════════════════════ -->
-<div class="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
-    <div class="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-0">
-        <h1 class="text-base sm:text-lg font-bold text-[#002b75] leading-tight whitespace-nowrap">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 md:mb-8">
+    <div>
+        <p class="text-[26px] font-bold text-[#0e3687] mb-0.5 tracking-tight">
             <span id="saludo-hora">Hola</span>,&nbsp;{{ request.user.nombre_completo|default:"Técnico"|truncatewords:1 }}
-        </h1>
-        <span class="hidden xs:inline mx-3 text-slate-300 font-light text-lg select-none">|</span>
-        <p class="text-slate-400 text-xs sm:text-sm font-normal leading-tight">
+        </p>
+        <p class="text-[13px] text-slate-600 font-medium">
             <span id="subtitulo-dinamico">Bienvenido de nuevo.</span>
             <span id="texto-citas-hoy">Tienes citas pendientes para hoy.</span>
         </p>
     </div>
-
 </div>
 {% endblock page_header %}
 
@@ -26,6 +24,7 @@
 
 {% block content %}
 {% csrf_token %}
+
 <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
     <!-- Citas Hoy -->
     <div class="bg-white rounded-2xl border border-slate-100 p-4 md:p-5 shadow-sm flex items-center gap-3 md:gap-4">
