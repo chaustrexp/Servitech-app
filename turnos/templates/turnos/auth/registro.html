@@ -10,8 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        #video-fondo { position:fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:-2; }
-        #video-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,15,50,0.60); z-index:-1; }
+        #video-fondo { position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; object-fit:cover; object-position:center; z-index:-2; }
+        #video-overlay { position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(0,15,50,0.25); z-index:-1; }
         .input-field { transition: border-color 0.2s, box-shadow 0.2s; }
         .input-field:focus { border-color:#002b75; box-shadow:0 0 0 3px rgba(0,43,117,0.08); outline:none; }
         .btn-register { background: linear-gradient(135deg,#002b75 0%,#0044cc 100%); transition: opacity .15s, transform .1s; }
@@ -25,19 +25,8 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <video id="video-fondo" autoplay loop playsinline>
-        <source src="{% static 'img/fondo para login.mp4' %}" type="video/mp4">
-    </video>
+    <img id="video-fondo" src="{% static 'img/Fondo/Fondo para login.jpeg' %}" alt="Fondo">
     <div id="video-overlay"></div>
-
-    <!-- Botón activar sonido -->
-    <button id="btn-sonido" onclick="activarSonido()"
-            class="fixed bottom-6 right-6 z-50 hidden items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/25 text-white text-xs font-semibold px-4 py-2 rounded-full transition shadow-lg">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12M9 9H6a1 1 0 00-1 1v4a1 1 0 001 1h3l4 4V5L9 9z"/>
-        </svg>
-        Activar sonido
-    </button>
 
     <!-- CONTENEDOR RECTANGULAR -->
     <div class="w-full max-w-5xl flex rounded-2xl overflow-hidden shadow-2xl shadow-black/40">
@@ -221,11 +210,15 @@
                 </div>
 
                 <!-- Botón registrarse -->
-                <button type="submit"
+                <button type="submit" id="btn-reg-submit"
                         class="btn-register w-full text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-md mt-2 text-sm">
-                    Crear Cuenta
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <span id="btn-reg-text">Crear Cuenta</span>
+                    <svg id="btn-reg-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                    <svg id="btn-reg-spinner" class="animate-spin w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 </button>
             </form>
@@ -244,18 +237,18 @@
     </div>
 
     <script>
-        /* Video */
-        const video = document.getElementById('video-fondo');
-        const btnS  = document.getElementById('btn-sonido');
-        video.play().then(() => btnS.classList.add('hidden')).catch(() => {
-            video.muted = true; video.play();
-            btnS.classList.remove('hidden'); btnS.classList.add('flex');
+        /* ── Spinner on Submit ── */
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const btnText = document.getElementById('btn-reg-text');
+            const btnIcon = document.getElementById('btn-reg-icon');
+            const btnSpinner = document.getElementById('btn-reg-spinner');
+            const btnSubmit = document.getElementById('btn-reg-submit');
+            
+            if(btnText) btnText.textContent = 'Creando Cuenta...';
+            if(btnIcon) btnIcon.classList.add('hidden');
+            if(btnSpinner) btnSpinner.classList.remove('hidden');
+            if(btnSubmit) btnSubmit.classList.add('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
         });
-        function activarSonido() {
-            video.muted = false; video.play();
-            btnS.style.opacity = '0';
-            setTimeout(() => btnS.classList.add('hidden'), 300);
-        }
 
         /* Toggle contraseña */
         function togglePwd(inputId, iconId) {
