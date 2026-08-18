@@ -435,7 +435,7 @@
             document.getElementById('sidebar-overlay').classList.add('hidden');
         }
 
-        let turnoPausado = {% if request.user.perfiltecnico.en_pausa_manual %}true{% else %}false{% endif %};
+        let turnoPausado = {% if request.user.perfil_tecnico.en_pausa_manual %}true{% else %}false{% endif %};
         function togglePausarTurno() {
             const btn      = document.getElementById('btn-pausar');
             const texto    = document.getElementById('texto-pausar');
@@ -591,7 +591,7 @@
         }
     </script>
     <!-- MODAL BLOQUEO POR PAUSA (Turno Pausado) -->
-    <div id="modal-pausa-turno" class="fixed inset-0 z-[100] {% if request.user.perfiltecnico.en_pausa_manual %}flex{% else %}hidden{% endif %} items-center justify-center bg-slate-900/80 backdrop-blur-md">
+    <div id="modal-pausa-turno" class="fixed inset-0 z-[100] {% if request.user.perfil_tecnico and request.user.perfil_tecnico.en_pausa_manual %}flex{% else %}hidden{% endif %} items-center justify-center bg-slate-900/80 backdrop-blur-md">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-8 text-center border border-slate-100">
             <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -353,6 +353,7 @@
                     <p id="dc-horario" class="font-bold text-slate-800 text-sm">—</p>
                 </div>
             </div>
+            <div id="dc-retraso" class="hidden bg-red-50 border border-red-200 rounded-xl px-3.5 py-2 text-sm font-semibold text-red-700"></div>
             <div class="bg-slate-50 rounded-xl p-4">
                 <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-3">Estado de la Cita</p>
                 <div class="relative flex items-center justify-between mx-2">
@@ -418,20 +419,16 @@
                         </div>
                     </div>
                     <div class="relative w-2/3">
-                        <select id="select-repuesto" class="w-full appearance-none bg-white border border-slate-200 text-slate-600 text-xs py-2 px-3 rounded-lg shadow-sm focus:outline-none focus:border-[#002b75]">
+                        <select id="select-repuesto" onchange="agregarRepuestoACita()" class="w-full appearance-none bg-white border border-slate-200 text-slate-600 text-xs py-2 px-3 rounded-lg shadow-sm focus:outline-none focus:border-[#002b75]">
                             <option value="">Seleccionar repuesto...</option>
                             {% for r in repuestos %}
-                            <option value="{{ r.id }}" data-categoria="{{ r.get_categoria_display|upper }}" data-nombre="{{ r.nombre }}">{{ r.nombre }} (Stock: {{ r.stock }})</option>
+                            <option value="{{ r.id }}" data-categoria="{{ r.get_categoria_display|upper }}" data-nombre="{{ r.nombre }}" data-stock="{{ r.stock }}">{{ r.nombre }} (Stock: {{ r.stock }})</option>
                             {% endfor %}
                         </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </div>
                     </div>
-                </div>
-                <div class="flex gap-2 mt-2">
-                    <input type="number" id="input-cantidad" min="1" value="1" class="w-16 bg-white border border-slate-200 rounded-lg px-2 py-2 text-sm text-slate-800 text-center shadow-sm">
-                    <button type="button" onclick="agregarRepuestoACita()" class="flex-1 bg-blue-50 hover:bg-blue-100 text-[#002b75] border border-blue-200 text-sm font-bold rounded-lg py-2 transition">Añadir a lista</button>
                 </div>
             </div>
             <ul id="lista-repuestos-usados" class="mt-3 space-y-1 text-sm text-slate-600 max-h-24 overflow-y-auto"></ul>
@@ -465,6 +462,8 @@ const CITAS_DATA = {
     }{% if not forloop.last %},{% endif %}
 {% endfor %}
 };
+
+const REPUESTOS_POR_CITA = {{ repuestos_por_cita_json|safe }};
 
 const TITULOS_DIAS = {
 {% for dia in dias_semana %}
@@ -589,18 +588,38 @@ function filtrarRepuestosEnModal() {
 
 function agregarRepuestoACita() {
     const select = document.getElementById('select-repuesto');
-    const cantidadInput = document.getElementById('input-cantidad');
     const repuestoId = select.value;
     if (!repuestoId) return;
-    const nombre = select.options[select.selectedIndex].getAttribute('data-nombre');
-    const cantidad = parseInt(cantidadInput.value);
-    if (cantidad < 1) return;
+
+    const option = select.options[select.selectedIndex];
+    const nombre = option.getAttribute('data-nombre');
+    // Extraer stock del texto de la opción ej: "Batería Samsung S22 (Stock: 2)"
+    const stockMatch = option.textContent.match(/Stock:\s*(\d+)/);
+    const stockDisponible = stockMatch ? parseInt(stockMatch[1]) : 1;
+
     const index = _repuestosUsados.findIndex(r => r.id === repuestoId);
-    if (index >= 0) _repuestosUsados[index].cantidad += cantidad;
-    else _repuestosUsados.push({ id: repuestoId, nombre: nombre, cantidad: cantidad });
+    const cantidadActual = index >= 0 ? _repuestosUsados[index].cantidad : 0;
+
+    if (cantidadActual >= stockDisponible) {
+        mostrarToast(`⚠️ Stock máximo alcanzado para ${nombre}`, 'warning');
+        select.value = '';
+        return;
+    }
+
+    if (index >= 0) {
+        _repuestosUsados[index].cantidad += 1;
+    } else {
+        _repuestosUsados.push({ id: repuestoId, nombre: nombre, cantidad: 1, stock: stockDisponible });
+    }
+
+    // Si se agotó el stock, deshabilitar la opción
+    if (cantidadActual + 1 >= stockDisponible) {
+        option.disabled = true;
+        option.textContent = option.textContent.replace(/\(Stock:.*\)/, '(Sin stock)');
+    }
+
     renderListaRepuestos();
     select.value = '';
-    cantidadInput.value = 1;
 }
 
 function renderListaRepuestos() {
@@ -615,7 +634,19 @@ function renderListaRepuestos() {
 }
 
 function removerRepuesto(idx) {
+    const repuesto = _repuestosUsados[idx];
     _repuestosUsados.splice(idx, 1);
+
+    // Rehabilitar la opción en el select
+    const select = document.getElementById('select-repuesto');
+    for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === repuesto.id) {
+            select.options[i].disabled = false;
+            select.options[i].textContent = repuesto.nombre + ' (Stock: ' + repuesto.stock + ')';
+            break;
+        }
+    }
+
     renderListaRepuestos();
 }
 
@@ -706,10 +737,20 @@ function verDetalleCita(citaId) {
     btnFinalizar.disabled = false;
     btnAceptar.innerHTML = 'Aceptar Cita';
     btnFinalizar.innerHTML = '✅ Finalizar Cita';
+    _repuestosUsados = [];
+    // Rehabilitar todas las opciones del select de repuestos
+    document.querySelectorAll('#select-repuesto option').forEach(opt => {
+        opt.disabled = false;
+        if (opt.getAttribute('data-nombre')) {
+            const stock = opt.getAttribute('data-stock');
+            if (stock) opt.textContent = opt.getAttribute('data-nombre') + ' (Stock: ' + stock + ')';
+        }
+    });
     
     if (est.includes('FINALIZ')) {
-        if (cita.repuestos && cita.repuestos.length > 0) {
-            cita.repuestos.forEach(r => {
+        const repsGuardados = REPUESTOS_POR_CITA[String(citaId)] || [];
+        if (repsGuardados.length > 0) {
+            repsGuardados.forEach(r => {
                 ul.innerHTML += `<li class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100">
                     <span><b>${r.cantidad}x</b> ${r.nombre}</span>
                 </li>`;

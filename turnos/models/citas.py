@@ -38,3 +38,15 @@ class HistorialCita(models.Model):
     estado_nuevo = models.CharField(max_length=50, blank=True, null=True)
     descripcion = models.CharField(max_length=255, blank=True, null=True)
     fecha_cambio = models.DateTimeField(auto_now_add=True)
+
+
+class CitaRepuesto(models.Model):
+    cita = models.ForeignKey(Cita, on_delete=models.CASCADE, related_name='cita_repuestos')
+    repuesto = models.ForeignKey('Repuesto', on_delete=models.PROTECT, related_name='cita_repuestos')
+    cantidad = models.IntegerField(default=1)
+
+    class Meta:
+        unique_together = ('cita', 'repuesto')
+
+    def __str__(self):
+        return f"{self.cantidad}x {self.repuesto.nombre} — Cita #{self.cita.id}"
