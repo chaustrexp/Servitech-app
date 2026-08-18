@@ -123,7 +123,7 @@ def dashboard_tecnico(request):
         estado__nombre__iexact='retrasada'
     ).count()
 
-    # Citas disponibles para tomar: sin técnico asignado, en estado PENDIENTE, CONFIRMADA o REAGENDADA
+    # Citas disponibles: asignadas al técnico en estado pendiente/confirmada/reagendada
     ESTADOS_DISPONIBLES = [
         'PENDIENTE', 'Pendiente', 'pendiente',
         'CONFIRMADA', 'Confirmada', 'confirmada',
@@ -131,7 +131,7 @@ def dashboard_tecnico(request):
     ]
     citas_disponibles = base_qs.filter(
         estado__nombre__in=ESTADOS_DISPONIBLES,
-        tecnico__isnull=True
+        tecnico=request.user
     ).select_related('cliente', 'servicio', 'estado').order_by('fecha', 'hora_inicio')
 
     # ────────────────────────────────────────────────────────
