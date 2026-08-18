@@ -211,15 +211,13 @@
 
 
 <!-- ══════════════════════════════════════════════
-     FILA INFERIOR: Rendimiento + Tarea Actual
+     FILA INFERIOR: Rendimiento Semanal
 ══════════════════════════════════════════════ -->
-<div class="grid grid-cols-1 lg:grid-cols-5 gap-5 md:gap-6">
-
+<div class="mb-6">
     <!-- Rendimiento Semanal -->
-    <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
         <h3 class="text-lg font-bold text-slate-800 mb-5">Rendimiento Semanal</h3>
         <div class="flex items-end gap-1.5 md:gap-2 h-32 md:h-40">
-            <!-- Barras del gráfico dinámicas -->
             {% for d in dias_semana %}
             <div class="flex-1 flex flex-col items-center gap-1.5" title="{{ d.count }} citas">
                 {% if d.es_hoy %}
@@ -246,59 +244,6 @@
                 <p class="text-xl font-extrabold text-slate-700">47m</p>
             </div>
         </div>
-    </div>
-
-    <!-- Tarea Actual -->
-    <div class="lg:col-span-2 bg-[#002b75] rounded-2xl shadow-sm p-6 flex flex-col">
-        <div class="flex items-center justify-between mb-1">
-            <h3 class="text-lg font-bold text-white">Tarea Actual</h3>
-            {% if tarea_actual %}
-            <span class="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></span>
-            {% else %}
-            <span class="w-2.5 h-2.5 bg-slate-400 rounded-full"></span>
-            {% endif %}
-        </div>
-        
-        {% if tarea_actual %}
-        <p class="text-blue-200 text-sm mb-5">{{ tarea_actual.servicio.nombre|truncatechars:20 }} — {{ tarea_actual.cliente.nombre_completo|truncatewords:2 }}</p>
-
-        <div class="mb-4">
-            <div class="flex justify-between items-center mb-2">
-                <span class="text-sm text-blue-200 font-medium">Progreso Diagnóstico</span>
-                <span id="pct-progreso" class="text-sm font-bold text-white">{{ progreso_tarea }}%</span>
-            </div>
-            <div class="bg-white/20 rounded-full h-2.5">
-                <div id="barra-progreso" class="progress-fill bg-white rounded-full h-2.5" style="width: {{ progreso_tarea }}%"></div>
-            </div>
-        </div>
-
-        <div class="space-y-2 mb-5">
-            {% for paso in pasos_tarea %}
-            <div class="flex items-center gap-2 text-sm {% if paso.completado %}text-blue-200{% else %}text-blue-200/60{% endif %}">
-                {% if paso.completado %}
-                <svg class="w-4 h-4 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-                {% else %}
-                <svg class="w-4 h-4 text-white/30 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {% endif %}
-                {{ paso.nombre }}
-            </div>
-            {% endfor %}
-        </div>
-
-        <a href="{% url 'tecnico_agenda' %}" class="mt-auto w-full block text-center bg-white hover:bg-slate-50 text-[#002b75] font-bold py-3 rounded-xl transition-all shadow text-sm">
-            Continuar Reparación
-        </a>
-        {% else %}
-        <div class="flex-1 flex flex-col items-center justify-center text-center opacity-70 my-8">
-            <svg class="w-12 h-12 text-blue-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
-            <p class="text-white font-medium">¡Estás al día!</p>
-            <p class="text-blue-200 text-sm mt-1">No tienes tareas activas en progreso en este momento.</p>
-        </div>
-        {% endif %}
     </div>
 </div>
 

@@ -248,10 +248,11 @@ def tecnico_agenda(request):
 
     base_qs = Cita.objects.filter(servicio__tipo_dispositivo__in=dispositivos_permitidos)
 
-    # Citas del técnico para la semana
+    # Citas del técnico para la semana (excluir canceladas)
     citas_semana_qs = (
         base_qs
         .filter(tecnico=request.user, fecha__range=(inicio_semana, fin_semana))
+        .exclude(estado__nombre__iexact='CANCELADA')
         .select_related('cliente', 'servicio', 'estado')
         .order_by('fecha', 'hora_inicio')
     )
@@ -261,6 +262,7 @@ def tecnico_agenda(request):
         citas_semana_qs = (
             base_qs
             .filter(fecha__range=(inicio_semana, fin_semana))
+            .exclude(estado__nombre__iexact='CANCELADA')
             .select_related('cliente', 'servicio', 'estado')
             .order_by('fecha', 'hora_inicio')
         )
@@ -319,8 +321,20 @@ def tecnico_agenda(request):
             })
         grid_rows.append({'hora': hora_str, 'celdas': celdas})
 
-    from ..models import Repuesto
+    from ..models import Repuesto, CitaRepuesto
     repuestos = Repuesto.objects.filter(activo=True, stock__gt=0).order_by('nombre')
+
+    # Pre-cargar repuestos usados por citas finalizadas de esta semana
+    citas_ids = [c.id for c in citas_semana]
+    repuestos_por_cita = {}
+    for cr in CitaRepuesto.objects.filter(cita_id__in=citas_ids).select_related('repuesto'):
+        repuestos_por_cita.setdefault(cr.cita_id, []).append({
+            'nombre': cr.repuesto.nombre,
+            'cantidad': cr.cantidad
+        })
+
+    import json
+    repuestos_por_cita_json = json.dumps({str(k): v for k, v in repuestos_por_cita.items()})
 
     context = {
         'dias_semana': dias_semana,
@@ -335,6 +349,9 @@ def tecnico_agenda(request):
         'horas_grid': horas_grid,
         'grid_rows': grid_rows,
         'hoy': hoy,
+        'repuestos': repuestos,
+        'repuestos_por_cita': repuestos_por_cita,
+        'repuestos_por_cita_json': repuestos_por_cita_json,
     }
     return render(request, 'turnos/tecnico/tecnico_agenda.html', context)
 
@@ -377,10 +394,32 @@ def finalizar_cita(request, cita_id):
         return JsonResponse({'success': False, 'error': 'No autorizado.'}, status=403)
 
     cita = get_object_or_404(Cita, id=cita_id, tecnico=request.user)
-    
-    # Obtener o crear el estado FINALIZADA
+
+    import json
+    from ..models import CitaRepuesto
+
+    try:
+        body = json.loads(request.body)
+        repuestos = body.get('repuestos', [])
+    except Exception:
+        repuestos = []
+
+    # Guardar repuestos y descontar stock
+    for item in repuestos:
+        try:
+            repuesto = Repuesto.objects.get(id=item['id'])
+            cantidad = int(item['cantidad'])
+            if cantidad > 0 and repuesto.stock >= cantidad:
+                CitaRepuesto.objects.update_or_create(
+                    cita=cita, repuesto=repuesto,
+                    defaults={'cantidad': cantidad}
+                )
+                repuesto.stock -= cantidad
+                repuesto.save()
+        except (Repuesto.DoesNotExist, KeyError, ValueError):
+            continue
+
     estado_finalizada, _ = EstadoCita.objects.get_or_create(nombre='FINALIZADA')
-    
     cita.estado = estado_finalizada
     cita.save()
 
