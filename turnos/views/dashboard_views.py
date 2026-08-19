@@ -2615,3 +2615,27 @@ def tecnico_clientes_historial_general(request):
         })
         
     return JsonResponse({'success': True, 'historial': data})
+
+@login_required
+def admin_toggle_pausa_tecnico(request, tecnico_id):
+    """
+    Alterna el estado de pausa de un técnico por parte del administrador.
+    """
+    from django.shortcuts import get_object_or_404
+    from turnos.models.usuarios import Usuario
+    
+    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
+        return JsonResponse({'success': False, 'error': 'No autorizado'}, status=403)
+        
+    try:
+        tecnico = get_object_or_404(Usuario, pk=tecnico_id)
+        if not hasattr(tecnico, 'perfil_tecnico'):
+            return JsonResponse({'success': False, 'error': 'El usuario no tiene perfil de técnico'})
+            
+        perfil = tecnico.perfil_tecnico
+        perfil.en_pausa_manual = not perfil.en_pausa_manual
+        perfil.save(update_fields=['en_pausa_manual'])
+        
+        return JsonResponse({'success': True, 'pausado': perfil.en_pausa_manual})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

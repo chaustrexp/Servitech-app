@@ -185,6 +185,15 @@
                         Nivel {{ perfil.nivel }}
                     </span>
                     {% endif %}
+                    {% if estado != 'inactivo' %}
+                    <button onclick="togglePausarTecnicoAdmin({{ t.pk }})" id="btn-admin-pausa-{{ t.pk }}"
+                            class="mt-1 text-[9px] font-bold px-2 py-1 rounded-md transition-all flex items-center gap-1 {% if estado == 'pausado' %}bg-blue-100 text-blue-700 hover:bg-blue-200{% else %}bg-amber-100 text-amber-700 hover:bg-amber-200{% endif %}">
+                        <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span id="txt-admin-pausa-{{ t.pk }}">{% if estado == 'pausado' %}Reanudar{% else %}Suspender{% endif %}</span>
+                    </button>
+                    {% endif %}
                 </div>
             </div>
 
@@ -744,9 +753,49 @@ document.getElementById('sel-usuario-existente').addEventListener('change', func
                             badge.textContent = 'Inactivo';
                         }
                     }
+                    const btnAdminPausa = document.getElementById('btn-admin-pausa-' + t.id);
+                    const txtAdminPausa = document.getElementById('txt-admin-pausa-' + t.id);
+                    if (btnAdminPausa && txtAdminPausa) {
+                        if (t.estado === 'pausado') {
+                            txtAdminPausa.textContent = 'Reanudar';
+                            btnAdminPausa.className = 'mt-1 text-[9px] font-bold px-2 py-1 rounded-md transition-all flex items-center gap-1 bg-blue-100 text-blue-700 hover:bg-blue-200';
+                        } else {
+                            txtAdminPausa.textContent = 'Suspender';
+                            btnAdminPausa.className = 'mt-1 text-[9px] font-bold px-2 py-1 rounded-md transition-all flex items-center gap-1 bg-amber-100 text-amber-700 hover:bg-amber-200';
+                        }
+                    }
                 });
             }
         });
     }, 5000);
+    function togglePausarTecnicoAdmin(tecnicoId) {
+        const btn = document.getElementById('btn-admin-pausa-' + tecnicoId);
+        const txt = document.getElementById('txt-admin-pausa-' + tecnicoId);
+        
+        fetch(`/admin-panel/tecnicos/${tecnicoId}/toggle-pausa/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '{{ csrf_token }}'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (data.pausado) {
+                    txt.textContent = 'Reanudar';
+                    btn.className = 'mt-1 text-[9px] font-bold px-2 py-1 rounded-md transition-all flex items-center gap-1 bg-blue-100 text-blue-700 hover:bg-blue-200';
+                    if (typeof mostrarToast === 'function') mostrarToast('Técnico suspendido', 'warning');
+                } else {
+                    txt.textContent = 'Suspender';
+                    btn.className = 'mt-1 text-[9px] font-bold px-2 py-1 rounded-md transition-all flex items-center gap-1 bg-amber-100 text-amber-700 hover:bg-amber-200';
+                    if (typeof mostrarToast === 'function') mostrarToast('Técnico reanudado', 'success');
+                }
+            } else {
+                if (typeof mostrarToast === 'function') mostrarToast(data.error || 'Error al cambiar estado', 'error');
+                else alert(data.error || 'Error al cambiar estado');
+            }
+        });
+    }
 </script>
 {% endblock %}

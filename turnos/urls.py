@@ -34,6 +34,7 @@ urlpatterns = [
     path('admin-panel/citas/',                              views.admin_citas,            name='admin_citas'),
     path('admin-panel/citas/exportar/',                     views.admin_exportar_citas_excel, name='admin_exportar_citas_excel'),
     path('admin-panel/tecnicos/',                           views.admin_tecnicos,         name='admin_tecnicos'),
+    path('admin-panel/tecnicos/<int:tecnico_id>/toggle-pausa/', views.admin_toggle_pausa_tecnico, name='admin_toggle_pausa_tecnico'),
     path('admin-panel/reportes/',                           views.admin_reportes,         name='admin_reportes'),
     path('admin-panel/reportes/exportar/',                  views.admin_exportar_analitico_excel, name='admin_exportar_analitico_excel'),
     path('admin-panel/reportes/exportar-pdf/',              views.admin_exportar_analitico_pdf,   name='admin_exportar_analitico_pdf'),

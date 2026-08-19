@@ -28,6 +28,7 @@ from .dashboard_views import (
     admin_exportar_analitico_pdf,
     admin_reportes,
     admin_tecnicos,
+    admin_toggle_pausa_tecnico,
     admin_inventario,
     admin_historial_inventario,
     admin_perfil,
