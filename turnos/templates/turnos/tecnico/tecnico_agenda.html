@@ -478,8 +478,8 @@ const TOTAL_DIA = {
 };
 
 // Día activo por defecto (hoy si está en la semana, si no el primero)
-let diaActivo = {% for dia in dias_semana %}{% if dia.es_hoy %}{{ dia.index }}{% endif %}{% endfor %};
-if (typeof diaActivo !== 'number') diaActivo = 0;
+let diaActivoStr = "{% for dia in dias_semana %}{% if dia.es_hoy %}{{ dia.index }}{% endif %}{% endfor %}";
+let diaActivo = diaActivoStr ? parseInt(diaActivoStr) : 0;
 
 /* ════════════════════════════════════════════
    Vista Semana / Día
