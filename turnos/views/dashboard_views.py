@@ -779,10 +779,14 @@ def cliente_inicio(request):
     
     citas_recientes = citas_usuario
     
+    from turnos.models.notificaciones import Notificacion
+    notificaciones = Notificacion.objects.filter(usuario=request.user, leida=False).order_by('-fecha_envio')
+    
     context = {
         'total_citas_activas': total_citas_activas,
         'total_reparaciones': total_reparaciones,
         'citas_recientes': citas_recientes,
+        'notificaciones': notificaciones,
     }
     return render(request, 'turnos/cliente/cliente_inicio.html', context)
 
@@ -2633,8 +2637,35 @@ def admin_toggle_pausa_tecnico(request, tecnico_id):
             return JsonResponse({'success': False, 'error': 'El usuario no tiene perfil de técnico'})
             
         perfil = tecnico.perfil_tecnico
-        perfil.en_pausa_manual = not perfil.en_pausa_manual
+        is_pausing = not perfil.en_pausa_manual
+        perfil.en_pausa_manual = is_pausing
         perfil.save(update_fields=['en_pausa_manual'])
+        
+        if is_pausing:
+            from django.utils import timezone
+            from turnos.models.notificaciones import Notificacion
+            from turnos.models.citas import Cita
+            
+            today = timezone.now().date()
+            citas_afectadas = Cita.objects.filter(
+                tecnico=tecnico,
+                fecha__gte=today,
+                estado__nombre__in=['PENDIENTE', 'CONFIRMADA', 'RETRASADA']
+            )
+            for cita in citas_afectadas:
+                especialidad_disp = perfil.get_especialidad_display()
+                mensaje = (
+                    f"Tu cita programada para el {cita.fecha.strftime('%d/%m/%Y')} "
+                    f"a las {cita.hora_inicio.strftime('%H:%M')} no podrá ser atendida "
+                    f"debido a una suspensión temporal del técnico {tecnico.nombre_completo}. "
+                    f"Puedes reagendar tu cita con otro técnico de la misma especialidad ({especialidad_disp})."
+                )
+                Notificacion.objects.create(
+                    usuario=cita.cliente,
+                    cita=cita,
+                    tipo='SUSPENSION_TECNICO',
+                    mensaje=mensaje
+                )
         
         return JsonResponse({'success': True, 'pausado': perfil.en_pausa_manual})
     except Exception as e:

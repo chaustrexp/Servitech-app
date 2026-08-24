@@ -63,6 +63,7 @@ urlpatterns = [
     path('cliente/servicios/', views.cliente_servicios, name='cliente_servicios'),
     path('cliente/soporte/', views.cliente_soporte, name='cliente_soporte'),
     path('cliente/perfil/', views.cliente_perfil, name='cliente_perfil'),
+    path('cita/<int:cita_id>/reagendar/', views.iniciar_reagendamiento, name='iniciar_reagendamiento'),
 
     # ── Turnos Digitales ──────────────────────────────────────────
     path('turno/<int:turno_id>/', views.ver_turno, name='ver_turno'),

@@ -31,6 +31,29 @@
 
 {% block content %}
 
+{% if notificaciones %}
+<div class="mb-6 space-y-3">
+    {% for notif in notificaciones %}
+    <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-amber-800">Cita Afectada por Suspensión</p>
+            <p class="text-xs text-amber-700 mt-0.5">{{ notif.mensaje }}</p>
+        </div>
+        {% if notif.tipo == 'SUSPENSION_TECNICO' %}
+        <a href="{% url 'iniciar_reagendamiento' notif.cita.pk %}" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg transition shadow-sm whitespace-nowrap">
+            Reagendar Cita
+        </a>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 <!-- GRID PRINCIPAL: Columna izquierda (2/3) + Columna derecha (1/3) -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
