@@ -101,18 +101,48 @@ def resumen_cita(request):
             messages.error(request, str(e))
             return redirect('seleccionar_fecha_hora')
 
-        cita = Cita.objects.create(
-            cliente=request.user,
-            tecnico=tecnico_asignado,
-            servicio=servicio_obj,
-            estado=estado,
-            fecha=fecha_obj,
-            hora_inicio=hora_inicio,
-            hora_fin=hora_fin,
-            observaciones=notas_usuario if notas_usuario else None,
-        )
+        reagenda_cita_id = request.session.get('reagenda_cita_id')
+        if reagenda_cita_id:
+            try:
+                cita = Cita.objects.get(pk=reagenda_cita_id, cliente=request.user)
+                cita.tecnico = tecnico_asignado
+                cita.fecha = fecha_obj
+                cita.hora_inicio = hora_inicio
+                cita.hora_fin = hora_fin
+                if notas_usuario:
+                    cita.observaciones = notas_usuario
+                estado_confirmada, _ = EstadoCita.objects.get_or_create(nombre='Confirmada')
+                cita.estado = estado_confirmada
+                cita.save()
+                
+                # Mark associated notifications as read
+                from turnos.models.notificaciones import Notificacion
+                Notificacion.objects.filter(cita=cita, usuario=request.user).update(leida=True)
+                messages.success(request, 'Cita reagendada exitosamente.')
+            except Cita.DoesNotExist:
+                cita = Cita.objects.create(
+                    cliente=request.user,
+                    tecnico=tecnico_asignado,
+                    servicio=servicio_obj,
+                    estado=estado,
+                    fecha=fecha_obj,
+                    hora_inicio=hora_inicio,
+                    hora_fin=hora_fin,
+                    observaciones=notas_usuario if notas_usuario else None,
+                )
+        else:
+            cita = Cita.objects.create(
+                cliente=request.user,
+                tecnico=tecnico_asignado,
+                servicio=servicio_obj,
+                estado=estado,
+                fecha=fecha_obj,
+                hora_inicio=hora_inicio,
+                hora_fin=hora_fin,
+                observaciones=notas_usuario if notas_usuario else None,
+            )
 
-        for key in ['wizard_dispositivo', 'wizard_servicio', 'wizard_fecha', 'wizard_hora']:
+        for key in ['wizard_dispositivo', 'wizard_servicio', 'wizard_fecha', 'wizard_hora', 'reagenda_cita_id']:
             request.session.pop(key, None)
 
         return redirect('cita_confirmada', cita_id=cita.pk)
@@ -247,3 +277,15 @@ def api_estado_cita(request, cita_id):
         raise Http404('No tienes permiso.')
     estado_nombre = cita.estado.nombre if cita.estado else 'Confirmada'
     return JsonResponse({'estado': estado_nombre})
+
+@login_required
+def iniciar_reagendamiento(request, cita_id):
+    """Inicia el flujo de reagendamiento para una cita específica."""
+    cita = get_object_or_404(Cita, pk=cita_id, cliente=request.user)
+    
+    # Pre-cargar datos de la cita en la sesión para el wizard de fecha y hora
+    request.session['wizard_dispositivo'] = cita.servicio.tipo_dispositivo
+    request.session['wizard_servicio'] = cita.servicio.nombre
+    request.session['reagenda_cita_id'] = cita.pk
+    
+    return redirect('seleccionar_fecha_hora')

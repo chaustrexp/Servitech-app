@@ -8,3 +8,5 @@ from .inventario import Inventario
 from .tecnicos import PerfilTecnico
 from .dispositivos import Dispositivo
 from .soporte import EstadoSistema, TicketSoporte
+from .auditoria import AuditoriaLog
+
