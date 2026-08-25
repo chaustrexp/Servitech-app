@@ -42,12 +42,12 @@
 <div class="mb-14">
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-extrabold text-slate-800">Categorías de Ayuda</h2>
-        <a href="#" class="text-xs font-bold text-[#002b75] hover:underline flex items-center gap-1">
+        <button onclick="abrirGuiaSoporte('ver_todas')" class="text-xs font-bold text-[#002b75] hover:underline flex items-center gap-1">
             Ver todas
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/>
             </svg>
-        </a>
+        </button>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
@@ -63,28 +63,28 @@
             <p class="text-sm text-slate-500 mb-8 leading-relaxed">Configuración inicial, mantenimiento preventivo y diagnóstico de hardware empresarial.</p>
             <ul class="space-y-4">
                 <li>
-                    <a href="#" class="flex items-center gap-2 text-xs font-medium text-slate-600 hover:text-[#002b75] transition-colors">
+                    <button onclick="abrirGuiaSoporte('registrar_servidor')" class="flex items-center gap-2 text-xs font-medium text-slate-600 hover:text-[#002b75] transition-colors text-left w-full">
                         <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         Cómo registrar un nuevo servidor
-                    </a>
+                    </button>
                 </li>
                 <li>
-                    <a href="#" class="flex items-center gap-2 text-xs font-medium text-slate-600 hover:text-[#002b75] transition-colors">
+                    <button onclick="abrirGuiaSoporte('manual_limpieza')" class="flex items-center gap-2 text-xs font-medium text-slate-600 hover:text-[#002b75] transition-colors text-left w-full">
                         <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         Manual de limpieza de componentes
-                    </a>
+                    </button>
                 </li>
                 <li>
-                    <a href="#" class="flex items-center gap-2 text-xs font-medium text-slate-600 hover:text-[#002b75] transition-colors">
+                    <button onclick="abrirGuiaSoporte('problemas_energia')" class="flex items-center gap-2 text-xs font-medium text-slate-600 hover:text-[#002b75] transition-colors text-left w-full">
                         <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         Resolución de problemas de energía
-                    </a>
+                    </button>
                 </li>
             </ul>
         </div>
 
         <!-- Tarjetas Pequeñas -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow group cursor-pointer">
+        <div onclick="mostrarToast('Sección de Facturación en desarrollo', 'info')" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow group cursor-pointer">
             <div class="w-10 h-10 bg-[#eaf7f2] rounded-lg flex items-center justify-center text-green-700 mb-4 group-hover:scale-110 transition-transform">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -94,7 +94,7 @@
             <p class="text-[11px] text-slate-500 leading-relaxed">Planes, métodos de pago y descarga de facturas.</p>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow group cursor-pointer">
+        <div onclick="mostrarToast('Configuración de Seguridad en desarrollo', 'info')" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow group cursor-pointer">
             <div class="w-10 h-10 bg-[#eef2ff] rounded-lg flex items-center justify-center text-[#002b75] mb-4 group-hover:scale-110 transition-transform">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
@@ -104,7 +104,7 @@
             <p class="text-[11px] text-slate-500 leading-relaxed">Configuración de 2FA, accesos y permisos de técnico.</p>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow group cursor-pointer">
+        <div onclick="abrirModal('modal-soporte-tecnico')" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow group cursor-pointer">
             <div class="w-10 h-10 bg-[#fef2f2] rounded-lg flex items-center justify-center text-red-600 mb-4 group-hover:scale-110 transition-transform">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -114,7 +114,7 @@
             <p class="text-[11px] text-slate-500 leading-relaxed">Seguimiento de tickets y garantías de hardware.</p>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow group cursor-pointer">
+        <div onclick="mostrarToast('Sincronización en la nube en desarrollo', 'info')" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow group cursor-pointer">
             <div class="w-10 h-10 bg-[#f3e8ff] rounded-lg flex items-center justify-center text-purple-600 mb-4 group-hover:scale-110 transition-transform">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
@@ -196,7 +196,7 @@
             </div>
             <h3 class="font-bold text-slate-800 text-base mb-1">Chat en vivo</h3>
             <p class="text-xs text-slate-500 mb-6 leading-relaxed">Habla con un técnico especializado ahora mismo.</p>
-            <button onclick="alert('Conectando con un especialista... Por favor espera.');"
+            <button onclick="mostrarToast('Conectando con un especialista de soporte... Por favor espera.', 'success');"
                     class="w-full border border-green-500 text-green-700 hover:bg-green-50 font-bold py-2.5 rounded-xl text-sm transition-colors">
                 Iniciar Chat
             </button>
@@ -211,10 +211,10 @@
             </div>
             <h3 class="font-bold text-slate-800 text-base mb-1">Correo Electrónico</h3>
             <p class="text-xs text-slate-500 mb-6 leading-relaxed">Envíanos tus dudas y te responderemos en menos de 4 horas.</p>
-            <a href="mailto:soporte@servitech.com"
-               class="block w-full text-center border border-[#002b75] text-[#002b75] hover:bg-[#eef2ff] font-bold py-2.5 rounded-xl text-sm transition-colors">
+            <button onclick="abrirModal('modal-soporte-tecnico')"
+                    class="w-full text-center border border-[#002b75] bg-white text-[#002b75] hover:bg-[#eef2ff] font-bold py-2.5 rounded-xl text-sm transition-colors">
                 Enviar Ticket
-            </a>
+            </button>
         </div>
 
         <!-- Teléfono -->
@@ -235,22 +235,130 @@
     </div>
 </div>
 
-<!-- Banner de Guía Interactiva -->
-<div class="bg-[#002b75] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between text-white gap-6">
-    <div>
-        <span class="bg-white/20 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3 inline-block">Novedad</span>
-        <h2 class="text-xl font-bold mb-1">Guía Interactiva de Diagnóstico</h2>
-        <p class="text-blue-200 text-sm max-w-sm leading-relaxed">Resuelve problemas comunes paso a paso sin esperar a un técnico. Nuestro asistente inteligente te guiará.</p>
+<!-- Banner de Soporte Técnico Urgente -->
+<div class="bg-gradient-to-r from-[#001a4d] to-[#003399] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between text-white gap-6 shadow-md relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10 pointer-events-none" style="background: radial-gradient(circle at 80% 50%, #fff 0%, transparent 50%)"></div>
+    <div class="relative z-10">
+        <span class="bg-amber-500 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider mb-3 inline-block">Soporte 24/7</span>
+        <h2 class="text-xl font-bold mb-1">¿Tienes una emergencia con tu hardware?</h2>
+        <p class="text-blue-200 text-sm max-w-md leading-relaxed">Genera un ticket prioritario de soporte técnico de inmediato. Nuestros técnicos de guardia se encargarán de resolver tu caso de forma urgente.</p>
     </div>
-    <a href="#" class="bg-white text-[#002b75] font-bold px-6 py-3 rounded-xl hover:bg-slate-50 transition shadow-sm whitespace-nowrap text-sm flex items-center gap-2">
-        Comenzar Guía
+    <button onclick="abrirModal('modal-soporte-tecnico')" class="relative z-10 bg-white text-[#002b75] font-bold px-6 py-3 rounded-xl hover:bg-blue-50 transition shadow whitespace-nowrap text-sm flex items-center gap-2">
+        Generar Ticket Urgente
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
         </svg>
-    </a>
+    </button>
+</div>
+
+<!-- Modal de Guías de Soporte -->
+<div id="modal-guia-soporte" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 flex transition-opacity duration-300">
+    <div class="bg-white rounded-[20px] shadow-2xl w-full sm:max-w-md overflow-hidden relative flex flex-col" style="max-height:80dvh">
+        <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+            <h3 id="guia-soporte-titulo" class="font-bold text-slate-800 text-[16px] sm:text-[18px]">Título de Guía</h3>
+            <button type="button" onclick="cerrarGuiaSoporte()" class="text-slate-400 hover:bg-slate-100 p-2 rounded-xl transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div id="guia-soporte-contenido" class="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
+            <!-- Contenido dinámico -->
+        </div>
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+            <button type="button" onclick="cerrarGuiaSoporte()" class="px-5 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-700 font-bold text-[13px] hover:bg-slate-50 transition w-full sm:w-auto">
+                Cerrar
+            </button>
+        </div>
+    </div>
 </div>
 
 <script>
+    // Guias de Soporte
+    const _guias = {
+        'registrar_servidor': {
+            titulo: 'Cómo registrar un nuevo servidor',
+            contenido: `
+                <p class="font-semibold text-slate-800 mb-2">Pasos para registrar un servidor en tu cuenta:</p>
+                <ol class="list-decimal list-inside space-y-2">
+                    <li>Dirígete al <strong>Dashboard de Inicio</strong>.</li>
+                    <li>Busca la sección de <strong>Mis Dispositivos</strong> y haz clic en el botón de agregar (<strong>+</strong>).</li>
+                    <li>En el formulario emergente, selecciona el tipo de dispositivo <strong>PC de Escritorio / Servidor</strong>.</li>
+                    <li>Ingresa la <strong>Marca</strong> y <strong>Modelo</strong> del servidor.</li>
+                    <li>Haz clic en <strong>Guardar</strong>. El servidor quedará registrado bajo el estado <strong>Disponible</strong> para agendar mantenimientos.</li>
+                </ol>
+            `
+        },
+        'manual_limpieza': {
+            titulo: 'Manual de limpieza de componentes',
+            contenido: `
+                <p class="font-semibold text-slate-800 mb-2">Procedimiento recomendado para limpieza de hardware:</p>
+                <ol class="list-decimal list-inside space-y-2">
+                    <li><strong>Apagado seguro:</strong> Apaga el dispositivo por completo y desconéctalo de cualquier fuente de energía eléctrica.</li>
+                    <li><strong>Desensamble básico:</strong> Si es posible, retira la tapa lateral o componentes modulares con cuidado.</li>
+                    <li><strong>Aire comprimido:</strong> Utiliza una lata de aire comprimido a una distancia de 15-20 cm para remover el polvo acumulado en ventiladores, disipadores y placa base. Evita tocar los contactos directamente.</li>
+                    <li><strong>Limpieza de contactos:</strong> Si hay óxido o suciedad rebelde, usa un hisopo humedecido ligeramente con alcohol isopropílico (99%).</li>
+                    <li><strong>Secado:</strong> Espera al menos 10 minutos para asegurar la evaporación completa antes de encender.</li>
+                </ol>
+            `
+        },
+        'problemas_energia': {
+            titulo: 'Resolución de problemas de energía',
+            contenido: `
+                <p class="font-semibold text-slate-800 mb-2">Sigue estos pasos de descarte si tu equipo no enciende:</p>
+                <ol class="list-decimal list-inside space-y-2">
+                    <li><strong>Verificación de cableado:</strong> Desconecta y vuelve a conectar firmemente el cable de poder tanto del equipo como del tomacorriente.</li>
+                    <li><strong>Prueba de enchufe:</strong> Conecta otro dispositivo funcional al mismo tomacorriente para descartar problemas en la línea eléctrica.</li>
+                    <li><strong>Drenado de energía estática:</strong> Desconecta el cable de poder, mantén presionado el botón de encendido por 30 segundos continuos, vuelve a conectar el cable e intenta encender.</li>
+                    <li><strong>LEDs de estado:</strong> Verifica si los indicadores LED de la placa base o de la fuente de poder emiten luz o parpadean al presionar el encendido.</li>
+                </ol>
+            `
+        },
+        'ver_todas': {
+            titulo: 'Todas las Categorías de Ayuda',
+            contenido: `
+                <div class="space-y-4">
+                    <div class="border-b pb-3 border-slate-100">
+                        <p class="font-bold text-[#0e3687] text-sm">Gestión de Equipos</p>
+                        <p class="text-xs text-slate-500">Mantenimiento de hardware, registro de servidores y guías de desensamble de computadoras y laptops.</p>
+                    </div>
+                    <div class="border-b pb-3 border-slate-100">
+                        <p class="font-bold text-green-700 text-sm">Facturación</p>
+                        <p class="text-xs text-slate-500">Administración de planes de soporte, descarga de facturas y actualización de métodos de pago.</p>
+                    </div>
+                    <div class="border-b pb-3 border-slate-100">
+                        <p class="font-bold text-[#002b75] text-sm">Seguridad</p>
+                        <p class="text-xs text-slate-500">Configuración de doble factor de autenticación (2FA), restablecimiento de credenciales y accesos.</p>
+                    </div>
+                    <div class="border-b pb-3 border-slate-100">
+                        <p class="font-bold text-red-600 text-sm">Reparaciones</p>
+                        <p class="text-xs text-slate-500">Seguimiento de garantías de reparaciones físicas, tiempos estimados y estados del taller.</p>
+                    </div>
+                    <div class="pb-1">
+                        <p class="font-bold text-purple-600 text-sm">Sincronización</p>
+                        <p class="text-xs text-slate-500">Respaldos en la nube, sincronización de base de datos de repuestos y documentación técnica.</p>
+                    </div>
+                </div>
+            `
+        }
+    };
+
+    function abrirGuiaSoporte(llave) {
+        const guia = _guias[llave];
+        if (!guia) return;
+        document.getElementById('guia-soporte-titulo').textContent = guia.titulo;
+        document.getElementById('guia-soporte-contenido').innerHTML = guia.contenido;
+        const m = document.getElementById('modal-guia-soporte');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarGuiaSoporte() {
+        const m = document.getElementById('modal-guia-soporte');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+
     // Filtrar FAQs
     function filterFAQs(query) {
         query = query.toLowerCase();

@@ -9,7 +9,7 @@
     /* Ocultar interfaz, navegación, botones, filtros y KPIs */
     aside, header, #sidebar, #sidebar-overlay, #toast-container,
     .no-print, form#form-filtros, .kpis-container, .btn-acciones-head,
-    .col-acciones, button, .paginacion-container {
+    .col-acciones, button, .paginacion-container, .mobile-citas-cards {
         display: none !important;
     }
 
@@ -59,11 +59,12 @@
         color: #1e293b !important;
     }
 
-    .overflow-x-auto {
+    .desktop-tabla-container {
+        display: block !important;
         overflow: visible !important;
     }
 
-    .min-w-[800px] {
+    .min-w-\[800px\] {
         min-width: 0 !important;
     }
 }
@@ -90,29 +91,29 @@
 </div>
 
 <!-- ENCABEZADO -->
-<div class="mb-6 mt-2">
-    <h1 class="text-[26px] font-bold text-[#0e3687] tracking-tight leading-none mb-1">Gestión de Citas</h1>
-    <p class="text-[13px] text-slate-500 font-medium max-w-lg leading-relaxed">Monitorea y administra todas las citas de servicio técnico.</p>
+<div class="mb-4 sm:mb-6 mt-1 sm:mt-2">
+    <h1 class="text-[22px] sm:text-[26px] font-bold text-[#0e3687] tracking-tight leading-none mb-1">Gestión de Citas</h1>
+    <p class="text-[12px] sm:text-[13px] text-slate-500 font-medium max-w-lg leading-relaxed">Monitorea y administra todas las citas de servicio técnico.</p>
 </div>
 
 <!-- ════════════════════════════════════════════
      1. TARJETAS DE KPIS SUPERIORES (4 TARJETAS)
 ════════════════════════════════════════════ -->
-<div class="kpis-container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 mt-6">
+<div class="kpis-container grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6 mt-4 sm:mt-6">
     <!-- KPI 1: Citas Hoy -->
-    <div class="bg-white rounded-[16px] p-5 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition-shadow">
+    <div class="bg-white rounded-[16px] p-3.5 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition-shadow">
         <div class="flex items-start justify-between">
-            <span class="text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-1">Citas de Hoy</span>
-            <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span class="text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-0.5 sm:mt-1">Citas de Hoy</span>
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"/>
                 </svg>
             </div>
         </div>
         <div class="mt-2">
-            <h3 class="text-3xl font-extrabold text-slate-800 leading-none mb-1">{{ citas_hoy|default:0 }}</h3>
-            <p class="text-[11px] font-medium text-emerald-500 flex items-center gap-1">
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-800 leading-none mb-1">{{ citas_hoy|default:0 }}</h3>
+            <p class="text-[10px] sm:text-[11px] font-medium text-emerald-500 flex items-center gap-0.5 sm:gap-1">
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                 12% vs ayer
             </p>
@@ -120,52 +121,52 @@
     </div>
 
     <!-- KPI 2: Pendientes -->
-    <div class="bg-white rounded-[16px] p-5 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition-shadow">
+    <div class="bg-white rounded-[16px] p-3.5 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition-shadow">
         <div class="flex items-start justify-between">
-            <span class="text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-1">Pendientes</span>
-            <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span class="text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-0.5 sm:mt-1">Pendientes</span>
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     <circle cx="12" cy="13" r="3" />
                 </svg>
             </div>
         </div>
         <div class="mt-2">
-            <h3 class="text-3xl font-extrabold text-slate-800 leading-none mb-1">{{ pendientes|default:0 }}</h3>
-            <p class="text-[11px] font-medium text-slate-400">Requieren atención</p>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-800 leading-none mb-1">{{ pendientes|default:0 }}</h3>
+            <p class="text-[10px] sm:text-[11px] font-medium text-slate-400">Requieren atención</p>
         </div>
     </div>
 
     <!-- KPI 3: En Proceso -->
-    <div class="bg-white rounded-[16px] p-5 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition-shadow">
+    <div class="bg-white rounded-[16px] p-3.5 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition-shadow">
         <div class="flex items-start justify-between">
-            <span class="text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-1">En Proceso</span>
-            <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span class="text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-0.5 sm:mt-1">En Proceso</span>
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
             </div>
         </div>
         <div class="mt-2">
-            <h3 class="text-3xl font-extrabold text-slate-800 leading-none mb-1">{{ en_proceso|default:0 }}</h3>
-            <p class="text-[11px] font-medium text-slate-400">Técnicos asignados</p>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-800 leading-none mb-1">{{ en_proceso|default:0 }}</h3>
+            <p class="text-[10px] sm:text-[11px] font-medium text-slate-400">Técnicos asignados</p>
         </div>
     </div>
 
     <!-- KPI 4: Completadas -->
-    <div class="bg-white rounded-[16px] p-5 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition-shadow">
+    <div class="bg-white rounded-[16px] p-3.5 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition-shadow">
         <div class="flex items-start justify-between">
-            <span class="text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-1">Finalizadas</span>
-            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-500 flex items-center justify-center">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span class="text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-0.5 sm:mt-1">Finalizadas</span>
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-100 text-emerald-500 flex items-center justify-center flex-shrink-0">
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             </div>
         </div>
         <div class="mt-2">
-            <h3 class="text-3xl font-extrabold text-slate-800 leading-none mb-1">{{ completadas|default:0 }}</h3>
-            <p class="text-[11px] font-medium text-emerald-500 flex items-center gap-1">
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-800 leading-none mb-1">{{ completadas|default:0 }}</h3>
+            <p class="text-[10px] sm:text-[11px] font-medium text-emerald-500 flex items-center gap-0.5 sm:gap-1">
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                8% vs semana pasada
+                8% vs sem. pasada
             </p>
         </div>
     </div>
@@ -174,7 +175,7 @@
 <!-- ════════════════════════════════════════════
      2. FILTROS AVANZADOS
 ════════════════════════════════════════════ -->
-<form method="GET" action="{% url 'admin_citas' %}" class="bg-white rounded-[16px] border border-slate-200 p-2 shadow-sm mb-6 flex flex-col sm:flex-row gap-2" id="form-filtros">
+<form method="GET" action="{% url 'admin_citas' %}" class="bg-white rounded-[16px] border border-slate-200 p-2.5 sm:p-2 shadow-sm mb-5 sm:mb-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-2" id="form-filtros">
     <!-- Búsqueda -->
     <div class="relative flex-1">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -182,70 +183,183 @@
         </div>
         <input type="text" name="cliente" value="{{ filtro_cliente }}" placeholder="Buscar por cliente, ID o técnico..."
                onchange="document.getElementById('form-filtros').submit()"
-               class="w-full pl-9 pr-3 py-2.5 bg-transparent text-[13px] text-slate-700 focus:outline-none placeholder-slate-400">
+               class="w-full pl-9 pr-3 py-2 bg-slate-50 sm:bg-transparent rounded-lg sm:rounded-none border border-slate-200 sm:border-0 text-[13px] text-slate-700 focus:outline-none placeholder-slate-400">
     </div>
     
-    <div class="hidden sm:block w-px bg-slate-200 my-1"></div>
+    <div class="hidden sm:block w-px bg-slate-200 my-1 h-6"></div>
 
-    <!-- Dropdowns y Botón -->
-    <div class="flex items-center gap-2 flex-wrap">
-        <select name="estado" onchange="document.getElementById('form-filtros').submit()" class="px-3 py-2 bg-transparent text-[13px] text-slate-600 font-medium focus:outline-none cursor-pointer border-r border-slate-200">
-            <option value="">Estado (Todos)</option>
-            {% for est in estados %}
-            <option value="{{ est.nombre }}" {% if filtro_estado == est.nombre %}selected{% endif %}>
-                {% if est.nombre == 'EN_DIAGNOSTICO' %}En Diagnóstico
-                {% elif est.nombre == 'EN_REPARACION' %}En Reparación
-                {% else %}{{ est.nombre|title }}{% endif %}
-            </option>
-            {% endfor %}
-        </select>
+    <!-- Dropdowns y Botones de Acción -->
+    <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-between sm:justify-start">
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 flex-1 sm:flex-none">
+            <select name="estado" onchange="document.getElementById('form-filtros').submit()" class="px-2.5 py-2 bg-slate-50 sm:bg-transparent text-[12px] sm:text-[13px] text-slate-600 font-medium focus:outline-none cursor-pointer border border-slate-200 sm:border-0 sm:border-r rounded-lg sm:rounded-none">
+                <option value="">Estado (Todos)</option>
+                {% for est in estados %}
+                <option value="{{ est.nombre }}" {% if filtro_estado == est.nombre %}selected{% endif %}>
+                    {% if est.nombre == 'EN_DIAGNOSTICO' %}En Diagnóstico
+                    {% elif est.nombre == 'EN_REPARACION' %}En Reparación
+                    {% else %}{{ est.nombre|title }}{% endif %}
+                </option>
+                {% endfor %}
+            </select>
 
-        <select name="fecha" onchange="document.getElementById('form-filtros').submit()" class="px-3 py-2 bg-transparent text-[13px] text-slate-600 font-medium focus:outline-none cursor-pointer">
-            <option value="">Fecha (Todas)</option>
-            <option value="hoy" {% if request.GET.fecha == 'hoy' %}selected{% endif %}>Fecha (Hoy)</option>
-            <option value="ayer" {% if request.GET.fecha == 'ayer' %}selected{% endif %}>Fecha (Ayer)</option>
-        </select>
+            <select name="fecha" onchange="document.getElementById('form-filtros').submit()" class="px-2.5 py-2 bg-slate-50 sm:bg-transparent text-[12px] sm:text-[13px] text-slate-600 font-medium focus:outline-none cursor-pointer border border-slate-200 sm:border-0 rounded-lg sm:rounded-none">
+                <option value="">Fecha (Todas)</option>
+                <option value="hoy" {% if request.GET.fecha == 'hoy' %}selected{% endif %}>Fecha (Hoy)</option>
+                <option value="ayer" {% if request.GET.fecha == 'ayer' %}selected{% endif %}>Fecha (Ayer)</option>
+            </select>
+        </div>
 
         <div class="w-px h-6 bg-slate-200 mx-1 hidden sm:block"></div>
 
-        <!-- Botón Limpiar Filtros -->
-        <a href="{% url 'admin_citas' %}" class="p-2 text-slate-400 hover:text-[#003399] transition flex items-center justify-center" title="Limpiar Filtros">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-        </a>
+        <!-- Botones de Acción -->
+        <div class="flex items-center gap-1 ml-auto sm:ml-0">
+            <!-- Botón Limpiar Filtros -->
+            <a href="{% url 'admin_citas' %}" class="p-2 text-slate-400 hover:text-[#003399] transition rounded-lg hover:bg-slate-100 flex items-center justify-center" title="Limpiar Filtros">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            </a>
 
-        <!-- Botón Exportar (Download) -->
-        <button type="button" onclick="exportarCitasExcel()" class="p-2 text-slate-400 hover:text-[#003399] transition flex items-center justify-center" title="Exportar a Excel">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-        </button>
+            <!-- Botón Exportar (Download) -->
+            <button type="button" onclick="exportarCitasExcel()" class="p-2 text-slate-400 hover:text-[#003399] transition rounded-lg hover:bg-slate-100 flex items-center justify-center" title="Exportar a Excel">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            </button>
 
-        <!-- Botón Imprimir (Print) -->
-        <button type="button" onclick="window.print()" class="p-2 text-slate-400 hover:text-[#003399] transition flex items-center justify-center" title="Imprimir">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"/></svg>
-        </button>
+            <!-- Botón Imprimir (Print) -->
+            <button type="button" onclick="window.print()" class="p-2 text-slate-400 hover:text-[#003399] transition rounded-lg hover:bg-slate-100 flex items-center justify-center" title="Imprimir">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"/></svg>
+            </button>
+        </div>
     </div>
 </form>
 
 <!-- ════════════════════════════════════════════
-     3. TABLA DE CITAS
+     3A. VISTA MÓVIL (TARJETAS/CARDS) - < sm
 ════════════════════════════════════════════ -->
-<div class="bg-white rounded-[16px] border border-slate-200 shadow-sm overflow-hidden mb-6">
+<div class="block sm:hidden mobile-citas-cards space-y-3 mb-6">
+    {% for cita in citas %}
+    <div class="bg-white rounded-[16px] border border-slate-200 p-4 shadow-sm space-y-3">
+        <!-- Card Header: ID Cita + Estado -->
+        <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+            <div class="flex items-center gap-2">
+                <span class="text-[13px] font-extrabold text-[#003399] bg-blue-50 px-2.5 py-0.5 rounded-md">#AP-{{ cita.pk }}</span>
+                <span class="text-[11px] font-semibold text-slate-500">
+                    {% if cita.fecha == hoy %}Hoy, {% elif cita.fecha == manana %}Mañana, {% elif cita.fecha == ayer %}Ayer, {% else %}{{ cita.fecha|date:"d M," }} {% endif %}
+                    {{ cita.hora_inicio|time:"h:i A" }}
+                </span>
+            </div>
+            <!-- Estado Badge -->
+            <div>
+                {% if cita.estado.nombre == 'Pendiente' or cita.estado.nombre == 'PENDIENTE' %}
+                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Pendiente
+                    </span>
+                {% elif cita.estado.nombre == 'Confirmada' or cita.estado.nombre == 'CONFIRMADA' %}
+                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Confirmada
+                    </span>
+                {% elif cita.estado.nombre == 'Diagnóstico' or cita.estado.nombre == 'En Diagnóstico' or cita.estado.nombre == 'EN_DIAGNOSTICO' %}
+                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> En Diagnóstico
+                    </span>
+                {% elif cita.estado.nombre == 'En Reparación' or cita.estado.nombre == 'En Proceso' or cita.estado.nombre == 'EN_REPARACION' %}
+                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> En Reparación
+                    </span>
+                {% elif cita.estado.nombre == 'Finalizada' or cita.estado.nombre == 'Completada' or cita.estado.nombre == 'FINALIZADA' %}
+                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Finalizada
+                    </span>
+                {% elif cita.estado.nombre == 'Cancelada' or cita.estado.nombre == 'CANCELADA' %}
+                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-600">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Cancelada
+                    </span>
+                {% else %}
+                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> {{ cita.estado.nombre|title }}
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Cliente & Servicio Info -->
+        <div class="flex items-start gap-3">
+            <img src="{{ cita.cliente.get_avatar_url }}" class="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-slate-200 bg-white mt-0.5">
+            <div class="flex-1 min-w-0">
+                <p class="text-[13px] font-bold text-slate-800 leading-tight truncate">{{ cita.cliente.nombre_completo }}</p>
+                <p class="text-[11px] text-slate-500 mt-0.5 truncate">
+                    <span class="font-medium text-slate-700">{{ cita.servicio.nombre|default:"Servicio General" }}</span>
+                    {% if cita.descripcion %} — {{ cita.descripcion|truncatechars:35 }}{% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Técnico Asignado -->
+        <div class="bg-slate-50 rounded-xl p-2.5 flex items-center justify-between text-[11px]">
+            <span class="text-slate-500 font-medium">Técnico Asignado:</span>
+            {% if cita.tecnico %}
+            <div class="flex items-center gap-1.5">
+                <img src="{{ cita.tecnico.get_avatar_url }}" class="w-5 h-5 rounded-full object-cover border border-slate-200 bg-white">
+                <span class="font-semibold text-slate-700">{{ cita.tecnico.nombre_completo }}</span>
+            </div>
+            {% else %}
+            <span class="text-slate-400 italic">Sin asignar</span>
+            {% endif %}
+        </div>
+
+        <!-- Acciones Bar -->
+        <div class="pt-1 flex items-center justify-end gap-2 border-t border-slate-100">
+            <a href="{% url 'detalle_cita' cita.id %}" class="flex items-center gap-1 text-[12px] font-bold text-[#003399] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z"/></svg>
+                Ver Detalle
+            </a>
+
+            <form method="POST" action="{% url 'admin_citas' %}" class="inline-block" onsubmit="return confirm('¿Marcar como cancelada esta cita?');">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="cancelar_cita">
+                <input type="hidden" name="cita_id" value="{{ cita.id }}">
+                <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition" title="Cancelar cita">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </button>
+            </form>
+
+            <form method="POST" action="{% url 'admin_citas' %}" class="inline-block" onsubmit="return confirm('¿Eliminar permanentemente esta cita del registro?');">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="eliminar_cita">
+                <input type="hidden" name="cita_id" value="{{ cita.id }}">
+                <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:bg-red-100 hover:text-red-600 transition" title="Eliminar definitivamente">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+    <div class="bg-white rounded-[16px] border border-slate-200 p-8 text-center text-slate-400 font-medium">
+        <svg class="w-10 h-10 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        No se encontraron citas.
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ════════════════════════════════════════════
+     3B. VISTA ESCRITORIO (TABLA TRADICIONAL) - >= sm
+════════════════════════════════════════════ -->
+<div class="hidden sm:block desktop-tabla-container bg-white rounded-[16px] border border-slate-200 shadow-sm overflow-hidden mb-6">
     <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-full sm:min-w-[800px]">
+        <table class="w-full text-left border-collapse min-w-[700px]">
             <thead>
                 <tr class="border-b border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-white">
-                    <th class="py-4 px-6">ID Cita</th>
+                    <th class="py-4 px-6 whitespace-nowrap">ID Cita</th>
                     <th class="py-4 px-6">Cliente / Equipo</th>
-                    <th class="py-4 px-6">Fecha y Hora</th>
-                    <th class="py-4 px-6 hidden sm:table-cell">Técnico Asignado</th>
-                    <th class="py-4 px-6 hidden sm:table-cell">Estado</th>
-                    <th class="py-4 px-6 text-right col-acciones hidden sm:table-cell">Acciones</th>
+                    <th class="py-4 px-6 whitespace-nowrap">Fecha y Hora</th>
+                    <th class="py-4 px-6 whitespace-nowrap">Técnico Asignado</th>
+                    <th class="py-4 px-6 whitespace-nowrap">Estado</th>
+                    <th class="py-4 px-6 text-right col-acciones whitespace-nowrap">Acciones</th>
                 </tr>
             </thead>
             <tbody id="tabla-citas-body" class="divide-y divide-slate-100">
                 {% for cita in citas %}
                 <tr class="hover:bg-slate-50/50 transition-colors group">
                     <!-- ID Cita -->
-                    <td class="py-4 px-6">
+                    <td class="py-4 px-6 whitespace-nowrap">
                         <span class="text-[12px] font-bold text-[#003399]">#AP-{{ cita.pk }}</span>
                     </td>
 
@@ -256,7 +370,7 @@
                             <div>
                                 <p class="text-[12px] font-bold text-slate-800 leading-tight mb-1">{{ cita.cliente.nombre_completo }}</p>
                                 <div class="flex items-center gap-1.5 text-[11px] text-slate-500">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                                     {{ cita.servicio.nombre|default:"Servicio General" }} - {{ cita.descripcion|default:"Sin descripción"|truncatechars:30 }}
                                 </div>
                             </div>
@@ -264,7 +378,7 @@
                     </td>
 
                     <!-- Fecha / Hora -->
-                    <td class="py-4 px-6">
+                    <td class="py-4 px-6 whitespace-nowrap">
                         <p class="text-[12px] font-bold text-slate-800 mb-1">
                             {% if cita.fecha == hoy %}Hoy, {% elif cita.fecha == manana %}Mañana, {% elif cita.fecha == ayer %}Ayer, {% else %}{{ cita.fecha|date:"d M," }} {% endif %}
                             {{ cita.hora_inicio|time:"h:i A" }}
@@ -273,7 +387,7 @@
                     </td>
 
                     <!-- Técnico Asignado -->
-                    <td class="py-4 px-6 hidden sm:table-cell">
+                    <td class="py-4 px-6 whitespace-nowrap">
                         {% if cita.tecnico %}
                         <div class="flex items-center gap-2">
                             <img src="{{ cita.tecnico.get_avatar_url }}" class="w-6 h-6 rounded-full object-cover flex-shrink-0 border border-slate-200 bg-white">
@@ -285,7 +399,7 @@
                     </td>
 
                     <!-- Estado -->
-                    <td class="py-4 px-6 hidden sm:table-cell">
+                    <td class="py-4 px-6 whitespace-nowrap">
                         {% if cita.estado.nombre == 'Pendiente' or cita.estado.nombre == 'PENDIENTE' %}
                             <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-500">
                                 <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Pendiente
@@ -318,8 +432,8 @@
                     </td>
 
                     <!-- Acciones -->
-                    <td class="py-4 px-6 text-right hidden sm:table-cell">
-                        <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td class="py-4 px-6 text-right whitespace-nowrap">
+                        <div class="flex items-center justify-end gap-1 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                             <a href="{% url 'detalle_cita' cita.id %}" class="p-1.5 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition inline-block" title="Ver detalles">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -359,7 +473,7 @@
         </table>
     </div>
 
-    <!-- Paginación -->
+    <!-- Paginación Escritorio -->
     <div class="px-6 py-4 bg-[#F8FAFC] flex items-center justify-between paginacion-container">
         <p class="text-[13px] text-slate-600 font-medium">
             Mostrando {% if citas.start_index %}{{ citas.start_index }}{% else %}0{% endif %} - 
@@ -395,6 +509,44 @@
     </div>
 </div>
 
+<!-- ════════════════════════════════════════════
+     4. PAGINACIÓN MÓVIL (< sm)
+════════════════════════════════════════════ -->
+<div class="block sm:hidden bg-white rounded-[16px] border border-slate-200 p-4 shadow-sm mb-6 paginacion-container">
+    <div class="flex flex-col items-center gap-3">
+        <p class="text-[12px] text-slate-600 font-medium">
+            Mostrando {% if citas.start_index %}{{ citas.start_index }}{% else %}0{% endif %} - 
+            {% if citas.end_index %}{{ citas.end_index }}{% else %}0{% endif %} de {{ total_citas }} citas
+        </p>
+        <div class="flex items-center gap-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.tecnico %}&tecnico={{ request.GET.tecnico }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_ini %}&fecha_ini={{ request.GET.fecha_ini }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" 
+               class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </a>
+            {% else %}
+            <div class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </div>
+            {% endif %}
+            
+            <button class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#003399] text-white font-bold text-[13px] shadow-sm">
+                {{ page_obj.number }}
+            </button>
+            
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.tecnico %}&tecnico={{ request.GET.tecnico }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_ini %}&fecha_ini={{ request.GET.fecha_ini }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" 
+               class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+            {% else %}
+            <div class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -419,3 +571,4 @@ function exportarCitasExcel() {
 }
 </script>
 {% endblock %}
+
