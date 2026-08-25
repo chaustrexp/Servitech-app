@@ -236,16 +236,17 @@
             <h2 class="font-bold text-slate-800 text-[14px]">Seguimiento de la Cita</h2>
         </div>
 
-        <div class="relative flex items-center justify-between px-2 sm:px-8">
+        <div class="relative flex items-center justify-between px-0 sm:px-4">
             <!-- Línea de fondo -->
-            <div class="absolute top-5 left-10 right-10 h-[2px] bg-slate-100"></div>
-            <!-- Línea de progreso -->
-            <div class="absolute top-5 left-10 h-[2px] bg-[#0e3687] transition-all duration-700"
-                 style="width: {% if estado_actual_idx == 0 %}0%{% elif estado_actual_idx == 1 %}33%{% elif estado_actual_idx == 2 %}66%{% else %}100%{% endif %}">
+            <div class="absolute top-5 left-[10%] right-[10%] h-[2px] bg-slate-100">
+                <!-- Línea de progreso -->
+                <div class="h-full bg-[#0e3687] transition-all duration-700"
+                     style="width: {% if estado_actual_idx == 0 %}0%{% elif estado_actual_idx == 1 %}33.33%{% elif estado_actual_idx == 2 %}66.66%{% else %}100%{% endif %}">
+                </div>
             </div>
 
             {% for estado in estados_progreso %}
-            <div class="relative flex flex-col items-center gap-3 z-10 w-24">
+            <div class="relative flex flex-col items-center gap-3 z-10 flex-1">
                 {% if forloop.counter0 <= estado_actual_idx %}
                     <div class="w-10 h-10 rounded-full
                         {% if forloop.counter0 == estado_actual_idx %}
@@ -273,9 +274,9 @@
                         {% endif %}
                     </div>
                 {% endif %}
-                <span class="text-[9px] font-bold uppercase tracking-wider
+                <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider leading-tight
                     {% if forloop.counter0 == estado_actual_idx %}text-[#0e3687]{% elif forloop.counter0 < estado_actual_idx %}text-slate-800{% else %}text-slate-400{% endif %}
-                    text-center">
+                    text-center w-full max-w-[70px]">
                     {{ estado.nombre }}
                 </span>
             </div>

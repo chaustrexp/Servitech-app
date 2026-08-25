@@ -18,32 +18,32 @@
 
 <div class="bg-white rounded-2xl border border-slate-100 p-3 mb-5 shadow-sm">
     <!-- Fila 1: Vista Semana/Día + Navegación semanas -->
-    <div class="flex items-center justify-between gap-2 mb-2">
-        <div class="flex bg-slate-100 rounded-xl p-1 gap-1 flex-shrink-0">
+    <div class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 mb-3">
+        <div class="flex bg-slate-100 rounded-xl p-1 gap-1 flex-shrink-0 w-full sm:w-auto justify-center sm:justify-start">
             <button id="btn-vista-semana" onclick="setVista('semana')"
-                    class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-[#002b75] shadow-sm transition-all">
+                    class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-[#002b75] shadow-sm transition-all">
                 Semana
             </button>
             <button id="btn-vista-dia" onclick="setVista('dia')"
-                    class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all">
+                    class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all">
                 Día
             </button>
         </div>
 
-        <div class="flex items-center gap-0.5 flex-shrink-0">
+        <div class="flex items-center justify-center gap-1 flex-shrink-0 w-full sm:w-auto bg-slate-50 sm:bg-transparent p-1 sm:p-0 rounded-xl">
             <a href="?semana_offset={{ semana_offset_prev }}"
-               class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition" title="Semana anterior">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="nav-semana-link p-1.5 rounded-lg hover:bg-slate-200 text-slate-600 transition" title="Semana anterior">
+                <svg class="w-5 h-5 icon-nav" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
             </a>
             <a href="?semana_offset=0"
-               class="px-2 py-1 rounded-lg hover:bg-slate-100 text-slate-400 transition text-[10px] font-bold">
-                Hoy
+               class="nav-semana-link px-3 py-1.5 rounded-lg hover:bg-slate-200 text-slate-500 transition text-[11px] font-bold">
+                <span class="icon-nav">Hoy</span>
             </a>
             <a href="?semana_offset={{ semana_offset_next }}"
-               class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition" title="Semana siguiente">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="nav-semana-link p-1.5 rounded-lg hover:bg-slate-200 text-slate-600 transition" title="Semana siguiente">
+                <svg class="w-5 h-5 icon-nav" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
             </a>
@@ -51,7 +51,7 @@
     </div>
 
     <!-- Fila 2: Filtro de estado + badge contador -->
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
         <select id="filtro-estado" onchange="filtrarPorEstado(this.value)"
                 class="flex-1 min-w-0 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#002b75] cursor-pointer">
             <option value="TODOS">Todos los estados</option>
@@ -62,7 +62,7 @@
             <option value="FINALIZADA">Finalizada</option>
             <option value="RETRASADA">Retrasada</option>
         </select>
-        <span class="flex-shrink-0 bg-[#eef2ff] text-[#002b75] text-xs font-bold px-3 py-2 rounded-xl border border-[#002b75]/10 whitespace-nowrap">
+        <span class="flex-shrink-0 w-full sm:w-auto text-center sm:text-left bg-[#eef2ff] text-[#002b75] text-xs font-bold px-3 py-2 rounded-xl border border-[#002b75]/10 whitespace-nowrap">
             {{ total_citas_semana }} cita{{ total_citas_semana|pluralize:"s" }}
         </span>
     </div>
@@ -149,7 +149,7 @@
 <div id="vista-movil" class="sm:hidden space-y-3 mb-5">
 
     {# Cinta deslizable de días #}
-    <div class="overflow-x-auto pb-1" style="-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none">
+    <div id="movil-slider-dias" class="overflow-x-auto pb-1" style="-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none">
         <div class="flex gap-2 pr-1" style="width:max-content;min-width:100%">
             {% for dia in dias_semana %}
             <button onclick="seleccionarDia({{ dia.index }})"
@@ -171,7 +171,7 @@
 
     {# Panel del día seleccionado #}
     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div class="px-4 pt-4 pb-3 border-b border-slate-100 flex items-center justify-between">
+        <div id="movil-header-dia" class="px-4 pt-4 pb-3 border-b border-slate-100 flex items-center justify-between">
             <p id="movil-dia-titulo" class="text-sm font-bold text-[#002b75]">
                 {% for dia in dias_semana %}{% if dia.es_hoy %}{{ dia.fecha_display }}{% endif %}{% endfor %}
             </p>
@@ -183,6 +183,7 @@
         {% for dia in dias_semana %}
         <div id="timeline-{{ dia.index }}"
              class="timeline-dia p-4{% if not dia.es_hoy %} hidden{% endif %}">
+            <h4 class="titulo-dia-semana hidden text-[11px] uppercase font-bold text-slate-400 mb-3 border-b border-slate-100 pb-1">{{ dia.fecha_display }}</h4>
             {% if dia.citas %}
             <div class="space-y-3">
                 {% for cita in dia.citas %}
@@ -484,11 +485,19 @@ let diaActivo = diaActivoStr ? parseInt(diaActivoStr) : 0;
 /* ════════════════════════════════════════════
    Vista Semana / Día
    ════════════════════════════════════════════ */
-function setVista(vista) {
+function setVista(vista, guardarEnStorage = true) {
+    if (guardarEnStorage) {
+        localStorage.setItem('agenda_tecnico_vista', vista);
+    }
     const btnSem = document.getElementById('btn-vista-semana');
     const btnDia = document.getElementById('btn-vista-dia');
-    const activeClass = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-[#002b75] shadow-sm transition-all';
-    const inactClass  = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all';
+    const activeClass = 'flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-[#002b75] shadow-sm transition-all';
+    const inactClass  = 'flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all';
+
+    btnSem.className = vista === 'semana' ? activeClass : inactClass;
+    btnDia.className = vista === 'dia' ? activeClass : inactClass;
+
+    const isMobile = window.innerWidth < 640;
 
     const vistaDesktop = document.getElementById('vista-desktop');
     const vistaMovil = document.getElementById('vista-movil');
@@ -497,27 +506,87 @@ function setVista(vista) {
     vistaDesktop.classList.remove('hidden', 'sm:block');
     vistaMovil.classList.remove('sm:hidden');
 
-    if (vista === 'semana') {
-        btnSem.className = activeClass;
-        btnDia.className = inactClass;
-        
-        vistaDesktop.style.display = 'block';
-        vistaMovil.style.display = 'none';
-    } else {
-        btnDia.className = activeClass;
-        btnSem.className = inactClass;
-        
+    if (isMobile) {
+        // En móvil, la vista "Semana" es una lista de todos los días apilada.
         vistaDesktop.style.display = 'none';
         vistaMovil.style.display = 'block';
-        seleccionarDia(diaActivo);
+
+        if (vista === 'semana') {
+            document.getElementById('movil-slider-dias').style.display = 'none';
+            document.getElementById('movil-header-dia').classList.add('hidden');
+            
+            document.querySelectorAll('.timeline-dia').forEach(t => {
+                t.classList.remove('hidden');
+                // Agregar borde inferior para separar los días en la lista
+                t.classList.add('border-b', 'border-slate-100');
+            });
+            document.querySelectorAll('.titulo-dia-semana').forEach(t => t.classList.remove('hidden'));
+        } else {
+            document.getElementById('movil-slider-dias').style.display = '';
+            document.getElementById('movil-header-dia').classList.remove('hidden');
+            
+            document.querySelectorAll('.titulo-dia-semana').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.timeline-dia').forEach(t => t.classList.remove('border-b', 'border-slate-100'));
+            seleccionarDia(diaActivo);
+        }
+    } else {
+        // En desktop, Semana = Tabla Grid, Día = Tarjetas
+        if (vista === 'semana') {
+            vistaDesktop.style.display = 'block';
+            vistaMovil.style.display = 'none';
+        } else {
+            vistaDesktop.style.display = 'none';
+            vistaMovil.style.display = 'block';
+            document.getElementById('movil-slider-dias').style.display = '';
+            document.getElementById('movil-header-dia').classList.remove('hidden');
+            document.querySelectorAll('.titulo-dia-semana').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.timeline-dia').forEach(t => t.classList.remove('border-b', 'border-slate-100'));
+            seleccionarDia(diaActivo);
+        }
     }
 }
+
+// Escuchar cambios de tamaño de pantalla para ajustar la vista
+window.addEventListener('resize', () => {
+    const isSemanaActive = document.getElementById('btn-vista-semana').className.includes('bg-white');
+    setVista(isSemanaActive ? 'semana' : 'dia', false); // No guardar en localStorage al redimensionar
+});
+
+// Inicializar la vista al cargar (según el botón activo o por defecto)
+window.addEventListener('DOMContentLoaded', () => {
+    const vistaGuardada = localStorage.getItem('agenda_tecnico_vista') || 'semana';
+    setVista(vistaGuardada, false); // Inicialmente mostramos la guardada
+
+    // Agregar feedback de carga al navegar entre semanas
+    document.querySelectorAll('.nav-semana-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Prevenir doble click
+            if (this.classList.contains('pointer-events-none')) return;
+            
+            // Opacar la agenda para indicar que está cargando
+            const agendaContainer = document.querySelector('main');
+            if (agendaContainer) agendaContainer.style.opacity = '0.5';
+            
+            // Cambiar icono por un spinner
+            const icon = this.querySelector('.icon-nav');
+            if (icon) {
+                const originalHtml = icon.outerHTML;
+                this.innerHTML = `<svg class="w-5 h-5 animate-spin text-[#002b75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>`;
+            }
+            this.classList.add('pointer-events-none');
+        });
+    });
+});
 
 /* ════════════════════════════════════════════
    Selector de día (vista móvil)
    ════════════════════════════════════════════ */
 function seleccionarDia(idx) {
     diaActivo = idx;
+
+    // Solo funciona en vista 'dia'
+    const isSemanaActive = document.getElementById('btn-vista-semana').className.includes('bg-white');
+    if (isSemanaActive && window.innerWidth < 640) return; // Si es semana móvil, mostramos todos
 
     // Ocultar todos
     document.querySelectorAll('.timeline-dia').forEach(t => t.classList.add('hidden'));
