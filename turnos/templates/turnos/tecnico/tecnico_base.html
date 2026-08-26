@@ -14,7 +14,7 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .nav-item-active { background-color: #eff6ff; color: #2563eb; font-weight: 700; }
-        .sidebar-transition { transition: transform 0.3s ease; }
+        .sidebar-t { transition: transform 0.3s ease; }
         .cita-card { transition: box-shadow 0.2s ease, transform 0.2s ease; }
         .cita-card:hover { box-shadow: 0 8px 25px -5px rgba(0,43,117,0.12); transform: translateY(-1px); }
         .progress-fill { transition: width 1s ease-in-out; }
@@ -25,11 +25,11 @@
 <body class="bg-[#f0f4f8] min-h-screen flex overflow-x-hidden">
 
     <!-- OVERLAY MÓVIL -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden" onclick="closeSidebar()"></div>
 
     <!-- SIDEBAR -->
     <aside id="sidebar"
-           class="sidebar-transition fixed top-0 left-0 h-full w-56 bg-white border-r border-slate-100 shadow-sm z-40 flex flex-col -translate-x-full md:translate-x-0">
+           class="sidebar-t fixed top-0 left-0 h-full w-[220px] bg-white border-r border-slate-200 shadow-sm z-40 flex flex-col -translate-x-full lg:translate-x-0">
 
         <!-- Logo + Nombre -->
         <div class="px-5 pt-6 pb-6 border-b border-slate-100">
@@ -133,16 +133,6 @@
                 </svg>
                 Soporte
             </a>
-
-            <a href="{% url 'tecnico_perfil' %}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all
-                      {% if request.resolver_match.url_name == 'tecnico_perfil' %}nav-item-active{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                Mi Perfil
-            </a>
         </nav>
 
         <!-- Acciones inferiores -->
@@ -156,8 +146,6 @@
                 </svg>
                 Exportar Reporte
             </button>
-
-
 
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
@@ -175,20 +163,99 @@
     </aside>
 
     <!-- CONTENIDO PRINCIPAL -->
-    <div class="flex-1 flex flex-col min-h-screen md:ml-56 min-w-0 w-full max-w-full">
-        <!-- Top bar móvil -->
-        <div class="md:hidden bg-white border-b border-slate-100 px-4 h-14 flex items-center justify-between sticky top-0 z-20 top-bar-mobile">
-            <button onclick="openSidebar()" class="text-slate-600 hover:text-[#002b75] p-1">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-            <a href="{% url 'dashboard_tecnico' %}" class="flex items-center gap-2">
-                <img src="{% static 'img/Logo/logo.jpg' %}" alt="Logo" class="w-7 h-7 rounded-lg object-cover">
-                <span class="font-extrabold text-[#002b75]">ServiTech</span>
-            </a>
-            <div class="w-8"></div>
-        </div>
+    <div class="flex-1 flex flex-col min-h-screen lg:ml-[220px] min-w-0 w-full max-w-full">
+        <!-- ═══ TOPBAR TÉCNICO ═══ -->
+        <header class="bg-white border-b border-slate-100 sticky top-0 z-20 h-[56px] px-4 md:px-7 flex items-center justify-between">
+
+            <!-- Izq: hamburguesa + breadcrumb -->
+            <div class="flex items-center gap-3">
+                <button onclick="openSidebar()" class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#002b75] transition" title="Menú">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                <div class="flex items-center gap-1.5 text-xs">
+                    <span class="text-slate-400">Técnico</span>
+                    <span class="text-slate-300">/</span>
+                    <span class="font-semibold text-slate-700">
+                        {% if request.resolver_match.url_name == 'dashboard_tecnico' %}Inicio
+                        {% elif request.resolver_match.url_name == 'tecnico_agenda' %}Mi Agenda
+                        {% elif request.resolver_match.url_name == 'tecnico_historial' %}Historial
+                        {% elif request.resolver_match.url_name == 'tecnico_dispositivos' %}Inventario
+                        {% elif request.resolver_match.url_name == 'tecnico_clientes' %}Clientes
+                        {% elif request.resolver_match.url_name == 'tecnico_soporte' %}Soporte
+                        {% elif request.resolver_match.url_name == 'tecnico_perfil' %}Mi Perfil
+                        {% else %}Panel{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Der: buscador + notificaciones + perfil -->
+            <div class="flex items-center gap-1.5">
+
+                <!-- Buscador rápido técnico -->
+                <div class="relative hidden sm:block">
+                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="text" id="topbar-search-tecnico" placeholder="Buscar en agenda..."
+                           class="w-40 focus:w-56 pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder-slate-400 focus:outline-none focus:border-[#002b75] focus:bg-white transition-all duration-300"
+                           onkeydown="if(event.key==='Enter'){ buscarTopbarTecnico(this.value); }">
+                </div>
+
+                <div class="w-px h-4 bg-slate-200 mx-1 hidden sm:block"></div>
+
+                <!-- Notificaciones técnico -->
+                <div class="relative">
+                    <button id="btn-notif-tecnico" onclick="toggleNotifTecnico()"
+                            class="relative p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#002b75] transition">
+                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        {% if request.user.unread_notifs %}
+                            <span id="notif-dot-tecnico" class="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                        {% endif %}
+                    </button>
+
+                    <!-- Dropdown notificaciones técnico -->
+                    <div id="dropdown-notif-tecnico"
+                         class="hidden fixed bg-white rounded-xl shadow-2xl border border-slate-100 z-[999]"
+                         style="width: min(288px, calc(100vw - 24px)); max-height: 80vh; overflow-y: auto;">
+                        <div class="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between">
+                            <p class="text-xs font-bold text-slate-800">Notificaciones</p>
+                            <button onclick="marcarLeidasTecnico()" class="text-[11px] font-semibold text-[#002b75] hover:underline">Marcar leídas</button>
+                        </div>
+                         <div class="divide-y divide-slate-50">
+                            {% for notif in request.user.unread_notifs|slice:":5" %}
+                                <a href="#" class="flex gap-3 px-4 py-2.5 hover:bg-slate-50 transition">
+                                    <div class="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <svg class="w-3.5 h-3.5 text-[#002b75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-[11px] font-semibold text-slate-800 line-clamp-2 leading-snug">{{ notif.mensaje }}</p>
+                                        <p class="text-[9px] text-slate-400 mt-0.5">{{ notif.fecha_envio|timesince }}</p>
+                                    </div>
+                                </a>
+                            {% empty %}
+                                <div class="px-4 py-4 text-center">
+                                    <p class="text-xs text-slate-500 font-medium">No tienes notificaciones nuevas</p>
+                                </div>
+                            {% endfor %}
+                        </div>                     
+                    </div>
+                </div>
+
+                <div class="w-px h-4 bg-slate-200 mx-1"></div>
+
+                <!-- Perfil -->
+                <button onclick="window.location.href='{% url 'tecnico_perfil' %}'"
+                        class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-slate-50 transition group">
+                    <div class="w-7 h-7 rounded-full overflow-hidden ring-2 ring-slate-200 group-hover:ring-[#002b75] transition">
+                        <img src="{{ request.user.get_avatar_url }}" alt="Técnico" class="w-full h-full object-cover">
+                    </div>
+                    <div class="hidden sm:block text-left">
+                        <p class="text-xs font-bold text-slate-700 group-hover:text-[#002b75] transition leading-none truncate max-w-[90px]">
+                            {{ request.user.nombre_completo|default:"Técnico"|truncatewords:1 }}
+                        </p>
+                        <p class="text-[10px] text-slate-400 leading-none mt-0.5">Técnico</p>
+                    </div>
+                </button>
+            </div>
+        </header>
 
         <main class="flex-1 p-4 md:p-6 lg:p-8 min-w-0 w-full max-w-full overflow-x-hidden">
             {% block page_header %}{% endblock %}
@@ -581,6 +648,52 @@
             const cliente = document.getElementById('ns-cliente').value;
             cerrarModalNuevoServicio();
             mostrarToast(`✅ Servicio "${nombre}" agendado para ${cliente}`, 'success');
+        }
+
+        /* ── Notificaciones Técnico ── */
+        function toggleNotifTecnico() {
+            const d = document.getElementById('dropdown-notif-tecnico');
+            const b = document.getElementById('btn-notif-tecnico');
+            if (d.classList.contains('hidden')) {
+                const btnRect = b.getBoundingClientRect();
+                const panelW = Math.min(288, window.innerWidth - 24);
+                let left = btnRect.right - panelW;
+                if (left < 12) left = 12;
+                if (left + panelW > window.innerWidth - 12) left = window.innerWidth - panelW - 12;
+                d.style.top = (btnRect.bottom + 6) + 'px';
+                d.style.left = left + 'px';
+                d.classList.remove('hidden');
+            } else {
+                d.classList.add('hidden');
+            }
+        }
+        function marcarLeidasTecnico() {
+            const dot = document.getElementById('notif-dot-tecnico');
+            if (dot) dot.style.display = 'none';
+            const d = document.getElementById('dropdown-notif-tecnico');
+            if (d) d.classList.add('hidden');
+            mostrarToast('✅ Notificaciones marcadas como leídas', 'success');
+        }
+        document.addEventListener('click', e => {
+            const d = document.getElementById('dropdown-notif-tecnico');
+            const b = document.getElementById('btn-notif-tecnico');
+            if (d && !d.contains(e.target) && b && !b.contains(e.target)) d.classList.add('hidden');
+        });
+
+        /* ── Búsqueda Topbar Técnico ── */
+        function buscarTopbarTecnico(q) {
+            if (!q.trim()) return;
+            const enc = encodeURIComponent(q.trim());
+            const path = window.location.pathname;
+            if (path.includes('/tecnico/historial/')) {
+                window.location.href = "{% url 'tecnico_historial' %}?buscar=" + enc;
+            } else if (path.includes('/tecnico/clientes/')) {
+                window.location.href = "{% url 'tecnico_clientes' %}?buscar=" + enc;
+            } else if (path.includes('/tecnico/dispositivos/')) {
+                window.location.href = "{% url 'tecnico_dispositivos' %}?search=" + enc;
+            } else {
+                window.location.href = "{% url 'tecnico_agenda' %}?buscar=" + enc;
+            }
         }
     </script>
     <!-- MODAL BLOQUEO POR PAUSA (Turno Pausado) -->

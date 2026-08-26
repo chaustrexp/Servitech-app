@@ -1,5 +1,11 @@
 from django.urls import path
-from django.contrib.auth.views import LogoutView
+from django.contrib.auth.views import (
+    LogoutView,
+    PasswordResetView,
+    PasswordResetDoneView,
+    PasswordResetConfirmView,
+    PasswordResetCompleteView,
+)
 from . import views
 
 urlpatterns = [
@@ -10,6 +16,32 @@ urlpatterns = [
     path('registro/', views.RegistroView.as_view(), name='registro'),
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+
+    # ── Recuperación de Contraseña ────────────────────────────────
+    path('password-reset/',
+         PasswordResetView.as_view(
+             template_name='turnos/auth/password_reset.html',
+             email_template_name='turnos/auth/password_reset_email.html',
+             subject_template_name='turnos/auth/password_reset_subject.txt',
+             success_url='/password-reset/done/',
+         ),
+         name='password_reset'),
+    path('password-reset/done/',
+         PasswordResetDoneView.as_view(
+             template_name='turnos/auth/password_reset_done.html',
+         ),
+         name='password_reset_done'),
+    path('password-reset/<uidb64>/<token>/',
+         PasswordResetConfirmView.as_view(
+             template_name='turnos/auth/password_reset_confirm.html',
+             success_url='/password-reset/complete/',
+         ),
+         name='password_reset_confirm'),
+    path('password-reset/complete/',
+         PasswordResetCompleteView.as_view(
+             template_name='turnos/auth/password_reset_complete.html',
+         ),
+         name='password_reset_complete'),
 
     # ── Agendamiento ──────────────────────────────────────────────
     path('servicios/dispositivo/', views.seleccionar_dispositivo, name='seleccionar_dispositivo'),
@@ -41,6 +73,7 @@ urlpatterns = [
     path('admin-panel/inventario/',                         views.admin_inventario,       name='admin_inventario'),
     path('admin-panel/inventario/historial/',               views.admin_historial_inventario, name='admin_historial_inventario'),
     path('admin-panel/perfil/',                             views.admin_perfil,           name='admin_perfil'),
+    path('api/admin/busqueda-global/',                     views.api_busqueda_global,    name='api_busqueda_global'),
     path('tecnico/', views.dashboard_tecnico, name='dashboard_tecnico'),
     path('tecnico/toggle-pausa/', views.tecnico_toggle_pausa, name='tecnico_toggle_pausa'),
     path('api/estado-tecnicos/', views.api_estado_tecnicos, name='api_estado_tecnicos'),
@@ -63,6 +96,7 @@ urlpatterns = [
     path('cliente/servicios/', views.cliente_servicios, name='cliente_servicios'),
     path('cliente/soporte/', views.cliente_soporte, name='cliente_soporte'),
     path('cliente/perfil/', views.cliente_perfil, name='cliente_perfil'),
+    path('cliente/notificaciones/', views.cliente_notificaciones, name='cliente_notificaciones'),
     path('cita/<int:cita_id>/reagendar/', views.iniciar_reagendamiento, name='iniciar_reagendamiento'),
 
     # ── Turnos Digitales ──────────────────────────────────────────

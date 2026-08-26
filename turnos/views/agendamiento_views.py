@@ -238,12 +238,23 @@ def detalle_cita(request, cita_id):
         {'nombre': 'Finalizada',  'icono': 'flag'},
     ]
 
+    fecha_str = cita.fecha.strftime('%Y%m%d')
+    hi_str = cita.hora_inicio.strftime('%H%M%S')
+    hf_str = cita.hora_fin.strftime('%H%M%S')
+    gcal_url = (
+        f"https://calendar.google.com/calendar/render?action=TEMPLATE"
+        f"&text=Cita+ServiTech+-+{cita.servicio.nombre.replace(' ', '+')}"
+        f"&dates={fecha_str}T{hi_str}/{fecha_str}T{hf_str}"
+        f"&details=Cita+%23ST-{cita.pk}+en+ServiTech"
+    )
+
     return render(request, 'turnos/contingencias/detalle_cita.html', {
         'cita': cita,
         'dispositivo': dispositivo_display,
         'estado_nombre': estado_nombre,
         'estados_progreso': estados_progreso,
         'estado_actual_idx': estado_actual_idx,
+        'gcal_url': gcal_url,
     })
 
 def ver_turno(request, turno_id):

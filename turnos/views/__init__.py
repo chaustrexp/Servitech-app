@@ -33,6 +33,7 @@ from .dashboard_views import (
     admin_inventario,
     admin_historial_inventario,
     admin_perfil,
+    api_busqueda_global,
     # Técnico
     dashboard_tecnico,
     tecnico_toggle_pausa,
@@ -56,4 +57,5 @@ from .dashboard_views import (
     cliente_servicios,
     cliente_perfil,
     cliente_soporte,
+    cliente_notificaciones,
 )

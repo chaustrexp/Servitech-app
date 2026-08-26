@@ -403,7 +403,19 @@ function abrirModalAgregarServicio() {
 function cerrarModalAgregarServicio() {
     const m = document.getElementById('modal-agregar-servicio');
     m.classList.add('hidden'); m.classList.remove('flex');
+    // Limpiar query params para no abrir el modal al refrescar manualmente
+    const url = new URL(window.location.href);
+    url.searchParams.delete('crear');
+    window.history.replaceState({}, document.title, url.toString());
 }
+
+// Auto abrir modal si viene el query param ?crear=1
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('crear') === '1') {
+        abrirModalAgregarServicio();
+    }
+});
 
 // ─────────────────────────────────────────────
 // MODAL EDITAR SERVICIO (LÁPIZ)

@@ -65,6 +65,10 @@ class Usuario(AbstractUser):
         return self.rol in [self.Rol.ADMINISTRADOR, 'ADMIN']
 
     @property
+    def unread_notifs(self):
+        return self.notificaciones.filter(leida=False).order_by('-fecha_envio')
+
+    @property
     def get_avatar_url(self):
         if self.foto_perfil:
             return self.foto_perfil.url

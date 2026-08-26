@@ -126,3 +126,18 @@ AUTH_USER_MODEL = 'turnos.Usuario'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+# ── Configuración de Correo Electrónico ──────────────────────────────────────
+# Para desarrollo: imprime el correo en la consola (no envía nada real).
+# Para producción con Gmail, cambia EMAIL_BACKEND y agrega las variables al .env
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+
+EMAIL_HOST        = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT        = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS     = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1')
+EMAIL_HOST_USER   = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'ServiTech <noreply@servitech.com>')
+
+# URL base para los enlaces de restablecimiento
+PASSWORD_RESET_TIMEOUT = 86400  # El enlace expira en 24 horas
