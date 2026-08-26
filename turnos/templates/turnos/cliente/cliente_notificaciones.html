@@ -1,0 +1,86 @@
+{% extends 'turnos/cliente/cliente_base.html' %}
+{% load static %}
+
+{% block title %}Notificaciones - ServiTech{% endblock %}
+
+{% block page_header %}
+<div class="mb-8">
+    <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Mis Notificaciones</h1>
+    <p class="text-sm text-slate-500 mt-1">Revisa las actualizaciones y avisos de tus citas técnicas.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-4 max-w-4xl">
+    {% if notificaciones %}
+        {% for notificacion in notificaciones %}
+            <div class="bg-white border {% if not notificacion.leida %}border-blue-200 shadow-sm{% else %}border-slate-100{% endif %} rounded-2xl p-5 md:p-6 flex flex-col md:flex-row gap-5 transition-all">
+                
+                <!-- Icono según tipo -->
+                <div class="flex-shrink-0">
+                    {% if notificacion.tipo == 'SUSPENSION_TECNICO' %}
+                        <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center ring-4 ring-amber-50/50">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                    {% else %}
+                        <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center ring-4 ring-blue-50/50">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Contenido -->
+                <div class="flex-1">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                        <h3 class="font-bold text-slate-800 text-base">
+                            {% if notificacion.tipo == 'SUSPENSION_TECNICO' %}
+                                Cita Suspendida por el Técnico
+                            {% else %}
+                                {{ notificacion.tipo|title }}
+                            {% endif %}
+                        </h3>
+                        <span class="text-xs font-medium text-slate-400 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            {{ notificacion.fecha_envio|date:"d/m/Y - h:i A" }}
+                        </span>
+                    </div>
+                    
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        {{ notificacion.mensaje }}
+                    </p>
+                    
+                    <!-- Acción de Reagendar -->
+                    {% if notificacion.tipo == 'SUSPENSION_TECNICO' and notificacion.cita %}
+                        <div class="mt-5">
+                            <a href="{% url 'iniciar_reagendamiento' notificacion.cita.id %}" 
+                               class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#002b75] hover:bg-[#001f54] text-white text-sm font-bold rounded-xl shadow-sm transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                Reagendar Cita
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <!-- Empty State -->
+        <div class="bg-white border border-slate-100 rounded-2xl p-12 text-center flex flex-col items-center">
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                <svg class="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700 mb-1">No tienes notificaciones</h3>
+            <p class="text-sm text-slate-500 max-w-md">Cuando haya actualizaciones sobre tus citas, como suspensiones o recordatorios, aparecerán aquí.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

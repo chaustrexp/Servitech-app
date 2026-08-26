@@ -829,6 +829,23 @@ def cliente_soporte(request):
     if request.user.rol != Usuario.Rol.CLIENTE:
         return redirect('home')
     return render(request, 'turnos/cliente/cliente_soporte.html')
+@login_required
+def cliente_notificaciones(request):
+    """Módulo de notificaciones para el cliente."""
+    if request.user.rol != Usuario.Rol.CLIENTE:
+        return redirect('home')
+    
+    from turnos.models.notificaciones import Notificacion
+    notificaciones = Notificacion.objects.filter(usuario=request.user).order_by('-fecha_envio')
+    
+    # Marcar como leídas automáticamente al entrar a la vista (opcional pero recomendado)
+    notifs_no_leidas = notificaciones.filter(leida=False)
+    if notifs_no_leidas.exists():
+        notifs_no_leidas.update(leida=True)
+        
+    return render(request, 'turnos/cliente/cliente_notificaciones.html', {
+        'notificaciones': notificaciones
+    })
 
 
 @login_required
@@ -1066,18 +1083,29 @@ def admin_toggle_usuario(request, usuario_id):
 def admin_servicios(request):
     if not request.user.es_admin:
         return redirect('home')
-    servicios         = Servicio.objects.select_related('especialidad').order_by('tipo_dispositivo', 'nombre')
-    especialidades    = Especialidad.objects.filter(activo=True).order_by('nombre')
-    servicios_activos   = servicios.filter(activo=True).count()
-    servicios_inactivos = servicios.filter(activo=False).count()
-    # Bloque Premium: los primeros 4 servicios activos (en producción se puede agregar un campo premium=True)
-    servicios_premium = servicios.filter(activo=True)[:4]
+    servicios      = Servicio.objects.select_related('especialidad').order_by('tipo_dispositivo', 'nombre')
+    especialidades = Especialidad.objects.filter(activo=True).order_by('nombre')
+
+    # Búsqueda global desde topbar
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        from django.db.models import Q
+        servicios = servicios.filter(
+            Q(nombre__icontains=search_query) |
+            Q(descripcion__icontains=search_query) |
+            Q(tipo_dispositivo__icontains=search_query)
+        )
+
+    servicios_activos   = Servicio.objects.filter(activo=True).count()
+    servicios_inactivos = Servicio.objects.filter(activo=False).count()
+    servicios_premium   = Servicio.objects.filter(activo=True).order_by('tipo_dispositivo', 'nombre')[:4]
     return render(request, 'turnos/administracion/admin_servicios.html', {
         'servicios':           servicios,
         'especialidades':      especialidades,
         'servicios_activos':   servicios_activos,
         'servicios_inactivos': servicios_inactivos,
         'servicios_premium':   servicios_premium,
+        'search_query':        search_query,
     })
 
 
@@ -1880,9 +1908,22 @@ def admin_tecnicos(request):
     # ══════════════════════════════════════════════════════════════════════════
     #  GET: Preparar datos
     # ══════════════════════════════════════════════════════════════════════════
-    tecnicos = Usuario.objects.filter(
+    # Búsqueda global desde topbar
+    search_query = request.GET.get('search', '').strip()
+
+    tecnicos_qs = Usuario.objects.filter(
         rol=Usuario.Rol.TECNICO
     ).select_related('perfil_tecnico').order_by('nombre_completo')
+
+    if search_query:
+        from django.db.models import Q
+        tecnicos_qs = tecnicos_qs.filter(
+            Q(nombre_completo__icontains=search_query) |
+            Q(correo__icontains=search_query) |
+            Q(telefono__icontains=search_query)
+        )
+
+    tecnicos = tecnicos_qs
 
     # ── Enriquecer cada técnico con datos de monitoreo ───────────────────────
     tecnicos_monitoreo = []
@@ -1960,6 +2001,7 @@ def admin_tecnicos(request):
         'usuarios_vinculables': usuarios_vinculables,
         'niveles':             PerfilTecnico.Nivel.choices,
         'dispositivos':        PerfilTecnico.EspecialidadTecnico.choices,
+        'search_query':        search_query,
     }
     return render(request, 'turnos/administracion/admin_tecnicos.html', context)
 
@@ -2047,16 +2089,28 @@ def admin_inventario(request):
         return redirect('admin_inventario')
 
     # ── GET: preparar datos para el template ─────────────────────────────────
-    repuestos = Repuesto.objects.filter(activo=True).order_by('categoria', 'nombre')
+    repuestos_base = Repuesto.objects.filter(activo=True).order_by('categoria', 'nombre')
 
-    # Métricas
-    stock_critico = repuestos.filter(stock__lt=5).count()
-    stock_agotado = repuestos.filter(stock=0).count()
-    total_items   = repuestos.count()
-    valorizacion  = sum(r.stock * r.precio for r in repuestos if r.stock > 0)
+    # Búsqueda global desde topbar
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        from django.db.models import Q
+        repuestos = repuestos_base.filter(
+            Q(nombre__icontains=search_query) |
+            Q(categoria__icontains=search_query) |
+            Q(proveedor__icontains=search_query)
+        )
+    else:
+        repuestos = repuestos_base
+
+    # Métricas (sobre base completa, no sobre búsqueda)
+    stock_critico = repuestos_base.filter(stock__lt=5).count()
+    stock_agotado = repuestos_base.filter(stock=0).count()
+    total_items   = repuestos_base.count()
+    valorizacion  = sum(r.stock * r.precio for r in repuestos_base if r.stock > 0)
 
     # Alertas de stock (< 5 unidades)
-    alertas_stock = repuestos.filter(stock__lt=5).order_by('stock')[:6]
+    alertas_stock = repuestos_base.filter(stock__lt=5).order_by('stock')[:6]
 
     # Últimos 10 ingresos registrados
     from django.utils import timezone
@@ -2084,6 +2138,7 @@ def admin_inventario(request):
         'ingresos_hoy':     ingresos_hoy,
         'proveedores_hoy':  proveedores_hoy,
         'categorias':       Repuesto.CATEGORIA_CHOICES,
+        'search_query':     search_query,
     }
     return render(request, 'turnos/administracion/admin_inventario.html', context)
 
@@ -2670,3 +2725,84 @@ def admin_toggle_pausa_tecnico(request, tecnico_id):
         return JsonResponse({'success': True, 'pausado': perfil.en_pausa_manual})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ─────────────────────────────────────────────
+#  API: BÚSQUEDA GLOBAL (ADMIN)
+# ─────────────────────────────────────────────
+@login_required
+def api_busqueda_global(request):
+    """Devuelve conteos de resultados por módulo para el buscador global del topbar admin."""
+    if not request.user.es_admin:
+        return JsonResponse({'error': 'No autorizado'}, status=403)
+
+    q = request.GET.get('q', '').strip()
+    if not q or len(q) < 2:
+        return JsonResponse({'resultados': {}})
+
+    from django.db.models import Q
+    from ..models import Repuesto, Inventario
+
+    resultados = {}
+
+    # Usuarios (clientes)
+    usuarios_count = Usuario.objects.filter(
+        Q(nombre_completo__icontains=q) | Q(correo__icontains=q) | Q(telefono__icontains=q),
+        rol=Usuario.Rol.CLIENTE
+    ).count()
+    resultados['usuarios'] = {
+        'count': usuarios_count,
+        'url': f"/admin-panel/usuarios/?search={q}",
+        'label': 'Usuarios',
+        'icon': '👤',
+    }
+
+    # Técnicos
+    tecnicos_count = Usuario.objects.filter(
+        Q(nombre_completo__icontains=q) | Q(correo__icontains=q) | Q(telefono__icontains=q),
+        rol=Usuario.Rol.TECNICO
+    ).count()
+    resultados['tecnicos'] = {
+        'count': tecnicos_count,
+        'url': f"/admin-panel/tecnicos/?search={q}",
+        'label': 'Técnicos',
+        'icon': '🔧',
+    }
+
+    # Citas
+    citas_count = Cita.objects.filter(
+        Q(cliente__nombre_completo__icontains=q) |
+        Q(tecnico__nombre_completo__icontains=q) |
+        Q(servicio__nombre__icontains=q)
+    ).count()
+    resultados['citas'] = {
+        'count': citas_count,
+        'url': f"/admin-panel/citas/?cliente={q}",
+        'label': 'Citas',
+        'icon': '📅',
+    }
+
+    # Servicios / Catálogo
+    servicios_count = Servicio.objects.filter(
+        Q(nombre__icontains=q) | Q(descripcion__icontains=q)
+    ).count()
+    resultados['servicios'] = {
+        'count': servicios_count,
+        'url': f"/admin-panel/servicios/?search={q}",
+        'label': 'Catálogo',
+        'icon': '📋',
+    }
+
+    # Inventario / Repuestos
+    inventario_count = Repuesto.objects.filter(
+        Q(nombre__icontains=q) | Q(categoria__icontains=q) | Q(proveedor__icontains=q)
+    ).count()
+    resultados['inventario'] = {
+        'count': inventario_count,
+        'url': f"/admin-panel/inventario/?search={q}",
+        'label': 'Inventario',
+        'icon': '📦',
+    }
+
+    return JsonResponse({'resultados': resultados, 'q': q})
+

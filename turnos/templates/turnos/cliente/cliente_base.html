@@ -16,7 +16,7 @@
         .nav-item { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:500; color:#64748b; transition:all .15s; text-decoration:none; }
         .nav-item:hover { background:#f1f5f9; color:#1e293b; }
         .nav-item.active { background:#eff6ff; color:#2563eb; font-weight:700; }
-        .sidebar-transition { transition: transform 0.3s ease; }
+        .sidebar-t { transition: transform 0.3s ease; }
         @media print {
             /* Ocultar todo el contenido de la página en la pantalla */
             body > * {
@@ -41,11 +41,11 @@
 <body class="bg-[#f4f7fb] min-h-screen flex overflow-x-hidden">
 
     <!-- Overlay móvil -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden" onclick="closeSidebar()"></div>
 
     <!-- ══════════════ SIDEBAR ══════════════ -->
     <aside id="sidebar"
-           class="sidebar-transition fixed top-0 left-0 h-full w-[200px] bg-white border-r border-slate-100 z-40 flex flex-col -translate-x-full md:translate-x-0">
+           class="sidebar-t fixed top-0 left-0 h-full w-[220px] bg-white border-r border-slate-200 z-40 flex flex-col -translate-x-full lg:translate-x-0">
 
         <!-- Logo -->
         <div class="px-5 pt-6 pb-6 border-b border-slate-100">
@@ -81,15 +81,6 @@
                 Servicios
             </a>
 
-            <a href="{% url 'cliente_perfil' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'cliente_perfil' %}active{% endif %}">
-                <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                Mi Perfil
-            </a>
-
             <a href="{% url 'cliente_soporte' %}"
                class="nav-item {% if request.resolver_match.url_name == 'cliente_soporte' %}active{% endif %}">
                 <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,6 +88,15 @@
                           d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 Soporte Técnico
+            </a>
+
+            <a href="{% url 'cliente_notificaciones' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'cliente_notificaciones' %}active{% endif %}">
+                <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                Notificaciones
             </a>
         </nav>
 
@@ -130,21 +130,100 @@
     </aside>
 
     <!-- ══════════════ CONTENIDO ══════════════ -->
-    <div class="flex-1 flex flex-col min-h-screen md:ml-[200px]">
+    <div class="flex-1 flex flex-col min-h-screen lg:ml-[220px] min-w-0 w-full">
 
-        <!-- Top bar móvil -->
-        <div class="md:hidden bg-white border-b border-slate-100 px-4 h-14 flex items-center justify-between sticky top-0 z-20">
-            <button onclick="openSidebar()" class="text-slate-600 hover:text-[#0e3687] p-1">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-            <a href="{% url 'cliente_inicio' %}" class="flex items-center gap-2">
-                <img src="{% static 'img/Logo/logo.jpg' %}" alt="Logo" class="w-7 h-7 rounded-lg object-cover">
-                <span class="font-extrabold text-[#0e3687]">ServiTech</span>
-            </a>
-            <div class="w-8"></div>
-        </div>
+        <!-- ═══ TOPBAR CLIENTE ═══ -->
+        <header class="bg-white border-b border-slate-100 sticky top-0 z-20 h-[56px] px-4 md:px-7 flex items-center justify-between">
+
+            <!-- Izq: hamburguesa + breadcrumb -->
+            <div class="flex items-center gap-3">
+                <button onclick="openSidebar()" class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#0e3687] transition" title="Menú">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                <div class="flex items-center gap-1.5 text-xs">
+                    <span class="text-slate-400">Portal</span>
+                    <span class="text-slate-300">/</span>
+                    <span class="font-semibold text-slate-700">
+                        {% if request.resolver_match.url_name == 'cliente_inicio' %}Inicio
+                        {% elif request.resolver_match.url_name == 'cliente_servicios' %}Servicios
+                        {% elif request.resolver_match.url_name == 'cliente_soporte' %}Soporte
+                        {% elif request.resolver_match.url_name == 'cliente_perfil' %}Mi Perfil
+                        {% else %}Portal{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Der: buscador + notificaciones + perfil -->
+            <div class="flex items-center gap-1.5">
+
+                <!-- Buscador rápido en servicios -->
+                <div class="relative hidden sm:block">
+                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="text" id="topbar-search-cliente" placeholder="Buscar servicios..."
+                           class="w-40 focus:w-56 pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder-slate-400 focus:outline-none focus:border-[#0e3687] focus:bg-white transition-all duration-300"
+                           onkeydown="if(event.key==='Enter'){ window.location.href='{% url 'cliente_servicios' %}?q=' + encodeURIComponent(this.value); }">
+                </div>
+
+                <div class="w-px h-4 bg-slate-200 mx-1 hidden sm:block"></div>
+
+                <!-- Notificaciones -->
+                <div class="relative">
+                    <button id="btn-notif-cliente" onclick="toggleNotifCliente()"
+                            class="relative p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#0e3687] transition">
+                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        {% if request.user.unread_notifs %}
+                            <span id="notif-dot-cliente" class="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                        {% endif %}
+                    </button>
+
+                    <!-- Dropdown notificaciones cliente -->
+                    <div id="dropdown-notif-cliente"
+                         class="hidden fixed bg-white rounded-xl shadow-2xl border border-slate-100 z-[999]"
+                         style="width: min(288px, calc(100vw - 24px)); max-height: 80vh; overflow-y: auto;">
+                        <div class="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between">
+                            <p class="text-xs font-bold text-slate-800">Notificaciones</p>
+                            <button onclick="marcarLeidasCliente()" class="text-[11px] font-semibold text-[#0e3687] hover:underline">Marcar leídas</button>
+                        </div>
+                        <div class="divide-y divide-slate-50">
+                            {% for notif in request.user.unread_notifs|slice:":5" %}
+                                <a href="{% url 'cliente_notificaciones' %}" class="flex gap-3 px-4 py-2.5 hover:bg-slate-50 transition">
+                                    <div class="w-7 h-7 rounded-full {% if notif.tipo == 'SUSPENSION_TECNICO' %}bg-orange-50{% else %}bg-blue-50{% endif %} flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <svg class="w-3.5 h-3.5 {% if notif.tipo == 'SUSPENSION_TECNICO' %}text-orange-500{% else %}text-[#0e3687]{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-[11px] font-semibold text-slate-800 line-clamp-2 leading-snug">{{ notif.mensaje }}</p>
+                                        <p class="text-[9px] text-slate-400 mt-0.5">{{ notif.fecha_envio|timesince }}</p>
+                                    </div>
+                                </a>
+                            {% empty %}
+                                <div class="px-4 py-4 text-center">
+                                    <p class="text-xs text-slate-500 font-medium">No tienes notificaciones nuevas</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="px-4 py-2 border-t border-slate-100 text-center">
+                            <a href="{% url 'cliente_notificaciones' %}" class="text-[11px] font-bold text-[#0e3687] hover:underline">Ver todas las notificaciones</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-px h-4 bg-slate-200 mx-1"></div>
+
+                <!-- Perfil -->
+                <button onclick="window.location.href='{% url 'cliente_perfil' %}'"
+                        class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-slate-50 transition group">
+                    <div class="w-7 h-7 rounded-full overflow-hidden ring-2 ring-slate-200 group-hover:ring-[#0e3687] transition">
+                        <img src="{{ request.user.get_avatar_url }}" alt="Cliente" class="w-full h-full object-cover">
+                    </div>
+                    <div class="hidden sm:block text-left">
+                        <p class="text-xs font-bold text-slate-700 group-hover:text-[#0e3687] transition leading-none truncate max-w-[90px]">
+                            {{ request.user.nombre_completo|default:"Cliente"|truncatewords:1 }}
+                        </p>
+                        <p class="text-[10px] text-slate-400 leading-none mt-0.5">Cliente</p>
+                    </div>
+                </button>
+            </div>
+        </header>
 
         <main class="flex-1 p-5 md:p-7 max-w-6xl mx-auto w-full">
             {% block page_header %}{% endblock %}
@@ -370,6 +449,34 @@
             requestAnimationFrame(()=>el.classList.remove('translate-y-4','opacity-0'));
             setTimeout(()=>{el.classList.add('opacity-0','translate-y-4');setTimeout(()=>el.remove(),300);},3500);
         }
+        function toggleNotifCliente() {
+            const d = document.getElementById('dropdown-notif-cliente');
+            const b = document.getElementById('btn-notif-cliente');
+            if (d.classList.contains('hidden')) {
+                const btnRect = b.getBoundingClientRect();
+                const panelW = Math.min(288, window.innerWidth - 24);
+                let left = btnRect.right - panelW;
+                if (left < 12) left = 12;
+                if (left + panelW > window.innerWidth - 12) left = window.innerWidth - panelW - 12;
+                d.style.top = (btnRect.bottom + 6) + 'px';
+                d.style.left = left + 'px';
+                d.classList.remove('hidden');
+            } else {
+                d.classList.add('hidden');
+            }
+        }
+        function marcarLeidasCliente() {
+            const dot = document.getElementById('notif-dot-cliente');
+            if (dot) dot.style.display = 'none';
+            const d = document.getElementById('dropdown-notif-cliente');
+            if (d) d.classList.add('hidden');
+            mostrarToast('✅ Notificaciones marcadas como leídas', 'success');
+        }
+        document.addEventListener('click', e => {
+            const d = document.getElementById('dropdown-notif-cliente');
+            const b = document.getElementById('btn-notif-cliente');
+            if (d && !d.contains(e.target) && b && !b.contains(e.target)) d.classList.add('hidden');
+        });
     </script>
     {% block scripts %}{% endblock %}
 </body>

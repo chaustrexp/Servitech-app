@@ -71,7 +71,7 @@
         <div class="px-3 pb-4 pt-3 border-t border-slate-100 space-y-2">
             
             <!-- Botón Nuevo Servicio -->
-            <a href="{% url 'admin_crear_servicio' %}" class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-[13px] font-bold text-white bg-[#003399] hover:bg-[#002266] transition shadow-sm mb-2">
+            <a href="{% url 'admin_servicios' %}?crear=1" class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-[13px] font-bold text-white bg-[#003399] hover:bg-[#002266] transition shadow-sm mb-2">
                 <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                 Nuevo Servicio
             </a>
@@ -88,17 +88,17 @@
     </aside>
 
     <!-- CONTENIDO -->
-    <div class="flex-1 flex flex-col min-h-screen lg:ml-[210px] min-w-0 w-full">
+    <div id="main-content" class="flex-1 flex flex-col min-h-screen lg:ml-[210px] min-w-0 w-full transition-all duration-300">
 
         <!-- ═══ TOPBAR NUEVO ═══ -->
         <header class="bg-white border-b border-slate-100 sticky top-0 z-20 h-[56px] px-5 flex items-center justify-between">
 
             <!-- Izq: hamburguesa + breadcrumb -->
             <div class="flex items-center gap-3">
-                <button onclick="openSidebar()" class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 transition">
+                <button onclick="openSidebar()" class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#0e3687] transition" title="Menú">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
-                <div class="hidden md:flex items-center gap-1.5 text-xs">
+                <div class="flex items-center gap-1.5 text-xs">
                     <span class="text-slate-400">Panel</span>
                     <span class="text-slate-300">/</span>
                     <span class="font-semibold text-slate-700">
@@ -115,12 +115,19 @@
             <!-- Der: buscador + acciones + perfil -->
             <div class="flex items-center gap-1.5">
 
-                <!-- Buscador compacto con expansión -->
-                <div class="relative hidden sm:block">
-                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <input type="text" id="topbar-search" placeholder="Buscar..."
-                           class="w-40 focus:w-56 pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder-slate-400 focus:outline-none focus:border-[#1d4ed8] focus:bg-white transition-all duration-300"
-                           onkeydown="if(event.key==='Enter'){ buscarTopbar(this.value); }">
+                <!-- Buscador global con dropdown -->
+                <div class="relative hidden sm:block" id="global-search-wrap">
+                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="text" id="topbar-search" placeholder="Buscar en todo..."
+                           autocomplete="off"
+                           class="w-44 focus:w-64 pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder-slate-400 focus:outline-none focus:border-[#1d4ed8] focus:bg-white transition-all duration-300"
+                           oninput="buscarGlobal(this.value)"
+                           onkeydown="if(event.key==='Enter'){ irPrimerResultado(); } if(event.key==='Escape'){ cerrarDropdown(); }">
+                    <!-- Dropdown resultados -->
+                    <div id="search-dropdown"
+                         class="hidden absolute top-full left-0 mt-1.5 bg-white rounded-xl border border-slate-200 shadow-xl z-[9999] w-72 max-h-80 overflow-y-auto">
+                        <div id="search-results" class="py-1"></div>
+                    </div>
                 </div>
 
                 <div class="w-px h-4 bg-slate-200 mx-1 hidden sm:block"></div>
@@ -130,7 +137,9 @@
                     <button id="btn-notif" onclick="toggleNotifAdmin()"
                             class="relative p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#1d4ed8] transition">
                         <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                        <span id="notif-dot" class="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                        {% if request.user.unread_notifs %}
+                            <span id="notif-dot" class="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                        {% endif %}
                     </button>
                 </div>
 
@@ -143,35 +152,26 @@
                         <button onclick="marcarLeidas()" class="text-[11px] font-semibold text-[#1d4ed8] hover:underline">Marcar leídas</button>
                     </div>
                     <div class="divide-y divide-slate-50">
-                        <a href="{% url 'admin_citas' %}" class="flex gap-3 px-4 py-2.5 hover:bg-slate-50 transition">
-                            <div class="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg class="w-3.5 h-3.5 text-[#1d4ed8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        {% for notif in request.user.unread_notifs|slice:":5" %}
+                            <a href="#" class="flex gap-3 px-4 py-2.5 hover:bg-slate-50 transition">
+                                <div class="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <svg class="w-3.5 h-3.5 text-[#1d4ed8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-[11px] font-semibold text-slate-800 line-clamp-2 leading-snug">{{ notif.mensaje }}</p>
+                                    <p class="text-[9px] text-slate-400 mt-0.5">{{ notif.fecha_envio|timesince }}</p>
+                                </div>
+                            </a>
+                        {% empty %}
+                            <div class="px-4 py-4 text-center">
+                                <p class="text-xs text-slate-500 font-medium">No tienes notificaciones nuevas</p>
                             </div>
-                            <div class="min-w-0">
-                                <p class="text-xs font-semibold text-slate-800">Nuevas citas registradas</p>
-                                <p class="text-[10px] text-slate-400 mt-0.5">Revisa las citas pendientes.</p>
-                            </div>
-                        </a>
-                        <a href="{% url 'admin_reportes' %}" class="flex gap-3 px-4 py-2.5 hover:bg-slate-50 transition">
-                            <div class="w-7 h-7 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            </div>
-                            <div class="min-w-0">
-                                <p class="text-xs font-semibold text-slate-800">Sistema operativo</p>
-                                <p class="text-[10px] text-slate-400 mt-0.5">Todos los servicios normales.</p>
-                            </div>
-                        </a>
+                        {% endfor %}
                     </div>
                     <div class="px-4 py-2 border-t border-slate-100">
                         <a href="{% url 'admin_reportes' %}" class="text-[11px] font-semibold text-[#1d4ed8] hover:underline">Ver reportes →</a>
                     </div>
                 </div>
-
-                <!-- Settings -->
-                <a href="{% url 'admin_servicios' %}" title="Catálogo"
-                   class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#1d4ed8] transition">
-                    <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                </a>
 
                 <div class="w-px h-4 bg-slate-200 mx-1"></div>
 
@@ -201,8 +201,14 @@
     <div id="toast-container"></div>
 
     <script>
-        function openSidebar() { document.getElementById('sidebar').classList.remove('-translate-x-full'); document.getElementById('sidebar-overlay').classList.remove('hidden'); }
-        function closeSidebar() { document.getElementById('sidebar').classList.add('-translate-x-full'); document.getElementById('sidebar-overlay').classList.add('hidden'); }
+        function openSidebar() {
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.remove('hidden');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.add('hidden');
+        }
 
         function toggleNotifAdmin() {
             const d = document.getElementById('dropdown-notif-admin');
@@ -234,38 +240,219 @@
             if (d && !d.contains(e.target) && !b.contains(e.target)) d.classList.add('hidden');
         });
 
-        function buscarTopbar(q) {
-            if (!q.trim()) return;
-            const v = q.toLowerCase().trim();
+        // ── BÚSQUEDA GLOBAL ──────────────────────────────────────────────────
+        let _searchTimer = null;
+        let _primerUrl   = null;
 
-            // Navegación rápida por sección
-            if (v === 'citas' || v === 'cita') {
-                window.location.href = "{% url 'admin_citas' %}";
-                return;
-            }
-            if (v === 'usuarios' || v === 'usuario' || v === 'tecnicos' || v === 'tecnico' || v === 'clientes' || v === 'cliente') {
-                window.location.href = "{% url 'admin_usuarios' %}";
-                return;
-            }
-            if (v === 'servicios' || v === 'servicio' || v === 'catalogo' || v === 'catálogo') {
-                window.location.href = "{% url 'admin_servicios' %}";
-                return;
-            }
-            if (v === 'reportes' || v === 'reporte' || v === 'metricas' || v === 'métrica') {
-                window.location.href = "{% url 'admin_reportes' %}";
+        function buscarGlobal(q) {
+            clearTimeout(_searchTimer);
+            const dropdown = document.getElementById('search-dropdown');
+
+            if (!q.trim()) {
+                cerrarDropdown();
                 return;
             }
 
-            // Búsqueda inteligente por término en el módulo actual o global usuarios/citas
+            dropdown.classList.remove('hidden');
+            // Renderizar base sin números al escribir
+            _construirDropdownHTML(q, null);
+
+            // Debounce de 300 ms para consultar la API y traer conteos reales
+            _searchTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/api/admin/busqueda-global/?q=${encodeURIComponent(q)}`);
+                    const data = await res.json();
+                    if (data.resultados) {
+                        _construirDropdownHTML(q, data.resultados);
+                    }
+                } catch(e) {
+                    console.error("Error al consultar API de busqueda:", e);
+                }
+            }, 300);
+        }
+
+        function navegarPorNombre(v) {
+            if (v === 'citas' || v === 'cita') return "{% url 'admin_citas' %}";
+            if (['usuarios','usuario','clientes','cliente'].includes(v)) return "{% url 'admin_usuarios' %}";
+            if (['tecnicos','técnicos','tecnico','técnico'].includes(v)) return "{% url 'admin_tecnicos' %}";
+            if (['servicios','servicio','catalogo','catálogo'].includes(v)) return "{% url 'admin_servicios' %}";
+            if (['inventario','repuestos','repuesto','stock'].includes(v)) return "{% url 'admin_inventario' %}";
+            if (['reportes','reporte'].includes(v)) return "{% url 'admin_reportes' %}";
+            return null;
+        }
+
+        function irPrimerResultado() {
+            const q = document.getElementById('topbar-search').value.trim();
+            if (!q) return;
+
+            // Si ya hay un primer URL recomendado (por tener resultados), ir a ese
+            if (_primerUrl) {
+                window.location.href = _primerUrl;
+                return;
+            }
+
+            const enc = encodeURIComponent(q);
             const path = window.location.pathname;
-            if (path.includes('/citas/')) {
-                window.location.href = "{% url 'admin_citas' %}?cliente=" + encodeURIComponent(q);
-            } else if (path.includes('/usuarios/')) {
-                window.location.href = "{% url 'admin_usuarios' %}?search=" + encodeURIComponent(q);
+
+            // Fallback por URL si la API no ha respondido o no arrojó conteos
+            if (path.includes('/admin-panel/citas/')) {
+                window.location.href = "{% url 'admin_citas' %}?cliente=" + enc;
+            } else if (path.includes('/admin-panel/tecnicos/')) {
+                window.location.href = "{% url 'admin_tecnicos' %}?search=" + enc;
+            } else if (path.includes('/admin-panel/servicios/') || path.includes('/admin-panel/servicios')) {
+                window.location.href = "{% url 'admin_servicios' %}?search=" + enc;
+            } else if (path.includes('/admin-panel/inventario/')) {
+                window.location.href = "{% url 'admin_inventario' %}?search=" + enc;
+            } else if (path.includes('/admin-panel/reportes/')) {
+                window.location.href = "{% url 'admin_reportes' %}";
             } else {
-                window.location.href = "{% url 'admin_usuarios' %}?search=" + encodeURIComponent(q);
+                window.location.href = "{% url 'admin_usuarios' %}?search=" + enc;
             }
         }
+
+        function cerrarDropdown() {
+            const dropdown = document.getElementById('search-dropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+            const searchInput = document.getElementById('topbar-search');
+            if (searchInput) searchInput.value = '';
+        }
+
+        // Cerrar al hacer clic fuera (pero no en el mismo input/dropdown)
+        document.addEventListener('click', e => {
+            const wrap = document.getElementById('global-search-wrap');
+            if (wrap && !wrap.contains(e.target)) {
+                const dropdown = document.getElementById('search-dropdown');
+                if (dropdown) dropdown.classList.add('hidden');
+            }
+        });
+
+        // ── Función unificada para construir el dropdown de resultados ───────
+        function _construirDropdownHTML(q, resultados) {
+            const dropdown = document.getElementById('search-dropdown');
+            const results  = document.getElementById('search-results');
+            if (!dropdown || !results) return;
+
+            const enc = encodeURIComponent(q);
+            const qLow = q.toLowerCase().trim();
+
+            const modulos = [
+                { nombre: ['dashboard','inicio','panel'],                   label: 'Ir a Inicio',      icon: '🏠', url: "{% url 'admin_dashboard' %}" },
+                { nombre: ['citas','cita'],                                  label: 'Ir a Citas',        icon: '📅', url: "{% url 'admin_citas' %}?cliente=" + enc },
+                { nombre: ['usuarios','usuario','cliente','clientes'],       label: 'Ir a Usuarios',    icon: '👤', url: "{% url 'admin_usuarios' %}?search=" + enc },
+                { nombre: ['tecnicos','técnicos','tecnico','técnico'],       label: 'Ir a Técnicos',    icon: '🔧', url: "{% url 'admin_tecnicos' %}?search=" + enc },
+                { nombre: ['servicios','servicio','catalogo','catálogo'],    label: 'Ir a Catálogo',    icon: '📋', url: "{% url 'admin_servicios' %}?search=" + enc },
+                { nombre: ['inventario','repuesto','repuestos','stock'],     label: 'Ir a Inventario',  icon: '📦', url: "{% url 'admin_inventario' %}?search=" + enc },
+                { nombre: ['reportes','reporte','métrica','metricas'],       label: 'Ir a Reportes',    icon: '📊', url: "{% url 'admin_reportes' %}" },
+                { nombre: ['perfil','mi perfil','mi cuenta'],                label: 'Ir a Mi Perfil',   icon: '⚙️', url: "{% url 'admin_perfil' %}" },
+            ];
+
+            const navDirecta = modulos.filter(m => m.nombre.some(n => n.includes(qLow) || qLow.includes(n)));
+            let html = '';
+            _primerUrl = null;
+
+            if (navDirecta.length > 0) {
+                html += `<div class="px-3 pt-2 pb-1"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Ir a módulo</p></div>`;
+                navDirecta.forEach(m => {
+                    if (!_primerUrl) _primerUrl = m.url;
+                    html += `<a href="${m.url}" class="flex items-center gap-2.5 px-3 py-2 hover:bg-blue-50 transition group">
+                        <span class="text-base leading-none">${m.icon}</span>
+                        <span class="text-[12px] font-semibold text-slate-700 group-hover:text-[#1d4ed8]">${m.label}</span>
+                    </a>`;
+                });
+            }
+
+            const buscarEn = [
+                { key: 'usuarios',   label: 'Buscar usuarios',   icon: '👤', url: "{% url 'admin_usuarios' %}?search=" + enc },
+                { key: 'citas',      label: 'Buscar en citas',   icon: '📅', url: "{% url 'admin_citas' %}?cliente=" + enc },
+                { key: 'tecnicos',   label: 'Buscar técnicos',   icon: '🔧', url: "{% url 'admin_tecnicos' %}?search=" + enc },
+                { key: 'servicios',  label: 'Buscar catálogo',   icon: '📋', url: "{% url 'admin_servicios' %}?search=" + enc },
+                { key: 'inventario', label: 'Buscar inventario', icon: '📦', url: "{% url 'admin_inventario' %}?search=" + enc },
+            ];
+
+            html += `<div class="px-3 pt-2 pb-1 ${navDirecta.length ? 'border-t border-slate-100 mt-1' : ''}"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Buscar "<span class="text-slate-500">${q}</span>" en...</p></div>`;
+            
+            // Decidir la primera URL inteligente basada en resultados de API
+            let maxCount = -1;
+            let mejorModuloUrl = null;
+            let moduloActualUrl = null;
+            
+            const path = window.location.pathname;
+            let currentModuleKey = 'usuarios';
+            if (path.includes('/citas/')) currentModuleKey = 'citas';
+            else if (path.includes('/tecnicos/')) currentModuleKey = 'tecnicos';
+            else if (path.includes('/servicios/')) currentModuleKey = 'servicios';
+            else if (path.includes('/inventario/')) currentModuleKey = 'inventario';
+
+            buscarEn.forEach(b => {
+                let badge = '';
+                if (resultados && resultados[b.key] !== undefined) {
+                    const count = resultados[b.key].count;
+                    badge = `<span class="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${count > 0 ? 'bg-blue-100 text-[#1d4ed8]' : 'bg-slate-100 text-slate-400'}">${count}</span>`;
+                    
+                    if (count > maxCount) {
+                        maxCount = count;
+                        mejorModuloUrl = b.url;
+                    }
+                    if (b.key === currentModuleKey) {
+                        moduloActualUrl = b.url;
+                    }
+                }
+
+                html += `<a href="${b.url}" class="flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 transition group">
+                    <span class="text-base leading-none">${b.icon}</span>
+                    <span class="text-[12px] text-slate-600 group-hover:text-[#1d4ed8]">${b.label}</span>
+                    ${badge ? badge : '<svg class="w-3 h-3 ml-auto text-slate-300 group-hover:text-[#1d4ed8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>'}
+                </a>`;
+            });
+
+            // Establecer _primerUrl
+            if (resultados) {
+                // Si el módulo actual tiene resultados, priorizarlo
+                if (moduloActualUrl && resultados[currentModuleKey] && resultados[currentModuleKey].count > 0) {
+                    _primerUrl = moduloActualUrl;
+                } else if (mejorModuloUrl && maxCount > 0) {
+                    // Si no, el que tenga más resultados
+                    _primerUrl = mejorModuloUrl;
+                } else {
+                    // Si nadie tiene resultados, usar el módulo actual para no salir de contexto
+                    _primerUrl = moduloActualUrl || buscarEn[0].url;
+                }
+            } else {
+                _primerUrl = moduloActualUrl || buscarEn[0].url;
+            }
+
+            // Hint contextual de Enter dinámico
+            let labelEnter = 'usuarios';
+            if (_primerUrl) {
+                const matched = buscarEn.find(b => b.url === _primerUrl);
+                if (matched) labelEnter = matched.label.toLowerCase().replace('buscar ', '');
+            }
+
+            html += `<div class="border-t border-slate-100 px-3 py-2 mt-1">
+                <button onclick="irPrimerResultado()" class="w-full text-[11px] font-semibold text-[#1d4ed8] hover:underline text-left">
+                    Presiona Enter · Buscar en ${labelEnter} →
+                </button>
+            </div>`;
+
+            results.innerHTML = html;
+            dropdown.classList.remove('hidden');
+        }
+
+        // Prellenar y abrir dropdown al recargar con búsqueda activa en URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            const q = params.get('search') || params.get('cliente') || params.get('q') || '';
+            if (q) {
+                const input = document.getElementById('topbar-search');
+                if (input) {
+                    input.value = q;
+                    input.classList.add('w-64');
+                    input.classList.remove('w-44');
+                    // Realizar búsqueda y cargar dropdown
+                    buscarGlobal(q);
+                }
+            }
+        });
 
         function mostrarToast(msg, tipo='info') {
             const c = {success:'bg-emerald-600', warning:'bg-amber-500', error:'bg-red-600', info:'bg-[#1d4ed8]'};
