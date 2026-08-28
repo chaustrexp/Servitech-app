@@ -141,6 +141,9 @@ def dashboard_tecnico(request):
     from django.utils import timezone
     hoy = timezone.now().date()
     inicio_semana = hoy - timedelta(days=hoy.weekday()) # Lunes
+    
+    NOMBRES_DIA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+    
     dias_semana = []
     max_citas_dia = 1
     total_semana = 0
@@ -149,10 +152,13 @@ def dashboard_tecnico(request):
         dia = inicio_semana + timedelta(days=i)
         count = Cita.objects.filter(
             tecnico=request.user,
-            fecha=dia,
-            estado__nombre__iexact='finalizada'
-        ).count()
-        dias_semana.append({'nombre': dia.strftime('%a')[:3].capitalize(), 'count': count, 'fecha': dia})
+            fecha=dia
+        ).exclude(estado__nombre__iexact='cancelada').count()
+        dias_semana.append({
+            'nombre': NOMBRES_DIA[i],
+            'count': count,
+            'fecha': dia
+        })
         total_semana += count
         if count > max_citas_dia:
             max_citas_dia = count
@@ -1227,6 +1233,7 @@ def admin_citas(request):
     filtro_cliente  = request.GET.get('cliente', '').strip()
     filtro_tecnico  = request.GET.get('tecnico', '').strip()
     filtro_estado   = request.GET.get('estado', '').strip()
+    filtro_fecha    = request.GET.get('fecha', '').strip()
     filtro_fecha_ini = request.GET.get('fecha_ini', '').strip()
     filtro_fecha_fin = request.GET.get('fecha_fin', '').strip()
 
@@ -1236,6 +1243,14 @@ def admin_citas(request):
         qs = qs.filter(tecnico__id=filtro_tecnico)
     if filtro_estado:
         qs = qs.filter(estado__nombre__iexact=filtro_estado)
+
+    # Filtro rápido de fecha (Hoy / Ayer)
+    from datetime import timedelta
+    if filtro_fecha == 'hoy':
+        qs = qs.filter(fecha=hoy)
+    elif filtro_fecha == 'ayer':
+        qs = qs.filter(fecha=hoy - timedelta(days=1))
+
     if filtro_fecha_ini:
         try:
             from datetime import datetime
@@ -1256,7 +1271,15 @@ def admin_citas(request):
     page_obj    = paginator.get_page(page_number)
 
     tecnicos    = Usuario.objects.filter(rol=Usuario.Rol.TECNICO, activo=True).order_by('nombre_completo')
-    estados     = EstadoCita.objects.all().order_by('nombre')
+    # Deduplicar estados por nombre (ignorando mayúsculas/minúsculas)
+    todos_estados = EstadoCita.objects.all().order_by('nombre')
+    vistos = set()
+    estados = []
+    for est in todos_estados:
+        clave = est.nombre.upper().strip()
+        if clave not in vistos:
+            vistos.add(clave)
+            estados.append(est)
 
     context = {
         'citas':           page_obj,
@@ -1268,9 +1291,13 @@ def admin_citas(request):
         'completadas':     completadas,
         'tecnicos':        tecnicos,
         'estados':         estados,
+        'hoy':             hoy,
+        'manana':          hoy + timedelta(days=1),
+        'ayer':            hoy - timedelta(days=1),
         'filtro_cliente':  filtro_cliente,
         'filtro_tecnico':  filtro_tecnico,
         'filtro_estado':   filtro_estado,
+        'filtro_fecha':    filtro_fecha,
         'filtro_fecha_ini': filtro_fecha_ini,
         'filtro_fecha_fin': filtro_fecha_fin,
     }
