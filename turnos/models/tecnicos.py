@@ -64,3 +64,17 @@ class PerfilTecnico(models.Model):
     @property
     def nivel_label_corto(self):
         return {1: 'N1', 2: 'N2', 3: 'N3'}.get(self.nivel, '?')
+
+    @property
+    def dias_laborales_str(self):
+        return ",".join(str(h.dia_semana) for h in self.tecnico.horarios.all())
+
+    @property
+    def hora_inicio_str(self):
+        first = self.tecnico.horarios.first()
+        return first.hora_inicio.strftime("%H:%M") if first else "08:00"
+
+    @property
+    def hora_fin_str(self):
+        first = self.tecnico.horarios.first()
+        return first.hora_fin.strftime("%H:%M") if first else "18:00"
