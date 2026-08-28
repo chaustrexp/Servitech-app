@@ -1854,6 +1854,31 @@ def admin_tecnicos(request):
                 }
             )
 
+            # Guardar horarios seleccionados
+            from turnos.models.horarios import HorarioTecnico
+            from datetime import datetime
+            dias_laborales = request.POST.getlist('dias_laborales')
+            hora_inicio_str = request.POST.get('hora_inicio', '08:00')
+            hora_fin_str = request.POST.get('hora_fin', '18:00')
+            
+            if not dias_laborales:
+                dias_laborales = ['0', '1', '2', '3', '4', '5'] # Lunes a Sábado por defecto
+                
+            HorarioTecnico.objects.filter(tecnico=tecnico).delete()
+            
+            try:
+                hi = datetime.strptime(hora_inicio_str, '%H:%M').time()
+                hf = datetime.strptime(hora_fin_str, '%H:%M').time()
+                for dia_str in dias_laborales:
+                    HorarioTecnico.objects.create(
+                        tecnico=tecnico,
+                        dia_semana=int(dia_str),
+                        hora_inicio=hi,
+                        hora_fin=hf
+                    )
+            except Exception as e:
+                pass
+
             msg = f'Técnico {tecnico.nombre_completo} {"creado" if creado else "actualizado"} exitosamente.'
             if creado:
                 msg += f' Contraseña temporal: {password_nuevo} (cámbiela al primer inicio de sesión).'
@@ -1885,6 +1910,28 @@ def admin_tecnicos(request):
                         'observaciones':  observaciones or None,
                     }
                 )
+
+                # Guardar horarios seleccionados
+                from turnos.models.horarios import HorarioTecnico
+                from datetime import datetime
+                dias_laborales = request.POST.getlist('dias_laborales')
+                hora_inicio_str = request.POST.get('hora_inicio', '08:00')
+                hora_fin_str = request.POST.get('hora_fin', '18:00')
+                
+                HorarioTecnico.objects.filter(tecnico=tecnico).delete()
+                
+                try:
+                    hi = datetime.strptime(hora_inicio_str, '%H:%M').time()
+                    hf = datetime.strptime(hora_fin_str, '%H:%M').time()
+                    for dia_str in dias_laborales:
+                        HorarioTecnico.objects.create(
+                            tecnico=tecnico,
+                            dia_semana=int(dia_str),
+                            hora_inicio=hi,
+                            hora_fin=hf
+                        )
+                except Exception as e:
+                    pass
                 messages.success(request, f'Perfil de {tecnico.nombre_completo} actualizado exitosamente.')
             except Usuario.DoesNotExist:
                 messages.error(request, 'Técnico no encontrado.')

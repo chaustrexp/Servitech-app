@@ -8,6 +8,9 @@ La base de datos ha sido restablecida y se han inyectado datos iniciales para po
 |---|---|---|---|
 | Administrador Principal | `ADMINISTRADOR` | `admin@servitech.com` | `admin123` |
 | Tecnico Celulares | `TECNICO` | `tec.cel@servitech.com` | `tecnico123` |
+| Tecnico Celular 2 | `TECNICO` | `tec.cel2@servitech.com` | `tecnico123` |
+| Tecnico Celular 3 | `TECNICO` | `tec.cel3@servitech.com` | `tecnico123` |
+| Tecnico Celular 4 | `TECNICO` | `tec.cel4@servitech.com` | `tecnico123` |
 | Tecnico Laptops | `TECNICO` | `tec.lap@servitech.com` | `tecnico123` |
 | Tecnico General | `TECNICO` | `tec.gen@servitech.com` | `tecnico123` |
 | Ana Torres | `CLIENTE` | `ana.torres@gmail.com` | `cliente123` |

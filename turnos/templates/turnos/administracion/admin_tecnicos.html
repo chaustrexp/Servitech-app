@@ -253,7 +253,7 @@
             <div class="px-5 py-3 border-t border-slate-100 flex items-center justify-between bg-white">
                 <span class="text-[11px] font-medium text-slate-400">Progreso del día: <span class="font-bold text-slate-600">{{ item.completadas_hoy }}/{{ item.total_citas_hoy|default:0 }}</span></span>
                 
-                <button onclick="abrirModalEditarPerfil({{ t.pk }},'{{ t.nombre_completo|escapejs }}','{{ t.genero|default:"" }}','{{ perfil.especialidad|default:"" }}','{{ perfil.observaciones|default_if_none:""|escapejs }}')"
+                <button onclick="abrirModalEditarPerfil({{ t.pk }},'{{ t.nombre_completo|escapejs }}','{{ t.genero|default:"" }}','{{ perfil.especialidad|default:"" }}','{{ perfil.observaciones|default_if_none:""|escapejs }}','{{ perfil.dias_laborales_str }}','{{ perfil.hora_inicio_str }}','{{ perfil.hora_fin_str }}')"
                         class="text-[12px] font-bold text-slate-500 hover:text-[#003399] transition flex items-center gap-1.5 group-hover:text-[#003399]">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
@@ -525,6 +525,53 @@
                     </div>
                 </div>
 
+                <!-- Horario de Trabajo -->
+                <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200">
+                    <label class="block text-[11px] sm:text-[12px] font-bold text-slate-800 mb-2">Horario de Trabajo</label>
+                    
+                    <!-- Días Laborables -->
+                    <div class="mb-3">
+                        <span class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Días Laborales</span>
+                        <div class="flex flex-wrap gap-1.5">
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="0" checked class="accent-[#0e3687]"> Lun
+                            </label>
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="1" checked class="accent-[#0e3687]"> Mar
+                            </label>
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="2" checked class="accent-[#0e3687]"> Mié
+                            </label>
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="3" checked class="accent-[#0e3687]"> Jue
+                            </label>
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="4" checked class="accent-[#0e3687]"> Vie
+                            </label>
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="5" checked class="accent-[#0e3687]"> Sáb
+                            </label>
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="6" class="accent-[#0e3687]"> Dom
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Rango de Horas -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Hora de Entrada *</label>
+                            <input type="time" name="hora_inicio" value="08:00" required
+                                   class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[12px] focus:outline-none focus:border-[#0e3687] bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Hora de Salida *</label>
+                            <input type="time" name="hora_fin" value="18:00" required
+                                   class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[12px] focus:outline-none focus:border-[#0e3687] bg-white">
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-[11px] font-bold text-slate-800 mb-0.5">Observaciones</label>
                     <textarea name="observaciones" rows="1" placeholder="Notas adicionales..."
@@ -606,6 +653,53 @@
                             </span>
                         </label>
                         {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Horario de Trabajo -->
+                <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200">
+                    <label class="block text-[11px] sm:text-[12px] font-bold text-slate-800 mb-2">Horario de Trabajo</label>
+                    
+                    <!-- Días Laborables -->
+                    <div class="mb-3">
+                        <span class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Días Laborales</span>
+                        <div class="flex flex-wrap gap-1.5">
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="0" class="edit-dia-check accent-[#0e3687]"> Lun
+                            </label>
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="1" class="edit-dia-check accent-[#0e3687]"> Mar
+                            </label>
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="2" class="edit-dia-check accent-[#0e3687]"> Mié
+                            </label>
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="3" class="edit-dia-check accent-[#0e3687]"> Jue
+                            </label>
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="4" class="edit-dia-check accent-[#0e3687]"> Vie
+                            </label>
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="5" class="edit-dia-check accent-[#0e3687]"> Sáb
+                            </label>
+                            <label class="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition text-[11px] font-semibold">
+                                <input type="checkbox" name="dias_laborales" value="6" class="edit-dia-check accent-[#0e3687]"> Dom
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Rango de Horas -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Hora de Entrada *</label>
+                            <input type="time" name="hora_inicio" id="edit-hora-inicio" value="08:00" required
+                                   class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[12px] focus:outline-none focus:border-[#0e3687] bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Hora de Salida *</label>
+                            <input type="time" name="hora_fin" id="edit-hora-fin" value="18:00" required
+                                   class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[12px] focus:outline-none focus:border-[#0e3687] bg-white">
+                        </div>
                     </div>
                 </div>
 
@@ -703,7 +797,7 @@ function switchTab(actId, inactId) {
     document.getElementById(map[actId]).classList.remove('hidden');
     document.getElementById(map[inactId]).classList.add('hidden');
 }
-function abrirModalEditarPerfil(id, nombre, genero, especialidad, observaciones) {
+function abrirModalEditarPerfil(id, nombre, genero, especialidad, observaciones, diasLaborales, horaInicio, horaFin) {
     document.getElementById('edit-tecnico-id').value = id;
     document.getElementById('edit-tecnico-nombre').textContent = nombre;
     
@@ -725,6 +819,16 @@ function abrirModalEditarPerfil(id, nombre, genero, especialidad, observaciones)
     if(obsElement) {
         obsElement.value = (observaciones === 'None') ? '' : observaciones;
     }
+
+    // Populate schedules
+    const daysArr = diasLaborales ? diasLaborales.split(',') : [];
+    document.querySelectorAll('.edit-dia-check').forEach(c => {
+        c.checked = daysArr.includes(c.value);
+    });
+    
+    document.getElementById('edit-hora-inicio').value = horaInicio || '08:00';
+    document.getElementById('edit-hora-fin').value = horaFin || '18:00';
+    
     abrirModal('modal-editar-perfil');
 }
 function abrirModalAsignar(id, nombre) {
