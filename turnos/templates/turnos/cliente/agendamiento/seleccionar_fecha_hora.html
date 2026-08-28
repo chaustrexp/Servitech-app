@@ -2,6 +2,96 @@
 
 {% block title %}Selecciona Fecha y Hora - ServiTech{% endblock %}
 
+{% block extra_head %}
+<!-- FullCalendar v6.1.11 -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/es.js'></script>
+
+<style>
+    /* Personalización de FullCalendar para ServiTech */
+    :root {
+        --fc-border-color: #e2e8f0;
+        --fc-daygrid-event-dot-width: 8px;
+        --fc-today-bg-color: #f0f5ff;
+        --fc-button-bg-color: #002b75;
+        --fc-button-border-color: #002b75;
+        --fc-button-hover-bg-color: #001f54;
+        --fc-button-hover-border-color: #001f54;
+        --fc-button-active-bg-color: #001a47;
+    }
+    
+    .fc {
+        font-family: 'Inter', sans-serif;
+    }
+    .fc-theme-standard .fc-scrollgrid {
+        border: none;
+    }
+    .fc-theme-standard td, .fc-theme-standard th {
+        border-color: #f1f5f9;
+    }
+    .fc-col-header-cell {
+        padding: 8px 0;
+        font-size: 0.875rem;
+        color: #475569;
+        border-bottom: 2px solid #e2e8f0 !important;
+    }
+    .fc-daygrid-day {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .fc-daygrid-day:hover:not(.fc-day-disabled) {
+        background-color: #f8fafc;
+    }
+    .fc-daygrid-day.fc-day-today {
+        background-color: transparent !important;
+    }
+    .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+        background-color: #f1f5f9;
+        border-radius: 50%;
+        color: #0f172a;
+        font-weight: bold;
+    }
+    
+    .fc-day-disabled {
+        background-color: #f8fafc;
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .fc-daygrid-day-number {
+        padding: 8px !important;
+        margin: 4px;
+        width: 32px;
+        height: 32px;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        color: #334155;
+    }
+
+    .fc-daygrid-day.selected-date .fc-daygrid-day-number {
+        background-color: #002b75;
+        color: white;
+        border-radius: 50%;
+        font-weight: bold;
+        box-shadow: 0 4px 6px -1px rgba(0, 43, 117, 0.4);
+    }
+    
+    .fc .fc-toolbar-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #091124;
+    }
+    
+    .fc-button-primary {
+        text-transform: capitalize;
+        border-radius: 8px !important;
+        padding: 0.25rem 0.75rem !important;
+        font-size: 0.875rem !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="max-w-6xl mx-auto">
 
@@ -58,31 +148,17 @@
             
             <!-- Columna Izquierda: Calendario -->
             <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex-1 p-8">
-                <div class="flex justify-between items-center mb-6">
+                <div class="mb-4 flex justify-between items-center">
                     <h2 class="text-2xl font-bold text-[#091124]">Selecciona una Fecha</h2>
-                    <div class="flex items-center gap-4 text-slate-700 font-bold text-lg">
-                        <button type="button" id="prev-month" class="p-1 hover:bg-slate-100 rounded-full transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                        </button>
-                        <span id="month-label"></span>
-                        <button type="button" id="next-month" class="p-1 hover:bg-slate-100 rounded-full transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                        </button>
-                    </div>
                 </div>
 
-                <!-- Cabecera días de la semana -->
-                <div class="grid grid-cols-7 gap-2 text-center text-sm font-bold text-slate-600 mb-4">
-                    <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
-                </div>
-
-                <!-- Grid Calendario Dinámico -->
-                <div id="calendar-grid" class="grid grid-cols-7 gap-y-3 gap-x-2 text-center text-sm"></div>
+                <!-- Contenedor FullCalendar -->
+                <div id="calendar" class="w-full h-auto"></div>
 
                 <!-- Leyenda -->
-                <div class="mt-8 bg-[#f4f7fb] rounded-lg p-4 flex flex-wrap items-center gap-6 text-xs text-slate-600 font-medium">
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-green-400 rounded-full"></span> Disponible</div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 border border-slate-300 rounded-full bg-white"></span> No disponible</div>
+                <div class="mt-6 bg-[#f4f7fb] rounded-lg p-4 flex flex-wrap items-center gap-6 text-xs text-slate-600 font-medium">
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 border border-slate-300 rounded-full bg-white"></span> Disponible</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#f8fafc] border border-slate-200 rounded-full opacity-50"></span> No disponible</div>
                     <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#002b75] rounded-full"></span> Seleccionado</div>
                 </div>
             </div>
@@ -170,97 +246,77 @@
         </div>
     </form>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-    // ─── Estado del calendario ───────────────────────────────────────
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    let currentYear = today.getFullYear();
-    let currentMonth = today.getMonth(); // 0-indexed
-
-    let selectedDate = null;   // objeto Date
-    let selectedHora = null;   // string "HH:MM"
-    let selectedHoraLabel = null; // string "HH:MM AM/PM"
-
     const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
                    'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-    // Días con disponibilidad simulada (weekdays = lun-vie son disponibles, fines no)
-    function esDiaDisponible(date) {
-        const day = date.getDay(); // 0 dom, 6 sab
-        return day !== 0 && day !== 6 && date >= today;
-    }
+    let selectedDate = null;
+    let selectedHora = null;
+    let selectedHoraLabel = null;
 
-    // ─── Renderizar calendario ───────────────────────────────────────
-    function renderCalendar() {
-        document.getElementById('month-label').textContent =
-            MESES[currentMonth] + ' ' + currentYear;
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
 
-        const grid = document.getElementById('calendar-grid');
-        grid.innerHTML = '';
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            locale: 'es',
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'title',
+                right: 'prev,next'
+            },
+            firstDay: 1, // Lunes
+            hiddenDays: [0], // Ocultar solo domingos (0)
+            validRange: {
+                start: new Date() // No se pueden seleccionar días anteriores a hoy
+            },
+            showNonCurrentDates: false,
+            fixedWeekCount: false,
+            contentHeight: "auto",
+            
+            dateClick: function(info) {
+                // Remover clase seleccionada de todos los dias
+                document.querySelectorAll('.fc-daygrid-day').forEach(el => {
+                    el.classList.remove('selected-date');
+                });
+                // Agregar clase al día clickeado
+                info.dayEl.classList.add('selected-date');
 
-        const firstDay = new Date(currentYear, currentMonth, 1).getDay(); // día semana del 1ro
-        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-        // Celdas vacías iniciales
-        for (let i = 0; i < firstDay; i++) {
-            const empty = document.createElement('div');
-            grid.appendChild(empty);
-        }
-
-        // Días del mes
-        for (let d = 1; d <= daysInMonth; d++) {
-            const date = new Date(currentYear, currentMonth, d);
-            const isToday = date.getTime() === today.getTime();
-            const isPast = date < today;
-            const isAvail = esDiaDisponible(date);
-            const isSelected = selectedDate && date.getTime() === selectedDate.getTime();
-
-            const cell = document.createElement('div');
-            cell.className = 'relative py-2 rounded-lg text-sm font-medium select-none';
-
-            if (isSelected) {
-                cell.className += ' bg-[#002b75] text-white font-bold rounded-3xl shadow-md';
-            } else if (isPast || !isAvail) {
-                cell.className += ' text-slate-300 cursor-not-allowed';
-            } else {
-                cell.className += ' cursor-pointer hover:bg-slate-100 text-slate-700';
-                if (isToday) cell.className += ' ring-2 ring-[#002b75] rounded-full';
-                cell.addEventListener('click', () => selectDate(date, d));
+                selectDate(info.date);
+            },
+            
+            dayCellClassNames: function(arg) {
+                // Agregar clase personalizada a días pasados si fuera necesario
+                if (arg.date < new Date(new Date().setHours(0,0,0,0))) {
+                    return ['fc-day-disabled'];
+                }
+                return [];
             }
+        });
 
-            cell.textContent = d;
+        calendar.render();
+    });
 
-            // Punto verde de disponibilidad
-            if (isAvail && !isSelected && !isPast) {
-                const dot = document.createElement('span');
-                dot.className = 'absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-green-400 rounded-full';
-                cell.appendChild(dot);
-            }
-
-            grid.appendChild(cell);
-        }
-    }
-
-    // ─── Seleccionar fecha ───────────────────────────────────────────
-    function selectDate(date, day) {
+    // ─── Lógica de Selección ───────────────────────────────────────────
+    function selectDate(date) {
         selectedDate = date;
         selectedHora = null;
         selectedHoraLabel = null;
         document.getElementById('hora_input').value = '';
 
-        // Formatear fecha para el input hidden (YYYY-MM-DD)
+        // Formatear fecha (YYYY-MM-DD)
         const yyyy = date.getFullYear();
         const mm = String(date.getMonth() + 1).padStart(2, '0');
         const dd = String(date.getDate()).padStart(2, '0');
         document.getElementById('fecha_input').value = `${yyyy}-${mm}-${dd}`;
 
-        // Mostrar en label de horarios
-        const labelFecha = `${day} de ${MESES[date.getMonth()]} ${date.getFullYear()}`;
+        // Mostrar en label
+        const labelFecha = `${date.getDate()} de ${MESES[date.getMonth()]} ${date.getFullYear()}`;
         document.getElementById('fecha-label-horario').textContent = labelFecha;
 
-        // Mostrar panel de horarios
+        // Mostrar panel horarios
         document.getElementById('horarios-container').classList.remove('hidden');
 
         // Resetear slots
@@ -268,33 +324,23 @@
             btn.className = 'time-slot border border-slate-200 rounded-lg py-3 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700';
         });
 
-        // Actualizar resumen
         actualizarResumen();
-
-        // Deshabilitar botón hasta que elija hora
         deshabilitarBtn();
-
-        // Re-renderizar calendario para mostrar selección
-        renderCalendar();
     }
 
-    // ─── Seleccionar hora ────────────────────────────────────────────
     function seleccionarHora(hora, horaLabel, btn) {
         selectedHora = hora;
         selectedHoraLabel = horaLabel;
         document.getElementById('hora_input').value = hora;
 
-        // Resetear todos los slots
         document.querySelectorAll('.time-slot').forEach(el => {
             el.className = 'time-slot border border-slate-200 rounded-lg py-3 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700';
         });
 
-        // Activar el seleccionado
         btn.className = 'time-slot border border-[#002b75] bg-[#002b75] text-white rounded-lg py-3 text-sm font-bold shadow-md transition';
 
         actualizarResumen();
 
-        // Habilitar botón
         if (selectedDate && selectedHora) {
             const btnSig = document.getElementById('btn-siguiente');
             btnSig.disabled = false;
@@ -303,17 +349,12 @@
         }
     }
 
-    // ─── Actualizar resumen lateral ──────────────────────────────────
     function actualizarResumen() {
         const resumenEl = document.getElementById('resumen-fecha-hora');
         if (selectedDate && selectedHoraLabel) {
-            const d = selectedDate.getDate();
-            const m = MESES[selectedDate.getMonth()];
-            resumenEl.textContent = `${d} ${m}, ${selectedHoraLabel}`;
+            resumenEl.textContent = `${selectedDate.getDate()} ${MESES[selectedDate.getMonth()]}, ${selectedHoraLabel}`;
         } else if (selectedDate) {
-            const d = selectedDate.getDate();
-            const m = MESES[selectedDate.getMonth()];
-            resumenEl.textContent = `${d} ${m} — Elige una hora`;
+            resumenEl.textContent = `${selectedDate.getDate()} ${MESES[selectedDate.getMonth()]} — Elige una hora`;
         } else {
             resumenEl.textContent = 'Pendiente de selección';
         }
@@ -325,23 +366,5 @@
         btnSig.classList.add('bg-[#7888b5]', 'cursor-not-allowed');
         btnSig.classList.remove('bg-[#002b75]', 'hover:bg-[#001f54]', 'cursor-pointer');
     }
-
-    // ─── Navegación mes ──────────────────────────────────────────────
-    document.getElementById('prev-month').addEventListener('click', () => {
-        // No permitir ir antes del mes actual
-        if (currentYear === today.getFullYear() && currentMonth === today.getMonth()) return;
-        currentMonth--;
-        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-        renderCalendar();
-    });
-
-    document.getElementById('next-month').addEventListener('click', () => {
-        currentMonth++;
-        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-        renderCalendar();
-    });
-
-    // ─── Inicializar ─────────────────────────────────────────────────
-    renderCalendar();
 </script>
 {% endblock %}
