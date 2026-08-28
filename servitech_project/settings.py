@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Cargar variables de entorno desde el archivo .env
-load_dotenv(BASE_DIR / '.env')
+load_dotenv(BASE_DIR / '.env', encoding='utf-8')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-servitech-secret-key-change-in-production'
