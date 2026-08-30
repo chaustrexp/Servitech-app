@@ -91,7 +91,7 @@ def resumen_cita(request):
         hora_fin = (datetime.combine(fecha_obj, hora_inicio)
                     + timedelta(minutes=servicio_obj.duracion_minutos)).time()
 
-        estado, _ = EstadoCita.objects.get_or_create(nombre='Confirmada')
+        estado, _ = EstadoCita.objects.get_or_create(nombre='CONFIRMADA')
 
         notas_usuario = (request.POST.get('observaciones') or request.POST.get('notas') or '').strip()
 
@@ -111,7 +111,7 @@ def resumen_cita(request):
                 cita.hora_fin = hora_fin
                 if notas_usuario:
                     cita.observaciones = notas_usuario
-                estado_confirmada, _ = EstadoCita.objects.get_or_create(nombre='Confirmada')
+                estado_confirmada, _ = EstadoCita.objects.get_or_create(nombre='CONFIRMADA')
                 cita.estado = estado_confirmada
                 cita.save()
                 
@@ -203,7 +203,7 @@ def detalle_cita(request, cita_id):
                 messages.warning(request, 'Ya notificaste un retraso para esta cita.')
 
         elif accion == 'cancelar':
-            estado_cancelada, _ = EstadoCita.objects.get_or_create(nombre='Cancelada')
+            estado_cancelada, _ = EstadoCita.objects.get_or_create(nombre='CANCELADA')
             cita.estado = estado_cancelada
             cita.save()
             messages.success(request, 'Cita cancelada exitosamente.')
@@ -215,7 +215,7 @@ def detalle_cita(request, cita_id):
     tipo_disp = cita.servicio.tipo_dispositivo.upper() if cita.servicio and cita.servicio.tipo_dispositivo else ''
     dispositivo_display = dispositivo_map.get(tipo_disp, cita.servicio.tipo_dispositivo.title() if cita.servicio and cita.servicio.tipo_dispositivo else 'Equipo')
 
-    estado_nombre = cita.estado.nombre if cita.estado else 'Confirmada'
+    estado_nombre = cita.estado.nombre if cita.estado else 'CONFIRMADA'
     
     est_upper = estado_nombre.upper()
     
@@ -286,7 +286,7 @@ def api_estado_cita(request, cita_id):
     if request.user != cita.cliente and request.user != cita.tecnico and request.user.rol != Usuario.Rol.ADMINISTRADOR:
         from django.http import Http404
         raise Http404('No tienes permiso.')
-    estado_nombre = cita.estado.nombre if cita.estado else 'Confirmada'
+    estado_nombre = cita.estado.nombre if cita.estado else 'CONFIRMADA'
     return JsonResponse({'estado': estado_nombre})
 
 @login_required
