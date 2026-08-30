@@ -280,11 +280,11 @@
                     </div>
                 </div>
                 <!-- Badge de estado -->
-                <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full
-                             {% if cita.estado.nombre == 'Finalizada' or cita.estado.nombre == 'FINALIZADA' %}bg-emerald-100 text-emerald-800
-                             {% elif cita.estado.nombre == 'Confirmada' or cita.estado.nombre == 'CONFIRMADA' %}bg-blue-100 text-blue-800
-                             {% elif cita.estado.nombre == 'Cancelada' or cita.estado.nombre == 'CANCELADA' %}bg-rose-100 text-rose-700
-                             {% else %}bg-amber-100 text-amber-800{% endif %}">
+                 <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full
+                              {% if cita.estado.nombre == 'FINALIZADA' %}bg-emerald-100 text-emerald-800
+                              {% elif cita.estado.nombre == 'CONFIRMADA' %}bg-blue-100 text-blue-800
+                              {% elif cita.estado.nombre == 'CANCELADA' %}bg-rose-100 text-rose-700
+                              {% else %}bg-amber-100 text-amber-800{% endif %}">
                     {{ cita.estado.nombre }}
                 </span>
             </div>
@@ -357,27 +357,27 @@
 
                     <!-- Estado -->
                     <td class="py-4 px-6">
-                        {% if cita.estado.nombre == 'Pendiente' %}
+                        {% if cita.estado.nombre == 'PENDIENTE' %}
                             <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#FEE2E2] text-[#B91C1C]">
                                 <span class="w-1.5 h-1.5 rounded-full bg-[#EF4444]"></span> Pendiente
                             </span>
-                        {% elif cita.estado.nombre == 'Confirmada' %}
+                        {% elif cita.estado.nombre == 'CONFIRMADA' %}
                             <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-800">
                                 <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Confirmada
                             </span>
-                        {% elif cita.estado.nombre == 'Diagnóstico' %}
+                        {% elif cita.estado.nombre == 'EN_DIAGNOSTICO' %}
                             <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">
-                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Diagnóstico
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> En Diagnóstico
                             </span>
-                        {% elif cita.estado.nombre == 'En Reparación' or cita.estado.nombre == 'En Proceso' %}
+                        {% elif cita.estado.nombre == 'EN_REPARACION' %}
                             <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#E0E7FF] text-[#003399]">
                                 <span class="w-1.5 h-1.5 rounded-full bg-[#003399]"></span> En Proceso
                             </span>
-                        {% elif cita.estado.nombre == 'Finalizada' or cita.estado.nombre == 'Completada' %}
+                        {% elif cita.estado.nombre == 'FINALIZADA' %}
                             <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#6EE7B7] text-[#047857]">
                                 <span class="w-1.5 h-1.5 rounded-full bg-[#059669]"></span> Completada
                             </span>
-                        {% elif cita.estado.nombre == 'Cancelada' %}
+                        {% elif cita.estado.nombre == 'CANCELADA' %}
                             <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
                                 <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Cancelada
                             </span>

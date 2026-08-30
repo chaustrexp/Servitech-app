@@ -51,7 +51,7 @@
         <h1 class="text-2xl font-extrabold text-[#091124]">Detalle de Ticket</h1>
     </div>
 
-    {% if cita.tecnico.perfil_tecnico.en_pausa_manual and estado_nombre != 'Cancelada' and estado_nombre != 'Finalizada' %}
+    {% if cita.tecnico.perfil_tecnico.en_pausa_manual and estado_nombre != 'CANCELADA' and estado_nombre != 'FINALIZADA' %}
     <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-[20px] flex items-start gap-3 shadow-sm">
         <div class="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,17 +76,17 @@
                 <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Identificador de Cita</p>
                 <p class="text-3xl font-extrabold text-[#0e3687]">#CITA-{{ cita.pk|stringformat:"03d" }}</p>
             </div>
-            {% if estado_nombre == 'Confirmada' %}
+            {% if estado_nombre == 'CONFIRMADA' %}
                 <span class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
                     <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
                     CONFIRMADA
                 </span>
-            {% elif estado_nombre == 'Cancelada' %}
+            {% elif estado_nombre == 'CANCELADA' %}
                 <span class="inline-flex items-center gap-1.5 bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
                     <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                     CANCELADA
                 </span>
-            {% elif estado_nombre == 'Finalizada' %}
+            {% elif estado_nombre == 'FINALIZADA' %}
                 <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
                     <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
                     FINALIZADA
@@ -117,7 +117,7 @@
                 <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Técnico Asignado</p>
                 {% if cita.tecnico %}
                     <p class="font-bold text-slate-800 text-[15px]">{{ cita.tecnico.nombre_completo }}</p>
-                    {% if cita.tecnico.perfil_tecnico.en_pausa_manual and estado_nombre != 'Cancelada' and estado_nombre != 'Finalizada' %}
+                    {% if cita.tecnico.perfil_tecnico.en_pausa_manual and estado_nombre != 'CANCELADA' and estado_nombre != 'FINALIZADA' %}
                         <span class="inline-flex items-center gap-1.5 mt-1 bg-amber-50 text-amber-600 border border-amber-200 text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
                             <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                             SUSPENDIDO
@@ -156,7 +156,7 @@
 
         <!-- Notificar Retraso / Observaciones -->
         {% if request.user == cita.cliente %}
-            {% if estado_nombre == 'Confirmada' and cita.minutos_retraso == 0 %}
+            {% if estado_nombre == 'CONFIRMADA' and cita.minutos_retraso == 0 %}
             <div class="bg-[#fffbeb] border border-[#fef08a] rounded-xl p-4 mb-6">
                 <form method="POST" action="">
                     {% csrf_token %}
@@ -199,7 +199,7 @@
         {% endif %}
 
         <!-- Botones de Acción (Reagendar / Cancelar para Cliente) -->
-        {% if request.user == cita.cliente and estado_nombre != 'Cancelada' and estado_nombre != 'Finalizada' %}
+        {% if request.user == cita.cliente and estado_nombre != 'CANCELADA' and estado_nombre != 'FINALIZADA' %}
         <div class="border-t border-slate-100 pt-6 flex flex-col sm:flex-row items-center justify-end gap-3">
             <a href="{% url 'iniciar_reagendamiento' cita.pk %}" class="flex items-center justify-center gap-2 w-full sm:w-auto bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-[13px] font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>

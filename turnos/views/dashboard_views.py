@@ -108,26 +108,26 @@ def dashboard_tecnico(request):
     # Citas en proceso asignadas al técnico (En diagnóstico o En reparación)
     en_proceso_count = base_qs.filter(
         tecnico=request.user,
-        estado__nombre__in=['EN_DIAGNOSTICO', 'EN_REPARACION', 'En Diagnóstico', 'En Reparación']
+        estado__nombre__in=['EN_REPARACION']
     ).count()
 
     # Citas finalizadas asignadas al técnico
     finalizadas_count = base_qs.filter(
         tecnico=request.user,
-        estado__nombre__iexact='finalizada'
+        estado__nombre__iexact='FINALIZADA'
     ).count()
 
     # Citas con retraso asignadas al técnico
     retrasos_count = base_qs.filter(
         tecnico=request.user,
-        estado__nombre__iexact='retrasada'
+        estado__nombre__iexact='RETRASADA'
     ).count()
 
     # Citas disponibles: asignadas al técnico en estado pendiente/confirmada/reagendada
     ESTADOS_DISPONIBLES = [
-        'PENDIENTE', 'Pendiente', 'pendiente',
-        'CONFIRMADA', 'Confirmada', 'confirmada',
-        'REAGENDADA', 'Reagendada', 'reagendada',
+        'PENDIENTE',
+        'CONFIRMADA',
+        'REAGENDADA',
     ]
     citas_disponibles = base_qs.filter(
         estado__nombre__in=ESTADOS_DISPONIBLES,
@@ -150,7 +150,7 @@ def dashboard_tecnico(request):
         count = Cita.objects.filter(
             tecnico=request.user,
             fecha=dia,
-            estado__nombre__iexact='finalizada'
+            estado__nombre__iexact='FINALIZADA'
         ).count()
         dias_semana.append({'nombre': dia.strftime('%a')[:3].capitalize(), 'count': count, 'fecha': dia})
         total_semana += count
@@ -166,9 +166,9 @@ def dashboard_tecnico(request):
     # Tarea Actual (Cita en curso)
     # ────────────────────────────────────────────────────────
     tarea_actual = base_qs.filter(
-        tecnico=request.user,
-        estado__nombre__in=['EN_DIAGNOSTICO', 'EN_REPARACION', 'En Diagnóstico', 'En Reparación', 'En proceso', 'EN_PROCESO']
-    ).order_by('hora_inicio').first()
+            tecnico=request.user,
+            estado__nombre__in=['EN_REPARACION']
+        ).order_by('hora_inicio').first()
 
     progreso_tarea = 0
     pasos_tarea = []
@@ -373,7 +373,7 @@ def aceptar_cita(request, cita_id):
     
     # Cambiar estado a EN REPARACION
     from turnos.models.citas import EstadoCita
-    estado_rep, _ = EstadoCita.objects.get_or_create(nombre='EN REPARACION')
+    estado_rep, _ = EstadoCita.objects.get_or_create(nombre='EN_REPARACION')
     cita.estado = estado_rep
     
     cita.save()
@@ -620,9 +620,9 @@ def tecnico_reporte_mensual(request):
     )
 
     total      = citas.count()
-    finalizadas = citas.filter(estado__nombre__iexact='finalizada').count()
-    canceladas  = citas.filter(estado__nombre__iexact='cancelada').count()
-    pendientes  = citas.exclude(estado__nombre__in=['Finalizada','Cancelada','FINALIZADA','CANCELADA']).count()
+    finalizadas = citas.filter(estado__nombre__iexact='FINALIZADA').count()
+    canceladas  = citas.filter(estado__nombre__iexact='CANCELADA').count()
+    pendientes  = citas.exclude(estado__nombre__in=['FINALIZADA', 'CANCELADA']).count()
     tasa        = f"{round(finalizadas / total * 100, 1)}%" if total > 0 else "0%"
 
     wb = openpyxl.Workbook()
@@ -774,8 +774,8 @@ def cliente_inicio(request):
         
     citas_usuario = Cita.objects.filter(cliente=request.user).order_by('-fecha', '-hora_inicio')
     
-    total_citas_activas = citas_usuario.exclude(estado__nombre__in=['Finalizada', 'Cancelada']).count()
-    total_reparaciones = citas_usuario.filter(estado__nombre='Finalizada').count()
+    total_citas_activas = citas_usuario.exclude(estado__nombre__in=['FINALIZADA', 'CANCELADA']).count()
+    total_reparaciones = citas_usuario.filter(estado__nombre='FINALIZADA').count()
     
     citas_recientes = citas_usuario
     
@@ -1196,7 +1196,7 @@ def admin_citas(request):
             
             try:
                 cita = Cita.objects.get(id=cita_id)
-                estado_cancelada, _ = EstadoCita.objects.get_or_create(nombre='Cancelada')
+                estado_cancelada, _ = EstadoCita.objects.get_or_create(nombre='CANCELADA')
                 cita.estado = estado_cancelada
                 cita.save()
                 messages.success(request, f'La cita #{cita.id} ha sido marcada como cancelada.')
@@ -1217,9 +1217,9 @@ def admin_citas(request):
 
     # ── KPIs ──
     citas_hoy      = Cita.objects.filter(fecha=hoy).count()
-    pendientes     = Cita.objects.filter(estado__nombre__iexact='Confirmada').count()
-    en_proceso     = Cita.objects.filter(estado__nombre__iexact='Diagnóstico').count()
-    completadas    = Cita.objects.filter(estado__nombre__iexact='Finalizada').count()
+    pendientes     = Cita.objects.filter(estado__nombre__iexact='CONFIRMADA').count()
+    en_proceso     = Cita.objects.filter(estado__nombre__iexact='EN_REPARACION').count()
+    completadas    = Cita.objects.filter(estado__nombre__iexact='FINALIZADA').count()
 
     # ── Filtros desde GET ──
     qs = Cita.objects.select_related('cliente', 'tecnico', 'servicio', 'estado').order_by('-fecha', '-hora_inicio')
@@ -1336,8 +1336,8 @@ def admin_exportar_citas_excel(request):
     ws.merge_cells("E4:F4"); ws["E4"] = "Completadas"
 
     ws.merge_cells("A5:B5"); ws["A5"] = Cita.objects.filter(fecha=hoy).count()
-    ws.merge_cells("C5:D5"); ws["C5"] = Cita.objects.filter(estado__nombre__iexact='Confirmada').count()
-    ws.merge_cells("E5:F5"); ws["E5"] = Cita.objects.filter(estado__nombre__iexact='Finalizada').count()
+    ws.merge_cells("C5:D5"); ws["C5"] = Cita.objects.filter(estado__nombre__iexact='CONFIRMADA').count()
+    ws.merge_cells("E5:F5"); ws["E5"] = Cita.objects.filter(estado__nombre__iexact='FINALIZADA').count()
 
     for cell in ["A4","C4","E4"]:
         ws[cell].font = Font(name="Inter", size=9, bold=True, color="64748B")
@@ -1372,7 +1372,7 @@ def admin_exportar_citas_excel(request):
             row_fill = green_fill
         elif estado_nombre.lower() in ['cancelada']:
             row_fill = red_fill
-        elif estado_nombre.lower() in ['diagnóstico', 'diagnostico']:
+        elif estado_nombre.lower() in ['diagnóstico', 'diagnostico', 'en_reparacion']:
             row_fill = purple_fill
         elif estado_nombre.lower() in ['confirmada']:
             row_fill = amber_fill
@@ -1427,9 +1427,9 @@ def admin_reportes(request):
     hoy = date.today()
     citas_mes_qs = Cita.objects.filter(fecha__year=hoy.year, fecha__month=hoy.month)
     total       = citas_mes_qs.count()
-    finalizadas = citas_mes_qs.filter(estado__nombre__iexact='Finalizada').count()
-    canceladas  = citas_mes_qs.filter(estado__nombre__iexact='Cancelada').count()
-    en_proceso  = citas_mes_qs.filter(estado__nombre__in=['Diagnóstico', 'En Reparación', 'EN_DIAGNOSTICO', 'EN_REPARACION']).count()
+    finalizadas = citas_mes_qs.filter(estado__nombre__iexact='FINALIZADA').count()
+    canceladas  = citas_mes_qs.filter(estado__nombre__iexact='CANCELADA').count()
+    en_proceso  = citas_mes_qs.filter(estado__nombre__in=['EN_REPARACION']).count()
     tasa_exito  = round(finalizadas / total * 100, 1) if total > 0 else 0.0
 
     # Servicios populares
@@ -1466,7 +1466,7 @@ def admin_reportes(request):
         for _ in range(i):
             mes_obj = (mes_obj.replace(day=1) - timedelta(days=1)).replace(day=1)
         ultimo = calendar.monthrange(mes_obj.year, mes_obj.month)[1]
-        cnt = Cita.objects.filter(fecha__gte=mes_obj, fecha__lte=mes_obj.replace(day=ultimo), estado__nombre__iexact='Finalizada').count()
+        cnt = Cita.objects.filter(fecha__gte=mes_obj, fecha__lte=mes_obj.replace(day=ultimo), estado__nombre__iexact='FINALIZADA').count()
         chart_labels.append(MESES_ES[mes_obj.month - 1])
         chart_data.append(cnt)
         chart_metas.append(max(cnt + 2, 5))
@@ -1510,9 +1510,9 @@ def admin_exportar_analitico_pdf(request):
     hoy = date.today()
     citas_mes_qs = Cita.objects.filter(fecha__year=hoy.year, fecha__month=hoy.month)
     total       = citas_mes_qs.count()
-    finalizadas = citas_mes_qs.filter(estado__nombre__iexact='Finalizada').count()
-    canceladas  = citas_mes_qs.filter(estado__nombre__iexact='Cancelada').count()
-    en_proceso  = citas_mes_qs.filter(estado__nombre__in=['EN_DIAGNOSTICO','EN_REPARACION','Diagnóstico','En Reparación']).count()
+    finalizadas = citas_mes_qs.filter(estado__nombre__iexact='FINALIZADA').count()
+    canceladas  = citas_mes_qs.filter(estado__nombre__iexact='CANCELADA').count()
+    en_proceso  = citas_mes_qs.filter(estado__nombre__in=['EN_REPARACION']).count()
     tasa_exito  = round(finalizadas / total * 100, 1) if total > 0 else 0.0
 
     reportes_recientes = Cita.objects.select_related('cliente','servicio','estado','tecnico').order_by('-fecha_creacion')[:10]
@@ -1980,7 +1980,7 @@ def admin_tecnicos(request):
         ).select_related('estado', 'cliente', 'servicio').order_by('hora_inicio')
 
         cita_activa = citas_hoy.exclude(
-            estado__nombre__in=['Cancelada', 'Completada', 'No asistió']
+            estado__nombre__in=['CANCELADA', 'FINALIZADA']
         ).first()
 
         # Obtener perfil si existe
@@ -2005,7 +2005,7 @@ def admin_tecnicos(request):
             estado_monitor = 'disponible'
 
         total_hoy       = citas_hoy.count()
-        completadas_hoy = citas_hoy.filter(estado__nombre__in=['Completada', 'Atendida']).count()
+        completadas_hoy = citas_hoy.filter(estado__nombre__in=['FINALIZADA']).count()
 
         tecnicos_monitoreo.append({
             'tecnico':         t,
@@ -2028,7 +2028,7 @@ def admin_tecnicos(request):
     citas_sin_tecnico = Cita.objects.filter(
         tecnico__isnull=True, fecha=hoy
     ).exclude(
-        estado__nombre__in=['Cancelada', 'Completada']
+        estado__nombre__in=['CANCELADA', 'FINALIZADA']
     ).select_related('cliente', 'servicio', 'estado').order_by('hora_inicio')[:5]
 
     # Usuarios NO-técnicos para el selector de vincular usuario existente
@@ -2424,7 +2424,7 @@ def tecnico_toggle_pausa(request):
                 hoy = timezone.now().date()
                 citas_activas = request.user.citas_tecnico.filter(
                     fecha=hoy
-                ).exclude(estado__nombre__in=['Cancelada', 'Completada', 'No asistió'])
+                ).exclude(estado__nombre__in=['CANCELADA', 'FINALIZADA'])
                 
                 if citas_activas.exists():
                     if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
@@ -2472,7 +2472,7 @@ def api_estado_tecnicos(request):
                 fecha=hoy, 
                 hora_inicio__lte=ahora, 
                 hora_fin__gte=ahora
-            ).exclude(estado__nombre__in=['Cancelada', 'Completada', 'No asistió']).first()
+            ).exclude(estado__nombre__in=['CANCELADA', 'FINALIZADA']).first()
             if cita_activa:
                 estado = 'en_proceso'
                 
@@ -2495,9 +2495,9 @@ def tecnico_historial(request):
     qs_total = Cita.objects.filter(tecnico=request.user)
     
     citas_hoy      = qs_total.filter(fecha=hoy).count()
-    pendientes     = qs_total.filter(estado__nombre__in=['PENDIENTE', 'CONFIRMADA', 'RETRASADA', 'Pendiente', 'Confirmada']).count()
-    en_proceso     = qs_total.filter(estado__nombre__in=['EN_DIAGNOSTICO', 'EN_REPARACION', 'Diagnóstico', 'En Reparación', 'En Proceso']).count()
-    completadas    = qs_total.filter(estado__nombre__in=['FINALIZADA', 'Finalizada', 'Completada']).count()
+    pendientes     = qs_total.filter(estado__nombre__in=['PENDIENTE', 'CONFIRMADA', 'RETRASADA']).count()
+    en_proceso     = qs_total.filter(estado__nombre__in=['EN_REPARACION']).count()
+    completadas    = qs_total.filter(estado__nombre__in=['FINALIZADA']).count()
 
     # ── Filtros desde GET ──
     qs = qs_total.select_related('cliente', 'servicio', 'estado').order_by('-fecha', '-hora_inicio')

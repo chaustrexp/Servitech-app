@@ -122,11 +122,11 @@
                     <!-- Info -->
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 flex-wrap mb-1">
-                            {% if cita.estado.nombre == 'Confirmada' %}
+                            {% if cita.estado.nombre == 'CONFIRMADA' %}
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">CONFIRMADA</span>
-                            {% elif cita.estado.nombre == 'Finalizada' %}
+                            {% elif cita.estado.nombre == 'FINALIZADA' %}
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">FINALIZADA</span>
-                            {% elif cita.estado.nombre == 'Cancelada' %}
+                            {% elif cita.estado.nombre == 'CANCELADA' %}
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700">CANCELADA</span>
                             {% else %}
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">{{ cita.estado.nombre|upper }}</span>
@@ -182,7 +182,7 @@
                     <p class="text-white font-extrabold text-sm">Próxima Cita</p>
                 </div>
                 <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider
-                    {% if proxima_cita.estado.nombre == 'Confirmada' %}bg-blue-400/30 text-blue-100
+                    {% if proxima_cita.estado.nombre == 'CONFIRMADA' %}bg-blue-400/30 text-blue-100
                     {% else %}bg-white/20 text-white/80{% endif %}">
                     {{ proxima_cita.estado.nombre }}
                 </span>

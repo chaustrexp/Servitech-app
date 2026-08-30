@@ -208,11 +208,11 @@
             {% for cita in actividad_reciente %}
             <a href="{% url 'admin_citas' %}" class="flex gap-4 p-2 rounded-lg hover:bg-slate-50 transition group">
                 <div class="w-10 h-10 rounded-lg bg-[#e0e7ff] flex items-center justify-center flex-shrink-0">
-                    {% if cita.estado.nombre == 'Finalizada' %}
+                    {% if cita.estado.nombre == 'FINALIZADA' %}
                     <svg class="w-5 h-5 text-[#0e3687]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    {% elif cita.estado.nombre == 'Cancelada' %}
+                    {% elif cita.estado.nombre == 'CANCELADA' %}
                     <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -224,7 +224,7 @@
                 </div>
                 <div class="min-w-0 flex-1">
                     <p class="text-[13.5px] font-bold text-[#0e3687] leading-tight truncate">
-                        {% if cita.estado.nombre == 'Finalizada' %}Cita #{{ cita.pk }} completada
+                        {% if cita.estado.nombre == 'FINALIZADA' %}Cita #{{ cita.pk }} completada
                         {% else %}Nueva cita — {{ cita.servicio.nombre }}{% endif %}
                     </p>
                     <p class="text-[12px] text-slate-500 mt-0.5 truncate font-medium">
