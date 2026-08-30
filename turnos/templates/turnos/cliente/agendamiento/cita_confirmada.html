@@ -38,27 +38,29 @@
         <!-- Header eliminado según requerimiento -->
 
         <!-- Detalles en grid -->
-        <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
-            <div>
-                <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Equipo</p>
-                <p class="font-bold text-slate-800">{{ dispositivo }}</p>
-            </div>
-            <div>
-                <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Servicio</p>
-                <p class="font-bold text-slate-800">{{ cita.servicio.nombre }}</p>
-            </div>
-            <div>
-                <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Sucursal</p>
-                <p class="font-bold text-slate-800">Centro de Servicio Principal</p>
-            </div>
-            <div>
-                <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Fecha y Hora</p>
-                <p class="font-bold text-[#002b75]">{{ cita.fecha|date:"j M" }}, {{ cita.hora_inicio|time:"g:i A" }}</p>
+        <div class="p-6 grid grid-cols-1 gap-y-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
+                <div class="min-w-0">
+                    <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Equipo</p>
+                    <p class="font-bold text-slate-800 break-words">{{ dispositivo }}</p>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Servicio</p>
+                    <p class="font-bold text-slate-800 break-words">{{ cita.servicio.nombre }}</p>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Sucursal</p>
+                    <p class="font-bold text-slate-800 break-words">Centro de Servicio Principal</p>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Fecha y Hora</p>
+                    <p class="font-bold text-[#002b75]">{{ cita.fecha|date:"j M" }}, {{ cita.hora_inicio|time:"g:i A" }}</p>
+                </div>
             </div>
             {% if cita.observaciones %}
-            <div class="col-span-2">
+            <div class="min-w-0">
                 <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Notas / Observaciones</p>
-                <p class="font-medium text-slate-700 text-sm italic">{{ cita.observaciones }}</p>
+                <p class="font-medium text-slate-700 text-sm italic break-words">{{ cita.observaciones }}</p>
             </div>
             {% endif %}
         </div>

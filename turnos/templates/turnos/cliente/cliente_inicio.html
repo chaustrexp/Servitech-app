@@ -80,17 +80,17 @@
                 <p class="text-2xl sm:text-4xl font-extrabold text-[#002b75]">{{ total_reparaciones }}</p>
             </div>
 
-            <!-- Mis Dispositivos KPI -->
+            <!-- Notificaciones KPI -->
             <div class="bg-white rounded-2xl border border-slate-200 p-3 sm:p-5 shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#eef2ff] flex items-center justify-center text-[#002b75] mb-2 sm:mb-4">
                         <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
                     </div>
-                    <p class="text-[9px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 sm:mb-2 leading-tight">Dispositivos</p>
-                    <p class="text-2xl sm:text-4xl font-extrabold text-[#002b75]">{{ total_dispositivos|default:"2" }}</p>
+                    <p class="text-[9px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 sm:mb-2 leading-tight">Notificaciones</p>
+                    <p class="text-2xl sm:text-4xl font-extrabold text-[#002b75]">{{ notificaciones.count|default:"0" }}</p>
                 </div>
             </div>
         </div>
@@ -212,90 +212,24 @@
                 </span>
             </div>
         </a>
-        {% else %}
-        <!-- Sin citas próximas -->
-        <div class="relative bg-gradient-to-r from-[#001a4d] to-[#003399] rounded-2xl overflow-hidden p-5 flex flex-col items-center justify-center gap-3 shadow-sm min-h-[130px]">
-            <div class="absolute inset-0 opacity-10 pointer-events-none"
-                 style="background: radial-gradient(circle at 80% 50%, #fff 0%, transparent 50%)"></div>
-            <svg class="w-8 h-8 text-white/40 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            <p class="text-white/70 text-sm font-semibold relative z-10">Sin citas nuevas próximas</p>
-            <a href="{% url 'seleccionar_dispositivo' %}"
-               class="relative z-10 bg-white text-[#002b75] font-bold px-4 py-2 rounded-xl text-xs hover:bg-blue-50 transition shadow">
-                + Agendar ahora
-            </a>
-        </div>
         {% endif %}
     </div>
 
     <!-- ══ COLUMNA DERECHA ══ -->
     <div class="space-y-5">
 
-        <!-- Mis Dispositivos -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-base font-bold text-slate-800">Mis Dispositivos</h2>
-                <button onclick="abrirModalDispositivo()"
-                        class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-[#eef2ff] flex items-center justify-center text-slate-400 hover:text-[#002b75] transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                </button>
-            </div>
-
-            <div class="space-y-3" id="lista-dispositivos">
-
-                <!-- Dispositivo 1 -->
-                <div class="border border-slate-200 rounded-xl p-4">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-9 h-9 rounded-lg bg-[#eef2ff] flex items-center justify-center text-[#002b75]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                            </svg>
-                        </div>
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">DISPONIBLE</span>
-                    </div>
-                    <p class="font-bold text-slate-800 text-sm">MacBook Pro M2</p>
-                    <p class="text-xs text-slate-400 mb-3">Apple • 2023</p>
-                    <div class="flex items-center justify-between border-t border-slate-100 pt-3">
-                        <span class="text-xs text-slate-400">Último servicio: Jul 2024</span>
-                        <button onclick="verDetallesDispositivo('MacBook Pro M2', 'Apple', '2023', 'DISPONIBLE', 'Jul 2024', 'Laptop')" class="text-xs font-bold text-[#002b75] hover:underline">Detalles</button>
-                    </div>
-                </div>
-
-                <!-- Dispositivo 2 -->
-                <div class="border border-slate-200 rounded-xl p-4">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-9 h-9 rounded-lg bg-[#eef2ff] flex items-center justify-center text-[#002b75]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                            </svg>
-                        </div>
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">EN TALLER</span>
-                    </div>
-                    <p class="font-bold text-slate-800 text-sm">iPhone 14 Pro</p>
-                    <p class="text-xs text-slate-400 mb-3">Apple • 2022</p>
-                    <div class="flex items-center justify-between border-t border-slate-100 pt-3">
-                        <span class="text-xs text-slate-400">Último servicio: En curso</span>
-                        <button onclick="verDetallesDispositivo('iPhone 14 Pro', 'Apple', '2022', 'EN TALLER', 'En curso', 'Celular')" class="text-xs font-bold text-[#002b75] hover:underline">Detalles</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tip del Técnico -->
-        <div class="bg-[#eef2ff] rounded-2xl border border-[#c7d4f5] p-5">
-            <div class="flex items-center gap-2 mb-3">
-                <svg class="w-5 h-5 text-[#002b75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                </svg>
-                <p class="text-sm font-bold text-[#002b75]">Tip del Técnico</p>
-            </div>
-            <p class="text-xs text-slate-600 leading-relaxed">
-                ¿Sabías que una limpieza de hardware cada 6 meses puede extender la vida útil de tu laptop hasta un 30%? Agenda un mantenimiento preventivo.
-            </p>
+        <!-- Banner Agendar -->
+        <div class="relative bg-gradient-to-r from-[#001a4d] to-[#003399] rounded-2xl overflow-hidden p-10 flex flex-col items-center justify-center gap-4 shadow-sm min-h-[300px] sm:min-h-[320px]">
+            <div class="absolute inset-0 opacity-10 pointer-events-none"
+                 style="background: radial-gradient(circle at 80% 50%, #fff 0%, transparent 50%)"></div>
+            <svg class="w-9 h-9 text-white/40 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <p class="text-white/70 text-sm font-semibold relative z-10">Sin citas nuevas próximas</p>
+            <a href="{% url 'seleccionar_dispositivo' %}"
+               class="relative z-10 bg-white text-[#002b75] font-bold px-6 py-2.5 rounded-xl text-sm hover:bg-blue-50 transition shadow">
+                + Agendar ahora
+            </a>
         </div>
     </div>
 </div>
