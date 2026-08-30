@@ -8,86 +8,114 @@
 <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/es.js'></script>
 
 <style>
-    /* Personalización de FullCalendar para ServiTech */
     :root {
         --fc-border-color: #e2e8f0;
-        --fc-daygrid-event-dot-width: 8px;
-        --fc-today-bg-color: #f0f5ff;
+        --fc-today-bg-color: #eef2ff;
         --fc-button-bg-color: #002b75;
         --fc-button-border-color: #002b75;
         --fc-button-hover-bg-color: #001f54;
         --fc-button-hover-border-color: #001f54;
         --fc-button-active-bg-color: #001a47;
     }
-    
-    .fc {
-        font-family: 'Inter', sans-serif;
-    }
-    .fc-theme-standard .fc-scrollgrid {
-        border: none;
-    }
-    .fc-theme-standard td, .fc-theme-standard th {
-        border-color: #f1f5f9;
-    }
+
+    .fc { font-family: 'Inter', sans-serif; }
+
+    .fc-theme-standard .fc-scrollgrid { border: none; }
+    .fc-theme-standard td, .fc-theme-standard th { border-color: #f1f5f9; }
+
+    /* Encabezado días */
     .fc-col-header-cell {
-        padding: 8px 0;
-        font-size: 0.875rem;
-        color: #475569;
+        padding: 10px 0;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         border-bottom: 2px solid #e2e8f0 !important;
     }
+    .fc-col-header-cell-cushion { text-decoration: none !important; color: inherit; }
+
+    /* Celdas de día */
     .fc-daygrid-day {
         cursor: pointer;
-        transition: background-color 0.2s;
+        transition: background-color 0.15s;
     }
-    .fc-daygrid-day:hover:not(.fc-day-disabled) {
-        background-color: #f8fafc;
+    .fc-daygrid-day:hover:not(.fc-day-disabled):not(.fc-day-other) {
+        background-color: #f0f5ff;
     }
     .fc-daygrid-day.fc-day-today {
         background-color: transparent !important;
     }
-    .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
-        background-color: #f1f5f9;
-        border-radius: 50%;
-        color: #0f172a;
-        font-weight: bold;
-    }
-    
-    .fc-day-disabled {
-        background-color: #f8fafc;
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-    
+
+    /* Número del día */
     .fc-daygrid-day-number {
-        padding: 8px !important;
-        margin: 4px;
-        width: 32px;
-        height: 32px;
+        width: 34px;
+        height: 34px;
         display: flex !important;
         align-items: center;
         justify-content: center;
+        margin: 4px auto;
+        border-radius: 50%;
+        font-size: 0.85rem;
+        font-weight: 500;
         color: #334155;
+        text-decoration: none !important;
+    }
+    .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+        background-color: #eef2ff;
+        color: #002b75;
+        font-weight: 700;
     }
 
+    /* Día seleccionado */
     .fc-daygrid-day.selected-date .fc-daygrid-day-number {
         background-color: #002b75;
         color: white;
-        border-radius: 50%;
-        font-weight: bold;
-        box-shadow: 0 4px 6px -1px rgba(0, 43, 117, 0.4);
-    }
-    
-    .fc .fc-toolbar-title {
-        font-size: 1.25rem;
         font-weight: 700;
-        color: #091124;
+        box-shadow: 0 4px 10px rgba(0, 43, 117, 0.35);
     }
-    
+
+    /* Días deshabilitados */
+    .fc-day-disabled, .fc-day-other {
+        background-color: #f8fafc !important;
+        opacity: 0.45;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    /* Toolbar */
+    .fc .fc-toolbar { margin-bottom: 12px !important; }
+    .fc .fc-toolbar-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #0e3687;
+    }
     .fc-button-primary {
-        text-transform: capitalize;
         border-radius: 8px !important;
-        padding: 0.25rem 0.75rem !important;
-        font-size: 0.875rem !important;
+        padding: 0.3rem 0.75rem !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+    }
+
+    /* Responsive móvil */
+    @media (max-width: 640px) {
+        .fc .fc-toolbar { gap: 4px; }
+        .fc .fc-toolbar-title { font-size: 0.88rem; }
+        .fc-button-primary { padding: 0.2rem 0.45rem !important; font-size: 0.72rem !important; }
+        .fc-daygrid-day-number { width: 26px; height: 26px; font-size: 0.75rem; margin: 2px auto; }
+        .fc-col-header-cell { font-size: 0.65rem; padding: 5px 0; }
+    }
+
+    /* Tablet */
+    @media (min-width: 641px) and (max-width: 1024px) {
+        .fc .fc-toolbar-title { font-size: 0.95rem; }
+        .fc-button-primary { padding: 0.25rem 0.6rem !important; font-size: 0.78rem !important; }
+        .fc-daygrid-day-number { width: 30px; height: 30px; font-size: 0.8rem; }
+    }
+
+    /* Panel de horarios: scroll horizontal en móvil para los botones */
+    @media (max-width: 640px) {
+        .time-slot { padding-top: 0.6rem !important; padding-bottom: 0.6rem !important; font-size: 0.8rem !important; }
     }
 </style>
 {% endblock %}
@@ -147,98 +175,91 @@
         <div class="flex flex-col lg:flex-row gap-6">
             
             <!-- Columna Izquierda: Calendario -->
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex-1 p-8">
-                <div class="mb-4 flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-[#091124]">Selecciona una Fecha</h2>
-                </div>
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex-1 p-4 sm:p-6">
+                <h2 class="text-lg sm:text-2xl font-bold text-[#091124] mb-4">Selecciona una Fecha</h2>
 
                 <!-- Contenedor FullCalendar -->
                 <div id="calendar" class="w-full h-auto"></div>
 
                 <!-- Leyenda -->
-                <div class="mt-6 bg-[#f4f7fb] rounded-lg p-4 flex flex-wrap items-center gap-6 text-xs text-slate-600 font-medium">
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 border border-slate-300 rounded-full bg-white"></span> Disponible</div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#f8fafc] border border-slate-200 rounded-full opacity-50"></span> No disponible</div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#002b75] rounded-full"></span> Seleccionado</div>
+                <div class="mt-4 bg-[#f4f7fb] rounded-lg px-4 py-3 flex flex-wrap items-center gap-4 text-xs text-slate-600 font-medium">
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 border border-slate-300 rounded-full bg-white inline-block"></span> Disponible</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#f8fafc] border border-slate-200 rounded-full opacity-50 inline-block"></span> No disponible</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#002b75] rounded-full inline-block"></span> Seleccionado</div>
                 </div>
             </div>
 
             <!-- Columna Derecha: Horarios y Resumen -->
-            <div class="w-full lg:w-[350px] flex flex-col gap-6">
+            <div class="w-full lg:w-[340px] flex flex-col gap-4">
                 <!-- Horarios Disponibles -->
-                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                    <h2 class="text-xl font-bold text-[#091124] mb-2">Horarios Disponibles</h2>
-                    <p id="fecha-label-horario" class="text-sm text-slate-500 mb-5">Selecciona una fecha para ver los horarios.</p>
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6">
+                    <h2 class="text-base sm:text-xl font-bold text-[#091124] mb-1">Horarios Disponibles</h2>
+                    <p id="fecha-label-horario" class="text-sm text-slate-500 mb-4">Selecciona una fecha para ver los horarios.</p>
                     
                     <div id="horarios-container" class="hidden">
                         <div class="mb-4">
                             <h3 class="text-xs font-bold text-slate-500 tracking-wider mb-3">MAÑANA</h3>
-                            <div class="grid grid-cols-2 gap-3">
-                                <button type="button" onclick="seleccionarHora('09:00', '09:00 AM', this)" class="time-slot border border-slate-200 rounded-lg py-3 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">09:00 AM</button>
-                                <button type="button" onclick="seleccionarHora('10:00', '10:00 AM', this)" class="time-slot border border-slate-200 rounded-lg py-3 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">10:00 AM</button>
-                                <button type="button" onclick="seleccionarHora('11:00', '11:00 AM', this)" class="time-slot border border-slate-200 rounded-lg py-3 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">11:00 AM</button>
+                            <div class="grid grid-cols-3 sm:grid-cols-2 gap-2">
+                                <button type="button" onclick="seleccionarHora('09:00', '09:00 AM', this)" class="time-slot border border-slate-200 rounded-lg py-2.5 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">09:00 AM</button>
+                                <button type="button" onclick="seleccionarHora('10:00', '10:00 AM', this)" class="time-slot border border-slate-200 rounded-lg py-2.5 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">10:00 AM</button>
+                                <button type="button" onclick="seleccionarHora('11:00', '11:00 AM', this)" class="time-slot border border-slate-200 rounded-lg py-2.5 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">11:00 AM</button>
                             </div>
                         </div>
-
                         <div>
                             <h3 class="text-xs font-bold text-slate-500 tracking-wider mb-3">TARDE</h3>
-                            <div class="grid grid-cols-2 gap-3">
-                                <button type="button" onclick="seleccionarHora('14:00', '02:00 PM', this)" class="time-slot border border-slate-200 rounded-lg py-3 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">02:00 PM</button>
-                                <button type="button" onclick="seleccionarHora('15:00', '03:00 PM', this)" class="time-slot border border-slate-200 rounded-lg py-3 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">03:00 PM</button>
-                                <button type="button" onclick="seleccionarHora('16:00', '04:00 PM', this)" class="time-slot border border-slate-200 rounded-lg py-3 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">04:00 PM</button>
-                                <button type="button" onclick="seleccionarHora('17:00', '05:00 PM', this)" class="time-slot border border-slate-200 rounded-lg py-3 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">05:00 PM</button>
+                            <div class="grid grid-cols-3 sm:grid-cols-2 gap-2">
+                                <button type="button" onclick="seleccionarHora('14:00', '02:00 PM', this)" class="time-slot border border-slate-200 rounded-lg py-2.5 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">02:00 PM</button>
+                                <button type="button" onclick="seleccionarHora('15:00', '03:00 PM', this)" class="time-slot border border-slate-200 rounded-lg py-2.5 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">03:00 PM</button>
+                                <button type="button" onclick="seleccionarHora('16:00', '04:00 PM', this)" class="time-slot border border-slate-200 rounded-lg py-2.5 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">04:00 PM</button>
+                                <button type="button" onclick="seleccionarHora('17:00', '05:00 PM', this)" class="time-slot border border-slate-200 rounded-lg py-2.5 text-sm font-medium hover:border-[#002b75] transition bg-white text-slate-700">05:00 PM</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Resumen de Solicitud (Card lateral) -->
-                <div class="bg-[#e4ebf6] rounded-xl border border-[#d2def0] p-6 shadow-sm">
-                    <h3 class="font-bold text-[#002b75] text-lg mb-4">Resumen de Solicitud</h3>
-                    
-                    <div class="space-y-4">
+                <div class="bg-[#e4ebf6] rounded-xl border border-[#d2def0] p-4 sm:p-6 shadow-sm">
+                    <h3 class="font-bold text-[#002b75] text-base sm:text-lg mb-3">Resumen de Solicitud</h3>
+                    <div class="space-y-3">
                         <div class="flex items-start gap-3 text-[#002b75]">
-                            <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                             <div>
                                 <span class="text-[10px] uppercase font-bold text-slate-500 block leading-none mb-1">Equipo</span>
-                                <span class="font-bold text-slate-800">{{ dispositivo|default:"—" }}</span>
+                                <span class="font-bold text-slate-800 text-sm">{{ dispositivo|default:"—" }}</span>
                             </div>
                         </div>
-
                         <div class="flex items-start gap-3 text-[#002b75]">
-                            <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+                            <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
                             <div>
                                 <span class="text-[10px] uppercase font-bold text-slate-500 block leading-none mb-1">Servicio</span>
-                                <span class="font-bold text-slate-800">{{ servicio|default:"—" }}</span>
+                                <span class="font-bold text-slate-800 text-sm">{{ servicio|default:"—" }}</span>
                             </div>
                         </div>
-
                         <div class="flex items-start gap-3 text-[#002b75]">
-                            <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             <div>
                                 <span class="text-[10px] uppercase font-bold text-slate-500 block leading-none mb-1">Fecha y Hora</span>
-                                <span id="resumen-fecha-hora" class="font-bold text-slate-800">Pendiente de selección</span>
+                                <span id="resumen-fecha-hora" class="font-bold text-slate-800 text-sm">Pendiente de selección</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
 
         <!-- Controles de Navegación -->
-        <div class="mt-8 border-t border-slate-300 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <a href="{% url 'seleccionar_servicio' %}" class="bg-white border border-slate-300 text-slate-700 font-medium text-sm px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-slate-50 transition-all">
+        <div class="mt-6 border-t border-slate-300 pt-5 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <a href="{% url 'seleccionar_servicio' %}" class="w-full sm:w-auto bg-white border border-slate-300 text-slate-700 font-medium text-sm px-5 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-slate-50 transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 <span>Volver</span>
             </a>
 
-            <div class="text-sm text-slate-500 text-center sm:text-left">
-                Al hacer clic en siguiente, confirmas tu disponibilidad para la fecha seleccionada.
-            </div>
+            <p class="text-xs text-slate-400 text-center hidden sm:block">
+                Al confirmar, aceptas la disponibilidad para la fecha seleccionada.
+            </p>
 
             <button type="button" id="btn-siguiente" disabled
-                class="bg-[#7888b5] cursor-not-allowed text-white font-medium text-sm px-8 py-3 rounded-lg flex items-center gap-2 transition-all"
+                class="w-full sm:w-auto bg-[#7888b5] cursor-not-allowed text-white font-medium text-sm px-8 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all"
                 onclick="document.getElementById('wizard-form').submit()">
                 <span>Siguiente</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -264,31 +285,30 @@
             locale: 'es',
             initialView: 'dayGridMonth',
             headerToolbar: {
-                left: 'title',
-                right: 'prev,next'
+                left: 'prev,next',
+                center: 'title',
+                right: ''
             },
-            firstDay: 1, // Lunes
-            hiddenDays: [0], // Ocultar solo domingos (0)
+            firstDay: 1,
+            hiddenDays: [0],
             validRange: {
-                start: new Date() // No se pueden seleccionar días anteriores a hoy
+                start: new Date()
             },
             showNonCurrentDates: false,
             fixedWeekCount: false,
             contentHeight: "auto",
-            
+            dayCellContent: function(arg) {
+                // Solo mostrar el número sin el enlace
+                return { html: `<span>${arg.date.getDate()}</span>` };
+            },
             dateClick: function(info) {
-                // Remover clase seleccionada de todos los dias
                 document.querySelectorAll('.fc-daygrid-day').forEach(el => {
                     el.classList.remove('selected-date');
                 });
-                // Agregar clase al día clickeado
                 info.dayEl.classList.add('selected-date');
-
                 selectDate(info.date);
             },
-            
             dayCellClassNames: function(arg) {
-                // Agregar clase personalizada a días pasados si fuera necesario
                 if (arg.date < new Date(new Date().setHours(0,0,0,0))) {
                     return ['fc-day-disabled'];
                 }

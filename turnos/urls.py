@@ -22,6 +22,7 @@ urlpatterns = [
          PasswordResetView.as_view(
              template_name='turnos/auth/password_reset.html',
              email_template_name='turnos/auth/password_reset_email.html',
+             html_email_template_name='turnos/auth/password_reset_email.html',
              subject_template_name='turnos/auth/password_reset_subject.txt',
              success_url='/password-reset/done/',
          ),
