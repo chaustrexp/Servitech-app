@@ -11,6 +11,23 @@ from ..services.asignacion import asignar_tecnico, NoTechnicianAvailable
 @login_required
 def seleccionar_dispositivo(request):
     """Paso 1 del wizard de agendamiento: seleccionar tipo de dispositivo."""
+    
+    # REGLA DE NEGOCIO: Bloqueo por Inasistencias (No-Show Ban)
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    hace_30_dias = timezone.now() - timedelta(days=30)
+    citas_canceladas = request.user.citas_cliente.filter(
+        estado__nombre='CANCELADA',
+        fecha_creacion__gte=hace_30_dias
+    ).count()
+    
+    if citas_canceladas >= 3:
+        ultima_cancelacion = request.user.citas_cliente.filter(estado__nombre='CANCELADA').order_by('-fecha_creacion').first()
+        if ultima_cancelacion and (timezone.now() - ultima_cancelacion.fecha_creacion) < timedelta(days=3):
+            messages.error(request, 'Tu cuenta tiene una restricción temporal por múltiples cancelaciones. Por favor, acércate presencialmente a nuestro local.')
+            return redirect('home')
+
     if request.method == 'POST':
         dispositivo = request.POST.get('dispositivo')
         if dispositivo:
@@ -50,6 +67,19 @@ def seleccionar_fecha_hora(request):
         fecha = request.POST.get('fecha')
         hora = request.POST.get('hora')
         if fecha and hora:
+            # REGLA DE NEGOCIO: Ventana de Agendamiento (Booking Window)
+            from datetime import datetime, timedelta
+            fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
+            hoy = datetime.now().date()
+            
+            if fecha_obj <= hoy:
+                messages.error(request, 'Debes agendar con al menos 24 horas de anticipación.')
+                return redirect('seleccionar_fecha_hora')
+                
+            if fecha_obj > hoy + timedelta(days=30):
+                messages.error(request, 'Solo puedes agendar citas para los próximos 30 días.')
+                return redirect('seleccionar_fecha_hora')
+
             request.session['wizard_fecha'] = fecha
             request.session['wizard_hora'] = hora
             return redirect('resumen_cita')
@@ -203,12 +233,17 @@ def detalle_cita(request, cita_id):
                 messages.warning(request, 'Ya notificaste un retraso para esta cita.')
 
         elif accion == 'cancelar':
+            from datetime import datetime, timedelta
+            cita_dt = datetime.combine(cita.fecha, cita.hora_inicio)
+            if cita_dt - datetime.now() < timedelta(hours=24):
+                messages.error(request, 'No puedes cancelar una cita con menos de 24 horas de anticipación. Por favor, contacta a soporte.')
+                return redirect('detalle_cita', cita_id=cita.pk)
+                
             estado_cancelada, _ = EstadoCita.objects.get_or_create(nombre='CANCELADA')
             cita.estado = estado_cancelada
             cita.save()
             messages.success(request, 'Cita cancelada exitosamente.')
             return redirect('home')
-
         return redirect('detalle_cita', cita_id=cita.pk)
 
     dispositivo_map = {'CELULAR': 'Celular', 'LAPTOP': 'Laptop', 'PC': 'PC'}
@@ -293,6 +328,12 @@ def api_estado_cita(request, cita_id):
 def iniciar_reagendamiento(request, cita_id):
     """Inicia el flujo de reagendamiento para una cita específica."""
     cita = get_object_or_404(Cita, pk=cita_id, cliente=request.user)
+    
+    from datetime import datetime, timedelta
+    cita_dt = datetime.combine(cita.fecha, cita.hora_inicio)
+    if cita_dt - datetime.now() < timedelta(hours=24):
+        messages.error(request, 'No puedes reagendar una cita con menos de 24 horas de anticipación. Por favor, contacta a soporte.')
+        return redirect('detalle_cita', cita_id=cita.pk)
     
     # Pre-cargar datos de la cita en la sesión para el wizard de fecha y hora
     request.session['wizard_dispositivo'] = cita.servicio.tipo_dispositivo

@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from turnos.decorators import rol_requerido
 from django.contrib import messages
 from django.db.models import Count
 from datetime import date, timedelta
@@ -15,11 +16,9 @@ from ..forms import EditarPerfilForm
 #  DASHBOARD ADMINISTRADOR
 # ─────────────────────────────────────────────
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_dashboard(request):
     """Dashboard principal del administrador con métricas reales."""
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
-        return redirect('home')
-
     hoy = date.today()
 
     # ── KPIs ──
@@ -73,6 +72,7 @@ def admin_dashboard(request):
     return render(request, 'turnos/administracion/admin_dashboard.html', context)
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def dashboard_tecnico(request):
     """Dashboard del técnico: obtiene citas reales desde la base de datos PostgreSQL."""
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -216,6 +216,7 @@ def dashboard_tecnico(request):
     return render(request, 'turnos/tecnico/tecnico_inicio.html', context)
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def tecnico_agenda(request):
     """Agenda del técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -362,6 +363,7 @@ def tecnico_agenda(request):
     return render(request, 'turnos/tecnico/tecnico_agenda.html', context)
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 @require_POST
 def aceptar_cita(request, cita_id):
     """Permite al técnico aceptar una cita y pasarla a EN REPARACION."""
@@ -393,6 +395,7 @@ import json
 from django.db import transaction
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 @require_POST
 def finalizar_cita(request, cita_id):
     """Permite al técnico marcar una cita como finalizada."""
@@ -435,6 +438,7 @@ def finalizar_cita(request, cita_id):
     })
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def tecnico_dispositivos(request):
     """Gestión de dispositivos e inventario para el técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -463,6 +467,7 @@ def tecnico_dispositivos(request):
     })
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def tecnico_clientes(request):
     """Directorio de clientes para el técnico: muestra todos los clientes registrados."""
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -548,6 +553,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def tecnico_soporte(request):
     """Soporte operativo para el técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -563,6 +569,7 @@ def tecnico_soporte(request):
     return render(request, 'turnos/tecnico/tecnico_soporte.html', context)
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 @require_POST
 def tecnico_crear_ticket(request):
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -589,6 +596,7 @@ def tecnico_crear_ticket(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def tecnico_reporte_mensual(request):
     """
     Genera el reporte mensual del técnico como archivo Excel (.xlsx).
@@ -773,6 +781,7 @@ def tecnico_reporte_mensual(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def cliente_inicio(request):
     """Dashboard principal del cliente (Inicio)"""
     if request.user.rol != Usuario.Rol.CLIENTE:
@@ -797,6 +806,7 @@ def cliente_inicio(request):
     return render(request, 'turnos/cliente/cliente_inicio.html', context)
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def cliente_servicios(request):
     """Catálogo de servicios para el cliente"""
     if request.user.rol != Usuario.Rol.CLIENTE:
@@ -807,6 +817,7 @@ def cliente_servicios(request):
     return render(request, 'turnos/cliente/cliente_servicios.html', {'servicios': servicios})
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def cliente_perfil(request):
     """Perfil del cliente: permite editar datos personales."""
     if request.user.rol != Usuario.Rol.CLIENTE:
@@ -830,12 +841,14 @@ def cliente_perfil(request):
     return render(request, 'turnos/cliente/cliente_perfil.html', {'form': form})
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def cliente_soporte(request):
     """Página de soporte para el cliente"""
     if request.user.rol != Usuario.Rol.CLIENTE:
         return redirect('home')
     return render(request, 'turnos/cliente/cliente_soporte.html')
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def cliente_notificaciones(request):
     """Módulo de notificaciones para el cliente."""
     if request.user.rol != Usuario.Rol.CLIENTE:
@@ -855,6 +868,7 @@ def cliente_notificaciones(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def tecnico_perfil(request):
     """Perfil del técnico para ver métricas y actualizar información personal."""
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -875,6 +889,7 @@ def tecnico_perfil(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def exportar_inventario_excel(request):
     """Exporta la lista de repuestos del técnico a un archivo Excel (.xlsx)."""
     import openpyxl
@@ -966,7 +981,9 @@ def exportar_inventario_excel(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_usuarios(request):
     if not request.user.es_admin:
         return redirect('home')
@@ -1026,6 +1043,7 @@ def admin_usuarios(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_crear_usuario(request):
     if not request.user.es_admin:
         return redirect('home')
@@ -1050,6 +1068,7 @@ def admin_crear_usuario(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_editar_usuario(request, usuario_id):
     if not request.user.es_admin:
         return redirect('home')
@@ -1068,6 +1087,7 @@ def admin_editar_usuario(request, usuario_id):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_toggle_usuario(request, usuario_id):
     if not request.user.es_admin:
         return redirect('home')
@@ -1086,6 +1106,7 @@ def admin_toggle_usuario(request, usuario_id):
 #  CATÁLOGO DE SERVICIOS (ADMIN)
 # ─────────────────────────────────────────────
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_servicios(request):
     if not request.user.es_admin:
         return redirect('home')
@@ -1116,6 +1137,7 @@ def admin_servicios(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_crear_servicio(request):
     if not request.user.es_admin:
         return redirect('home')
@@ -1152,6 +1174,7 @@ def admin_crear_servicio(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_editar_servicio(request, servicio_id):
     if not request.user.es_admin:
         return redirect('home')
@@ -1176,6 +1199,7 @@ def admin_editar_servicio(request, servicio_id):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_toggle_servicio(request, servicio_id):
     if not request.user.es_admin:
         return redirect('home')
@@ -1191,10 +1215,8 @@ def admin_toggle_servicio(request, servicio_id):
 #  CITAS (ADMIN)
 # ─────────────────────────────────────────────
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_citas(request):
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
-        return redirect('home')
-        
     if request.method == 'POST':
         accion = request.POST.get('accion')
         cita_id = request.POST.get('cita_id')
@@ -1305,11 +1327,9 @@ def admin_citas(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_exportar_citas_excel(request):
     """Exporta la lista de citas a Excel con diseño profesional."""
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
-        return redirect('home')
-
     import openpyxl
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from openpyxl.utils import get_column_letter
@@ -1521,6 +1541,7 @@ def admin_reportes(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_exportar_analitico_pdf(request):
     """Exporta el informe analítico completo a PDF con reportlab."""
     if not request.user.es_admin:
@@ -1685,6 +1706,7 @@ def admin_exportar_analitico_pdf(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_exportar_analitico_excel(request):
     """Exporta el informe analítico completo a Excel con openpyxl."""
     if not request.user.es_admin:
@@ -1798,6 +1820,7 @@ def admin_exportar_analitico_excel(request):
 #  TÉCNICOS (ADMIN)
 # ─────────────────────────────────────────────
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_tecnicos(request):
     if not request.user.es_admin:
         return redirect('home')
@@ -2084,6 +2107,7 @@ def admin_tecnicos(request):
 #  INVENTARIO (ADMIN)
 # ─────────────────────────────────────────────
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_inventario(request):
     if not request.user.es_admin:
         return redirect('home')
@@ -2221,6 +2245,7 @@ def admin_inventario(request):
 #  HISTORIAL COMPLETO DE INVENTARIO
 # ─────────────────────────────────────────────
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_historial_inventario(request):
     """Historial completo de movimientos de inventario con filtros."""
     if not request.user.es_admin:
@@ -2287,6 +2312,7 @@ def admin_historial_inventario(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_exportar_usuarios_excel(request):
     """Exporta el directorio de usuarios a Excel con formato institucional."""
     if not request.user.es_admin:
@@ -2398,6 +2424,7 @@ def admin_exportar_usuarios_excel(request):
 #  MI PERFIL (ADMINISTRADOR)
 # ─────────────────────────────────────────────
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_perfil(request):
     """Perfil del Administrador: actualización de datos, foto y contraseña."""
     if not request.user.es_admin:
@@ -2438,6 +2465,7 @@ def admin_perfil(request):
 from django.http import JsonResponse
 
 @login_required
+@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def tecnico_toggle_pausa(request):
     """
     Alterna el estado de pausa manual del técnico. Soporta AJAX.
@@ -2478,9 +2506,6 @@ def api_estado_tecnicos(request):
     """
     Devuelve el estado de todos los técnicos para actualizar el panel de admin en tiempo real.
     """
-    if request.user.rol != Usuario.Rol.ADMINISTRADOR:
-        return JsonResponse({'success': False, 'error': 'No autorizado'}, status=403)
-        
     tecnicos = Usuario.objects.filter(rol=Usuario.Rol.TECNICO, is_active=True)
     data = []
     
@@ -2512,10 +2537,8 @@ def api_estado_tecnicos(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.TECNICO])
 def tecnico_historial(request):
-    if request.user.rol != Usuario.Rol.TECNICO:
-        return redirect('home')
-
     hoy = date.today()
 
     # ── KPIs ──
@@ -2576,10 +2599,8 @@ def tecnico_historial(request):
     return render(request, 'turnos/tecnico/tecnico_historial.html', context)
 
 @login_required
+@rol_requerido([Usuario.Rol.TECNICO])
 def exportar_historial_excel(request):
-    if request.user.rol != Usuario.Rol.TECNICO:
-        return redirect('home')
-
     import openpyxl
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from openpyxl.utils import get_column_letter
@@ -2664,11 +2685,9 @@ def exportar_historial_excel(request):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.TECNICO])
 def tecnico_cliente_historial(request, cliente_id):
     """Devuelve el historial clínico completo de los dispositivos de un cliente en formato JSON."""
-    if request.user.rol != Usuario.Rol.TECNICO:
-        return JsonResponse({'success': False, 'error': 'No autorizado'})
-
     try:
         cliente = Usuario.objects.get(id_usuario=cliente_id, rol=Usuario.Rol.CLIENTE)
     except Usuario.DoesNotExist:
@@ -2725,11 +2744,9 @@ def tecnico_cliente_historial(request, cliente_id):
 
 
 @login_required
+@rol_requerido([Usuario.Rol.TECNICO])
 def tecnico_clientes_historial_general(request):
     """Devuelve el historial general de reparaciones (todas las citas finalizadas) del técnico."""
-    if request.user.rol != Usuario.Rol.TECNICO:
-        return JsonResponse({'success': False, 'error': 'No autorizado'})
-    
     from turnos.models.citas import Cita
     # Solo citas finalizadas del técnico
     citas = Cita.objects.filter(
