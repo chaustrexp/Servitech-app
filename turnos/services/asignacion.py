@@ -8,6 +8,8 @@ class NoTechnicianAvailable(Exception):
     """Excepción lanzada cuando no hay ningún técnico disponible para la asignación."""
     pass
 
+# Configuración: Permite limitar a los técnicos a un máximo estricto de 1 cita activa por bloque de horario
+LIMITAR_UNA_CITA_POR_BLOQUE = True
 def asignar_tecnico(fecha: date, hora_inicio: time, tipo_equipo: str) -> Usuario:
     """
     Asigna un técnico disponible basado en especialidad, horario, y menor carga de trabajo.
@@ -84,7 +86,6 @@ def asignar_tecnico(fecha: date, hora_inicio: time, tipo_equipo: str) -> Usuario
 
     # 4. Elegir el de menor carga; en empate, aleatorio
     min_citas = tecnicos_con_citas.first().citas_en_bloque
-    
     # REGLA DE NEGOCIO: Anti-Overbooking
     if min_citas >= 1:
         raise NoTechnicianAvailable("Todos los técnicos disponibles ya tienen una cita asignada en este bloque horario.")
