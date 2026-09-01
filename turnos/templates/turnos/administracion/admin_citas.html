@@ -195,8 +195,12 @@
                 <option value="">Estado (Todos)</option>
                 {% for est in estados %}
                 <option value="{{ est.nombre }}" {% if filtro_estado == est.nombre %}selected{% endif %}>
-                    {% if est.nombre == 'EN_DIAGNOSTICO' %}En Diagnóstico
-                    {% elif est.nombre == 'EN_REPARACION' %}En Reparación
+                    {% if est.nombre == 'EN_REPARACION' %}En Reparación
+                    {% elif est.nombre == 'PENDIENTE' %}Pendiente
+                    {% elif est.nombre == 'CONFIRMADA' %}Confirmada
+                    {% elif est.nombre == 'RETRASADA' %}Retrasada
+                    {% elif est.nombre == 'FINALIZADA' %}Finalizada
+                    {% elif est.nombre == 'CANCELADA' %}Cancelada
                     {% else %}{{ est.nombre|title }}{% endif %}
                 </option>
                 {% endfor %}
@@ -255,10 +259,6 @@
                 {% elif cita.estado.nombre == 'Confirmada' or cita.estado.nombre == 'CONFIRMADA' %}
                     <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
                         <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Confirmada
-                    </span>
-                {% elif cita.estado.nombre == 'Diagnóstico' or cita.estado.nombre == 'En Diagnóstico' or cita.estado.nombre == 'EN_DIAGNOSTICO' %}
-                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> En Diagnóstico
                     </span>
                 {% elif cita.estado.nombre == 'En Reparación' or cita.estado.nombre == 'En Proceso' or cita.estado.nombre == 'EN_REPARACION' %}
                     <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
@@ -407,10 +407,6 @@
                         {% elif cita.estado.nombre == 'Confirmada' or cita.estado.nombre == 'CONFIRMADA' %}
                             <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700">
                                 <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Confirmada
-                            </span>
-                        {% elif cita.estado.nombre == 'Diagnóstico' or cita.estado.nombre == 'En Diagnóstico' or cita.estado.nombre == 'EN_DIAGNOSTICO' %}
-                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-blue-50 text-blue-600">
-                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> En Diagnóstico
                             </span>
                         {% elif cita.estado.nombre == 'En Reparación' or cita.estado.nombre == 'En Proceso' or cita.estado.nombre == 'EN_REPARACION' %}
                             <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-blue-50 text-blue-600">
