@@ -1,24 +1,7 @@
 {% extends 'turnos/cliente/agendamiento/wizard_base.html' %}
 
-{% block title %}Detalle de Ticket #ST-{{ cita.pk }} - ServiTech
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const currentEstado = "{{ estado_nombre|escapejs }}";
-        const citaId = "{{ cita.pk }}";
-        
-        setInterval(() => {
-            fetch(`/api/cita/${citaId}/estado/`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.estado && data.estado !== currentEstado) {
-                        window.location.reload();
-                    }
-                })
-                .catch(err => console.error("Error fetching status:", err));
-        }, 5000); // Revisa cada 5 segundos
-    });
-</script>
-{% endblock %}
+{% block title %}Detalle de Ticket #ST-{{ cita.pk }} - ServiTech{% endblock %}
+
 
 
 {% block content %}
@@ -302,6 +285,9 @@
 
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const currentEstado = "{{ estado_nombre|escapejs }}";
@@ -320,4 +306,5 @@
     });
 </script>
 {% endblock %}
+
 
