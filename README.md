@@ -123,7 +123,7 @@ Para vaciar la base de datos y generar datos de prueba:
 
 ```bash
 python manage.py flush --no-input
-python seed_full.py
+python scripts/seed_full.py
 ```
 
 **Scripts automáticos:**
