@@ -82,6 +82,9 @@
     .ev-retrasada   { background-color: #fee2e2 !important; border-left-color: #dc2626 !important; }
     .ev-retrasada   .ev-time, .ev-retrasada .ev-title, .ev-retrasada .ev-cliente { color: #7f1d1d !important; }
 
+    .ev-cancelada   { background-color: #f8fafc !important; border-left-color: #94a3b8 !important; opacity: 0.75; }
+    .ev-cancelada   .ev-time, .ev-cancelada .ev-title, .ev-cancelada .ev-cliente { color: #64748b !important; text-decoration: line-through; }
+
     /* Texto dentro del evento */
     .ev-time    { font-size: 0.63rem; font-weight: 500; opacity: 0.65; line-height: 1.2; display: block; }
     .ev-title   { font-size: 0.78rem; font-weight: 700; line-height: 1.25; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -178,6 +181,7 @@
             <option value="EN_REPARACION">En Reparación</option>
             <option value="FINALIZADA">Finalizada</option>
             <option value="RETRASADA">Retrasada</option>
+            <option value="CANCELADA">Cancelada (Inasistencia)</option>
         </select>
         <span class="flex-shrink-0 bg-[#eef2ff] text-[#002b75] text-xs font-bold px-3 py-2 rounded-xl border border-[#002b75]/10 whitespace-nowrap">
             {{ total_citas_semana }} cita{{ total_citas_semana|pluralize:"s" }}
@@ -406,6 +410,7 @@ const REPUESTOS_POR_CITA = {{ repuestos_por_cita_json|safe }};
 ════════════════════════════════════════════ */
 function clasePorEstado(estado) {
     const e = estado.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (e.includes('CANCEL'))    return 'ev-cancelada';
     if (e.includes('FINALIZ'))   return 'ev-finalizada';
     if (e.includes('RETRAS'))    return 'ev-retrasada';
     if (e.includes('DIAGN'))     return 'ev-diagnostico';
@@ -654,7 +659,9 @@ function verDetalleCita(citaId) {
         }
     });
 
-    if (est.includes('FINALIZ')) {
+    if (est.includes('CANCEL')) {
+        ul.innerHTML = `<li class="text-xs text-rose-600 font-semibold p-2.5 bg-rose-50 rounded-lg border border-rose-200">❌ Esta cita fue cancelada automáticamente por inasistencia.</li>`;
+    } else if (est.includes('FINALIZ')) {
         const repsGuardados = REPUESTOS_POR_CITA[String(citaId)] || [];
         if (repsGuardados.length > 0) {
             repsGuardados.forEach(r => {

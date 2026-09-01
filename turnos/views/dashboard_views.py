@@ -74,9 +74,12 @@ def admin_dashboard(request):
 
 @login_required
 def dashboard_tecnico(request):
-    """Dashboard del técnico: obtiene citas reales desde la base de datos PostgreSQL."""
+    """Dashboard principal del técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
         return redirect('home')
+
+    from turnos.services.cancelacion_automatica import cancelar_citas_vencidas
+    cancelar_citas_vencidas()
 
     from datetime import date
     hoy = date.today()
@@ -221,6 +224,9 @@ def tecnico_agenda(request):
     if request.user.rol != Usuario.Rol.TECNICO:
         return redirect('home')
 
+    from turnos.services.cancelacion_automatica import cancelar_citas_vencidas
+    cancelar_citas_vencidas()
+
     from datetime import date, timedelta
     hoy = date.today()
 
@@ -254,11 +260,10 @@ def tecnico_agenda(request):
 
     base_qs = Cita.objects.filter(servicio__tipo_dispositivo__in=dispositivos_permitidos)
 
-    # Citas del técnico para la semana (excluir canceladas)
+    # Citas del técnico para la semana (incluidas las canceladas)
     citas_semana_qs = (
         base_qs
         .filter(tecnico=request.user, fecha__range=(inicio_semana, fin_semana))
-        .exclude(estado__nombre__iexact='CANCELADA')
         .select_related('cliente', 'servicio', 'estado')
         .order_by('fecha', 'hora_inicio')
     )
@@ -268,7 +273,6 @@ def tecnico_agenda(request):
         citas_semana_qs = (
             base_qs
             .filter(fecha__range=(inicio_semana, fin_semana))
-            .exclude(estado__nombre__iexact='CANCELADA')
             .select_related('cliente', 'servicio', 'estado')
             .order_by('fecha', 'hora_inicio')
         )
@@ -777,22 +781,32 @@ def cliente_inicio(request):
     """Dashboard principal del cliente (Inicio)"""
     if request.user.rol != Usuario.Rol.CLIENTE:
         return redirect('home')
-        
+
+    from turnos.services.cancelacion_automatica import cancelar_citas_vencidas
+    cancelar_citas_vencidas()
+
     citas_usuario = Cita.objects.filter(cliente=request.user).order_by('-fecha', '-hora_inicio')
-    
+
     total_citas_activas = citas_usuario.exclude(estado__nombre__in=['FINALIZADA', 'CANCELADA']).count()
     total_reparaciones = citas_usuario.filter(estado__nombre='FINALIZADA').count()
-    
+
     citas_recientes = citas_usuario
-    
+
     from turnos.models.notificaciones import Notificacion
     notificaciones = Notificacion.objects.filter(usuario=request.user, leida=False).order_by('-fecha_envio')
-    
+
+    # Citas canceladas recientemente por inasistencia para alerta visual
+    citas_canceladas_recientes = citas_usuario.filter(
+        estado__nombre='CANCELADA',
+        observaciones__icontains='inasistencia'
+    )[:3]
+
     context = {
         'total_citas_activas': total_citas_activas,
         'total_reparaciones': total_reparaciones,
         'citas_recientes': citas_recientes,
         'notificaciones': notificaciones,
+        'citas_canceladas_recientes': citas_canceladas_recientes,
     }
     return render(request, 'turnos/cliente/cliente_inicio.html', context)
 

@@ -185,6 +185,9 @@ def cita_confirmada(request, cita_id):
 @login_required
 def detalle_cita(request, cita_id):
     """Ticket completo de la cita para el cliente."""
+    from turnos.services.cancelacion_automatica import cancelar_citas_vencidas
+    cancelar_citas_vencidas()
+
     cita = get_object_or_404(Cita, pk=cita_id)
     if request.user != cita.cliente and request.user != cita.tecnico and request.user.rol != Usuario.Rol.ADMINISTRADOR:
         from django.http import Http404

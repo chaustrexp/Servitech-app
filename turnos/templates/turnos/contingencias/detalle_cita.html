@@ -191,9 +191,34 @@
             {% endif %}
         {% endif %}
 
+        {% if estado_nombre == 'CANCELADA' %}
+        <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600 flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-rose-800">Cita Cancelada</p>
+                    <p class="text-xs text-rose-700 mt-0.5">
+                        {% if 'inasistencia' in cita.observaciones|lower %}
+                        Esta cita fue cancelada automáticamente por inasistencia al superarse los 15 minutos de tolerancia.
+                        {% else %}
+                        Esta cita ha sido cancelada.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            {% if request.user == cita.cliente %}
+            <a href="{% url 'seleccionar_dispositivo' %}" class="w-full sm:w-auto px-4 py-2 bg-[#002b75] hover:bg-[#001f54] text-white text-xs font-bold rounded-xl transition shadow-sm text-center whitespace-nowrap">
+                Agendar Nueva Cita
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
         {% if cita.observaciones %}
         <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl mb-6">
-            <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Notas del Cliente</p>
+            <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">Notas del Ticket</p>
             <p class="font-medium text-slate-700 text-[12px] italic">{{ cita.observaciones }}</p>
         </div>
         {% endif %}
