@@ -72,7 +72,7 @@ def admin_dashboard(request):
     return render(request, 'turnos/administracion/admin_dashboard.html', context)
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.TECNICO])
 def dashboard_tecnico(request):
     """Dashboard principal del técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -219,7 +219,7 @@ def dashboard_tecnico(request):
     return render(request, 'turnos/tecnico/tecnico_inicio.html', context)
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.TECNICO])
 def tecnico_agenda(request):
     """Agenda del técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -367,7 +367,7 @@ def tecnico_agenda(request):
     return render(request, 'turnos/tecnico/tecnico_agenda.html', context)
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.TECNICO])
 @require_POST
 def aceptar_cita(request, cita_id):
     """Permite al técnico aceptar una cita y pasarla a EN REPARACION."""
@@ -399,7 +399,7 @@ import json
 from django.db import transaction
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.TECNICO])
 @require_POST
 def finalizar_cita(request, cita_id):
     """Permite al técnico marcar una cita como finalizada."""
@@ -442,7 +442,7 @@ def finalizar_cita(request, cita_id):
     })
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.TECNICO])
 def tecnico_dispositivos(request):
     """Gestión de dispositivos e inventario para el técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -471,7 +471,7 @@ def tecnico_dispositivos(request):
     })
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.TECNICO])
 def tecnico_clientes(request):
     """Directorio de clientes para el técnico: muestra todos los clientes registrados."""
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -557,7 +557,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.TECNICO])
 def tecnico_soporte(request):
     """Soporte operativo para el técnico."""
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -573,7 +573,7 @@ def tecnico_soporte(request):
     return render(request, 'turnos/tecnico/tecnico_soporte.html', context)
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.TECNICO])
 @require_POST
 def tecnico_crear_ticket(request):
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -600,7 +600,7 @@ def tecnico_crear_ticket(request):
 
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.TECNICO])
 def tecnico_reporte_mensual(request):
     """
     Genera el reporte mensual del técnico como archivo Excel (.xlsx).
@@ -785,7 +785,7 @@ def tecnico_reporte_mensual(request):
 
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.CLIENTE])
 def cliente_inicio(request):
     """Dashboard principal del cliente (Inicio)"""
     if request.user.rol != Usuario.Rol.CLIENTE:
@@ -820,7 +820,7 @@ def cliente_inicio(request):
     return render(request, 'turnos/cliente/cliente_inicio.html', context)
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.CLIENTE])
 def cliente_servicios(request):
     """Catálogo de servicios para el cliente"""
     if request.user.rol != Usuario.Rol.CLIENTE:
@@ -831,7 +831,7 @@ def cliente_servicios(request):
     return render(request, 'turnos/cliente/cliente_servicios.html', {'servicios': servicios})
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.CLIENTE])
 def cliente_perfil(request):
     """Perfil del cliente: permite editar datos personales."""
     if request.user.rol != Usuario.Rol.CLIENTE:
@@ -855,14 +855,14 @@ def cliente_perfil(request):
     return render(request, 'turnos/cliente/cliente_perfil.html', {'form': form})
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.CLIENTE])
 def cliente_soporte(request):
     """Página de soporte para el cliente"""
     if request.user.rol != Usuario.Rol.CLIENTE:
         return redirect('home')
     return render(request, 'turnos/cliente/cliente_soporte.html')
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.CLIENTE])
 def cliente_notificaciones(request):
     """Módulo de notificaciones para el cliente."""
     if request.user.rol != Usuario.Rol.CLIENTE:
@@ -882,7 +882,7 @@ def cliente_notificaciones(request):
 
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.TECNICO])
 def tecnico_perfil(request):
     """Perfil del técnico para ver métricas y actualizar información personal."""
     if request.user.rol != Usuario.Rol.TECNICO:
@@ -903,7 +903,7 @@ def tecnico_perfil(request):
 
 
 @login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
+@rol_requerido([Usuario.Rol.TECNICO, Usuario.Rol.ADMINISTRADOR])
 def exportar_inventario_excel(request):
     """Exporta la lista de repuestos del técnico a un archivo Excel (.xlsx)."""
     import openpyxl
@@ -994,8 +994,6 @@ def exportar_inventario_excel(request):
     return response
 
 
-@login_required
-@rol_requerido([Usuario.Rol.ADMINISTRADOR])
 @login_required
 @rol_requerido([Usuario.Rol.ADMINISTRADOR])
 def admin_usuarios(request):

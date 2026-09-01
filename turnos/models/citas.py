@@ -42,10 +42,10 @@ class Cita(models.Model):
                 # Definir transiciones válidas
                 transiciones_validas = {
                     'PENDIENTE': ['CONFIRMADA', 'CANCELADA'],
-                    'CONFIRMADA': ['EN_DIAGNOSTICO', 'RETRASADA', 'CANCELADA'],
-                    'RETRASADA': ['EN_DIAGNOSTICO', 'CANCELADA'],
+                    'CONFIRMADA': ['EN_DIAGNOSTICO', 'EN_REPARACION', 'RETRASADA', 'CANCELADA'],
+                    'RETRASADA': ['EN_DIAGNOSTICO', 'EN_REPARACION', 'CANCELADA'],
                     'EN_DIAGNOSTICO': ['EN_REPARACION', 'CANCELADA'],
-                    'EN_REPARACION': ['FINALIZADA'],
+                    'EN_REPARACION': ['FINALIZADA', 'CANCELADA'],
                     'CANCELADA': [],
                     'FINALIZADA': []
                 }
