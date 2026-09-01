@@ -86,9 +86,10 @@ def asignar_tecnico(fecha: date, hora_inicio: time, tipo_equipo: str) -> Usuario
 
     # 4. Elegir el de menor carga; en empate, aleatorio
     min_citas = tecnicos_con_citas.first().citas_en_bloque
-    # Si la regla de 1 cita por bloque está activa y todos los técnicos ya tienen al menos 1 cita:
-    if LIMITAR_UNA_CITA_POR_BLOQUE and min_citas >= 1:
-        raise NoTechnicianAvailable("Todos los técnicos capacitados están ocupados en este bloque de horario.")
+    # REGLA DE NEGOCIO: Anti-Overbooking
+    if min_citas >= 1:
+        raise NoTechnicianAvailable("Todos los técnicos disponibles ya tienen una cita asignada en este bloque horario.")
+
     candidatos_finales = [t for t in tecnicos_con_citas if t.citas_en_bloque == min_citas]
 
     return random.choice(candidatos_finales)
